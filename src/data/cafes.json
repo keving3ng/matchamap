@@ -1,34 +1,120 @@
 {
   "cafes": [
     {
-      "id": "1",
-      "name": "Matcha Cafe Example",
-      "neighborhood": "Kensington Market",
-      "address": "123 Augusta Ave, Toronto, ON",
-      "coordinates": {
-        "lat": 43.6532,
-        "lng": -79.4003
+      "id": 1,
+      "name": "Green Tea House",
+      "score": 9.2,
+      "x": 60,
+      "y": 55,
+      "neighborhood": "Downtown",
+      "address": "123 Queen St W, Toronto, ON",
+      "distance": "0.8 km",
+      "walkTime": "10 min",
+      "quickNote": "Exceptional ceremonial grade matcha from Uji, Japan",
+      "review": "Exceptional matcha quality with a perfect balance of umami and sweetness. The ceremonial grade matcha is sourced directly from Uji, Japan. The baristas are knowledgeable and the preparation is meticulous. Smooth, creamy texture with no bitterness.",
+      "instagram": "@greenteahouse",
+      "tiktok": "@greenteahouse_to",
+      "hours": "Mon-Fri: 8am-8pm, Sat-Sun: 9am-9pm",
+      "priceRange": "$",
+      "menuHighlights": "Matcha latte ($6.50), Ceremonial matcha ($8), Matcha soft serve",
+      "secondaryScores": {
+        "value": 8.5,
+        "ambiance": 9.0,
+        "otherDrinks": 8.0
       },
-      "ratings": {
-        "matcha_quality": 4.5,
-        "overall_experience": 4.2
-      },
-      "hours": {
-        "monday": "8:00 AM - 8:00 PM",
-        "tuesday": "8:00 AM - 8:00 PM",
-        "wednesday": "8:00 AM - 8:00 PM",
-        "thursday": "8:00 AM - 8:00 PM",
-        "friday": "8:00 AM - 9:00 PM",
-        "saturday": "9:00 AM - 9:00 PM",
-        "sunday": "9:00 AM - 7:00 PM"
-      },
-      "price_range": "$$",
-      "phone": "(416) 123-4567",
-      "website": "https://example.com",
-      "instagram": "@matchacafe",
-      "review": "A sample cafe entry with authentic matcha preparation and cozy atmosphere.",
-      "tags": ["authentic", "cozy", "organic"],
-      "image": "/images/cafes/sample.jpg"
+      "emoji": "🍃",
+      "color": "from-green-400 to-green-600"
+    },
+    {
+      "id": 2,
+      "name": "Zen Matcha",
+      "score": 9.0,
+      "x": 70,
+      "y": 35,
+      "neighborhood": "Yorkville",
+      "address": "456 Bloor St, Toronto, ON",
+      "distance": "1.2 km",
+      "walkTime": "15 min",
+      "quickNote": "Premium matcha in a serene, minimalist setting",
+      "instagram": "@zenmatcha",
+      "emoji": "☯️",
+      "color": "from-purple-400 to-purple-600"
+    },
+    {
+      "id": 3,
+      "name": "Matcha Bar",
+      "score": 8.5,
+      "x": 45,
+      "y": 40,
+      "neighborhood": "Queen West",
+      "address": "789 Queen St W, Toronto, ON",
+      "distance": "0.5 km",
+      "walkTime": "6 min",
+      "quickNote": "Great value with solid matcha and trendy atmosphere",
+      "instagram": "@matchabar",
+      "emoji": "🎋",
+      "color": "from-emerald-400 to-emerald-600"
+    },
+    {
+      "id": 4,
+      "name": "Leaf & Bean",
+      "score": 8.2,
+      "x": 50,
+      "y": 75,
+      "neighborhood": "Distillery",
+      "address": "321 Mill St, Toronto, ON",
+      "distance": "2.1 km",
+      "walkTime": "25 min",
+      "quickNote": "Cozy spot with creative matcha drinks and pastries",
+      "instagram": "@leafandbean",
+      "emoji": "🌿",
+      "color": "from-lime-400 to-lime-600"
+    },
+    {
+      "id": 5,
+      "name": "Koi Cafe",
+      "score": 7.8,
+      "x": 35,
+      "y": 65,
+      "neighborhood": "Kensington",
+      "address": "555 Augusta Ave, Toronto, ON",
+      "distance": "1.5 km",
+      "walkTime": "18 min",
+      "quickNote": "Casual cafe with decent matcha and laid-back vibe",
+      "instagram": "@koicafe",
+      "emoji": "🐟",
+      "color": "from-orange-400 to-orange-600"
+    }
+  ],
+  "news": [
+    {
+      "id": 1,
+      "type": "new_location",
+      "title": "New Spot Alert: Zen Matcha in Yorkville",
+      "date": "September 25, 2025",
+      "preview": "Just discovered this hidden gem in Yorkville! Premium ceremonial matcha in a beautifully minimalist space.",
+      "score": 9.0,
+      "neighborhood": "Yorkville",
+      "image": "🍵"
+    },
+    {
+      "id": 2,
+      "type": "score_update",
+      "title": "Updated Review: Green Tea House",
+      "date": "September 22, 2025",
+      "preview": "Revisited this Downtown favorite and they've upped their game with a new seasonal matcha blend.",
+      "score": 9.2,
+      "previousScore": 8.8,
+      "neighborhood": "Downtown",
+      "image": "⭐"
+    },
+    {
+      "id": 3,
+      "type": "announcement",
+      "title": "Fall Matcha Season Is Here!",
+      "date": "September 18, 2025",
+      "preview": "Many cafes are introducing autumn-inspired matcha drinks. Keep an eye out for pumpkin matcha lattes and hojicha specials.",
+      "image": "🍂"
     }
   ],
   "last_updated": "2024-01-20"
