@@ -44,9 +44,9 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                       {cafe.distanceInfo.formattedKm}
                     </span>
                   ) : (
-                    <span className="flex items-center gap-1 text-gray-400">
+                    <span className="flex items-center gap-1 text-gray-400 cursor-pointer hover:text-gray-600 transition" title="Click map location button to enable">
                       <MapPin size={14} />
-                      Enable location
+                      Tap location button for distance
                     </span>
                   )}
                 </div>
@@ -69,7 +69,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                       {cafe.distanceInfo ? (
                         <p className="text-xs text-gray-500">{cafe.distanceInfo.walkTime} walk</p>
                       ) : (
-                        <p className="text-xs text-gray-400">Enable location for walk time</p>
+                        <p className="text-xs text-gray-400">Tap map location button for walk time</p>
                       )}
                     </div>
                   </div>

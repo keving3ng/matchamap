@@ -17,25 +17,12 @@ interface UseDistanceCalculationOptions {
 export const useDistanceCalculation = ({
   cafes,
   userLocation,
-  autoUpdate = true,
-  updateThresholdMeters = 50, // Only recalculate if user moves 50+ meters
 }: UseDistanceCalculationOptions) => {
   const [lastCalculatedLocation, setLastCalculatedLocation] = useState<Coordinates | null>(null)
   const [isCalculating, setIsCalculating] = useState(false)
 
-  // Check if we should recalculate distances
-  const shouldRecalculate = useMemo(() => {
-    if (!userLocation) return false
-    if (!lastCalculatedLocation) return true
-    if (!autoUpdate) return false
-
-    // Calculate distance moved since last calculation
-    const deltaLat = userLocation.latitude - lastCalculatedLocation.latitude
-    const deltaLng = userLocation.longitude - lastCalculatedLocation.longitude
-    const deltaMeters = Math.sqrt(deltaLat * deltaLat + deltaLng * deltaLng) * 111000 // Rough conversion to meters
-
-    return deltaMeters > updateThresholdMeters
-  }, [userLocation, lastCalculatedLocation, autoUpdate, updateThresholdMeters])
+  // We've simplified this - always recalculate when userLocation changes
+  // The shouldRecalculate logic was preventing updates when location first became available
 
   // Calculate distances for all cafes
   const cafesWithDistance = useMemo<CafeWithDistance[]>(() => {
@@ -62,12 +49,12 @@ export const useDistanceCalculation = ({
     }
   }, [userLocation])
 
-  // Update last calculated location when we recalculate
+  // Update last calculated location when userLocation changes
   useEffect(() => {
-    if (shouldRecalculate && userLocation) {
+    if (userLocation) {
       setLastCalculatedLocation(userLocation)
     }
-  }, [shouldRecalculate, userLocation])
+  }, [userLocation])
 
   // Sort cafes by distance
   const cafesByDistance = useMemo(() => {

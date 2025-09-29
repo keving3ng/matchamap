@@ -5,9 +5,7 @@ import ListView from './components/ListView'
 import DetailView from './components/DetailView'
 import NewsView from './components/NewsView'
 import PassportView from './components/PassportView'
-import { useGeolocation } from './hooks/useGeolocation'
 import { useDistanceCalculation } from './hooks/useDistanceCalculation'
-import { getOptimalGeolocationOptions } from './utils/deviceDetection'
 import cafeData from './data/cafes.json'
 import type { CafeData, CafeWithDistance, ViewType } from './types'
 
@@ -18,29 +16,37 @@ export const App: React.FC = () => {
   const [expandedCard, setExpandedCard] = useState<number | null>(null)
   const [visitedStamps, setVisitedStamps] = useState<number[]>([2, 4])
   const [visitedLocations, setVisitedLocations] = useState<number[]>([2, 4])
+  const [userCoordinates, setUserCoordinates] = useState<GeolocationCoordinates | null>(null)
 
   const { cafes, news } = cafeData as CafeData
 
-  // Get user location for distance calculations
-  const { coordinates } = useGeolocation(getOptimalGeolocationOptions())
-
-  // Don't auto-request location - let users enable it manually when they want distance info
+  // Memoize user location to prevent unnecessary recalculations
+  const userLocation = React.useMemo(() => {
+    if (!userCoordinates) return null
+    return {
+      latitude: userCoordinates.latitude,
+      longitude: userCoordinates.longitude,
+    }
+  }, [userCoordinates?.latitude, userCoordinates?.longitude])
 
   // Calculate distances from user location
   const {
     cafesWithDistance,
   } = useDistanceCalculation({
     cafes,
-    userLocation: coordinates ? {
-      latitude: coordinates.latitude,
-      longitude: coordinates.longitude,
-    } : null,
+    userLocation,
   })
 
   const handlePinClick = (cafe: CafeWithDistance): void => {
     setSelectedCafe(cafe)
     setShowPopover(true)
   }
+
+  // Ensure selectedCafe always has the latest distance info
+  const selectedCafeWithLatestInfo = React.useMemo(() => {
+    if (!selectedCafe) return null
+    return cafesWithDistance.find(c => c.id === selectedCafe.id) || selectedCafe
+  }, [selectedCafe, cafesWithDistance])
 
   const viewDetails = (cafe: CafeWithDistance): void => {
     setSelectedCafe(cafe)
@@ -96,15 +102,16 @@ export const App: React.FC = () => {
         <MapView
           cafes={cafesWithDistance}
           showPopover={showPopover}
-          selectedCafe={selectedCafe}
+          selectedCafe={selectedCafeWithLatestInfo}
           onPinClick={handlePinClick}
           onViewDetails={viewDetails}
           onClosePopover={() => setShowPopover(false)}
+          onLocationChange={setUserCoordinates}
         />
       )}
       {currentView === 'detail' && (
         <DetailView
-          cafe={selectedCafe || cafes[0]}
+          cafe={selectedCafeWithLatestInfo || cafesWithDistance[0]}
           visitedLocations={visitedLocations}
           onToggleVisited={toggleVisited}
         />

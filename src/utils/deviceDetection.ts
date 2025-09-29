@@ -20,17 +20,25 @@ export const isStandalone = (): boolean => {
   return window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true
 }
 
+export const isSecureContext = (): boolean => {
+  return window.isSecureContext || location.protocol === 'https:' || location.hostname === 'localhost'
+}
+
 export const getLocationRequestAdvice = (): string => {
+  if (!isSecureContext()) {
+    return '⚠️ Location requires HTTPS. This site needs to be accessed via https:// for location services to work on mobile devices.'
+  }
+  
   if (isIOSSafari()) {
-    return 'iPhone users: Make sure Location Services is enabled in Settings → Privacy & Security → Location Services → Safari.'
+    return 'iPhone/Safari: Go to Settings → Privacy & Security → Location Services → Safari → Allow Location Access. Make sure to tap "Allow" when prompted.'
   }
   if (isIOS()) {
-    return 'iPhone users: Make sure Location Services is enabled in Settings → Privacy & Security → Location Services for your browser.'
+    return 'iPhone: Enable Location Services in Settings → Privacy & Security → Location Services, then allow location access for your browser app when prompted.'
   }
   if (isAndroid()) {
-    return 'Android users: Make sure Location permission is enabled for your browser in Settings → Apps → [Browser] → Permissions.'
+    return 'Android: Allow location permission when prompted, or enable it manually in Settings → Apps → [Your Browser] → Permissions → Location.'
   }
-  return 'Make sure location services are enabled for your browser in your device settings.'
+  return 'Click "Allow" when your browser asks for location permission. Make sure location services are enabled in your device settings.'
 }
 
 export const getOptimalGeolocationOptions = () => {

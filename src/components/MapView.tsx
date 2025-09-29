@@ -7,7 +7,7 @@ import { CircleButton } from './CircleButton'
 import { getLocationRequestAdvice, getOptimalGeolocationOptions } from '../utils/deviceDetection'
 import type { MapViewProps } from '../types'
 
-export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCafe, onPinClick, onViewDetails, onClosePopover }) => {
+export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCafe, onPinClick, onViewDetails, onClosePopover, onLocationChange }) => {
   const { visitedCafeIds } = useVisitedCafes()
 
   const {
@@ -40,7 +40,11 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
     } else {
       removeUserLocationMarker()
     }
-  }, [coordinates, addUserLocationMarker, removeUserLocationMarker])
+    // Notify parent component of coordinate changes
+    if (onLocationChange) {
+      onLocationChange(coordinates)
+    }
+  }, [coordinates, addUserLocationMarker, removeUserLocationMarker, onLocationChange])
 
   const handleLocationClick = () => {
     if (coordinates && centerOnLocation) {
@@ -73,9 +77,9 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
               <h3 className="font-semibold text-gray-800 mb-1">Location Access Needed</h3>
               <p className="text-sm text-gray-600 mb-3">
                 {getLocationRequestAdvice()}
-                <br />
-                <br />
-                We need location access to show nearby cafes and calculate distances.
+              </p>
+              <p className="text-xs text-gray-500 mb-3">
+                We need location access to calculate distances to cafes. Your location is never stored or shared.
               </p>
               <div className="flex flex-col sm:flex-row gap-2">
                 <button
@@ -129,9 +133,10 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
             <div className="flex-1">
               <h3 className="font-semibold text-gray-800 mb-1">Location Unavailable</h3>
               <p className="text-sm text-gray-600 mb-3">
-                {error.code === 2 ? 'Unable to determine your location. Make sure you have a strong GPS signal and try moving to an open area.' :
-                 error.code === 3 ? 'Location request timed out. This can happen indoors or in areas with poor GPS signal.' :
-                 'Location services are not available on this device.'}
+                {error.code === 2 ? 'Unable to determine your location. Try moving to an open area with better GPS signal, or make sure location services are enabled for your browser.' :
+                 error.code === 3 ? 'Location request timed out. This often happens indoors or in areas with poor GPS signal. Try again when you have better signal or are outdoors.' :
+                 error.code === 0 ? 'Geolocation is not supported by your browser. Try using a modern browser like Chrome, Safari, or Firefox.' :
+                 'Location services are not available. Make sure you\'re on a secure (HTTPS) connection and location services are enabled.'}
               </p>
               <div className="flex flex-col sm:flex-row gap-2">
                 <button
@@ -186,7 +191,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
             ) : (
               <div className="flex items-center gap-2 text-sm text-gray-500 mb-3">
                 <MapPin size={16} className="text-gray-400" />
-                <span>Enable location to see distance</span>
+                <span>Tap location button above for distance</span>
               </div>
             )}
             <button
@@ -224,7 +229,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                 ) : (
                   <div className="flex items-center gap-2 text-gray-500">
                     <MapPin size={18} className="text-gray-400" />
-                    <span>Enable location to see distance</span>
+                    <span>Tap location button above for distance</span>
                   </div>
                 )}
                 <p className="text-sm text-gray-700">{selectedCafe.address}</p>
@@ -302,7 +307,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
         <CircleButton
           icon={loading ? Crosshair : MapPin}
           onClick={handleLocationClick}
-          className={`${!isSupported || error ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className={`${!isSupported || error ? 'opacity-50 cursor-not-allowed' : ''} ${coordinates ? 'bg-green-100' : ''}`}
         />
       </div>
 

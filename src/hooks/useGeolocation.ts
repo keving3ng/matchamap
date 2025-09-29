@@ -14,7 +14,7 @@ interface UseGeolocationOptions {
   watchPosition?: boolean
 }
 
-export const useGeolocation = (options: UseGeolocationOptions = {}) => {
+export const useGeolocation = (_options: UseGeolocationOptions = {}) => {
   const [state, setState] = useState<GeolocationState>({
     coordinates: null,
     error: null,
@@ -22,14 +22,10 @@ export const useGeolocation = (options: UseGeolocationOptions = {}) => {
     permission: null,
   })
 
-  const { 
-    enableHighAccuracy = false, // Start with false for better mobile compatibility
-    timeout = 15000, // Longer timeout for mobile
-    maximumAge = 300000 // 5 minutes cache
-  } = options
+  // Use options for potential future configuration (currently unused but structured for extensibility)
 
   // Request location permission and get current position
-  const requestLocation = useCallback(async () => {
+  const requestLocation = useCallback(() => {
     if (!navigator.geolocation) {
       setState(prev => ({
         ...prev,
@@ -46,47 +42,14 @@ export const useGeolocation = (options: UseGeolocationOptions = {}) => {
 
     setState(prev => ({ ...prev, loading: true, error: null }))
 
-    // iOS Safari requires user interaction to be recent
-    // First try with low accuracy for faster response
-    const tryGeolocation = (highAccuracy: boolean) => {
-      return new Promise<GeolocationPosition>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(
-          resolve,
-          reject,
-          {
-            enableHighAccuracy: highAccuracy,
-            timeout: highAccuracy ? timeout : 10000,
-            maximumAge: highAccuracy ? maximumAge : 60000,
-          }
-        )
-      })
+    // Mobile-optimized geolocation options
+    const geoOptions: PositionOptions = {
+      enableHighAccuracy: false, // Start with false for speed on mobile
+      timeout: 30000, // Longer timeout for mobile (30 seconds)
+      maximumAge: 60000, // Cache for 1 minute on mobile
     }
 
-    try {
-      // Check permission status if available (mainly for desktop)
-      if ('permissions' in navigator && navigator.permissions) {
-        try {
-          const permission = await navigator.permissions.query({ name: 'geolocation' })
-          setState(prev => ({ ...prev, permission: permission.state }))
-        } catch {
-          // Permissions API not fully supported on mobile, continue without it
-        }
-      }
-
-      let position: GeolocationPosition
-
-      try {
-        // First attempt: Quick location with lower accuracy
-        position = await tryGeolocation(false)
-      } catch (error) {
-        // If first attempt fails, try with high accuracy
-        if (enableHighAccuracy) {
-          position = await tryGeolocation(true)
-        } else {
-          throw error
-        }
-      }
-
+    const onSuccess = (position: GeolocationPosition) => {
       setState(prev => ({
         ...prev,
         coordinates: position.coords,
@@ -94,31 +57,40 @@ export const useGeolocation = (options: UseGeolocationOptions = {}) => {
         error: null,
       }))
 
-      // If we got a low-accuracy position and want high accuracy, try to improve it
-      if (!enableHighAccuracy && position.coords.accuracy > 100) {
-        setTimeout(() => {
-          tryGeolocation(true)
-            .then(betterPosition => {
-              setState(prev => ({
-                ...prev,
-                coordinates: betterPosition.coords,
-              }))
-            })
-            .catch(() => {
-              // Ignore errors for improvement attempt
-            })
-        }, 100)
-      }
+      // If accuracy is poor (>100m), try to get a better position
+      if (position.coords.accuracy > 100) {
+        const improvedOptions: PositionOptions = {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 0,
+        }
 
-    } catch (error) {
-      const geolocationError = error as GeolocationPositionError
+        navigator.geolocation.getCurrentPosition(
+          (betterPosition) => {
+            setState(prev => ({
+              ...prev,
+              coordinates: betterPosition.coords,
+            }))
+          },
+          () => {
+            // Ignore errors for improvement attempt - keep the original position
+          },
+          improvedOptions
+        )
+      }
+    }
+
+    const onError = (error: GeolocationPositionError) => {
       setState(prev => ({
         ...prev,
-        error: geolocationError,
+        error: error,
         loading: false,
       }))
     }
-  }, [enableHighAccuracy, timeout, maximumAge])
+
+    // Make the actual geolocation request
+    navigator.geolocation.getCurrentPosition(onSuccess, onError, geoOptions)
+  }, [])
 
   // Clear location data
   const clearLocation = useCallback(() => {
