@@ -49,6 +49,52 @@ export default {
       screens: {
         'xs': '375px',
       },
+      animation: {
+        'slide-up': 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+        'slide-in-left': 'slideInLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+        'fade-in': 'fadeIn 0.2s ease-out',
+        'scale-in': 'scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+      },
+      keyframes: {
+        slideUp: {
+          '0%': {
+            transform: 'translateY(100%) scale(0.95)',
+            opacity: '0',
+          },
+          '100%': {
+            transform: 'translateY(0) scale(1)',
+            opacity: '1',
+          },
+        },
+        slideInLeft: {
+          '0%': {
+            transform: 'translateX(-100%) scale(0.95)',
+            opacity: '0',
+          },
+          '100%': {
+            transform: 'translateX(0) scale(1)',
+            opacity: '1',
+          },
+        },
+        fadeIn: {
+          '0%': {
+            opacity: '0',
+          },
+          '100%': {
+            opacity: '1',
+          },
+        },
+        scaleIn: {
+          '0%': {
+            transform: 'scale(0.95)',
+            opacity: '0',
+          },
+          '100%': {
+            transform: 'scale(1)',
+            opacity: '1',
+          },
+        },
+      },
     },
   },
   plugins: [],

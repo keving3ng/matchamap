@@ -1,76 +1,165 @@
 import React from 'react'
-import { MapPin, Navigation, X } from 'lucide-react'
+import { MapPin, Navigation } from 'lucide-react'
+import { useLeafletMap } from '../hooks/useLeafletMap'
+import { CircleButton } from './CircleButton'
 import type { MapViewProps } from '../types'
 
 export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCafe, onPinClick, onViewDetails, onClosePopover }) => {
+  const { containerRef, zoomIn, zoomOut } = useLeafletMap({
+    cafes,
+    onPinClick,
+  })
+
   return (
-    <div className="flex-1 relative bg-green-50">
-      {/* Grid Pattern Background */}
-      <div className="absolute inset-0 opacity-30">
-        <svg width="100%" height="100%" className="text-green-200">
-          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="0.5"/>
-          </pattern>
-          <rect width="100%" height="100%" fill="url(#grid)" />
-        </svg>
-      </div>
+    <div className="flex-1 relative">
+      {/* Leaflet Map Container */}
+      <div 
+        ref={containerRef} 
+        className="w-full h-full"
+        style={{ minHeight: '400px' }}
+        onClick={onClosePopover}
+      />
 
-      {/* Cafe Pins */}
-      {cafes.map((cafe) => (
-        <button
-          key={cafe.id}
-          onClick={() => onPinClick(cafe)}
-          className="absolute transform -translate-x-1/2 -translate-y-full hover:scale-110 transition-transform z-10"
-          style={{ left: `${cafe.x}%`, top: `${cafe.y}%` }}
-        >
-          <MapPin size={32} className="text-green-600 fill-green-400 drop-shadow-lg" strokeWidth={2} />
-          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white px-2 py-0.5 rounded text-xs font-semibold text-green-700 shadow-md whitespace-nowrap">
-            {cafe.score}
-          </div>
-        </button>
-      ))}
-
-      {/* Popover */}
+      {/* Responsive Popover */}
       {showPopover && selectedCafe && (
-        <div className="absolute bottom-24 left-4 right-4 bg-white rounded-2xl shadow-2xl p-4 z-20 border-2 border-green-200">
-          <div className="flex justify-between items-start mb-2">
-            <div>
-              <h3 className="font-bold text-lg text-gray-800">{selectedCafe.name}</h3>
-              <p className="text-sm text-gray-500">{selectedCafe.neighborhood}</p>
-            </div>
-            <div className="bg-green-500 text-white px-3 py-1 rounded-full font-bold text-lg">
-              {selectedCafe.score}
-            </div>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-            <Navigation size={16} className="text-green-600" />
-            <span>{selectedCafe.distance} • {selectedCafe.walkTime} walk</span>
-          </div>
-          <button 
-            onClick={() => onViewDetails(selectedCafe)}
-            className="w-full bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-green-600 transition shadow-md"
-          >
-            View Details
-          </button>
-          <button 
+        <>
+          {/* Backdrop overlay for mobile */}
+          <div 
+            className="absolute inset-0 bg-black bg-opacity-20 backdrop-blur-sm z-[9998] animate-fade-in md:hidden" 
             onClick={onClosePopover}
-            className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
+          />
+          
+          {/* Mobile Bottom Sheet */}
+          <div 
+            className="absolute bottom-4 left-4 right-4 bg-white rounded-2xl shadow-2xl p-4 z-[9999] border-2 border-green-200 map-popover md:hidden transform transition-all duration-300 ease-out animate-slide-up"
+            onClick={(e) => e.stopPropagation()}
           >
-            <X size={20} />
-          </button>
-        </div>
+            {/* Handle indicator */}
+            <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-3 animate-scale-in" style={{ animationDelay: '0.1s' }}></div>
+            
+            <div className="flex justify-between items-start mb-2">
+              <div>
+                <h3 className="font-bold text-lg text-gray-800">{selectedCafe.name}</h3>
+                <p className="text-sm text-gray-500">{selectedCafe.neighborhood}</p>
+              </div>
+              <div className="bg-green-500 text-white px-3 py-1 rounded-full font-bold text-lg">
+                {selectedCafe.score}
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
+              <Navigation size={16} className="text-green-600" />
+              <span>{selectedCafe.distance} • {selectedCafe.walkTime} walk</span>
+            </div>
+            <button 
+              onClick={() => onViewDetails(selectedCafe)}
+              className="w-full bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-green-600 transition shadow-md"
+            >
+              View Details
+            </button>
+          </div>
+
+          {/* Tablet+ Sidebar */}
+          <div 
+            className="absolute top-4 left-4 bottom-4 w-80 bg-white rounded-2xl shadow-2xl p-6 z-[9999] border-2 border-green-200 map-popover hidden md:block overflow-y-auto transform transition-all duration-300 ease-out animate-slide-in-left"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="space-y-4">
+              {/* Header */}
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="font-bold text-xl text-gray-800">{selectedCafe.name}</h3>
+                  <p className="text-gray-500 mt-1">{selectedCafe.neighborhood}</p>
+                </div>
+                <div className="bg-green-500 text-white px-4 py-2 rounded-full font-bold text-xl">
+                  {selectedCafe.score}
+                </div>
+              </div>
+
+              {/* Location Info */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-gray-600">
+                  <Navigation size={18} className="text-green-600" />
+                  <span>{selectedCafe.distance} • {selectedCafe.walkTime} walk</span>
+                </div>
+                <p className="text-sm text-gray-700">{selectedCafe.address}</p>
+              </div>
+
+              {/* Quick Note */}
+              {selectedCafe.quickNote && (
+                <div className="bg-green-50 rounded-lg p-3 border border-green-200">
+                  <p className="text-sm text-gray-700 italic">"{selectedCafe.quickNote}"</p>
+                </div>
+              )}
+
+              {/* Additional Info for larger screens */}
+              {selectedCafe.hours && (
+                <div>
+                  <h4 className="font-semibold text-gray-800 mb-2">Hours</h4>
+                  <p className="text-sm text-gray-600">{selectedCafe.hours}</p>
+                </div>
+              )}
+
+              {selectedCafe.priceRange && (
+                <div>
+                  <h4 className="font-semibold text-gray-800 mb-2">Price Range</h4>
+                  <p className="text-sm text-gray-600">{selectedCafe.priceRange}</p>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="space-y-3 pt-4">
+                <button 
+                  onClick={() => onViewDetails(selectedCafe)}
+                  className="w-full bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-green-600 transition shadow-md"
+                >
+                  View Full Details
+                </button>
+                
+                <button 
+                  className="w-full bg-white border-2 border-green-300 text-green-600 py-3 rounded-xl font-semibold hover:bg-green-50 transition"
+                >
+                  Get Directions
+                </button>
+              </div>
+
+              {/* Social Links */}
+              {(selectedCafe.instagram || selectedCafe.tiktok) && (
+                <div>
+                  <h4 className="font-semibold text-gray-800 mb-3">Follow</h4>
+                  <div className="flex gap-2">
+                    {selectedCafe.instagram && (
+                      <a 
+                        href="#" 
+                        className="flex-1 bg-gradient-to-br from-purple-500 to-pink-500 text-white py-2 px-3 rounded-lg font-medium text-center hover:from-purple-600 hover:to-pink-600 transition text-sm"
+                      >
+                        Instagram
+                      </a>
+                    )}
+                    {selectedCafe.tiktok && (
+                      <a 
+                        href="#" 
+                        className="flex-1 bg-gray-800 text-white py-2 px-3 rounded-lg font-medium text-center hover:bg-gray-900 transition text-sm"
+                      >
+                        TikTok
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </>
       )}
 
-      {/* Map Controls */}
-      <div className="absolute right-4 top-4 flex flex-col gap-2 z-10">
-        <button className="bg-white p-3 rounded-full shadow-lg hover:bg-green-50 transition">
-          <MapPin size={20} className="text-green-600" />
-        </button>
+      {/* Location Control - Fixed positioning */}
+      <div className="absolute top-4 right-4 z-[1001]">
+        <CircleButton icon={MapPin} />
       </div>
 
-      <div className="absolute right-4 bottom-32 flex flex-col gap-2 z-10">
-        <button className="bg-white px-4 py-2 rounded-full shadow-lg text-2xl hover:bg-green-50 transition">+</button>
-        <button className="bg-white px-4 py-2 rounded-full shadow-lg text-2xl hover:bg-green-50 transition">−</button>
+      {/* Zoom Controls - Bottom right positioning */}
+      <div className="absolute bottom-4 right-4 flex flex-col gap-3 z-[1001]">
+        <CircleButton onClick={zoomIn}>+</CircleButton>
+        <CircleButton onClick={zoomOut}>−</CircleButton>
       </div>
     </div>
   )

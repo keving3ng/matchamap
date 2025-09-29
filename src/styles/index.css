@@ -57,4 +57,34 @@
   .safe-area-inset-bottom {
     padding-bottom: env(safe-area-inset-bottom);
   }
+
+  /* Leaflet map styles */
+  .custom-marker {
+    background: transparent !important;
+    border: none !important;
+  }
+  
+  /* Ensure Leaflet controls are above other elements but below our UI */
+  .leaflet-control-container {
+    z-index: 1000 !important;
+  }
+  
+  /* Keep Leaflet map itself at a low z-index */
+  .leaflet-container {
+    z-index: 1 !important;
+  }
+  
+  /* Fix Leaflet popup styles with Tailwind */
+  .leaflet-popup-content-wrapper {
+    @apply rounded-lg shadow-lg;
+  }
+  
+  .leaflet-popup-content {
+    @apply text-sm;
+  }
+  
+  /* Ensure our custom popover is always on top */
+  .map-popover {
+    z-index: 9999 !important;
+  }
 }

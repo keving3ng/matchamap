@@ -2,8 +2,8 @@ export interface Cafe {
   id: number
   name: string
   score: number
-  x: number
-  y: number
+  lat: number
+  lng: number
   neighborhood: string
   address: string
   distance: string
