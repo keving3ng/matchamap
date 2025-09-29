@@ -8,11 +8,11 @@ import type { MapViewProps } from '../types'
 export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCafe, onPinClick, onViewDetails, onClosePopover }) => {
   const { 
     containerRef, 
-    zoomIn, 
-    zoomOut, 
-    centerOnLocation, 
+    zoomIn,
+    zoomOut,
     addUserLocationMarker, 
-    removeUserLocationMarker 
+    removeUserLocationMarker,
+    centerOnLocation
   } = useLeafletMap({
     cafes,
     onPinClick,
@@ -22,7 +22,6 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
     coordinates, 
     error, 
     loading, 
-    permission, 
     requestLocation, 
     clearLocation, 
     isSupported 
@@ -244,7 +243,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
         </>
       )}
 
-      {/* Location Control - Fixed positioning */}
+      {/* Location Control - Top right positioning */}
       <div className="absolute top-4 right-4 z-[1001]">
         <CircleButton 
           icon={loading ? Crosshair : MapPin} 
