@@ -2,7 +2,7 @@ import React from 'react'
 import { Navigation, MapPin, ChevronDown } from 'lucide-react'
 import type { ListViewProps } from '../types'
 
-function ListView({ cafes, expandedCard, onToggleExpand, onViewDetails }: ListViewProps): JSX.Element {
+export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggleExpand, onViewDetails }) => {
   return (
     <div className="flex-1 overflow-y-auto pb-24">
       {/* Filter Header */}
@@ -24,7 +24,7 @@ function ListView({ cafes, expandedCard, onToggleExpand, onViewDetails }: ListVi
       <div className="px-4 py-4 space-y-3">
         {cafes.map((cafe) => (
           <div key={cafe.id} className="bg-white rounded-2xl shadow-md border-2 border-green-100 overflow-hidden">
-            <button 
+            <button
               onClick={() => onToggleExpand(expandedCard === cafe.id ? null : cafe.id)}
               className="w-full p-4 flex items-center justify-between"
             >
@@ -44,8 +44,8 @@ function ListView({ cafes, expandedCard, onToggleExpand, onViewDetails }: ListVi
                   </span>
                 </div>
               </div>
-              <ChevronDown 
-                size={24} 
+              <ChevronDown
+                size={24}
                 className={`text-green-600 transition-transform ${
                   expandedCard === cafe.id ? 'rotate-180' : ''
                 }`}
@@ -68,7 +68,7 @@ function ListView({ cafes, expandedCard, onToggleExpand, onViewDetails }: ListVi
                   </div>
 
                   <div className="flex gap-2 pt-2">
-                    <button 
+                    <button
                       onClick={() => onViewDetails(cafe)}
                       className="flex-1 bg-gradient-to-r from-green-600 to-green-500 text-white py-2.5 rounded-xl font-semibold hover:from-green-700 hover:to-green-600 transition shadow-md text-sm"
                     >

@@ -2,7 +2,7 @@ import React from 'react'
 import { TrendingUp } from 'lucide-react'
 import type { PassportViewProps } from '../types'
 
-function PassportView({ cafes, visitedStamps, onToggleStamp }: PassportViewProps): JSX.Element {
+export const PassportView: React.FC<PassportViewProps> = ({ cafes, visitedStamps, onToggleStamp }) => {
   const visitedCount: number = visitedStamps.length
   const totalCount: number = cafes.length
   const percentage: number = Math.round((visitedCount / totalCount) * 100)

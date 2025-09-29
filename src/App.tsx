@@ -8,7 +8,7 @@ import PassportView from './components/PassportView'
 import cafeData from './data/cafes.json'
 import type { CafeData, Cafe, ViewType } from './types'
 
-function App(): JSX.Element {
+export const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewType>('map')
   const [showPopover, setShowPopover] = useState<boolean>(false)
   const [selectedCafe, setSelectedCafe] = useState<Cafe | null>(null)

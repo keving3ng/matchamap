@@ -2,7 +2,7 @@ import React from 'react'
 import { MapPinned, Star, Calendar } from 'lucide-react'
 import type { NewsViewProps } from '../types'
 
-function NewsView({ newsItems }: NewsViewProps): JSX.Element {
+export const NewsView: React.FC<NewsViewProps> = ({ newsItems }) => {
   return (
     <div className="flex-1 overflow-y-auto pb-24">
       {/* Header */}

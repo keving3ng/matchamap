@@ -2,7 +2,7 @@ import React from 'react'
 import { MapPin, Navigation, X } from 'lucide-react'
 import type { MapViewProps } from '../types'
 
-function MapView({ cafes, showPopover, selectedCafe, onPinClick, onViewDetails, onClosePopover }: MapViewProps): JSX.Element {
+export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCafe, onPinClick, onViewDetails, onClosePopover }) => {
   return (
     <div className="flex-1 relative bg-green-50">
       {/* Grid Pattern Background */}

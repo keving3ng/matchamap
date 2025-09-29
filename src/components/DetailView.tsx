@@ -2,9 +2,9 @@ import React from 'react'
 import { MapPin, Navigation, Heart, CheckCircle, Instagram } from 'lucide-react'
 import type { DetailViewProps } from '../types'
 
-function DetailView({ cafe, visitedLocations, onToggleVisited }: DetailViewProps): JSX.Element {
+export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, onToggleVisited }) => {
   const isVisited: boolean = visitedLocations.includes(cafe.id)
-  
+
   return (
     <div className="flex-1 overflow-y-auto pb-24">
       {/* Hero Section */}
@@ -27,12 +27,12 @@ function DetailView({ cafe, visitedLocations, onToggleVisited }: DetailViewProps
               {cafe.score}
             </div>
           </div>
-          
+
           <div className="flex items-start gap-2 text-gray-700 mb-2">
             <MapPin size={18} className="text-green-600 mt-0.5 flex-shrink-0" />
             <span className="text-sm">{cafe.address}</span>
           </div>
-          
+
           <div className="flex items-center gap-2 text-gray-600 mb-4">
             <Navigation size={16} className="text-green-600" />
             <span className="text-sm">{cafe.distance} • {cafe.walkTime} walk</span>
@@ -46,7 +46,7 @@ function DetailView({ cafe, visitedLocations, onToggleVisited }: DetailViewProps
 
         {/* Visited Checkbox */}
         <div className="mt-4 bg-green-50 rounded-xl p-4 border-2 border-green-200">
-          <button 
+          <button
             onClick={() => onToggleVisited(cafe.id)}
             className="flex items-center gap-3 w-full"
           >
