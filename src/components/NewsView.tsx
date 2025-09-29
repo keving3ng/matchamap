@@ -21,7 +21,7 @@ export const NewsView: React.FC<NewsViewProps> = ({ newsItems }) => {
               'bg-purple-500'
             } text-white px-4 py-2 flex items-center gap-2 text-sm font-semibold`}>
               {item.type === 'new_location' ? <MapPinned size={16} /> : <Star size={16} />}
-              {item.type === 'new_location' ? 'New Location' : 
+              {item.type === 'new_location' ? 'New Location' :
                item.type === 'score_update' ? 'Updated Review' : 'Announcement'}
             </div>
 
@@ -30,7 +30,7 @@ export const NewsView: React.FC<NewsViewProps> = ({ newsItems }) => {
                 <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center text-4xl flex-shrink-0 shadow-md">
                   {item.image}
                 </div>
-                
+
                 <div className="flex-1">
                   <h3 className="font-bold text-lg text-gray-800 mb-1 leading-tight">{item.title}</h3>
                   <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-2">

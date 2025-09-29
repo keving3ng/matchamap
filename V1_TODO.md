@@ -33,13 +33,13 @@ This document tracks all remaining tasks to complete V1 based on the PRD require
     -   Add pinch/zoom support for mobile
     -   Implement double-tap to zoom
 
--   [ ] **#4** Add custom matcha-themed map markers
+-   [x] **#4** Add custom matcha-themed map markers
 
     -   Design custom pin icons with matcha branding
     -   Different states: default, selected, visited
     -   Score badges on pins
 
--   [ ] **#5** Implement distance calculation from user location
+-   [x] **#5** Implement distance calculation from user location
 
     -   Haversine formula for real distance calculations
     -   Update distances dynamically when user moves

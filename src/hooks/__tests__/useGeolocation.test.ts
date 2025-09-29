@@ -17,13 +17,13 @@ const mockPermissions = {
   }),
 }
 
-Object.defineProperty(global.navigator, 'geolocation', {
+Object.defineProperty(globalThis.navigator, 'geolocation', {
   value: mockGeolocation,
   writable: true,
   configurable: true,
 })
 
-Object.defineProperty(global.navigator, 'permissions', {
+Object.defineProperty(globalThis.navigator, 'permissions', {
   value: mockPermissions,
   writable: true,
   configurable: true,
@@ -92,7 +92,7 @@ describe('useGeolocation', () => {
       TIMEOUT: 3,
     }
 
-    mockGeolocation.getCurrentPosition.mockImplementation((success, error) => {
+    mockGeolocation.getCurrentPosition.mockImplementation((_success, error) => {
       setTimeout(() => error(mockError), 0)
     })
 
@@ -126,8 +126,8 @@ describe('useGeolocation', () => {
 
   it('should detect unsupported browsers', () => {
     // Temporarily remove geolocation support
-    const originalGeolocation = global.navigator.geolocation
-    Object.defineProperty(global.navigator, 'geolocation', {
+    const originalGeolocation = globalThis.navigator.geolocation
+    Object.defineProperty(globalThis.navigator, 'geolocation', {
       value: undefined,
       writable: true,
       configurable: true,
@@ -138,7 +138,7 @@ describe('useGeolocation', () => {
     expect(result.current.isSupported).toBe(false)
 
     // Restore geolocation
-    Object.defineProperty(global.navigator, 'geolocation', {
+    Object.defineProperty(globalThis.navigator, 'geolocation', {
       value: originalGeolocation,
       writable: true,
       configurable: true,

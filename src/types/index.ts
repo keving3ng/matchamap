@@ -6,8 +6,6 @@ export interface Cafe {
   lng: number
   neighborhood: string
   address: string
-  distance: string
-  walkTime: string
   quickNote: string
   review?: string
   instagram?: string
@@ -22,6 +20,14 @@ export interface Cafe {
   }
   emoji: string
   color: string
+}
+
+// Re-export distance types for convenience
+export type { DistanceResult, Coordinates } from '../utils/distance'
+
+// Extended cafe with dynamic distance calculation
+export interface CafeWithDistance extends Cafe {
+  distanceInfo: import('../utils/distance').DistanceResult | null
 }
 
 export interface NewsItem {
@@ -46,19 +52,19 @@ export type ViewType = 'map' | 'list' | 'detail' | 'news' | 'passport'
 
 // Component Props Types
 export interface MapViewProps {
-  cafes: Cafe[]
+  cafes: CafeWithDistance[]
   showPopover: boolean
-  selectedCafe: Cafe | null
-  onPinClick: (cafe: Cafe) => void
-  onViewDetails: (cafe: Cafe) => void
+  selectedCafe: CafeWithDistance | null
+  onPinClick: (cafe: CafeWithDistance) => void
+  onViewDetails: (cafe: CafeWithDistance) => void
   onClosePopover: () => void
 }
 
 export interface ListViewProps {
-  cafes: Cafe[]
+  cafes: CafeWithDistance[]
   expandedCard: number | null
   onToggleExpand: (id: number | null) => void
-  onViewDetails: (cafe: Cafe) => void
+  onViewDetails: (cafe: CafeWithDistance) => void
 }
 
 export interface DetailViewProps {

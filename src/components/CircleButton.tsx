@@ -8,19 +8,19 @@ interface CircleButtonProps {
   className?: string
 }
 
-export const CircleButton: React.FC<CircleButtonProps> = ({ 
-  onClick, 
-  icon: Icon, 
-  children, 
-  className = '' 
+export const CircleButton: React.FC<CircleButtonProps> = ({
+  onClick,
+  icon: Icon,
+  children,
+  className = ''
 }) => {
   return (
-    <button 
+    <button
       onClick={onClick}
       className={`
         bg-white/95 backdrop-blur-sm
-        w-12 h-12 
-        rounded-full 
+        w-12 h-12
+        rounded-full
         shadow-lg shadow-black/10
         hover:bg-white hover:shadow-xl hover:shadow-black/15
         active:scale-95

@@ -59,6 +59,11 @@
   }
 
   /* Leaflet map styles */
+  .matcha-marker {
+    background: transparent !important;
+    border: none !important;
+  }
+  
   .custom-marker {
     background: transparent !important;
     border: none !important;

@@ -5,25 +5,44 @@ import ListView from './components/ListView'
 import DetailView from './components/DetailView'
 import NewsView from './components/NewsView'
 import PassportView from './components/PassportView'
+import { useGeolocation } from './hooks/useGeolocation'
+import { useDistanceCalculation } from './hooks/useDistanceCalculation'
+import { getOptimalGeolocationOptions } from './utils/deviceDetection'
 import cafeData from './data/cafes.json'
-import type { CafeData, Cafe, ViewType } from './types'
+import type { CafeData, CafeWithDistance, ViewType } from './types'
 
 export const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewType>('map')
   const [showPopover, setShowPopover] = useState<boolean>(false)
-  const [selectedCafe, setSelectedCafe] = useState<Cafe | null>(null)
+  const [selectedCafe, setSelectedCafe] = useState<CafeWithDistance | null>(null)
   const [expandedCard, setExpandedCard] = useState<number | null>(null)
   const [visitedStamps, setVisitedStamps] = useState<number[]>([2, 4])
   const [visitedLocations, setVisitedLocations] = useState<number[]>([2, 4])
 
   const { cafes, news } = cafeData as CafeData
 
-  const handlePinClick = (cafe: Cafe): void => {
+  // Get user location for distance calculations
+  const { coordinates } = useGeolocation(getOptimalGeolocationOptions())
+
+  // Don't auto-request location - let users enable it manually when they want distance info
+
+  // Calculate distances from user location
+  const {
+    cafesWithDistance,
+  } = useDistanceCalculation({
+    cafes,
+    userLocation: coordinates ? {
+      latitude: coordinates.latitude,
+      longitude: coordinates.longitude,
+    } : null,
+  })
+
+  const handlePinClick = (cafe: CafeWithDistance): void => {
     setSelectedCafe(cafe)
     setShowPopover(true)
   }
 
-  const viewDetails = (cafe: Cafe): void => {
+  const viewDetails = (cafe: CafeWithDistance): void => {
     setSelectedCafe(cafe)
     setCurrentView('detail')
     setShowPopover(false)
@@ -52,7 +71,7 @@ export const App: React.FC = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             {currentView === 'detail' && (
-              <button 
+              <button
                 onClick={() => setCurrentView('map')}
                 className="p-2 hover:bg-green-700 rounded-lg transition"
               >
@@ -74,8 +93,8 @@ export const App: React.FC = () => {
 
       {/* Content */}
       {currentView === 'map' && (
-        <MapView 
-          cafes={cafes}
+        <MapView
+          cafes={cafesWithDistance}
           showPopover={showPopover}
           selectedCafe={selectedCafe}
           onPinClick={handlePinClick}
@@ -84,15 +103,15 @@ export const App: React.FC = () => {
         />
       )}
       {currentView === 'detail' && (
-        <DetailView 
+        <DetailView
           cafe={selectedCafe || cafes[0]}
           visitedLocations={visitedLocations}
           onToggleVisited={toggleVisited}
         />
       )}
       {currentView === 'list' && (
-        <ListView 
-          cafes={cafes}
+        <ListView
+          cafes={cafesWithDistance}
           expandedCard={expandedCard}
           onToggleExpand={setExpandedCard}
           onViewDetails={viewDetails}
@@ -102,7 +121,7 @@ export const App: React.FC = () => {
         <NewsView newsItems={news} />
       )}
       {currentView === 'passport' && (
-        <PassportView 
+        <PassportView
           cafes={cafes}
           visitedStamps={visitedStamps}
           onToggleStamp={toggleStamp}
@@ -112,7 +131,7 @@ export const App: React.FC = () => {
       {/* Bottom Navigation */}
       <div className="bg-white border-t-2 border-green-200 px-6 py-3 shadow-lg">
         <div className="flex justify-around items-center">
-          <button 
+          <button
             onClick={() => setCurrentView('map')}
             className={`flex flex-col items-center gap-1 transition ${
               currentView === 'map' ? 'text-green-600' : 'text-gray-400'
@@ -121,7 +140,7 @@ export const App: React.FC = () => {
             <MapPin size={24} strokeWidth={currentView === 'map' ? 2.5 : 2} />
             <span className={`text-xs ${currentView === 'map' ? 'font-semibold' : ''}`}>Map</span>
           </button>
-          <button 
+          <button
             onClick={() => setCurrentView('list')}
             className={`flex flex-col items-center gap-1 transition ${
               currentView === 'list' ? 'text-green-600' : 'text-gray-400'
@@ -130,7 +149,7 @@ export const App: React.FC = () => {
             <List size={24} strokeWidth={currentView === 'list' ? 2.5 : 2} />
             <span className={`text-xs ${currentView === 'list' ? 'font-semibold' : ''}`}>List</span>
           </button>
-          <button 
+          <button
             onClick={() => setCurrentView('news')}
             className={`flex flex-col items-center gap-1 transition ${
               currentView === 'news' ? 'text-green-600' : 'text-gray-400'
@@ -139,7 +158,7 @@ export const App: React.FC = () => {
             <span className="text-2xl">📰</span>
             <span className={`text-xs ${currentView === 'news' ? 'font-semibold' : ''}`}>News</span>
           </button>
-          <button 
+          <button
             onClick={() => setCurrentView('passport')}
             className={`flex flex-col items-center gap-1 transition ${
               currentView === 'passport' ? 'text-green-600' : 'text-gray-400'

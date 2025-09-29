@@ -1,4 +1,6 @@
 // Mock Leaflet for testing
+import { vi } from 'vitest'
+
 export const mockLeaflet = {
   map: vi.fn(() => ({
     setView: vi.fn(),

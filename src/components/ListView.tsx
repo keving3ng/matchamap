@@ -38,10 +38,17 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                 <div className="flex items-center gap-3 text-sm text-gray-600">
                   <span className="font-medium">{cafe.neighborhood}</span>
                   <span>•</span>
-                  <span className="flex items-center gap-1">
-                    <Navigation size={14} />
-                    {cafe.distance}
-                  </span>
+                  {cafe.distanceInfo ? (
+                    <span className="flex items-center gap-1">
+                      <Navigation size={14} />
+                      {cafe.distanceInfo.formattedKm}
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1 text-gray-400">
+                      <MapPin size={14} />
+                      Enable location
+                    </span>
+                  )}
                 </div>
               </div>
               <ChevronDown
@@ -59,7 +66,11 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                     <MapPin size={18} className="text-green-600 mt-0.5 flex-shrink-0" />
                     <div>
                       <p className="text-sm font-medium text-gray-700">{cafe.address}</p>
-                      <p className="text-xs text-gray-500">{cafe.walkTime} walk</p>
+                      {cafe.distanceInfo ? (
+                        <p className="text-xs text-gray-500">{cafe.distanceInfo.walkTime} walk</p>
+                      ) : (
+                        <p className="text-xs text-gray-400">Enable location for walk time</p>
+                      )}
                     </div>
                   </div>
 

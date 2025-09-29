@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MapView } from '../MapView'
-import type { Cafe } from '../../types'
+import type { CafeWithDistance } from '../../types'
 
 // Mock Leaflet
 vi.mock('leaflet', () => ({
@@ -27,7 +27,7 @@ vi.mock('leaflet', () => ({
   },
 }))
 
-const mockCafes: Cafe[] = [
+const mockCafes: CafeWithDistance[] = [
   {
     id: 1,
     name: 'Test Cafe',
@@ -36,11 +36,10 @@ const mockCafes: Cafe[] = [
     lng: -79.3832,
     neighborhood: 'Downtown',
     address: '123 Test St',
-    distance: '0.5 km',
-    walkTime: '5 min',
     quickNote: 'Great matcha',
     emoji: '🍃',
     color: 'from-green-400 to-green-600',
+    distanceInfo: null,
   },
 ]
 

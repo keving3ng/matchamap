@@ -34,9 +34,9 @@ export const PassportView: React.FC<PassportViewProps> = ({ cafes, visitedStamps
               <p className="text-3xl font-bold">{percentage}%</p>
             </div>
           </div>
-          
+
           <div className="bg-white/20 backdrop-blur rounded-full h-3 overflow-hidden">
-            <div 
+            <div
               className="bg-white h-full rounded-full transition-all duration-500 shadow-md"
               style={{ width: `${percentage}%` }}
             />
@@ -57,7 +57,7 @@ export const PassportView: React.FC<PassportViewProps> = ({ cafes, visitedStamps
         <div className="grid grid-cols-3 gap-4">
           {cafes.map((cafe) => {
             const isVisited = visitedStamps.includes(cafe.id)
-            
+
             return (
               <button
                 key={cafe.id}
@@ -70,7 +70,7 @@ export const PassportView: React.FC<PassportViewProps> = ({ cafes, visitedStamps
                   {isVisited && (
                     <div className="absolute inset-0 border-4 border-white/40 rounded-2xl pointer-events-none" />
                   )}
-                  
+
                   <div className="text-4xl mb-2 drop-shadow-md">{cafe.emoji}</div>
                   <p className="text-white font-bold text-xs text-center leading-tight drop-shadow-md">
                     {cafe.name}
