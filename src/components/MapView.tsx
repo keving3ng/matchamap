@@ -37,6 +37,10 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
   React.useEffect(() => {
     if (coordinates) {
       addUserLocationMarker(coordinates.latitude, coordinates.longitude)
+      // Auto-center on user location when first received
+      if (centerOnLocation) {
+        centerOnLocation(coordinates.latitude, coordinates.longitude)
+      }
     } else {
       removeUserLocationMarker()
     }
@@ -44,7 +48,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
     if (onLocationChange) {
       onLocationChange(coordinates)
     }
-  }, [coordinates, addUserLocationMarker, removeUserLocationMarker, onLocationChange])
+  }, [coordinates, addUserLocationMarker, removeUserLocationMarker, onLocationChange, centerOnLocation])
 
   const handleLocationClick = () => {
     if (coordinates && centerOnLocation) {
