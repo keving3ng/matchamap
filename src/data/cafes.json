@@ -1,0 +1,35 @@
+{
+  "cafes": [
+    {
+      "id": "1",
+      "name": "Matcha Cafe Example",
+      "neighborhood": "Kensington Market",
+      "address": "123 Augusta Ave, Toronto, ON",
+      "coordinates": {
+        "lat": 43.6532,
+        "lng": -79.4003
+      },
+      "ratings": {
+        "matcha_quality": 4.5,
+        "overall_experience": 4.2
+      },
+      "hours": {
+        "monday": "8:00 AM - 8:00 PM",
+        "tuesday": "8:00 AM - 8:00 PM",
+        "wednesday": "8:00 AM - 8:00 PM",
+        "thursday": "8:00 AM - 8:00 PM",
+        "friday": "8:00 AM - 9:00 PM",
+        "saturday": "9:00 AM - 9:00 PM",
+        "sunday": "9:00 AM - 7:00 PM"
+      },
+      "price_range": "$$",
+      "phone": "(416) 123-4567",
+      "website": "https://example.com",
+      "instagram": "@matchacafe",
+      "review": "A sample cafe entry with authentic matcha preparation and cozy atmosphere.",
+      "tags": ["authentic", "cozy", "organic"],
+      "image": "/images/cafes/sample.jpg"
+    }
+  ],
+  "last_updated": "2024-01-20"
+}
