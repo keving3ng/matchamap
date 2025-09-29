@@ -18,6 +18,7 @@ interface UseLeafletMapOptions {
 export const useLeafletMap = ({ cafes, onPinClick }: UseLeafletMapOptions) => {
   const mapRef = useRef<L.Map | null>(null)
   const markersRef = useRef<Map<number, L.Marker>>(new Map())
+  const userLocationMarkerRef = useRef<L.Marker | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -98,11 +99,49 @@ export const useLeafletMap = ({ cafes, onPinClick }: UseLeafletMapOptions) => {
     mapRef.current?.setView([lat, lng], 15)
   }
 
+  const addUserLocationMarker = (lat: number, lng: number) => {
+    if (!mapRef.current) return
+
+    // Remove existing user location marker
+    if (userLocationMarkerRef.current) {
+      mapRef.current.removeLayer(userLocationMarkerRef.current)
+    }
+
+    // Create user location marker
+    const userMarkerHtml = `
+      <div class="relative">
+        <div class="w-6 h-6 bg-blue-500 rounded-full border-2 border-white shadow-lg animate-pulse">
+          <div class="w-2 h-2 bg-white rounded-full absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
+        </div>
+        <div class="absolute w-12 h-12 border-2 border-blue-300 rounded-full opacity-30 -top-3 -left-3 animate-ping"></div>
+      </div>
+    `
+
+    const userIcon = L.divIcon({
+      html: userMarkerHtml,
+      className: 'user-location-marker',
+      iconSize: [24, 24],
+      iconAnchor: [12, 12],
+    })
+
+    const userMarker = L.marker([lat, lng], { icon: userIcon }).addTo(mapRef.current)
+    userLocationMarkerRef.current = userMarker
+  }
+
+  const removeUserLocationMarker = () => {
+    if (userLocationMarkerRef.current && mapRef.current) {
+      mapRef.current.removeLayer(userLocationMarkerRef.current)
+      userLocationMarkerRef.current = null
+    }
+  }
+
   return {
     containerRef,
     zoomIn,
     zoomOut,
     centerOnLocation,
+    addUserLocationMarker,
+    removeUserLocationMarker,
     map: mapRef.current,
   }
 }

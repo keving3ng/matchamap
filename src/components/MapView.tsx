@@ -1,14 +1,51 @@
 import React from 'react'
-import { MapPin, Navigation } from 'lucide-react'
+import { MapPin, Navigation, Crosshair } from 'lucide-react'
 import { useLeafletMap } from '../hooks/useLeafletMap'
+import { useGeolocation } from '../hooks/useGeolocation'
 import { CircleButton } from './CircleButton'
 import type { MapViewProps } from '../types'
 
 export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCafe, onPinClick, onViewDetails, onClosePopover }) => {
-  const { containerRef, zoomIn, zoomOut } = useLeafletMap({
+  const { 
+    containerRef, 
+    zoomIn, 
+    zoomOut, 
+    centerOnLocation, 
+    addUserLocationMarker, 
+    removeUserLocationMarker 
+  } = useLeafletMap({
     cafes,
     onPinClick,
   })
+
+  const { 
+    coordinates, 
+    error, 
+    loading, 
+    permission, 
+    requestLocation, 
+    clearLocation, 
+    isSupported 
+  } = useGeolocation()
+
+  // Add user location marker when coordinates are available
+  React.useEffect(() => {
+    if (coordinates) {
+      addUserLocationMarker(coordinates.latitude, coordinates.longitude)
+    } else {
+      removeUserLocationMarker()
+    }
+  }, [coordinates, addUserLocationMarker, removeUserLocationMarker])
+
+  const handleLocationClick = () => {
+    if (coordinates && centerOnLocation) {
+      // Center map on user's current location
+      centerOnLocation(coordinates.latitude, coordinates.longitude)
+    } else {
+      // Request location permission and get current position
+      requestLocation()
+    }
+  }
 
   return (
     <div className="flex-1 relative">
@@ -19,6 +56,62 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
         style={{ minHeight: '400px' }}
         onClick={onClosePopover}
       />
+
+      {/* Location Permission Dialog */}
+      {error && error.code === 1 && ( // PERMISSION_DENIED
+        <div className="absolute inset-x-4 top-4 bg-white rounded-xl shadow-xl p-4 z-[9999] border border-red-200">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <MapPin size={20} className="text-red-600" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-gray-800 mb-1">Location Access Required</h3>
+              <p className="text-sm text-gray-600 mb-3">
+                To show your location and calculate distances to cafes, we need access to your location.
+              </p>
+              <div className="flex gap-2">
+                <button 
+                  onClick={requestLocation}
+                  className="px-4 py-2 bg-matcha-500 text-white rounded-lg text-sm font-medium hover:bg-matcha-600 transition"
+                >
+                  Allow Location
+                </button>
+                <button 
+                  onClick={clearLocation}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition"
+                >
+                  Maybe Later
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Location Error Dialog */}
+      {error && error.code !== 1 && (
+        <div className="absolute inset-x-4 top-4 bg-white rounded-xl shadow-xl p-4 z-[9999] border border-yellow-200">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <Crosshair size={20} className="text-yellow-600" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-gray-800 mb-1">Location Unavailable</h3>
+              <p className="text-sm text-gray-600 mb-3">
+                {error.code === 2 ? 'Unable to determine your location. Please check your connection.' : 
+                 error.code === 3 ? 'Location request timed out. Please try again.' : 
+                 'Location services are not available.'}
+              </p>
+              <button 
+                onClick={requestLocation}
+                className="px-4 py-2 bg-matcha-500 text-white rounded-lg text-sm font-medium hover:bg-matcha-600 transition"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Responsive Popover */}
       {showPopover && selectedCafe && (
@@ -153,7 +246,11 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
 
       {/* Location Control - Fixed positioning */}
       <div className="absolute top-4 right-4 z-[1001]">
-        <CircleButton icon={MapPin} />
+        <CircleButton 
+          icon={loading ? Crosshair : MapPin} 
+          onClick={handleLocationClick}
+          className={`${loading ? 'animate-pulse' : ''} ${!isSupported || error ? 'opacity-50 cursor-not-allowed' : ''}`}
+        />
       </div>
 
       {/* Zoom Controls - Bottom right positioning */}
