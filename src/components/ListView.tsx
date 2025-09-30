@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react'
-import { Navigation, MapPin, ChevronDown, Crosshair, Filter, X } from 'lucide-react'
+import { Navigation, MapPin, ChevronDown, Crosshair, Filter, X, Search } from 'lucide-react'
 import { useGeolocation } from '../hooks/useGeolocation'
 import { getLocationRequestAdvice, getOptimalGeolocationOptions } from '../utils/deviceDetection'
 import type { ListViewProps } from '../types'
@@ -15,6 +15,8 @@ interface FilterState {
 export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggleExpand, onViewDetails, onLocationChange }) => {
   const [sortBy, setSortBy] = useState<SortOption>('rating')
   const [showFilters, setShowFilters] = useState(false)
+  const [showSearch, setShowSearch] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
   const [filters, setFilters] = useState<FilterState>({
     priceRange: [],
     minRating: null,
@@ -69,10 +71,12 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
     return Array.from(new Set(priceRanges)).sort()
   }, [cafes])
 
-  // Check if any filters are active
+  // Check if any filters or search are active
   const hasActiveFilters = filters.priceRange.length > 0 ||
                           filters.minRating !== null ||
                           filters.neighborhoods.length > 0
+
+  const hasActiveSearch = searchQuery.trim().length > 0
 
   // Toggle filter helpers
   const togglePriceRange = (price: string) => {
@@ -107,8 +111,38 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
 
   // Filter and sort cafes based on selected options
   const filteredAndSortedCafes = useMemo(() => {
-    // First apply filters
+    // First apply search
     let filtered = cafes.filter(cafe => {
+      if (hasActiveSearch) {
+        const query = searchQuery.toLowerCase().trim()
+
+        // Search in cafe name
+        if (cafe.name.toLowerCase().includes(query)) {
+          return true
+        }
+
+        // Search in neighborhood
+        if (cafe.neighborhood.toLowerCase().includes(query)) {
+          return true
+        }
+
+        // Search in quick note (keywords/tags)
+        if (cafe.quickNote && cafe.quickNote.toLowerCase().includes(query)) {
+          return true
+        }
+
+        // Search in address
+        if (cafe.address.toLowerCase().includes(query)) {
+          return true
+        }
+
+        return false
+      }
+      return true
+    })
+
+    // Then apply filters
+    filtered = filtered.filter(cafe => {
       // Price range filter
       if (filters.priceRange.length > 0) {
         if (!cafe.priceRange || !filters.priceRange.includes(cafe.priceRange)) {
@@ -158,12 +192,39 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
       default:
         return cafesCopy
     }
-  }, [cafes, sortBy, filters])
+  }, [cafes, sortBy, filters, searchQuery, hasActiveSearch])
 
   return (
     <div className="flex-1 overflow-y-auto pb-24 relative">
       {/* Sort & Filter Header */}
       <div className="bg-white border-b-2 border-green-200 shadow-sm">
+        {/* Search Bar (Collapsible) */}
+        {showSearch && (
+          <div className="px-4 pt-3 pb-2 animate-slide-up">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search cafes, neighborhoods, or keywords..."
+                className="w-full pl-10 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+                autoFocus
+              />
+              {hasActiveSearch && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
+                  aria-label="Clear search"
+                >
+                  <X size={18} />
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Sort Buttons */}
         <div className="px-4 py-3">
           <div className="flex items-center gap-2 overflow-x-auto">
             <button
@@ -195,6 +256,22 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
               }`}
             >
               Area
+            </button>
+
+            {/* Search Toggle Button */}
+            <button
+              onClick={() => setShowSearch(!showSearch)}
+              className={`px-3 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition flex items-center gap-1.5 relative ${
+                hasActiveSearch || showSearch
+                  ? 'bg-green-600 text-white'
+                  : 'bg-green-100 text-green-700 hover:bg-green-200'
+              }`}
+            >
+              <Search size={16} />
+              Search
+              {hasActiveSearch && !showSearch && (
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 border-2 border-white rounded-full"></span>
+              )}
             </button>
 
             {/* Filter Toggle Button */}

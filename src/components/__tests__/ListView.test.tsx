@@ -434,4 +434,293 @@ describe('ListView', () => {
       expect(filterButton).toHaveClass('bg-green-600')
     })
   })
+
+  describe('Search', () => {
+    it('shows search toggle button', () => {
+      render(
+        <ListView
+          cafes={mockCafes}
+          expandedCard={null}
+          onToggleExpand={mockOnToggleExpand}
+          onViewDetails={mockOnViewDetails}
+        />
+      )
+
+      expect(screen.getByRole('button', { name: /search/i })).toBeInTheDocument()
+    })
+
+    it('toggles search bar when search button is clicked', () => {
+      render(
+        <ListView
+          cafes={mockCafes}
+          expandedCard={null}
+          onToggleExpand={mockOnToggleExpand}
+          onViewDetails={mockOnViewDetails}
+        />
+      )
+
+      const searchButton = screen.getByRole('button', { name: /search/i })
+
+      // Search input should not be visible initially
+      expect(screen.queryByPlaceholderText(/search cafes/i)).not.toBeInTheDocument()
+
+      // Click to show search
+      fireEvent.click(searchButton)
+      expect(screen.getByPlaceholderText(/search cafes/i)).toBeInTheDocument()
+
+      // Click to hide search
+      fireEvent.click(searchButton)
+      expect(screen.queryByPlaceholderText(/search cafes/i)).not.toBeInTheDocument()
+    })
+
+    it('filters cafes by name search', () => {
+      render(
+        <ListView
+          cafes={mockCafes}
+          expandedCard={null}
+          onToggleExpand={mockOnToggleExpand}
+          onViewDetails={mockOnViewDetails}
+        />
+      )
+
+      // Open search
+      const searchButton = screen.getByRole('button', { name: /search/i })
+      fireEvent.click(searchButton)
+
+      const searchInput = screen.getByPlaceholderText(/search cafes/i)
+      fireEvent.change(searchInput, { target: { value: 'Cafe A' } })
+
+      // Should only show Cafe A
+      expect(screen.getByText('Matcha Cafe A')).toBeInTheDocument()
+      expect(screen.queryByText('Matcha Cafe B')).not.toBeInTheDocument()
+      expect(screen.queryByText('Matcha Cafe C')).not.toBeInTheDocument()
+    })
+
+    it('filters cafes by neighborhood search', () => {
+      render(
+        <ListView
+          cafes={mockCafes}
+          expandedCard={null}
+          onToggleExpand={mockOnToggleExpand}
+          onViewDetails={mockOnViewDetails}
+        />
+      )
+
+      // Open search
+      fireEvent.click(screen.getByRole('button', { name: /search/i }))
+
+      const searchInput = screen.getByPlaceholderText(/search cafes/i)
+      fireEvent.change(searchInput, { target: { value: 'Downtown' } })
+
+      // Should only show Downtown cafe
+      expect(screen.getByText('Matcha Cafe A')).toBeInTheDocument()
+      expect(screen.queryByText('Matcha Cafe B')).not.toBeInTheDocument()
+      expect(screen.queryByText('Matcha Cafe C')).not.toBeInTheDocument()
+    })
+
+    it('filters cafes by keyword in quick note', () => {
+      render(
+        <ListView
+          cafes={mockCafes}
+          expandedCard={null}
+          onToggleExpand={mockOnToggleExpand}
+          onViewDetails={mockOnViewDetails}
+        />
+      )
+
+      // Open search
+      fireEvent.click(screen.getByRole('button', { name: /search/i }))
+
+      const searchInput = screen.getByPlaceholderText(/search cafes/i)
+      fireEvent.change(searchInput, { target: { value: 'Amazing' } })
+
+      // Should only show Cafe B with "Amazing quality" in quick note
+      expect(screen.queryByText('Matcha Cafe A')).not.toBeInTheDocument()
+      expect(screen.getByText('Matcha Cafe B')).toBeInTheDocument()
+      expect(screen.queryByText('Matcha Cafe C')).not.toBeInTheDocument()
+    })
+
+    it('search is case-insensitive', () => {
+      render(
+        <ListView
+          cafes={mockCafes}
+          expandedCard={null}
+          onToggleExpand={mockOnToggleExpand}
+          onViewDetails={mockOnViewDetails}
+        />
+      )
+
+      // Open search
+      fireEvent.click(screen.getByRole('button', { name: /search/i }))
+
+      const searchInput = screen.getByPlaceholderText(/search cafes/i)
+      fireEvent.change(searchInput, { target: { value: 'DOWNTOWN' } })
+
+      // Should still find cafe with lowercase neighborhood
+      expect(screen.getByText('Matcha Cafe A')).toBeInTheDocument()
+    })
+
+    it('shows clear button when search is active', () => {
+      render(
+        <ListView
+          cafes={mockCafes}
+          expandedCard={null}
+          onToggleExpand={mockOnToggleExpand}
+          onViewDetails={mockOnViewDetails}
+        />
+      )
+
+      // Open search
+      fireEvent.click(screen.getByRole('button', { name: /search/i }))
+
+      const searchInput = screen.getByPlaceholderText(/search cafes/i)
+
+      // No clear button initially
+      expect(screen.queryByLabelText('Clear search')).not.toBeInTheDocument()
+
+      // Type in search
+      fireEvent.change(searchInput, { target: { value: 'test' } })
+
+      // Clear button should appear
+      expect(screen.getByLabelText('Clear search')).toBeInTheDocument()
+    })
+
+    it('clears search when clear button is clicked', () => {
+      render(
+        <ListView
+          cafes={mockCafes}
+          expandedCard={null}
+          onToggleExpand={mockOnToggleExpand}
+          onViewDetails={mockOnViewDetails}
+        />
+      )
+
+      // Open search
+      fireEvent.click(screen.getByRole('button', { name: /search/i }))
+
+      const searchInput = screen.getByPlaceholderText(/search cafes/i) as HTMLInputElement
+      fireEvent.change(searchInput, { target: { value: 'Downtown' } })
+
+      // Only one cafe shown
+      expect(screen.getByText('Matcha Cafe A')).toBeInTheDocument()
+      expect(screen.queryByText('Matcha Cafe B')).not.toBeInTheDocument()
+
+      // Click clear button
+      const clearButton = screen.getByLabelText('Clear search')
+      fireEvent.click(clearButton)
+
+      // Search should be cleared
+      expect(searchInput.value).toBe('')
+
+      // All cafes should be visible
+      expect(screen.getByText('Matcha Cafe A')).toBeInTheDocument()
+      expect(screen.getByText('Matcha Cafe B')).toBeInTheDocument()
+      expect(screen.getByText('Matcha Cafe C')).toBeInTheDocument()
+    })
+
+    it('search works with filters', () => {
+      render(
+        <ListView
+          cafes={mockCafes}
+          expandedCard={null}
+          onToggleExpand={mockOnToggleExpand}
+          onViewDetails={mockOnViewDetails}
+        />
+      )
+
+      // Open search
+      fireEvent.click(screen.getByRole('button', { name: /search/i }))
+
+      // Apply search
+      const searchInput = screen.getByPlaceholderText(/search cafes/i)
+      fireEvent.change(searchInput, { target: { value: 'Cafe' } })
+
+      // All cafes match "Cafe" in their names
+      expect(screen.getByText('Matcha Cafe A')).toBeInTheDocument()
+      expect(screen.getByText('Matcha Cafe B')).toBeInTheDocument()
+      expect(screen.getByText('Matcha Cafe C')).toBeInTheDocument()
+
+      // Now apply price filter
+      const filterButton = screen.getByRole('button', { name: /filter/i })
+      fireEvent.click(filterButton)
+
+      const dollarButton = screen.getByRole('button', { name: '$' })
+      fireEvent.click(dollarButton)
+
+      // Should show only $ cafes that match search (A and C)
+      expect(screen.getByText('Matcha Cafe A')).toBeInTheDocument()
+      expect(screen.queryByText('Matcha Cafe B')).not.toBeInTheDocument()
+      expect(screen.getByText('Matcha Cafe C')).toBeInTheDocument()
+    })
+
+    it('shows no results message when search matches nothing', () => {
+      render(
+        <ListView
+          cafes={mockCafes}
+          expandedCard={null}
+          onToggleExpand={mockOnToggleExpand}
+          onViewDetails={mockOnViewDetails}
+        />
+      )
+
+      // Open search
+      fireEvent.click(screen.getByRole('button', { name: /search/i }))
+
+      const searchInput = screen.getByPlaceholderText(/search cafes/i)
+      fireEvent.change(searchInput, { target: { value: 'NonexistentCafe123' } })
+
+      expect(screen.getByText('No cafes match your filters')).toBeInTheDocument()
+    })
+
+    it('real-time search updates as user types', () => {
+      render(
+        <ListView
+          cafes={mockCafes}
+          expandedCard={null}
+          onToggleExpand={mockOnToggleExpand}
+          onViewDetails={mockOnViewDetails}
+        />
+      )
+
+      // Open search
+      fireEvent.click(screen.getByRole('button', { name: /search/i }))
+
+      const searchInput = screen.getByPlaceholderText(/search cafes/i)
+
+      // Type 'A'
+      fireEvent.change(searchInput, { target: { value: 'A' } })
+      expect(screen.getByText('Matcha Cafe A')).toBeInTheDocument()
+
+      // Type more to narrow down
+      fireEvent.change(searchInput, { target: { value: 'Annex' } })
+      expect(screen.queryByText('Matcha Cafe A')).not.toBeInTheDocument()
+      expect(screen.getByText('Matcha Cafe B')).toBeInTheDocument()
+    })
+
+    it('shows indicator badge when search is active but collapsed', () => {
+      render(
+        <ListView
+          cafes={mockCafes}
+          expandedCard={null}
+          onToggleExpand={mockOnToggleExpand}
+          onViewDetails={mockOnViewDetails}
+        />
+      )
+
+      const searchButton = screen.getByRole('button', { name: /search/i })
+
+      // Open search
+      fireEvent.click(searchButton)
+
+      // Type search query
+      const searchInput = screen.getByPlaceholderText(/search cafes/i)
+      fireEvent.change(searchInput, { target: { value: 'test' } })
+
+      // Close search
+      fireEvent.click(searchButton)
+
+      // Search button should be highlighted since search is active
+      expect(searchButton).toHaveClass('bg-green-600')
+    })
+  })
 })

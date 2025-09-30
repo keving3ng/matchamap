@@ -5,9 +5,9 @@ This document tracks all remaining tasks to complete V1 based on the PRD require
 ## 📊 **Progress Overview**
 
 -   **Total Tasks**: 30
--   **Completed**: 7
+-   **Completed**: 8
 -   **In Progress**: 0
--   **Remaining**: 23
+-   **Remaining**: 22
 
 ---
 
@@ -69,7 +69,7 @@ This document tracks all remaining tasks to complete V1 based on the PRD require
     -   Filter by neighborhood selection
     -   Combine multiple filters
 
--   [ ] **#9** Implement search functionality for cafes
+-   [x] **#9** Implement search functionality for cafes
     -   Text search across cafe names
     -   Search by neighborhood
     -   Search by keywords/tags
