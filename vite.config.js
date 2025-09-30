@@ -5,9 +5,9 @@ import fs from 'fs'
 // Only load SSL certs if they exist (for local dev)
 const httpsConfig = fs.existsSync('./localhost+2-key.pem') && fs.existsSync('./localhost+2.pem')
   ? {
-      key: fs.readFileSync('./localhost+2-key.pem'),
-      cert: fs.readFileSync('./localhost+2.pem')
-    }
+    key: fs.readFileSync('./localhost+2-key.pem'),
+    cert: fs.readFileSync('./localhost+2.pem')
+  }
   : undefined
 
 export default defineConfig({

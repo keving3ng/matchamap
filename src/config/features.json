@@ -18,5 +18,9 @@
   "ENABLE_ADMIN_PANEL": {
     "dev": true,
     "prod": false
+  },
+  "SHOW_COMING_SOON": {
+    "dev": true,
+    "prod": true
   }
 }

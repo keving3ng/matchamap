@@ -6,6 +6,7 @@ import ListView from './components/ListView'
 import DetailView from './components/DetailView'
 import FeedView from './components/FeedView'
 import PassportView from './components/PassportView'
+import ComingSoon from './components/ComingSoon'
 import { useDistanceCalculation } from './hooks/useDistanceCalculation'
 import { useFeatureToggle } from './hooks/useFeatureToggle'
 import cafeData from './data/cafes.json'
@@ -23,6 +24,8 @@ export const App: React.FC = () => {
 
   // Feature toggles
   const isPassportEnabled = useFeatureToggle('ENABLE_PASSPORT')
+  const showComingSoon = useFeatureToggle('SHOW_COMING_SOON')
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   // Determine current view from URL path
   const currentView = location.pathname === '/list' ? 'list'
@@ -81,6 +84,10 @@ export const App: React.FC = () => {
     } else {
       setVisitedLocations([...visitedLocations, id])
     }
+  }
+
+  if (showComingSoon && !isAuthenticated) {
+    return <ComingSoon onPasswordCorrect={() => setIsAuthenticated(true)} />
   }
 
   return (
