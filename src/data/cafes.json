@@ -166,7 +166,7 @@
       "color": "from-slate-400 to-slate-600"
     }
   ],
-  "news": [
+  "feed": [
     {
       "id": 1,
       "type": "new_location",

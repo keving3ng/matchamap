@@ -4,7 +4,7 @@ import { MapPin, List, User, Menu, ArrowLeft } from 'lucide-react'
 import MapView from './components/MapView'
 import ListView from './components/ListView'
 import DetailView from './components/DetailView'
-import NewsView from './components/NewsView'
+import FeedView from './components/FeedView'
 import PassportView from './components/PassportView'
 import { useDistanceCalculation } from './hooks/useDistanceCalculation'
 import { useFeatureToggle } from './hooks/useFeatureToggle'
@@ -26,12 +26,12 @@ export const App: React.FC = () => {
 
   // Determine current view from URL path
   const currentView = location.pathname === '/list' ? 'list'
-    : location.pathname === '/news' ? 'news'
+    : location.pathname === '/feed' ? 'feed'
     : location.pathname === '/passport' ? 'passport'
     : location.pathname.startsWith('/cafe/') ? 'detail'
     : 'map'
 
-  const { cafes, news } = cafeData as CafeData
+  const { cafes, feed } = cafeData as CafeData
 
   // Memoize user location to prevent unnecessary recalculations
   const userLocation = React.useMemo(() => {
@@ -132,8 +132,8 @@ export const App: React.FC = () => {
             onLocationChange={setUserCoordinates}
           />
         } />
-        <Route path="/news" element={
-          <NewsView newsItems={news} />
+        <Route path="/feed" element={
+          <FeedView feedItems={feed} />
         } />
         {isPassportEnabled && (
           <Route path="/passport" element={
@@ -175,13 +175,13 @@ export const App: React.FC = () => {
             <span className={`text-xs ${currentView === 'list' ? 'font-semibold' : ''}`}>List</span>
           </button>
           <button
-            onClick={() => navigate('/news')}
+            onClick={() => navigate('/feed')}
             className={`flex flex-col items-center gap-1 transition ${
-              currentView === 'news' ? 'text-green-600' : 'text-gray-400'
+              currentView === 'feed' ? 'text-green-600' : 'text-gray-400'
             }`}
           >
             <span className="text-2xl">📰</span>
-            <span className={`text-xs ${currentView === 'news' ? 'font-semibold' : ''}`}>News</span>
+            <span className={`text-xs ${currentView === 'feed' ? 'font-semibold' : ''}`}>Feed</span>
           </button>
           {isPassportEnabled && (
             <button

@@ -1,8 +1,8 @@
 import React from 'react'
 import { MapPinned, Star, Calendar } from 'lucide-react'
-import type { NewsViewProps } from '../types'
+import type { FeedViewProps } from '../types'
 
-export const NewsView: React.FC<NewsViewProps> = ({ newsItems }) => {
+export const FeedView: React.FC<FeedViewProps> = ({ feedItems }) => {
   return (
     <div className="flex-1 overflow-y-auto pb-24">
       {/* Header */}
@@ -11,9 +11,9 @@ export const NewsView: React.FC<NewsViewProps> = ({ newsItems }) => {
         <p className="text-sm text-gray-600 mt-1">Latest updates from the Toronto matcha scene</p>
       </div>
 
-      {/* News Items */}
+      {/* Feed Items */}
       <div className="px-4 py-4 space-y-4">
-        {newsItems.map((item) => (
+        {feedItems.map((item) => (
           <article key={item.id} className="bg-white rounded-2xl shadow-md border-2 border-green-100 overflow-hidden">
             <div className={`${
               item.type === 'new_location' ? 'bg-green-500' :
@@ -66,4 +66,4 @@ export const NewsView: React.FC<NewsViewProps> = ({ newsItems }) => {
   )
 }
 
-export default NewsView
+export default FeedView

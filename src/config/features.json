@@ -3,7 +3,7 @@
     "dev": false,
     "prod": false
   },
-  "ENABLE_NEWS": {
+  "ENABLE_FEED": {
     "dev": true,
     "prod": true
   },

@@ -30,7 +30,7 @@ export interface CafeWithDistance extends Cafe {
   distanceInfo: import('../utils/distance').DistanceResult | null
 }
 
-export interface NewsItem {
+export interface FeedItem {
   id: number
   type: 'new_location' | 'score_update' | 'announcement'
   title: string
@@ -44,11 +44,11 @@ export interface NewsItem {
 
 export interface CafeData {
   cafes: Cafe[]
-  news: NewsItem[]
+  feed: FeedItem[]
   last_updated: string
 }
 
-export type ViewType = 'map' | 'list' | 'detail' | 'news' | 'passport'
+export type ViewType = 'map' | 'list' | 'detail' | 'feed' | 'passport'
 
 // Component Props Types
 export interface MapViewProps {
@@ -75,8 +75,8 @@ export interface DetailViewProps {
   onToggleVisited: (id: number) => void
 }
 
-export interface NewsViewProps {
-  newsItems: NewsItem[]
+export interface FeedViewProps {
+  feedItems: FeedItem[]
 }
 
 export interface PassportViewProps {
