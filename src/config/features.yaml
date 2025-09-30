@@ -48,3 +48,9 @@ ENABLE_EVENTS:
 ENABLE_MENU:
   dev: false
   prod: false
+
+# City Selector
+# Dropdown to select different cities (Toronto, Montreal, Tokyo)
+ENABLE_CITY_SELECTOR:
+  dev: true
+  prod: false

@@ -1,12 +1,14 @@
 import React from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { ArrowLeft, Menu, Instagram } from 'lucide-react'
+import { CitySelector } from './CitySelector'
 
 interface HeaderProps {
   isMenuEnabled?: boolean
+  isCitySelectorEnabled?: boolean
 }
 
-export const Header: React.FC<HeaderProps> = ({ isMenuEnabled = false }) => {
+export const Header: React.FC<HeaderProps> = ({ isMenuEnabled = false, isCitySelectorEnabled = false }) => {
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -69,6 +71,9 @@ export const Header: React.FC<HeaderProps> = ({ isMenuEnabled = false }) => {
               />
             </svg>
           </a>
+          {isCitySelectorEnabled && (
+            <CitySelector />
+          )}
           {isMenuEnabled && (
             <button className="p-2 hover:bg-green-700 rounded-lg transition">
               <Menu size={24} />

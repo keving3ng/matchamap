@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useCallback } from 'react'
 import L from 'leaflet'
 import { createMatchaMarker, createUserLocationMarker } from '../utils/mapMarkers'
 import type { CafeWithDistance } from '../types'
@@ -16,9 +16,18 @@ interface UseLeafletMapOptions {
   onPinClick: (cafe: CafeWithDistance) => void
   selectedCafeId?: number | null
   visitedCafeIds?: number[]
+  initialCenter?: [number, number]
+  initialZoom?: number
 }
 
-export const useLeafletMap = ({ cafes, onPinClick, selectedCafeId, visitedCafeIds = [] }: UseLeafletMapOptions) => {
+export const useLeafletMap = ({
+  cafes,
+  onPinClick,
+  selectedCafeId,
+  visitedCafeIds = [],
+  initialCenter = [43.6532, -79.3832],
+  initialZoom = 13
+}: UseLeafletMapOptions) => {
   const mapRef = useRef<L.Map | null>(null)
   const markersRef = useRef<Map<number, L.Marker>>(new Map())
   const userLocationMarkerRef = useRef<L.Marker | null>(null)
@@ -29,8 +38,8 @@ export const useLeafletMap = ({ cafes, onPinClick, selectedCafeId, visitedCafeId
 
     // Initialize map
     const map = L.map(containerRef.current, {
-      center: [43.6532, -79.3832], // Toronto downtown
-      zoom: 13,
+      center: initialCenter,
+      zoom: initialZoom,
       zoomControl: false, // We'll add custom controls
       scrollWheelZoom: true,
       touchZoom: true,
@@ -50,6 +59,13 @@ export const useLeafletMap = ({ cafes, onPinClick, selectedCafeId, visitedCafeId
       map.remove()
     }
   }, [])
+
+  // Update map center when initialCenter changes
+  useEffect(() => {
+    if (mapRef.current) {
+      mapRef.current.setView(initialCenter, initialZoom)
+    }
+  }, [initialCenter, initialZoom])
 
   useEffect(() => {
     if (!mapRef.current) return
@@ -91,9 +107,9 @@ export const useLeafletMap = ({ cafes, onPinClick, selectedCafeId, visitedCafeId
     mapRef.current?.zoomOut()
   }
 
-  const centerOnLocation = (lat: number, lng: number) => {
+  const centerOnLocation = useCallback((lat: number, lng: number) => {
     mapRef.current?.setView([lat, lng], 15)
-  }
+  }, [])
 
   const addUserLocationMarker = (lat: number, lng: number) => {
     if (!mapRef.current) return

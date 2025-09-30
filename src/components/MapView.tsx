@@ -3,12 +3,15 @@ import { MapPin, Navigation, Crosshair } from 'lucide-react'
 import { useLeafletMap } from '../hooks/useLeafletMap'
 import { useGeolocation } from '../hooks/useGeolocation'
 import { useVisitedCafes } from '../hooks/useVisitedCafes'
+import { useCityStore } from '../stores/cityStore'
 import { CircleButton } from './CircleButton'
 import { getLocationRequestAdvice, getOptimalGeolocationOptions } from '../utils/deviceDetection'
 import type { MapViewProps } from '../types'
 
 export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCafe, onPinClick, onViewDetails, onClosePopover, onLocationChange }) => {
   const { visitedCafeIds } = useVisitedCafes()
+  const { getCity } = useCityStore()
+  const currentCity = getCity()
 
   const {
     containerRef,
@@ -22,6 +25,8 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
     onPinClick,
     selectedCafeId: selectedCafe?.id || null,
     visitedCafeIds,
+    initialCenter: currentCity.center,
+    initialZoom: currentCity.zoom,
   })
 
   const {

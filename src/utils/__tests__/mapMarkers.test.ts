@@ -11,6 +11,7 @@ const mockCafe: Cafe = {
   neighborhood: 'Downtown',
   address: '123 Test St',
   quickNote: 'Great matcha',
+  city: 'toronto',
   emoji: '🍃',
   color: 'from-green-400 to-green-600',
 }

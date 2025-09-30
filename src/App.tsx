@@ -10,6 +10,7 @@ import { useUIStore } from './stores/uiStore'
 import { useAuthStore } from './stores/authStore'
 import { useVisitedCafesStore } from './stores/visitedCafesStore'
 import { useLocationStore } from './stores/locationStore'
+import { useCityStore } from './stores/cityStore'
 import cafeData from './data/cafes.json'
 import type { CafeData } from './types'
 
@@ -18,6 +19,7 @@ export const App: React.FC = () => {
   const isPassportEnabled = useFeatureToggle('ENABLE_PASSPORT')
   const isEventsEnabled = useFeatureToggle('ENABLE_EVENTS')
   const isMenuEnabled = useFeatureToggle('ENABLE_MENU')
+  const isCitySelectorEnabled = useFeatureToggle('ENABLE_CITY_SELECTOR')
   const showComingSoon = useFeatureToggle('SHOW_COMING_SOON')
 
   // Zustand stores
@@ -25,6 +27,7 @@ export const App: React.FC = () => {
   const { showPopover, expandedCard, setExpandedCard, closePopover } = useUIStore()
   const { toggleVisited, toggleStamp } = useVisitedCafesStore()
   const { coordinates } = useLocationStore()
+  const { selectedCity } = useCityStore()
 
   // Local state for user coordinates (bridges between location store and distance calculation)
   const [userCoordinates, setUserCoordinates] = useState<GeolocationCoordinates | null>(null)
@@ -34,7 +37,12 @@ export const App: React.FC = () => {
     setUserCoordinates(coordinates)
   }, [coordinates])
 
-  const { cafes, feed, events } = cafeData as CafeData
+  const { cafes: allCafes, feed, events } = cafeData as CafeData
+
+  // Filter cafes by selected city
+  const cafes = React.useMemo(() => {
+    return allCafes.filter(cafe => cafe.city === selectedCity)
+  }, [allCafes, selectedCity])
 
   // Memoize user location to prevent unnecessary recalculations
   const userLocation = React.useMemo(() => {
@@ -60,7 +68,7 @@ export const App: React.FC = () => {
 
   return (
     <div className="w-full h-screen bg-gradient-to-br from-green-50 to-green-100 flex flex-col">
-      <Header isMenuEnabled={isMenuEnabled} />
+      <Header isMenuEnabled={isMenuEnabled} isCitySelectorEnabled={isCitySelectorEnabled} />
 
       <AppRoutes
         cafesWithDistance={cafesWithDistance}

@@ -7,6 +7,7 @@ export interface Cafe {
   neighborhood: string
   address: string
   quickNote: string
+  city: 'toronto' | 'montreal' | 'tokyo'
   review?: string
   instagram?: string
   tiktok?: string
