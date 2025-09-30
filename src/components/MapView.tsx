@@ -321,7 +321,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
         <CircleButton
           icon={loading ? Crosshair : MapPin}
           onClick={handleLocationClick}
-          className={`${!isSupported || error ? 'opacity-50 cursor-not-allowed' : ''} ${coordinates ? 'bg-green-100' : ''}`}
+          className={`${!isSupported || error ? 'opacity-50 cursor-not-allowed' : ''} ${coordinates ? 'bg-green-100' : ''} ${loading ? 'animate-pulse' : ''}`}
         />
       </div>
 
