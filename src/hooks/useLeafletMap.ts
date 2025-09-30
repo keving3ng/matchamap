@@ -39,9 +39,9 @@ export const useLeafletMap = ({ cafes, onPinClick, selectedCafeId, visitedCafeId
     })
 
     // Add tile layer
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors',
-      maxZoom: 18,
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors, © CARTO',
+      maxZoom: 19,
     }).addTo(map)
 
     mapRef.current = map
