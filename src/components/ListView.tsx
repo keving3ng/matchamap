@@ -192,32 +192,6 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
     <div className="flex-1 overflow-y-auto pb-24 relative">
       {/* Sort & Filter Header */}
       <div className="bg-white border-b-2 border-green-200 shadow-sm">
-        {/* Search Bar (Collapsible) */}
-        {showSearch && (
-          <div className="px-4 pt-3 pb-2 animate-slide-up">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search cafes, neighborhoods, or keywords..."
-                className="w-full pl-10 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-                autoFocus
-              />
-              {hasActiveSearch && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
-                  aria-label="Clear search"
-                >
-                  <X size={18} />
-                </button>
-              )}
-            </div>
-          </div>
-        )}
-
         {/* Sort & Action Buttons */}
         <div className="px-4 py-3">
           <div className="flex items-center justify-between gap-2">
@@ -239,7 +213,10 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
             <div className="flex items-center gap-2 flex-shrink-0">
               {/* Search Toggle Button */}
               <button
-                onClick={() => setShowSearch(!showSearch)}
+                onClick={() => {
+                  setShowSearch(!showSearch)
+                  if (!showSearch) setShowFilters(false) // Close filters when opening search
+                }}
                 className={`p-2 sm:px-3 sm:py-2 rounded-full text-sm font-semibold whitespace-nowrap transition flex items-center justify-center sm:justify-start gap-1.5 relative ${
                   hasActiveSearch || showSearch
                     ? 'bg-green-600 text-white'
@@ -255,7 +232,10 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
 
               {/* Filter Toggle Button */}
               <button
-                onClick={() => setShowFilters(!showFilters)}
+                onClick={() => {
+                  setShowFilters(!showFilters)
+                  if (!showFilters) setShowSearch(false) // Close search when opening filters
+                }}
                 className={`p-2 sm:px-3 sm:py-2 rounded-full text-sm font-semibold whitespace-nowrap transition flex items-center justify-center sm:justify-start gap-1.5 relative ${
                   hasActiveFilters || showFilters
                     ? 'bg-green-600 text-white'
@@ -293,9 +273,35 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
           </div>
         </div>
 
+        {/* Search Bar (Collapsible) */}
+        {showSearch && (
+          <div className="px-4 py-3 border-t border-green-100 overflow-hidden transition-all duration-300 ease-in-out animate-slide-down">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search cafes, neighborhoods, or keywords..."
+                className="w-full pl-10 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+                autoFocus
+              />
+              {hasActiveSearch && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
+                  aria-label="Clear search"
+                >
+                  <X size={18} />
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Filter Panel */}
         {showFilters && (
-          <div className="px-4 pb-4 pt-2 border-t border-green-100 animate-slide-up">
+          <div className="px-4 pb-4 pt-3 border-t border-green-100 overflow-hidden transition-all duration-300 ease-in-out animate-slide-down">
             <div className="space-y-3">
               {/* Price Range Filter */}
               {uniquePriceRanges.length > 0 && (
