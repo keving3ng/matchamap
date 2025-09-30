@@ -33,16 +33,21 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
     isSupported
   } = useGeolocation(getOptimalGeolocationOptions())
 
+  // Track if we've already auto-centered on initial location
+  const hasAutoCenteredRef = React.useRef(false)
+
   // Add user location marker when coordinates are available
   React.useEffect(() => {
     if (coordinates) {
       addUserLocationMarker(coordinates.latitude, coordinates.longitude)
-      // Auto-center on user location when first received
-      if (centerOnLocation) {
+      // Auto-center on user location ONLY when first received
+      if (centerOnLocation && !hasAutoCenteredRef.current) {
         centerOnLocation(coordinates.latitude, coordinates.longitude)
+        hasAutoCenteredRef.current = true
       }
     } else {
       removeUserLocationMarker()
+      hasAutoCenteredRef.current = false // Reset if location is cleared
     }
     // Notify parent component of coordinate changes
     if (onLocationChange) {
