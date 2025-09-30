@@ -57,11 +57,8 @@ export const createMatchaMarker = (cafe: Cafe, state: MarkerState = { isSelected
         <div class="${colors.bg} ${colors.border} border-2 ${colors.shadow} ${colors.pulse}
                     w-10 h-10 rounded-full flex items-center justify-center
                     transition-all duration-200 hover:scale-110 cursor-pointer">
-          <!-- Matcha leaf icon -->
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="text-white">
-            <path d="M12 2C9.76 2 7.82 3.69 7.82 6.5c0 2.81 2.09 5.17 4.18 5.17s4.18-2.36 4.18-5.17C16.18 3.69 14.24 2 12 2z"/>
-            <path d="M12 13.5c-1.93 0-3.5 1.57-3.5 3.5s1.57 3.5 3.5 3.5 3.5-1.57 3.5-3.5-1.57-3.5-3.5-3.5z"/>
-          </svg>
+          <!-- Matcha emoji -->
+          <span class="text-xl">🍵</span>
         </div>
 
         <!-- Pin point -->
@@ -72,7 +69,7 @@ export const createMatchaMarker = (cafe: Cafe, state: MarkerState = { isSelected
       <div class="absolute -top-3 -right-2 ${scoreBadgeStyle}
                   px-2 py-0.5 rounded-full text-xs font-bold shadow-md
                   border border-white/20 min-w-[2rem] text-center
-                  transition-all duration-200">
+                  transition-all duration-200 z-10">
         ${cafe.score}
       </div>
 
@@ -95,9 +92,8 @@ export const createMatchaMarker = (cafe: Cafe, state: MarkerState = { isSelected
 export const createUserLocationMarker = (): string => {
   return `
     <div class="relative flex items-center justify-center">
-      <!-- Outer pulse ring -->
-      <div class="absolute w-8 h-8 bg-blue-400 rounded-full opacity-30 animate-ping"></div>
-      <div class="absolute w-6 h-6 bg-blue-500 rounded-full opacity-50 animate-ping" style="animation-delay: 75ms;"></div>
+      <!-- Subtle static ring -->
+      <div class="absolute w-6 h-6 bg-blue-400 rounded-full opacity-20"></div>
 
       <!-- Main dot -->
       <div class="w-4 h-4 bg-blue-600 border-2 border-white rounded-full shadow-lg">
