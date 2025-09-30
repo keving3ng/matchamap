@@ -226,9 +226,9 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
 
         {/* Sort & Action Buttons */}
         <div className="px-4 py-3">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between gap-2">
             {/* Sort By Dropdown */}
-            <div className="relative flex-1">
+            <div className="relative max-w-xs">
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortOption)}
