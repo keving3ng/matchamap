@@ -18,7 +18,8 @@
     "lucide-react": "^0.544.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^6.27.0"
+    "react-router-dom": "^6.27.0",
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@rollup/plugin-yaml": "^4.1.2",

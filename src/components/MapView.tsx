@@ -51,12 +51,12 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
   }, [coordinates, addUserLocationMarker, removeUserLocationMarker, onLocationChange, centerOnLocation])
 
   const handleLocationClick = () => {
+    // Always refresh location when clicked (cheap operation, useful for moving users)
+    requestLocation()
+
+    // Also center map if we already have coordinates
     if (coordinates && centerOnLocation) {
-      // Center map on user's current location
       centerOnLocation(coordinates.latitude, coordinates.longitude)
-    } else {
-      // Request location permission and get current position
-      requestLocation()
     }
   }
 

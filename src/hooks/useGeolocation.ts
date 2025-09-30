@@ -1,11 +1,5 @@
-import { useState, useEffect, useCallback } from 'react'
-
-interface GeolocationState {
-  coordinates: GeolocationCoordinates | null
-  error: GeolocationPositionError | null
-  loading: boolean
-  permission: PermissionState | null
-}
+import { useEffect, useCallback } from 'react'
+import { useLocationStore } from '../stores/locationStore'
 
 interface UseGeolocationOptions {
   enableHighAccuracy?: boolean
@@ -15,32 +9,35 @@ interface UseGeolocationOptions {
 }
 
 export const useGeolocation = (_options: UseGeolocationOptions = {}) => {
-  const [state, setState] = useState<GeolocationState>({
-    coordinates: null,
-    error: null,
-    loading: false,
-    permission: null,
-  })
+  const {
+    coordinates,
+    error,
+    loading,
+    permission,
+    setCoordinates,
+    setError,
+    setLoading,
+    setPermission,
+    clearLocation: clearLocationStore,
+  } = useLocationStore()
 
   // Use options for potential future configuration (currently unused but structured for extensibility)
 
   // Request location permission and get current position
   const requestLocation = useCallback(() => {
     if (!navigator.geolocation) {
-      setState(prev => ({
-        ...prev,
-        error: {
-          code: 0,
-          message: 'Geolocation is not supported by this browser',
-          PERMISSION_DENIED: 1,
-          POSITION_UNAVAILABLE: 2,
-          TIMEOUT: 3,
-        } as GeolocationPositionError,
-      }))
+      setError({
+        code: 0,
+        message: 'Geolocation is not supported by this browser',
+        PERMISSION_DENIED: 1,
+        POSITION_UNAVAILABLE: 2,
+        TIMEOUT: 3,
+      } as GeolocationPositionError)
       return
     }
 
-    setState(prev => ({ ...prev, loading: true, error: null }))
+    setLoading(true)
+    setError(null)
 
     // Mobile-optimized geolocation options
     const geoOptions: PositionOptions = {
@@ -50,12 +47,8 @@ export const useGeolocation = (_options: UseGeolocationOptions = {}) => {
     }
 
     const onSuccess = (position: GeolocationPosition) => {
-      setState(prev => ({
-        ...prev,
-        coordinates: position.coords,
-        loading: false,
-        error: null,
-      }))
+      // setCoordinates will automatically set loading to false
+      setCoordinates(position.coords)
 
       // If accuracy is poor (>100m), try to get a better position
       if (position.coords.accuracy > 100) {
@@ -67,10 +60,7 @@ export const useGeolocation = (_options: UseGeolocationOptions = {}) => {
 
         navigator.geolocation.getCurrentPosition(
           (betterPosition) => {
-            setState(prev => ({
-              ...prev,
-              coordinates: betterPosition.coords,
-            }))
+            setCoordinates(betterPosition.coords)
           },
           () => {
             // Ignore errors for improvement attempt - keep the original position
@@ -81,48 +71,40 @@ export const useGeolocation = (_options: UseGeolocationOptions = {}) => {
     }
 
     const onError = (error: GeolocationPositionError) => {
-      setState(prev => ({
-        ...prev,
-        error: error,
-        loading: false,
-      }))
+      // setError will automatically set loading to false
+      setError(error)
     }
 
     // Make the actual geolocation request
     navigator.geolocation.getCurrentPosition(onSuccess, onError, geoOptions)
-  }, [])
+  }, [setCoordinates, setError, setLoading])
 
   // Clear location data
   const clearLocation = useCallback(() => {
-    setState({
-      coordinates: null,
-      error: null,
-      loading: false,
-      permission: null,
-    })
-  }, [])
+    clearLocationStore()
+  }, [clearLocationStore])
 
   // Check permission status on mount
   useEffect(() => {
     if ('permissions' in navigator && navigator.permissions) {
       navigator.permissions.query({ name: 'geolocation' }).then(permission => {
-        setState(prev => ({ ...prev, permission: permission.state }))
-        
+        setPermission(permission.state)
+
         // Listen for permission changes
         permission.addEventListener('change', () => {
-          setState(prev => ({ ...prev, permission: permission.state }))
+          setPermission(permission.state)
         })
       }).catch(() => {
         // Permissions API not fully supported, ignore
       })
     }
-  }, [])
+  }, [setPermission])
 
   return {
-    coordinates: state.coordinates,
-    error: state.error,
-    loading: state.loading,
-    permission: state.permission,
+    coordinates,
+    error,
+    loading,
+    permission,
     requestLocation,
     clearLocation,
     isSupported: 'geolocation' in navigator,

@@ -40,14 +40,8 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
   }, [coordinates, onLocationChange])
 
   const handleLocationClick = () => {
-    if (coordinates) {
-      // Location already obtained - maybe scroll to top or give feedback
-      // For now, just re-request to refresh
-      requestLocation()
-    } else {
-      // Request location permission and get current position
-      requestLocation()
-    }
+    // Always refresh location when clicked (cheap operation, useful for moving users)
+    requestLocation()
   }
 
   // Auto-trigger location when distance filter is selected
