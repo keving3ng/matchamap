@@ -6,6 +6,7 @@ import DetailView from './DetailView'
 import FeedView from './FeedView'
 import PassportView from './PassportView'
 import EventsView from './EventsView'
+import { useVisitedCafesStore } from '../stores/visitedCafesStore'
 import type { CafeWithDistance, FeedItem, EventItem } from '../types'
 
 interface AppRoutesProps {
@@ -33,12 +34,10 @@ interface AppRoutesProps {
 
   // Passport props
   cafes: CafeWithDistance[]
-  visitedStamps: number[]
   onToggleStamp: (id: number) => void
   isPassportEnabled?: boolean
 
   // Detail props
-  visitedLocations: number[]
   onToggleVisited: (id: number) => void
 }
 
@@ -56,12 +55,12 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({
   eventItems,
   isEventsEnabled = false,
   cafes,
-  visitedStamps,
   onToggleStamp,
   isPassportEnabled = false,
-  visitedLocations,
   onToggleVisited,
 }) => {
+  const { stampedCafeIds, visitedCafeIds } = useVisitedCafesStore()
+
   return (
     <Routes>
       <Route path="/" element={
@@ -96,7 +95,7 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({
         <Route path="/passport" element={
           <PassportView
             cafes={cafes}
-            visitedStamps={visitedStamps}
+            visitedStamps={stampedCafeIds}
             onToggleStamp={onToggleStamp}
           />
         } />
@@ -104,7 +103,7 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({
       <Route path="/cafe/:id" element={
         <DetailView
           cafe={selectedCafe || cafesWithDistance[0]}
-          visitedLocations={visitedLocations}
+          visitedLocations={visitedCafeIds}
           onToggleVisited={onToggleVisited}
         />
       } />
