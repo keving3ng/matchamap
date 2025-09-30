@@ -6,30 +6,106 @@ MatchaMap is a mobile-first web application providing a curated, map-based guide
 
 ## Tech Stack
 
--   **Framework**: React 18 (component-based UI)
--   **Build Tool**: Vite (fast build and dev server)
--   **Styling**: Tailwind CSS with custom matcha theme
--   **Routing**: React Router (client-side routing)
+-   **Framework**: React 18.3+ (functional components, hooks-first)
+-   **State Management**: Zustand (lightweight, performant global state)
+-   **Build Tool**: Vite 5+ (fast builds, HMR, ES modules)
+-   **Styling**: Tailwind CSS 3+ with custom design tokens
+-   **Routing**: React Router 6+ (client-side routing)
 -   **Maps**: Leaflet (vanilla JS in React components)
 -   **Data**: JSON file with weekly manual updates
--   **Hosting**: Netlify (zero-config static hosting)
+-   **Hosting**: Cloudflare Pages (edge deployment, global CDN)
+-   **TypeScript**: Strict mode enabled for type safety
 
 ## Architecture Principles
 
-### Performance-First
+### 1. Performance-First (Top 3 Priority)
 
--   React with Vite for fast builds and HMR
--   Component-based architecture for reusability
--   Mobile-first responsive design
--   Target bundle size: 25-65KB per page
+**MUST maintain these targets:**
+-   **LCP**: < 2.5 seconds
+-   **FID**: < 100ms
+-   **CLS**: < 0.1
+-   **Bundle size**: < 100KB total per page
+-   **Time to Interactive**: < 3.5 seconds on 3G
 
-### Design Principles
+**Performance rules:**
+-   Always lazy load routes and heavy components
+-   Optimize images (WebP, proper sizing)
+-   Minimize re-renders (React.memo, useMemo, useCallback when needed)
+-   Keep Zustand stores focused and minimal
+-   Test on real mobile devices, not just desktop emulation
 
--   **Mobile-first**: Optimize for on-the-go discovery
--   **Curated quality**: Expert reviews over user-generated content
--   **Geographic focus**: Map-based interface for location discovery
--   **Japanese aesthetic**: Matcha color schemes, subtly cutesy design
--   **Lean & efficient**: Quick wins on optimization, minimal complexity
+### 2. Mobile-First Design (Top 3 Priority)
+
+**ALWAYS start with mobile (320px), then scale up:**
+-   Base styles = mobile (320px-640px)
+-   `sm:` = tablet (640px+)
+-   `md:` = small desktop (768px+)
+-   `lg:` = desktop (1024px+)
+
+**Touch-first interactions:**
+-   Minimum touch target: 44px × 44px (enforced via CSS)
+-   Swipe gestures where appropriate
+-   One-handed operation priority
+-   No hover-dependent interactions
+
+### 3. Lean & Efficient (Top 3 Priority)
+
+**Keep it simple:**
+-   Avoid over-engineering
+-   Use browser APIs before libraries
+-   Prefer CSS animations over JS when possible
+-   Remove unused code aggressively
+-   Bundle analysis on every major change
+
+## State Management Philosophy
+
+### Zustand Stores (Preferred for Global State)
+
+**When to use Zustand:**
+-   Shared state across multiple components
+-   Persistent state (localStorage/sessionStorage)
+-   Complex state with multiple actions
+-   Authentication, user preferences, UI state
+
+**Store organization:**
+```
+src/stores/
+├── locationStore.ts      # User geolocation
+├── visitedCafesStore.ts  # Passport/visited tracking
+├── uiStore.ts            # UI state (modals, panels)
+└── authStore.ts          # Authentication state
+```
+
+**Store rules:**
+-   Keep stores focused and single-purpose
+-   Use persist middleware for data that survives refresh
+-   Always type stores with TypeScript interfaces
+-   Export typed hooks, not raw store
+
+### Custom Hooks (Preferred for Component Logic)
+
+**When to use hooks:**
+-   Reusable component logic
+-   API calls and data fetching
+-   Complex local state management
+-   Side effects and lifecycle management
+
+**Hook organization:**
+```
+src/hooks/
+├── useGeolocation.ts         # Browser geolocation
+├── useDistanceCalculation.ts # Cafe distance math
+├── useCafeSelection.ts       # Cafe selection logic
+├── useVisitedCafes.ts        # Wrapper around store
+└── useFeatureToggle.ts       # Feature flags
+```
+
+**Hook rules:**
+-   Name all hooks with `use` prefix
+-   One hook = one concern
+-   Document complex hooks with JSDoc
+-   Return objects, not arrays (better for destructuring)
+-   Avoid deeply nested hooks
 
 ## Key Features (V1)
 
@@ -84,50 +160,192 @@ MatchaMap is a mobile-first web application providing a curated, map-based guide
 3. Automatic rebuild and deploy via Netlify
 4. Cache invalidation handled automatically
 
-## Development Guidelines
+## Code Organization & Location Rules
 
-### Component Organization
+### Directory Structure (STRICT)
 
 ```
 src/
-├── components/          # Reusable React components
-├── pages/              # Page components for routing
-├── hooks/              # Custom React hooks
-├── data/               # JSON data files
-├── utils/              # Utility functions
-├── styles/             # Global styles and Tailwind config
-├── App.jsx             # Root component
-└── main.jsx            # React entry point
+├── components/          # React components ONLY
+│   ├── Header.tsx
+│   ├── BottomNavigation.tsx
+│   ├── AppRoutes.tsx
+│   ├── MapView.tsx
+│   ├── ListView.tsx
+│   └── __tests__/      # Component tests
+├── hooks/              # Custom React hooks ONLY
+│   ├── useGeolocation.ts
+│   ├── useCafeSelection.ts
+│   └── useDistanceCalculation.ts
+├── stores/             # Zustand stores ONLY
+│   ├── locationStore.ts
+│   ├── uiStore.ts
+│   ├── authStore.ts
+│   └── visitedCafesStore.ts
+├── utils/              # Pure utility functions ONLY
+│   ├── distanceCalculator.ts
+│   └── deviceDetection.ts
+├── types/              # TypeScript type definitions
+│   └── index.ts
+├── data/               # Static JSON data
+│   └── cafes.json
+├── styles/             # Global CSS and Tailwind config
+│   └── index.css
+├── App.tsx             # Root component (composition only)
+└── main.tsx            # React entry point
 ```
 
-### Mobile-First Development
+### Component Rules
 
--   Always start with mobile viewport (320px)
--   Use Tailwind's responsive utilities (`sm:`, `md:`, `lg:`)
--   Touch-friendly interface elements (44px minimum touch targets)
--   Optimize for one-handed use
+**MUST follow these patterns:**
 
-### Performance Targets
+1. **Functional components only** - No class components
+2. **TypeScript required** - All components use `.tsx`
+3. **Props interface first** - Define `interface ComponentProps` before component
+4. **Named exports** - Use `export const Component` (not default)
+5. **File = Component** - One component per file, file name matches component name
 
--   **LCP**: < 2.5 seconds
--   **FID**: < 100ms
--   **CLS**: < 0.1
--   **Bundle size**: < 100KB total per page
+**Component composition:**
+```tsx
+// ✅ GOOD - Focused, single-purpose
+export const CafeCard: React.FC<CafeCardProps> = ({ cafe }) => {
+  // Component logic
+}
+
+// ❌ BAD - Multiple components in one file
+export const CafeCard = () => {}
+export const CafeList = () => {}
+```
+
+**When to extract a component:**
+-   Logic repeated 2+ times → Create reusable component
+-   Component file > 300 lines → Split into smaller components
+-   Complex UI section → Extract to named component
+-   Different responsibilities → Separate components
+
+### Styling & Design System
+
+**Design Tokens (Tailwind Config):**
+
+```javascript
+// tailwind.config.js
+colors: {
+  matcha: {
+    50: '#f0f7e9',
+    100: '#e1efd3',
+    // ... full scale
+    500: '#7cb342',  // Primary
+    600: '#689f38',
+    // ... to 900
+  },
+  cream: { /* ... */ },
+  charcoal: { /* ... */ }
+}
+```
+
+**Use design tokens, not arbitrary values:**
+```tsx
+// ✅ GOOD - Uses design tokens
+<div className="bg-matcha-500 text-cream-50">
+
+// ❌ BAD - Arbitrary values
+<div className="bg-[#7cb342] text-[#faf7f2]">
+```
+
+**Animation Philosophy:**
+
+Small, purposeful animations that enhance UX without hurting performance:
+-   **Duration**: 150-300ms (never > 500ms)
+-   **Easing**: `ease-out` for exits, `ease-in-out` for movements
+-   **Prefer CSS animations** over JS (better performance)
+-   **Use transforms** (translateX, scale) over position/size changes
+-   **Animate sparingly** - only state changes and transitions
+
+**Animation patterns:**
+```css
+/* ✅ GOOD - CSS keyframe animation */
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ❌ AVOID - JS-driven animations unless necessary */
+```
+
+### TypeScript Rules
+
+**STRICT mode enabled** - No `any` types allowed
+
+```tsx
+// ✅ GOOD - Fully typed
+interface CafeCardProps {
+  cafe: CafeWithDistance
+  onSelect: (cafe: CafeWithDistance) => void
+}
+
+// ❌ BAD - Using any
+interface BadProps {
+  data: any
+  onClick: (item: any) => void
+}
+```
+
+**Type organization:**
+-   Shared types → `src/types/index.ts`
+-   Component-specific types → Same file as component
+-   Store types → Same file as store definition
+
+### Finding Code (For Claude Code)
+
+**To find a component:**
+```bash
+# Search by component name
+glob "**/*ComponentName*.tsx"
+
+# Search by functionality
+grep "functionName" --type ts
+```
+
+**To find where something is used:**
+```bash
+# Find all imports
+grep "import.*ComponentName" --type ts
+
+# Find all usages
+grep "ComponentName" --type tsx
+```
+
+**Common locations:**
+-   UI components → `src/components/`
+-   Business logic → `src/hooks/`
+-   Global state → `src/stores/`
+-   Pure functions → `src/utils/`
+-   Type definitions → `src/types/`
 
 ## Common Commands
 
 ```bash
 # Development
-npm run dev              # Start dev server
+npm run dev              # Start dev server (Vite)
 npm run build           # Build for production
 npm run preview         # Preview built site
+npm run typecheck       # TypeScript type checking (MUST pass)
 
-# Styling
-npx tailwindcss --watch # Watch Tailwind changes (if needed)
+# Quality checks (run before commit)
+npm run typecheck       # Check TypeScript types
+npm run build           # Ensure build succeeds
 
-# Deployment
-npm run build && netlify deploy --prod
+# Testing (when implemented)
+npm run test            # Run test suite
+npm run test:watch      # Run tests in watch mode
 ```
+
+**Pre-commit checklist:**
+1. ✅ `npm run typecheck` passes
+2. ✅ `npm run build` succeeds
+3. ✅ No console errors in browser
+4. ✅ Test on mobile viewport (320px)
+5. ✅ Check bundle size didn't explode
 
 ## Testing Approach
 
@@ -174,21 +392,51 @@ docs(readme): update deployment instructions
 style(ui): improve mobile navigation spacing
 ```
 
-## Deployment Process
+## Environment & Deployment
 
-### Netlify Configuration
+### Cloudflare Pages Configuration
 
--   Auto-deploy from `main` branch
+**Build Settings:**
+-   Framework preset: Vite
 -   Build command: `npm run build`
--   Publish directory: `dist`
--   Environment variables: None required for V1
+-   Build output directory: `dist`
+-   Node version: 18+
+
+**Environment Variables:**
+
+We use a YAML config file for feature toggles instead of env vars:
+```yaml
+# src/config/features.yaml
+ENABLE_PASSPORT: true
+ENABLE_EVENTS: false
+ENABLE_MENU: false
+SHOW_COMING_SOON: false
+```
+
+**Why not .env?**
+-   No secrets in this app (all public data)
+-   Easier to track in version control
+-   Type-safe with TypeScript
+-   No build-time variable injection needed
+
+**Deployment Process:**
+1. Push to `main` branch
+2. Cloudflare Pages auto-builds
+3. Deployed to global CDN edge
+4. Verify at production URL
+
+**Branch Previews:**
+-   Every branch gets preview URL
+-   Auto-deleted when branch is merged
+-   Perfect for testing before merge
 
 ### Weekly Content Updates
 
 1. Update `src/data/cafes.json`
 2. Commit to `main` branch
-3. Netlify auto-deploys within 2-3 minutes
-4. Verify changes on production site
+3. Cloudflare auto-deploys in ~1 minute
+4. Global CDN cache updated automatically
+5. Verify changes on production site
 
 ## Future Considerations (V2+)
 
@@ -240,16 +488,106 @@ npm run build -- --verbose    # Verbose build output
 npm run dev -- --host        # Expose dev server to network
 ```
 
+## Development Best Practices (Opinionated for Claude Code)
+
+### Code Review Checklist
+
+Before marking any task complete, verify:
+
+**1. TypeScript**
+-   [ ] No `any` types
+-   [ ] All props interfaces defined
+-   [ ] `npm run typecheck` passes
+
+**2. Performance**
+-   [ ] No unnecessary re-renders
+-   [ ] Heavy computations memoized
+-   [ ] Lazy loading where appropriate
+-   [ ] Bundle size < 100KB per page
+
+**3. Mobile-First**
+-   [ ] Tested at 320px width
+-   [ ] Touch targets ≥ 44px
+-   [ ] No hover-only interactions
+-   [ ] Works one-handed
+
+**4. State Management**
+-   [ ] Global state → Zustand store
+-   [ ] Local state → useState/useReducer
+-   [ ] Reusable logic → Custom hook
+-   [ ] Pure functions → Utils
+
+**5. Code Quality**
+-   [ ] Component < 300 lines
+-   [ ] Single responsibility per component
+-   [ ] Descriptive variable names
+-   [ ] No magic numbers/strings
+
+### Anti-Patterns to Avoid
+
+❌ **Don't do this:**
+-   Class components
+-   Inline styles (use Tailwind)
+-   Default exports (use named exports)
+-   `any` types in TypeScript
+-   God components (>500 lines)
+-   Prop drilling (use Zustand instead)
+-   Hover-dependent mobile interactions
+-   Heavy animations (>300ms)
+-   Arbitrary Tailwind values
+-   Multiple components per file
+
+✅ **Do this instead:**
+-   Functional components
+-   Tailwind classes
+-   Named exports
+-   Proper TypeScript types
+-   Small, focused components
+-   Zustand stores for shared state
+-   Touch-first interactions
+-   CSS animations 150-300ms
+-   Design token values
+-   One component per file
+
+### When to Refactor
+
+**Extract to component when:**
+-   Code duplicated 2+ times
+-   File > 300 lines
+-   Complex section that could be named
+-   Different responsibility/concern
+
+**Extract to hook when:**
+-   Reusable logic across components
+-   Complex state management
+-   Side effects need coordination
+-   API/data fetching logic
+
+**Extract to Zustand store when:**
+-   State shared across 3+ components
+-   State needs persistence
+-   Complex state with many actions
+-   Authentication/global UI state
+
+**Extract to utility when:**
+-   Pure function (no React dependencies)
+-   Math/calculation logic
+-   Data transformation
+-   Reusable helpers
+
 ## Support Resources
 
 -   [React Documentation](https://react.dev/)
+-   [Zustand Documentation](https://docs.pmnd.rs/zustand/)
 -   [Vite Documentation](https://vitejs.dev/)
 -   [React Router Documentation](https://reactrouter.com/)
 -   [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+-   [TypeScript Documentation](https://www.typescriptlang.org/docs/)
 -   [Leaflet Documentation](https://leafletjs.com/reference.html)
--   [Netlify Documentation](https://docs.netlify.com/)
+-   [Cloudflare Pages Documentation](https://developers.cloudflare.com/pages/)
 
 ---
 
-_Last updated: [Current Date]_
+_Last updated: 2025-09-30_
 _Project Phase: V1 Development_
+_React: 18.3+ | Zustand: Latest | TypeScript: Strict Mode_
