@@ -1,0 +1,22 @@
+{
+  "ENABLE_PASSPORT": {
+    "dev": false,
+    "prod": false
+  },
+  "ENABLE_NEWS": {
+    "dev": true,
+    "prod": true
+  },
+  "ENABLE_SEARCH": {
+    "dev": true,
+    "prod": true
+  },
+  "ENABLE_GEOLOCATION": {
+    "dev": true,
+    "prod": true
+  },
+  "ENABLE_ADMIN_PANEL": {
+    "dev": true,
+    "prod": false
+  }
+}

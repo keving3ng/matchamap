@@ -4,10 +4,11 @@ This document tracks all remaining tasks to complete V1 based on the PRD require
 
 ## 📊 **Progress Overview**
 
--   **Total Tasks**: 30
+-   **Total V1 Tasks**: 26
 -   **Completed**: 8
 -   **In Progress**: 0
--   **Remaining**: 22
+-   **Remaining**: 18
+-   **Moved to V2**: 4 (Passport features)
 
 ---
 
@@ -77,34 +78,19 @@ This document tracks all remaining tasks to complete V1 based on the PRD require
 
 ---
 
-## 🎫 **MATCHA PASSPORT** (High Priority - Unique Feature)
+## 🎫 **MATCHA PASSPORT** ~~(MOVED TO V2)~~
 
-### Status: Visual mockup with basic state → Need persistent storage & logic
+### Status: Deprioritized - focusing on core discovery & content features first
 
--   [ ] **#11** Implement persistent localStorage for Matcha Passport
-
-    -   Save visited cafes across browser sessions
-    -   Data structure for user progress
-    -   Migration strategy for data format changes
-
--   [ ] **#12** Add progress tracking and stats calculations
-
-    -   Real percentage calculations
-    -   Visit counts and averages
-    -   Favorite cafe tracking
-    -   Time-based statistics
-
--   [ ] **#13** Implement achievement/badge system
-    -   Define achievement criteria
-    -   Unlock system with notifications
-    -   Achievement display in passport
-    -   Special badges for milestones
+-   ~~[ ] **#11** Implement persistent localStorage for Matcha Passport~~ → V2
+-   ~~[ ] **#12** Add progress tracking and stats calculations~~ → V2
+-   ~~[ ] **#13** Implement achievement/badge system~~ → V2
 
 ---
 
-## 🏪 **CAFE DATA & DETAILS** (Medium Priority - Content)
+## 🏪 **CAFE DATA & DETAILS** (⭐ HIGH PRIORITY - Content Foundation)
 
-### Status: Basic mock data → Need comprehensive cafe profiles
+### Status: Basic mock data → Need comprehensive cafe profiles (waiting on real data collection)
 
 -   [ ] **#14** Expand cafe data with all required fields from PRD
 
@@ -148,26 +134,30 @@ This document tracks all remaining tasks to complete V1 based on the PRD require
 
 ---
 
-## 📰 **NEWS & CONTENT** (Medium Priority - Engagement)
+## 📰 **NEWS & CONTENT** (⭐ HIGH PRIORITY - Engagement & Social Proof)
 
-### Status: Static news list → Need dynamic content management
+### Status: Static news list → Need social media feed integration
 
--   [ ] **#20** Implement news content management
+-   [ ] **#20** Implement social media feed integration
 
-    -   Dynamic news loading from data
-    -   News item creation workflow
-    -   Content versioning
+    -   **Instagram Feed**: Pull recent posts automatically (investigate Instagram Basic Display API or embed options)
+    -   **TikTok Integration**: Explore TikTok embed API or feed options
+    -   Fallback to manual JSON updates if APIs are restricted
+    -   Combine social content with manual news updates
+    -   Mobile-optimized feed cards
 
 -   [ ] **#21** Add news categorization and filtering
 
-    -   Filter by news type (new location, updates, announcements)
-    -   Category-specific styling
+    -   Filter by content type (Instagram post, TikTok video, announcement, new location)
+    -   Category-specific styling and icons
     -   Filter persistence
+    -   Visual distinction between content sources
 
--   [ ] **#22** Implement news date sorting
+-   [ ] **#22** Implement news date sorting and caching
     -   Chronological organization
     -   "New" indicators for recent items
-    -   Archive old news functionality
+    -   Cache social media content to reduce API calls
+    -   Refresh strategy (manual trigger or time-based)
 
 ---
 
@@ -183,36 +173,41 @@ This document tracks all remaining tasks to complete V1 based on the PRD require
 
 ---
 
-## 📱 **MOBILE OPTIMIZATION** (High Priority - Platform)
+## 📱 **MOBILE OPTIMIZATION** (🔥 HIGHEST PRIORITY - Primary Platform)
 
-### Status: Responsive design basics → Need mobile-first perfection
+### Status: Mobile-first is THE experience → This is our main audience, nail it perfectly
 
--   [ ] **#23** Add responsive mobile-first optimizations
+-   [ ] **#23** Perfect mobile-first responsive design
 
-    -   Perfect touch targets (44px minimum)
-    -   Safe area handling for notched devices
-    -   Optimal font sizes and spacing
-    -   Landscape orientation support
+    -   **Touch targets**: Minimum 44px for all interactive elements
+    -   **Safe areas**: Handle iPhone notches and Android gesture bars
+    -   **Typography**: Mobile-optimized font sizes (16px+ base to prevent zoom)
+    -   **Spacing**: Generous padding for thumb-friendly navigation
+    -   **Orientation**: Perfect both portrait and landscape
+    -   **Test on real devices**: iPhone SE through iPhone 15 Pro Max, Android range
 
--   [ ] **#24** Implement touch gesture support
+-   [ ] **#24** Implement intuitive touch gestures
 
-    -   Swipe gestures for navigation
-    -   Pull-to-refresh functionality
-    -   Touch feedback animations
-    -   Prevent zoom on form inputs
+    -   **Swipe gestures**: Natural navigation between views
+    -   **Pull-to-refresh**: Refresh cafe data and social feeds
+    -   **Touch feedback**: Immediate visual/haptic response
+    -   **Prevent zoom**: No accidental zoom on double-tap or form inputs
+    -   **Smooth scrolling**: Momentum and bounce effects
 
--   [ ] **#25** Add loading states and error handling
+-   [ ] **#25** Bulletproof loading states and error handling
 
-    -   Loading spinners for async operations
-    -   Error boundaries for component failures
-    -   Network error handling
-    -   Retry mechanisms
+    -   **Loading states**: Skeleton screens for better perceived performance
+    -   **Error boundaries**: Graceful component failure handling
+    -   **Network errors**: Clear user-friendly messages with retry
+    -   **Empty states**: Helpful messaging when no data available
+    -   **Timeout handling**: For slow networks or API failures
 
 -   [ ] **#26** Implement offline-capable data caching
-    -   Service worker for offline functionality
-    -   Cache strategies for different content types
-    -   Offline indicator
-    -   Data sync when online
+    -   **Service worker**: Core functionality works offline
+    -   **Cache-first strategy**: Instant load for returning users
+    -   **Offline indicator**: Clear online/offline status
+    -   **Background sync**: Update when connection returns
+    -   **Image optimization**: WebP with fallbacks, lazy loading
 
 ---
 
@@ -259,62 +254,73 @@ This document tracks all remaining tasks to complete V1 based on the PRD require
 
 ---
 
-## 🚀 **SUGGESTED IMPLEMENTATION ORDER**
+## 🚀 **REVISED IMPLEMENTATION ORDER** (V1 Focus)
 
-### Sprint 1: Core Map Functionality
+### Phase 1: Mobile-First Foundation (HIGHEST PRIORITY)
+**Goal**: Nail the core mobile experience first
 
-1. **#1** Leaflet Map Integration
-2. **#2** Geolocation functionality
-3. **#3** Map controls
-4. **#5** Distance calculations
+1. **#23** Perfect mobile-first responsive design
+2. **#24** Implement touch gestures
+3. **#25** Loading states and error handling
+4. **#10** Get Directions integration (critical mobile feature)
 
-### Sprint 2: Data & Content
+### Phase 2: Content & Social Integration (HIGH PRIORITY)
+**Goal**: Rich content that keeps users engaged
 
-5. **#14** Expand cafe data
-6. **#16** Rating breakdown
-7. **#17** Hours display
-8. **#4** Custom map markers
+5. **#14** Expand cafe data structure (prepare for real data)
+6. **#20** Social media feed integration (Instagram/TikTok)
+7. **#21** News categorization and filtering
+8. **#22** News date sorting and caching
+9. **#15** Photo handling and optimization
+10. **#16** Rating breakdown display
+11. **#17** Hours/availability display
+12. **#18** Social media links
+13. **#19** Contact information
 
-### Sprint 3: Core Features
+### Phase 3: Performance & Polish (MEDIUM PRIORITY)
+**Goal**: Fast, reliable, professional experience
 
-9. **#11** localStorage Passport
-10. **#7** List sorting
-11. **#8** List filtering
-12. **#10** Get Directions
+14. **#26** Offline caching and PWA basics
+15. **#27** Performance optimizations (lazy loading, bundle splitting)
+16. **#29** PWA capabilities (install prompt, manifest)
+17. **#28** Accessibility features (WCAG compliance)
 
-### Sprint 4: Enhancement & Polish
+### Phase 4: Quality Assurance (LAUNCH PREP)
+**Goal**: Production-ready
 
-13. **#12** Progress tracking
-14. **#23** Mobile optimizations
-15. **#25** Loading states
-16. **#15** Photo handling
+18. **#30** Comprehensive testing on real devices
+19. **#31** Local dev admin panel for data management
 
-### Sprint 5: Advanced Features
+### ⏭️ **MOVED TO V2**
+- **#11** Matcha Passport localStorage
+- **#12** Progress tracking and stats
+- **#13** Achievement/badge system
 
-17. **#9** Search functionality
-18. **#13** Achievement system
-19. **#20-22** News management
-20. **#27** Performance optimizations
-
-### Sprint 6: Quality & Launch Prep
-
-21. **#28** Accessibility
-22. **#29** PWA capabilities
-23. **#30** Testing
-24. **#24** Touch gestures
-25. **#26** Offline capabilities
-
----
-
-## 📝 **NOTES**
-
--   This document should be updated as tasks are completed
--   Each task should include acceptance criteria before implementation
--   Consider dependencies between tasks when planning sprints
--   Regular testing on actual mobile devices is essential
--   Performance budgets should be established and monitored
+**Rationale**: Focus V1 on discovery and content. Passport gamification can be a major V2 feature that brings users back.
 
 ---
 
-_Last updated: [Current Date]_
-_Status: V1 Development Phase_
+## 📝 **NOTES & KEY DECISIONS**
+
+### Priority Changes (Latest)
+-   **Mobile-first is paramount**: This is our primary audience - every feature must be perfect on mobile
+-   **Passport moved to V2**: Focusing on core discovery and content first; gamification later
+-   **Social media integration**: Exploring Instagram/TikTok feed automation for news section
+-   **Real data pending**: Content structure ready, waiting for actual cafe data collection
+
+### Development Guidelines
+-   Test on **real devices** constantly (not just browser dev tools)
+-   Every feature must pass mobile usability test before considering complete
+-   Performance budgets: <2.5s LCP, <100KB bundle per page
+-   Instagram/TikTok APIs may have restrictions - have manual JSON fallback ready
+
+### Social Feed Integration Notes
+-   **Instagram**: Basic Display API requires app review, may use embed or manual curation
+-   **TikTok**: Embed API available, explore oEmbed endpoint
+-   **Fallback**: JSON structure that can accept manual social post data
+-   **Refresh strategy**: Time-based cache (hourly?) or manual admin trigger
+
+---
+
+_Last updated: 2025-09-30_
+_Status: V1 Development Phase - Mobile & Content Focus_

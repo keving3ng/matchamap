@@ -7,6 +7,7 @@ import DetailView from './components/DetailView'
 import NewsView from './components/NewsView'
 import PassportView from './components/PassportView'
 import { useDistanceCalculation } from './hooks/useDistanceCalculation'
+import { useFeatureToggle } from './hooks/useFeatureToggle'
 import cafeData from './data/cafes.json'
 import type { CafeData, CafeWithDistance } from './types'
 
@@ -19,6 +20,9 @@ export const App: React.FC = () => {
   const [visitedStamps, setVisitedStamps] = useState<number[]>([2, 4])
   const [visitedLocations, setVisitedLocations] = useState<number[]>([2, 4])
   const [userCoordinates, setUserCoordinates] = useState<GeolocationCoordinates | null>(null)
+
+  // Feature toggles
+  const isPassportEnabled = useFeatureToggle('ENABLE_PASSPORT')
 
   // Determine current view from URL path
   const currentView = location.pathname === '/list' ? 'list'
@@ -131,13 +135,15 @@ export const App: React.FC = () => {
         <Route path="/news" element={
           <NewsView newsItems={news} />
         } />
-        <Route path="/passport" element={
-          <PassportView
-            cafes={cafes}
-            visitedStamps={visitedStamps}
-            onToggleStamp={toggleStamp}
-          />
-        } />
+        {isPassportEnabled && (
+          <Route path="/passport" element={
+            <PassportView
+              cafes={cafes}
+              visitedStamps={visitedStamps}
+              onToggleStamp={toggleStamp}
+            />
+          } />
+        )}
         <Route path="/cafe/:id" element={
           <DetailView
             cafe={selectedCafeWithLatestInfo || cafesWithDistance[0]}
@@ -177,15 +183,17 @@ export const App: React.FC = () => {
             <span className="text-2xl">📰</span>
             <span className={`text-xs ${currentView === 'news' ? 'font-semibold' : ''}`}>News</span>
           </button>
-          <button
-            onClick={() => navigate('/passport')}
-            className={`flex flex-col items-center gap-1 transition ${
-              currentView === 'passport' ? 'text-green-600' : 'text-gray-400'
-            }`}
-          >
-            <User size={24} strokeWidth={currentView === 'passport' ? 2.5 : 2} />
-            <span className={`text-xs ${currentView === 'passport' ? 'font-semibold' : ''}`}>Passport</span>
-          </button>
+          {isPassportEnabled && (
+            <button
+              onClick={() => navigate('/passport')}
+              className={`flex flex-col items-center gap-1 transition ${
+                currentView === 'passport' ? 'text-green-600' : 'text-gray-400'
+              }`}
+            >
+              <User size={24} strokeWidth={currentView === 'passport' ? 2.5 : 2} />
+              <span className={`text-xs ${currentView === 'passport' ? 'font-semibold' : ''}`}>Passport</span>
+            </button>
+          )}
         </div>
       </div>
     </div>
