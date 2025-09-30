@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import { MapPin, List, User, Menu, ArrowLeft } from 'lucide-react'
 import MapView from './components/MapView'
 import ListView from './components/ListView'
@@ -7,16 +8,24 @@ import NewsView from './components/NewsView'
 import PassportView from './components/PassportView'
 import { useDistanceCalculation } from './hooks/useDistanceCalculation'
 import cafeData from './data/cafes.json'
-import type { CafeData, CafeWithDistance, ViewType } from './types'
+import type { CafeData, CafeWithDistance } from './types'
 
 export const App: React.FC = () => {
-  const [currentView, setCurrentView] = useState<ViewType>('map')
+  const navigate = useNavigate()
+  const location = useLocation()
   const [showPopover, setShowPopover] = useState<boolean>(false)
   const [selectedCafe, setSelectedCafe] = useState<CafeWithDistance | null>(null)
   const [expandedCard, setExpandedCard] = useState<number | null>(null)
   const [visitedStamps, setVisitedStamps] = useState<number[]>([2, 4])
   const [visitedLocations, setVisitedLocations] = useState<number[]>([2, 4])
   const [userCoordinates, setUserCoordinates] = useState<GeolocationCoordinates | null>(null)
+
+  // Determine current view from URL path
+  const currentView = location.pathname === '/list' ? 'list'
+    : location.pathname === '/news' ? 'news'
+    : location.pathname === '/passport' ? 'passport'
+    : location.pathname.startsWith('/cafe/') ? 'detail'
+    : 'map'
 
   const { cafes, news } = cafeData as CafeData
 
@@ -50,7 +59,7 @@ export const App: React.FC = () => {
 
   const viewDetails = (cafe: CafeWithDistance): void => {
     setSelectedCafe(cafe)
-    setCurrentView('detail')
+    navigate(`/cafe/${cafe.id}`)
     setShowPopover(false)
   }
 
@@ -78,7 +87,7 @@ export const App: React.FC = () => {
           <div className="flex items-center gap-3">
             {currentView === 'detail' && (
               <button
-                onClick={() => setCurrentView('map')}
+                onClick={() => navigate(-1)}
                 className="p-2 hover:bg-green-700 rounded-lg transition"
               >
                 <ArrowLeft size={24} />
@@ -98,48 +107,51 @@ export const App: React.FC = () => {
       </div>
 
       {/* Content */}
-      {currentView === 'map' && (
-        <MapView
-          cafes={cafesWithDistance}
-          showPopover={showPopover}
-          selectedCafe={selectedCafeWithLatestInfo}
-          onPinClick={handlePinClick}
-          onViewDetails={viewDetails}
-          onClosePopover={() => setShowPopover(false)}
-          onLocationChange={setUserCoordinates}
-        />
-      )}
-      {currentView === 'detail' && (
-        <DetailView
-          cafe={selectedCafeWithLatestInfo || cafesWithDistance[0]}
-          visitedLocations={visitedLocations}
-          onToggleVisited={toggleVisited}
-        />
-      )}
-      {currentView === 'list' && (
-        <ListView
-          cafes={cafesWithDistance}
-          expandedCard={expandedCard}
-          onToggleExpand={setExpandedCard}
-          onViewDetails={viewDetails}
-        />
-      )}
-      {currentView === 'news' && (
-        <NewsView newsItems={news} />
-      )}
-      {currentView === 'passport' && (
-        <PassportView
-          cafes={cafes}
-          visitedStamps={visitedStamps}
-          onToggleStamp={toggleStamp}
-        />
-      )}
+      <Routes>
+        <Route path="/" element={
+          <MapView
+            cafes={cafesWithDistance}
+            showPopover={showPopover}
+            selectedCafe={selectedCafeWithLatestInfo}
+            onPinClick={handlePinClick}
+            onViewDetails={viewDetails}
+            onClosePopover={() => setShowPopover(false)}
+            onLocationChange={setUserCoordinates}
+          />
+        } />
+        <Route path="/list" element={
+          <ListView
+            cafes={cafesWithDistance}
+            expandedCard={expandedCard}
+            onToggleExpand={setExpandedCard}
+            onViewDetails={viewDetails}
+            onLocationChange={setUserCoordinates}
+          />
+        } />
+        <Route path="/news" element={
+          <NewsView newsItems={news} />
+        } />
+        <Route path="/passport" element={
+          <PassportView
+            cafes={cafes}
+            visitedStamps={visitedStamps}
+            onToggleStamp={toggleStamp}
+          />
+        } />
+        <Route path="/cafe/:id" element={
+          <DetailView
+            cafe={selectedCafeWithLatestInfo || cafesWithDistance[0]}
+            visitedLocations={visitedLocations}
+            onToggleVisited={toggleVisited}
+          />
+        } />
+      </Routes>
 
       {/* Bottom Navigation */}
       <div className="bg-white border-t-2 border-green-200 px-6 py-3 shadow-lg">
         <div className="flex justify-around items-center">
           <button
-            onClick={() => setCurrentView('map')}
+            onClick={() => navigate('/')}
             className={`flex flex-col items-center gap-1 transition ${
               currentView === 'map' ? 'text-green-600' : 'text-gray-400'
             }`}
@@ -148,7 +160,7 @@ export const App: React.FC = () => {
             <span className={`text-xs ${currentView === 'map' ? 'font-semibold' : ''}`}>Map</span>
           </button>
           <button
-            onClick={() => setCurrentView('list')}
+            onClick={() => navigate('/list')}
             className={`flex flex-col items-center gap-1 transition ${
               currentView === 'list' ? 'text-green-600' : 'text-gray-400'
             }`}
@@ -157,7 +169,7 @@ export const App: React.FC = () => {
             <span className={`text-xs ${currentView === 'list' ? 'font-semibold' : ''}`}>List</span>
           </button>
           <button
-            onClick={() => setCurrentView('news')}
+            onClick={() => navigate('/news')}
             className={`flex flex-col items-center gap-1 transition ${
               currentView === 'news' ? 'text-green-600' : 'text-gray-400'
             }`}
@@ -166,7 +178,7 @@ export const App: React.FC = () => {
             <span className={`text-xs ${currentView === 'news' ? 'font-semibold' : ''}`}>News</span>
           </button>
           <button
-            onClick={() => setCurrentView('passport')}
+            onClick={() => navigate('/passport')}
             className={`flex flex-col items-center gap-1 transition ${
               currentView === 'passport' ? 'text-green-600' : 'text-gray-400'
             }`}

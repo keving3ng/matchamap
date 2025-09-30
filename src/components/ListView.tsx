@@ -1,11 +1,47 @@
 import React, { useState, useMemo } from 'react'
-import { Navigation, MapPin, ChevronDown } from 'lucide-react'
+import { Navigation, MapPin, ChevronDown, Crosshair } from 'lucide-react'
+import { useGeolocation } from '../hooks/useGeolocation'
+import { getLocationRequestAdvice, getOptimalGeolocationOptions } from '../utils/deviceDetection'
 import type { ListViewProps } from '../types'
 
 type SortOption = 'rating' | 'distance' | 'area'
 
-export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggleExpand, onViewDetails }) => {
+export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggleExpand, onViewDetails, onLocationChange }) => {
   const [sortBy, setSortBy] = useState<SortOption>('rating')
+
+  const {
+    coordinates,
+    error,
+    loading,
+    requestLocation,
+    clearLocation,
+    isSupported
+  } = useGeolocation(getOptimalGeolocationOptions())
+
+  // Notify parent component of coordinate changes
+  React.useEffect(() => {
+    if (onLocationChange) {
+      onLocationChange(coordinates)
+    }
+  }, [coordinates, onLocationChange])
+
+  const handleLocationClick = () => {
+    if (coordinates) {
+      // Location already obtained - maybe scroll to top or give feedback
+      // For now, just re-request to refresh
+      requestLocation()
+    } else {
+      // Request location permission and get current position
+      requestLocation()
+    }
+  }
+
+  // Auto-trigger location when distance filter is selected
+  React.useEffect(() => {
+    if (sortBy === 'distance' && !coordinates && !loading && !error) {
+      requestLocation()
+    }
+  }, [sortBy, coordinates, loading, error, requestLocation])
 
   // Sort cafes based on selected option
   const sortedCafes = useMemo(() => {
@@ -36,10 +72,10 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
   }, [cafes, sortBy])
 
   return (
-    <div className="flex-1 overflow-y-auto pb-24">
+    <div className="flex-1 overflow-y-auto pb-24 relative">
       {/* Filter Header */}
       <div className="bg-white border-b-2 border-green-200 px-4 py-3 shadow-sm">
-        <div className="flex gap-2 overflow-x-auto">
+        <div className="flex items-center gap-2 overflow-x-auto">
           <button
             onClick={() => setSortBy('rating')}
             className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition ${
@@ -70,8 +106,120 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
           >
             Area
           </button>
+
+          {/* Location Button */}
+          <button
+            onClick={handleLocationClick}
+            disabled={!isSupported || (error !== null && error.code === 1)}
+            className={`ml-auto p-2 rounded-full transition relative flex items-center justify-center ${
+              coordinates
+                ? 'bg-green-600 text-white hover:bg-green-700'
+                : 'bg-green-100 text-green-700 hover:bg-green-200'
+            } ${!isSupported || (error && error.code === 1) ? 'opacity-50 cursor-not-allowed' : ''}`}
+            title={coordinates ? 'Location found' : 'Find my location'}
+          >
+            {loading ? (
+              <Crosshair size={20} className="animate-pulse" />
+            ) : (
+              <MapPin size={20} />
+            )}
+            {coordinates && (
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 border-2 border-white rounded-full animate-pulse"></span>
+            )}
+          </button>
         </div>
       </div>
+
+      {/* Location Permission Dialog */}
+      {error && error.code === 1 && ( // PERMISSION_DENIED
+        <div className="absolute inset-x-4 top-4 bg-white rounded-xl shadow-xl p-4 z-[9999] border border-red-200 animate-slide-up">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <MapPin size={20} className="text-red-600" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-gray-800 mb-1">Location Access Needed</h3>
+              <p className="text-sm text-gray-600 mb-3">
+                {getLocationRequestAdvice()}
+              </p>
+              <p className="text-xs text-gray-500 mb-3">
+                We need location access to calculate distances to cafes. Your location is never stored or shared.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <button
+                  onClick={requestLocation}
+                  className="px-4 py-2 bg-matcha-500 text-white rounded-lg text-sm font-medium hover:bg-matcha-600 transition focus:outline-none focus:ring-2 focus:ring-matcha-500 focus:ring-offset-2"
+                >
+                  Try Again
+                </button>
+                <button
+                  onClick={clearLocation}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                >
+                  Skip for Now
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Location Loading Dialog */}
+      {loading && !error && !coordinates && (
+        <div className="absolute inset-x-4 top-4 bg-white rounded-xl shadow-xl p-4 z-[9999] border border-matcha-200 animate-slide-up">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 bg-matcha-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <Crosshair size={20} className="text-matcha-600" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-gray-800 mb-1">Finding Your Location</h3>
+              <p className="text-sm text-gray-600 mb-3">
+                Please allow location access when prompted. This may take a few seconds...
+              </p>
+              <button
+                onClick={clearLocation}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Location Error Dialog */}
+      {error && error.code !== 1 && (
+        <div className="absolute inset-x-4 top-4 bg-white rounded-xl shadow-xl p-4 z-[9999] border border-yellow-200 animate-slide-up">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <Crosshair size={20} className="text-yellow-600" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-gray-800 mb-1">Location Unavailable</h3>
+              <p className="text-sm text-gray-600 mb-3">
+                {error.code === 2 ? 'Unable to determine your location. Try moving to an open area with better GPS signal, or make sure location services are enabled for your browser.' :
+                 error.code === 3 ? 'Location request timed out. This often happens indoors or in areas with poor GPS signal. Try again when you have better signal or are outdoors.' :
+                 error.code === 0 ? 'Geolocation is not supported by your browser. Try using a modern browser like Chrome, Safari, or Firefox.' :
+                 'Location services are not available. Make sure you\'re on a secure (HTTPS) connection and location services are enabled.'}
+              </p>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <button
+                  onClick={requestLocation}
+                  className="px-4 py-2 bg-matcha-500 text-white rounded-lg text-sm font-medium hover:bg-matcha-600 transition focus:outline-none focus:ring-2 focus:ring-matcha-500 focus:ring-offset-2"
+                >
+                  Try Again
+                </button>
+                <button
+                  onClick={clearLocation}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Cafe List */}
       <div className="px-4 py-4 space-y-3">

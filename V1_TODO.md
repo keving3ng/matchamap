@@ -56,7 +56,7 @@ This document tracks all remaining tasks to complete V1 based on the PRD require
 
 ### Status: Static list with mock expand/collapse → Need real filtering/sorting
 
--   [ ] **#7** Implement list sorting (by rating, distance, neighborhood)
+-   [x] **#7** Implement list sorting (by rating, distance, neighborhood)
 
     -   Make filter button tabs functional
     -   Sort algorithms for each criteria
@@ -243,6 +243,7 @@ This document tracks all remaining tasks to complete V1 based on the PRD require
     -   Service worker for caching
 
 -   [ ] **#30** Create comprehensive test suite
+
     -   Unit tests for components
     -   Integration tests for user flows
     -   E2E tests for critical paths
