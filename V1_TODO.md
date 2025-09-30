@@ -5,9 +5,9 @@ This document tracks all remaining tasks to complete V1 based on the PRD require
 ## 📊 **Progress Overview**
 
 -   **Total Tasks**: 30
--   **Completed**: 0
+-   **Completed**: 6
 -   **In Progress**: 0
--   **Remaining**: 30
+-   **Remaining**: 24
 
 ---
 
@@ -45,7 +45,7 @@ This document tracks all remaining tasks to complete V1 based on the PRD require
     -   Update distances dynamically when user moves
     -   Handle no location permission scenario
 
--   [ ] **#6** Add map-to-list view toggle functionality
+-   [x] **#6** Add map-to-list view toggle functionality
     -   Seamless transition between map and list
     -   Maintain selected cafe across views
     -   Preserve scroll position where appropriate

@@ -1,20 +1,73 @@
-import React from 'react'
+import React, { useState, useMemo } from 'react'
 import { Navigation, MapPin, ChevronDown } from 'lucide-react'
 import type { ListViewProps } from '../types'
 
+type SortOption = 'rating' | 'distance' | 'area'
+
 export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggleExpand, onViewDetails }) => {
+  const [sortBy, setSortBy] = useState<SortOption>('rating')
+
+  // Sort cafes based on selected option
+  const sortedCafes = useMemo(() => {
+    const cafesCopy = [...cafes]
+
+    switch (sortBy) {
+      case 'rating':
+        // Sort by score (highest first)
+        return cafesCopy.sort((a, b) => b.score - a.score)
+
+      case 'distance':
+        // Sort by distance (nearest first)
+        // Cafes without distance info go to the end
+        return cafesCopy.sort((a, b) => {
+          if (!a.distanceInfo && !b.distanceInfo) return 0
+          if (!a.distanceInfo) return 1
+          if (!b.distanceInfo) return -1
+          return a.distanceInfo.kilometers - b.distanceInfo.kilometers
+        })
+
+      case 'area':
+        // Sort alphabetically by neighborhood
+        return cafesCopy.sort((a, b) => a.neighborhood.localeCompare(b.neighborhood))
+
+      default:
+        return cafesCopy
+    }
+  }, [cafes, sortBy])
+
   return (
     <div className="flex-1 overflow-y-auto pb-24">
       {/* Filter Header */}
       <div className="bg-white border-b-2 border-green-200 px-4 py-3 shadow-sm">
         <div className="flex gap-2 overflow-x-auto">
-          <button className="px-4 py-2 rounded-full text-sm font-semibold bg-green-600 text-white whitespace-nowrap">
+          <button
+            onClick={() => setSortBy('rating')}
+            className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition ${
+              sortBy === 'rating'
+                ? 'bg-green-600 text-white'
+                : 'bg-green-100 text-green-700 hover:bg-green-200'
+            }`}
+          >
             Rating
           </button>
-          <button className="px-4 py-2 rounded-full text-sm font-semibold bg-green-100 text-green-700 hover:bg-green-200 whitespace-nowrap">
+          <button
+            onClick={() => setSortBy('distance')}
+            className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition ${
+              sortBy === 'distance'
+                ? 'bg-green-600 text-white'
+                : 'bg-green-100 text-green-700 hover:bg-green-200'
+            }`}
+          >
             Distance
           </button>
-          <button className="px-4 py-2 rounded-full text-sm font-semibold bg-green-100 text-green-700 hover:bg-green-200 whitespace-nowrap">
+          <button
+            onClick={() => setSortBy('area')}
+            className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition ${
+              sortBy === 'area'
+                ? 'bg-green-600 text-white'
+                : 'bg-green-100 text-green-700 hover:bg-green-200'
+            }`}
+          >
             Area
           </button>
         </div>
@@ -22,7 +75,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
 
       {/* Cafe List */}
       <div className="px-4 py-4 space-y-3">
-        {cafes.map((cafe) => (
+        {sortedCafes.map((cafe) => (
           <div key={cafe.id} className="bg-white rounded-2xl shadow-md border-2 border-green-100 overflow-hidden">
             <button
               onClick={() => onToggleExpand(expandedCard === cafe.id ? null : cafe.id)}
