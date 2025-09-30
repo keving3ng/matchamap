@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { MapPin, List, User, Menu, ArrowLeft } from 'lucide-react'
 import MapView from './components/MapView'
 import ListView from './components/ListView'
 import DetailView from './components/DetailView'
 import FeedView from './components/FeedView'
 import PassportView from './components/PassportView'
+import EventsView from './components/EventsView'
 import ComingSoon from './components/ComingSoon'
 import { useDistanceCalculation } from './hooks/useDistanceCalculation'
 import { useFeatureToggle } from './hooks/useFeatureToggle'
@@ -24,6 +25,7 @@ export const App: React.FC = () => {
 
   // Feature toggles
   const isPassportEnabled = useFeatureToggle('ENABLE_PASSPORT')
+  const isEventsEnabled = useFeatureToggle('ENABLE_EVENTS')
   const showComingSoon = useFeatureToggle('SHOW_COMING_SOON')
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
@@ -31,10 +33,11 @@ export const App: React.FC = () => {
   const currentView = location.pathname === '/list' ? 'list'
     : location.pathname === '/feed' ? 'feed'
     : location.pathname === '/passport' ? 'passport'
+    : location.pathname === '/events' ? 'events'
     : location.pathname.startsWith('/cafe/') ? 'detail'
     : 'map'
 
-  const { cafes, feed } = cafeData as CafeData
+  const { cafes, feed, events } = cafeData as CafeData
 
   // Memoize user location to prevent unnecessary recalculations
   const userLocation = React.useMemo(() => {
@@ -142,6 +145,11 @@ export const App: React.FC = () => {
         <Route path="/feed" element={
           <FeedView feedItems={feed} />
         } />
+        {isEventsEnabled && (
+          <Route path="/events" element={
+            <EventsView eventItems={events} />
+          } />
+        )}
         {isPassportEnabled && (
           <Route path="/passport" element={
             <PassportView
@@ -158,6 +166,7 @@ export const App: React.FC = () => {
             onToggleVisited={toggleVisited}
           />
         } />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 
       {/* Bottom Navigation */}
@@ -190,6 +199,17 @@ export const App: React.FC = () => {
             <span className="text-2xl">📰</span>
             <span className={`text-xs ${currentView === 'feed' ? 'font-semibold' : ''}`}>Feed</span>
           </button>
+          {isEventsEnabled && (
+            <button
+              onClick={() => navigate('/events')}
+              className={`flex flex-col items-center gap-1 transition ${
+                currentView === 'events' ? 'text-green-600' : 'text-gray-400'
+              }`}
+            >
+              <span className="text-2xl">🎪</span>
+              <span className={`text-xs ${currentView === 'events' ? 'font-semibold' : ''}`}>Events</span>
+            </button>
+          )}
           {isPassportEnabled && (
             <button
               onClick={() => navigate('/passport')}

@@ -20,7 +20,11 @@
     "prod": false
   },
   "SHOW_COMING_SOON": {
-    "dev": true,
+    "dev": false,
     "prod": true
+  },
+  "ENABLE_EVENTS": {
+    "dev": true,
+    "prod": false
   }
 }

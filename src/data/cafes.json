@@ -197,5 +197,43 @@
       "image": "🍂"
     }
   ],
+  "events": [
+    {
+      "id": 1,
+      "title": "Toronto Matcha Festival 2025",
+      "date": "October 15, 2025",
+      "time": "11:00 AM - 6:00 PM",
+      "location": "Distillery District",
+      "venue": "Fermenting Cellar",
+      "description": "Join us for Toronto's premier matcha celebration featuring tastings from local cafes, traditional tea ceremonies, and matcha-making workshops. Free admission, paid tastings available.",
+      "image": "🎪",
+      "price": "Free entry",
+      "featured": true
+    },
+    {
+      "id": 2,
+      "title": "Japanese Tea Ceremony Workshop",
+      "date": "October 8, 2025",
+      "time": "2:00 PM - 4:00 PM",
+      "location": "Corktown",
+      "venue": "Sakura Matcha Studio",
+      "description": "Learn the art of traditional Japanese tea ceremony from certified tea master Yuki Tanaka. Includes hands-on matcha preparation and authentic wagashi. Limited to 12 participants.",
+      "image": "🍵",
+      "price": "$45",
+      "featured": false
+    },
+    {
+      "id": 3,
+      "title": "Matcha & Pastry Pairing Night",
+      "date": "October 22, 2025",
+      "time": "7:00 PM - 9:00 PM",
+      "location": "Trinity Bellwoods",
+      "venue": "Urban Leaf",
+      "description": "An evening exploring the perfect pairings of artisanal matcha drinks with locally-made pastries. Features 5 unique matcha preparations matched with seasonal treats from top Toronto bakeries.",
+      "image": "🧁",
+      "price": "$35",
+      "featured": false
+    }
+  ],
   "last_updated": "2024-01-20"
 }

@@ -42,13 +42,27 @@ export interface FeedItem {
   image: string
 }
 
+export interface EventItem {
+  id: number
+  title: string
+  date: string
+  time: string
+  location: string
+  venue: string
+  description: string
+  image: string
+  price: string
+  featured: boolean
+}
+
 export interface CafeData {
   cafes: Cafe[]
   feed: FeedItem[]
+  events: EventItem[]
   last_updated: string
 }
 
-export type ViewType = 'map' | 'list' | 'detail' | 'feed' | 'passport'
+export type ViewType = 'map' | 'list' | 'detail' | 'feed' | 'passport' | 'events'
 
 // Component Props Types
 export interface MapViewProps {
@@ -83,4 +97,8 @@ export interface PassportViewProps {
   cafes: Cafe[]
   visitedStamps: number[]
   onToggleStamp: (id: number) => void
+}
+
+export interface EventsViewProps {
+  eventItems: EventItem[]
 }
