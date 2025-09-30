@@ -224,92 +224,78 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
           </div>
         )}
 
-        {/* Sort Buttons */}
+        {/* Sort & Action Buttons */}
         <div className="px-4 py-3">
-          <div className="flex items-center gap-2 overflow-x-auto">
-            <button
-              onClick={() => setSortBy('rating')}
-              className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition ${
-                sortBy === 'rating'
-                  ? 'bg-green-600 text-white'
-                  : 'bg-green-100 text-green-700 hover:bg-green-200'
-              }`}
-            >
-              Rating
-            </button>
-            <button
-              onClick={() => setSortBy('distance')}
-              className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition ${
-                sortBy === 'distance'
-                  ? 'bg-green-600 text-white'
-                  : 'bg-green-100 text-green-700 hover:bg-green-200'
-              }`}
-            >
-              Distance
-            </button>
-            <button
-              onClick={() => setSortBy('area')}
-              className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition ${
-                sortBy === 'area'
-                  ? 'bg-green-600 text-white'
-                  : 'bg-green-100 text-green-700 hover:bg-green-200'
-              }`}
-            >
-              Area
-            </button>
+          <div className="flex items-center gap-2">
+            {/* Sort By Dropdown */}
+            <div className="relative flex-1">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as SortOption)}
+                className="w-full px-4 py-2 rounded-full text-sm font-semibold bg-green-600 text-white appearance-none cursor-pointer pr-8 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+              >
+                <option value="rating">Sort: Rating</option>
+                <option value="distance">Sort: Distance</option>
+                <option value="area">Sort: Area</option>
+              </select>
+              <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-white pointer-events-none" />
+            </div>
 
-            {/* Search Toggle Button */}
-            <button
-              onClick={() => setShowSearch(!showSearch)}
-              className={`px-3 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition flex items-center gap-1.5 relative ${
-                hasActiveSearch || showSearch
-                  ? 'bg-green-600 text-white'
-                  : 'bg-green-100 text-green-700 hover:bg-green-200'
-              }`}
-            >
-              <Search size={16} />
-              Search
-              {hasActiveSearch && !showSearch && (
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 border-2 border-white rounded-full"></span>
-              )}
-            </button>
+            {/* Fixed action buttons */}
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {/* Search Toggle Button */}
+              <button
+                onClick={() => setShowSearch(!showSearch)}
+                className={`p-2 sm:px-3 sm:py-2 rounded-full text-sm font-semibold whitespace-nowrap transition flex items-center justify-center sm:justify-start gap-1.5 relative ${
+                  hasActiveSearch || showSearch
+                    ? 'bg-green-600 text-white'
+                    : 'bg-green-100 text-green-700 hover:bg-green-200'
+                }`}
+              >
+                <Search size={16} />
+                <span className="hidden sm:inline">Search</span>
+                {hasActiveSearch && !showSearch && (
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 border-2 border-white rounded-full"></span>
+                )}
+              </button>
 
-            {/* Filter Toggle Button */}
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`px-3 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition flex items-center gap-1.5 relative ${
-                hasActiveFilters || showFilters
-                  ? 'bg-green-600 text-white'
-                  : 'bg-green-100 text-green-700 hover:bg-green-200'
-              }`}
-            >
-              <Filter size={16} />
-              Filter
-              {hasActiveFilters && !showFilters && (
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 border-2 border-white rounded-full"></span>
-              )}
-            </button>
+              {/* Filter Toggle Button */}
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`p-2 sm:px-3 sm:py-2 rounded-full text-sm font-semibold whitespace-nowrap transition flex items-center justify-center sm:justify-start gap-1.5 relative ${
+                  hasActiveFilters || showFilters
+                    ? 'bg-green-600 text-white'
+                    : 'bg-green-100 text-green-700 hover:bg-green-200'
+                }`}
+              >
+                <Filter size={16} />
+                <span className="hidden sm:inline">Filter</span>
+                {hasActiveFilters && !showFilters && (
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 border-2 border-white rounded-full"></span>
+                )}
+              </button>
 
-            {/* Location Button */}
-            <button
-              onClick={handleLocationClick}
-              disabled={!isSupported || (error !== null && error.code === 1)}
-              className={`ml-auto p-2 rounded-full transition relative flex items-center justify-center ${
-                coordinates
-                  ? 'bg-green-600 text-white hover:bg-green-700'
-                  : 'bg-green-100 text-green-700 hover:bg-green-200'
-              } ${!isSupported || (error && error.code === 1) ? 'opacity-50 cursor-not-allowed' : ''}`}
-              title={coordinates ? 'Location found' : 'Find my location'}
-            >
-              {loading ? (
-                <Crosshair size={20} className="animate-pulse" />
-              ) : (
-                <MapPin size={20} />
-              )}
-              {coordinates && (
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 border-2 border-white rounded-full animate-pulse"></span>
-              )}
-            </button>
+              {/* Location Button */}
+              <button
+                onClick={handleLocationClick}
+                disabled={!isSupported || (error !== null && error.code === 1)}
+                className={`p-2 rounded-full transition relative flex items-center justify-center ${
+                  coordinates
+                    ? 'bg-green-600 text-white hover:bg-green-700'
+                    : 'bg-green-100 text-green-700 hover:bg-green-200'
+                } ${!isSupported || (error && error.code === 1) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                title={coordinates ? 'Location found' : 'Find my location'}
+              >
+                {loading ? (
+                  <Crosshair size={20} className="animate-pulse" />
+                ) : (
+                  <MapPin size={20} />
+                )}
+                {coordinates && (
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 border-2 border-white rounded-full animate-pulse"></span>
+                )}
+              </button>
+            </div>
           </div>
         </div>
 
