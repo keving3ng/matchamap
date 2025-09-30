@@ -1,12 +1,8 @@
 import React, { useState } from 'react'
-import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
-import { MapPin, List, User, Menu, ArrowLeft, Instagram } from 'lucide-react'
-import MapView from './components/MapView'
-import ListView from './components/ListView'
-import DetailView from './components/DetailView'
-import FeedView from './components/FeedView'
-import PassportView from './components/PassportView'
-import EventsView from './components/EventsView'
+import { useNavigate } from 'react-router-dom'
+import Header from './components/Header'
+import BottomNavigation from './components/BottomNavigation'
+import AppRoutes from './components/AppRoutes'
 import ComingSoon from './components/ComingSoon'
 import { useDistanceCalculation } from './hooks/useDistanceCalculation'
 import { useFeatureToggle } from './hooks/useFeatureToggle'
@@ -15,7 +11,6 @@ import type { CafeData, CafeWithDistance } from './types'
 
 export const App: React.FC = () => {
   const navigate = useNavigate()
-  const location = useLocation()
   const [showPopover, setShowPopover] = useState<boolean>(false)
   const [selectedCafe, setSelectedCafe] = useState<CafeWithDistance | null>(null)
   const [expandedCard, setExpandedCard] = useState<number | null>(null)
@@ -29,14 +24,6 @@ export const App: React.FC = () => {
   const isMenuEnabled = useFeatureToggle('ENABLE_MENU')
   const showComingSoon = useFeatureToggle('SHOW_COMING_SOON')
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-
-  // Determine current view from URL path
-  const currentView = location.pathname === '/list' ? 'list'
-    : location.pathname === '/feed' ? 'feed'
-    : location.pathname === '/passport' ? 'passport'
-    : location.pathname === '/events' ? 'events'
-    : location.pathname.startsWith('/cafe/') ? 'detail'
-    : 'map'
 
   const { cafes, feed, events } = cafeData as CafeData
 
@@ -96,169 +83,33 @@ export const App: React.FC = () => {
 
   return (
     <div className="w-full h-screen bg-gradient-to-br from-green-50 to-green-100 flex flex-col">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-green-600 to-green-500 text-white px-4 py-3 shadow-lg">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {currentView === 'detail' && (
-              <button
-                onClick={() => navigate(-1)}
-                className="p-2 hover:bg-green-700 rounded-lg transition"
-              >
-                <ArrowLeft size={24} />
-              </button>
-            )}
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                <span className="text-green-600 text-xl">🍵</span>
-              </div>
-              <h1 className="text-xl font-bold tracking-wide">MatchaMap</h1>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            {/* Social Links */}
-            <a
-              href="https://www.instagram.com/vivisual.diary"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 hover:bg-green-700 rounded-lg transition flex items-center justify-center"
-              aria-label="Instagram"
-            >
-              <Instagram size={20} />
-            </a>
-            <a
-              href="https://www.tiktok.com/@vivisual.diary"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 hover:bg-green-700 rounded-lg transition flex items-center justify-center"
-              aria-label="TikTok"
-            >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="text-white"
-              >
-                <path
-                  d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"
-                  fill="currentColor"
-                />
-              </svg>
-            </a>
-            {isMenuEnabled && (
-              <button className="p-2 hover:bg-green-700 rounded-lg transition">
-                <Menu size={24} />
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
+      <Header isMenuEnabled={isMenuEnabled} />
 
-      {/* Content */}
-      <Routes>
-        <Route path="/" element={
-          <MapView
-            cafes={cafesWithDistance}
-            showPopover={showPopover}
-            selectedCafe={selectedCafeWithLatestInfo}
-            onPinClick={handlePinClick}
-            onViewDetails={viewDetails}
-            onClosePopover={() => setShowPopover(false)}
-            onLocationChange={setUserCoordinates}
-          />
-        } />
-        <Route path="/list" element={
-          <ListView
-            cafes={cafesWithDistance}
-            expandedCard={expandedCard}
-            onToggleExpand={setExpandedCard}
-            onViewDetails={viewDetails}
-            onLocationChange={setUserCoordinates}
-          />
-        } />
-        <Route path="/feed" element={
-          <FeedView feedItems={feed} />
-        } />
-        {isEventsEnabled && (
-          <Route path="/events" element={
-            <EventsView eventItems={events} />
-          } />
-        )}
-        {isPassportEnabled && (
-          <Route path="/passport" element={
-            <PassportView
-              cafes={cafes}
-              visitedStamps={visitedStamps}
-              onToggleStamp={toggleStamp}
-            />
-          } />
-        )}
-        <Route path="/cafe/:id" element={
-          <DetailView
-            cafe={selectedCafeWithLatestInfo || cafesWithDistance[0]}
-            visitedLocations={visitedLocations}
-            onToggleVisited={toggleVisited}
-          />
-        } />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <AppRoutes
+        cafesWithDistance={cafesWithDistance}
+        selectedCafe={selectedCafeWithLatestInfo}
+        onLocationChange={setUserCoordinates}
+        showPopover={showPopover}
+        onPinClick={handlePinClick}
+        onViewDetails={viewDetails}
+        onClosePopover={() => setShowPopover(false)}
+        expandedCard={expandedCard}
+        onToggleExpand={setExpandedCard}
+        feedItems={feed}
+        eventItems={events}
+        isEventsEnabled={isEventsEnabled}
+        cafes={cafesWithDistance}
+        visitedStamps={visitedStamps}
+        onToggleStamp={toggleStamp}
+        isPassportEnabled={isPassportEnabled}
+        visitedLocations={visitedLocations}
+        onToggleVisited={toggleVisited}
+      />
 
-      {/* Bottom Navigation */}
-      <div className="bg-white border-t-2 border-green-200 px-6 py-3 shadow-lg">
-        <div className="flex justify-around items-center">
-          <button
-            onClick={() => navigate('/')}
-            className={`flex flex-col items-center gap-1 transition ${
-              currentView === 'map' ? 'text-green-600' : 'text-gray-400'
-            }`}
-          >
-            <MapPin size={24} strokeWidth={currentView === 'map' ? 2.5 : 2} />
-            <span className={`text-xs ${currentView === 'map' ? 'font-semibold' : ''}`}>Map</span>
-          </button>
-          <button
-            onClick={() => navigate('/list')}
-            className={`flex flex-col items-center gap-1 transition ${
-              currentView === 'list' ? 'text-green-600' : 'text-gray-400'
-            }`}
-          >
-            <List size={24} strokeWidth={currentView === 'list' ? 2.5 : 2} />
-            <span className={`text-xs ${currentView === 'list' ? 'font-semibold' : ''}`}>List</span>
-          </button>
-          <button
-            onClick={() => navigate('/feed')}
-            className={`flex flex-col items-center gap-1 transition ${
-              currentView === 'feed' ? 'text-green-600' : 'text-gray-400'
-            }`}
-          >
-            <span className="text-2xl">📰</span>
-            <span className={`text-xs ${currentView === 'feed' ? 'font-semibold' : ''}`}>Feed</span>
-          </button>
-          {isEventsEnabled && (
-            <button
-              onClick={() => navigate('/events')}
-              className={`flex flex-col items-center gap-1 transition ${
-                currentView === 'events' ? 'text-green-600' : 'text-gray-400'
-              }`}
-            >
-              <span className="text-2xl">🎪</span>
-              <span className={`text-xs ${currentView === 'events' ? 'font-semibold' : ''}`}>Events</span>
-            </button>
-          )}
-          {isPassportEnabled && (
-            <button
-              onClick={() => navigate('/passport')}
-              className={`flex flex-col items-center gap-1 transition ${
-                currentView === 'passport' ? 'text-green-600' : 'text-gray-400'
-              }`}
-            >
-              <User size={24} strokeWidth={currentView === 'passport' ? 2.5 : 2} />
-              <span className={`text-xs ${currentView === 'passport' ? 'font-semibold' : ''}`}>Passport</span>
-            </button>
-          )}
-        </div>
-      </div>
+      <BottomNavigation
+        isPassportEnabled={isPassportEnabled}
+        isEventsEnabled={isEventsEnabled}
+      />
     </div>
   )
 }
