@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import yaml from '@rollup/plugin-yaml'
 import fs from 'fs'
 
 // Only load SSL certs if they exist (for local dev)
@@ -11,7 +12,7 @@ const httpsConfig = fs.existsSync('./localhost+2-key.pem') && fs.existsSync('./l
   : undefined
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), yaml()],
   build: {
     outDir: 'dist',
     sourcemap: true,

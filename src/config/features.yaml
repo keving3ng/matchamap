@@ -1,0 +1,50 @@
+# Feature Flags Configuration
+# Controls which features are enabled in development and production environments
+
+# Matcha Passport - Visit tracking system
+# Allows users to track which cafes they've visited with a digital stamp collection
+ENABLE_PASSPORT:
+  dev: false
+  prod: false
+
+# News Feed - Updates and announcements
+# Displays latest cafe additions, score updates, and matcha-related announcements
+ENABLE_FEED:
+  dev: true
+  prod: true
+
+# Search Functionality
+# Allows users to search for cafes by name, neighborhood, or other criteria
+ENABLE_SEARCH:
+  dev: true
+  prod: true
+
+# Geolocation Services
+# Enables user location detection and distance calculations from cafes
+ENABLE_GEOLOCATION:
+  dev: true
+  prod: true
+
+# Admin Panel
+# Internal tools for managing content and viewing analytics (dev only for security)
+ENABLE_ADMIN_PANEL:
+  dev: true
+  prod: false
+
+# Coming Soon Page
+# Password-protected splash page shown before public launch
+SHOW_COMING_SOON:
+  dev: false
+  prod: true
+
+# Events Page - Community gatherings and workshops
+# Displays upcoming matcha-related events, workshops, and festivals in Toronto
+ENABLE_EVENTS:
+  dev: true
+  prod: false
+
+# Hamburger Menu
+# Top-right navigation menu for additional features and settings
+ENABLE_MENU:
+  dev: false
+  prod: false

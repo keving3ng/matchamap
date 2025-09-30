@@ -26,6 +26,7 @@ export const App: React.FC = () => {
   // Feature toggles
   const isPassportEnabled = useFeatureToggle('ENABLE_PASSPORT')
   const isEventsEnabled = useFeatureToggle('ENABLE_EVENTS')
+  const isMenuEnabled = useFeatureToggle('ENABLE_MENU')
   const showComingSoon = useFeatureToggle('SHOW_COMING_SOON')
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
@@ -114,9 +115,11 @@ export const App: React.FC = () => {
               <h1 className="text-xl font-bold tracking-wide">MatchaMap</h1>
             </div>
           </div>
-          <button className="p-2 hover:bg-green-700 rounded-lg transition">
-            <Menu size={24} />
-          </button>
+          {isMenuEnabled && (
+            <button className="p-2 hover:bg-green-700 rounded-lg transition">
+              <Menu size={24} />
+            </button>
+          )}
         </div>
       </div>
 

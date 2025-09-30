@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import featureConfig from '../config/features.json'
+import featureConfig from '../config/features.yaml';
 
 type Environment = 'dev' | 'prod'
 type FeatureKey = keyof typeof featureConfig
