@@ -5,9 +5,9 @@ This document tracks all remaining tasks to complete V1 based on the PRD require
 ## 📊 **Progress Overview**
 
 -   **Total Tasks**: 30
--   **Completed**: 6
+-   **Completed**: 7
 -   **In Progress**: 0
--   **Remaining**: 24
+-   **Remaining**: 23
 
 ---
 
@@ -62,7 +62,7 @@ This document tracks all remaining tasks to complete V1 based on the PRD require
     -   Sort algorithms for each criteria
     -   Visual indication of current sort
 
--   [ ] **#8** Add list filtering capabilities
+-   [x] **#8** Add list filtering capabilities
 
     -   Filter by price range
     -   Filter by rating threshold

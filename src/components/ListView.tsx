@@ -1,13 +1,25 @@
 import React, { useState, useMemo } from 'react'
-import { Navigation, MapPin, ChevronDown, Crosshair } from 'lucide-react'
+import { Navigation, MapPin, ChevronDown, Crosshair, Filter, X } from 'lucide-react'
 import { useGeolocation } from '../hooks/useGeolocation'
 import { getLocationRequestAdvice, getOptimalGeolocationOptions } from '../utils/deviceDetection'
 import type { ListViewProps } from '../types'
 
 type SortOption = 'rating' | 'distance' | 'area'
 
+interface FilterState {
+  priceRange: string[]
+  minRating: number | null
+  neighborhoods: string[]
+}
+
 export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggleExpand, onViewDetails, onLocationChange }) => {
   const [sortBy, setSortBy] = useState<SortOption>('rating')
+  const [showFilters, setShowFilters] = useState(false)
+  const [filters, setFilters] = useState<FilterState>({
+    priceRange: [],
+    minRating: null,
+    neighborhoods: []
+  })
 
   const {
     coordinates,
@@ -43,9 +55,86 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
     }
   }, [sortBy, coordinates, loading, error, requestLocation])
 
-  // Sort cafes based on selected option
-  const sortedCafes = useMemo(() => {
-    const cafesCopy = [...cafes]
+  // Get unique neighborhoods for filter options
+  const uniqueNeighborhoods = useMemo(() => {
+    const neighborhoods = cafes.map(cafe => cafe.neighborhood)
+    return Array.from(new Set(neighborhoods)).sort()
+  }, [cafes])
+
+  // Get unique price ranges for filter options
+  const uniquePriceRanges = useMemo(() => {
+    const priceRanges = cafes
+      .map(cafe => cafe.priceRange)
+      .filter((price): price is string => price !== undefined)
+    return Array.from(new Set(priceRanges)).sort()
+  }, [cafes])
+
+  // Check if any filters are active
+  const hasActiveFilters = filters.priceRange.length > 0 ||
+                          filters.minRating !== null ||
+                          filters.neighborhoods.length > 0
+
+  // Toggle filter helpers
+  const togglePriceRange = (price: string) => {
+    setFilters(prev => ({
+      ...prev,
+      priceRange: prev.priceRange.includes(price)
+        ? prev.priceRange.filter(p => p !== price)
+        : [...prev.priceRange, price]
+    }))
+  }
+
+  const toggleNeighborhood = (neighborhood: string) => {
+    setFilters(prev => ({
+      ...prev,
+      neighborhoods: prev.neighborhoods.includes(neighborhood)
+        ? prev.neighborhoods.filter(n => n !== neighborhood)
+        : [...prev.neighborhoods, neighborhood]
+    }))
+  }
+
+  const setMinRating = (rating: number | null) => {
+    setFilters(prev => ({ ...prev, minRating: rating }))
+  }
+
+  const clearFilters = () => {
+    setFilters({
+      priceRange: [],
+      minRating: null,
+      neighborhoods: []
+    })
+  }
+
+  // Filter and sort cafes based on selected options
+  const filteredAndSortedCafes = useMemo(() => {
+    // First apply filters
+    let filtered = cafes.filter(cafe => {
+      // Price range filter
+      if (filters.priceRange.length > 0) {
+        if (!cafe.priceRange || !filters.priceRange.includes(cafe.priceRange)) {
+          return false
+        }
+      }
+
+      // Rating filter
+      if (filters.minRating !== null) {
+        if (cafe.score < filters.minRating) {
+          return false
+        }
+      }
+
+      // Neighborhood filter
+      if (filters.neighborhoods.length > 0) {
+        if (!filters.neighborhoods.includes(cafe.neighborhood)) {
+          return false
+        }
+      }
+
+      return true
+    })
+
+    // Then apply sorting
+    const cafesCopy = [...filtered]
 
     switch (sortBy) {
       case 'rating':
@@ -69,65 +158,165 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
       default:
         return cafesCopy
     }
-  }, [cafes, sortBy])
+  }, [cafes, sortBy, filters])
 
   return (
     <div className="flex-1 overflow-y-auto pb-24 relative">
-      {/* Filter Header */}
-      <div className="bg-white border-b-2 border-green-200 px-4 py-3 shadow-sm">
-        <div className="flex items-center gap-2 overflow-x-auto">
-          <button
-            onClick={() => setSortBy('rating')}
-            className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition ${
-              sortBy === 'rating'
-                ? 'bg-green-600 text-white'
-                : 'bg-green-100 text-green-700 hover:bg-green-200'
-            }`}
-          >
-            Rating
-          </button>
-          <button
-            onClick={() => setSortBy('distance')}
-            className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition ${
-              sortBy === 'distance'
-                ? 'bg-green-600 text-white'
-                : 'bg-green-100 text-green-700 hover:bg-green-200'
-            }`}
-          >
-            Distance
-          </button>
-          <button
-            onClick={() => setSortBy('area')}
-            className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition ${
-              sortBy === 'area'
-                ? 'bg-green-600 text-white'
-                : 'bg-green-100 text-green-700 hover:bg-green-200'
-            }`}
-          >
-            Area
-          </button>
+      {/* Sort & Filter Header */}
+      <div className="bg-white border-b-2 border-green-200 shadow-sm">
+        <div className="px-4 py-3">
+          <div className="flex items-center gap-2 overflow-x-auto">
+            <button
+              onClick={() => setSortBy('rating')}
+              className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition ${
+                sortBy === 'rating'
+                  ? 'bg-green-600 text-white'
+                  : 'bg-green-100 text-green-700 hover:bg-green-200'
+              }`}
+            >
+              Rating
+            </button>
+            <button
+              onClick={() => setSortBy('distance')}
+              className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition ${
+                sortBy === 'distance'
+                  ? 'bg-green-600 text-white'
+                  : 'bg-green-100 text-green-700 hover:bg-green-200'
+              }`}
+            >
+              Distance
+            </button>
+            <button
+              onClick={() => setSortBy('area')}
+              className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition ${
+                sortBy === 'area'
+                  ? 'bg-green-600 text-white'
+                  : 'bg-green-100 text-green-700 hover:bg-green-200'
+              }`}
+            >
+              Area
+            </button>
 
-          {/* Location Button */}
-          <button
-            onClick={handleLocationClick}
-            disabled={!isSupported || (error !== null && error.code === 1)}
-            className={`ml-auto p-2 rounded-full transition relative flex items-center justify-center ${
-              coordinates
-                ? 'bg-green-600 text-white hover:bg-green-700'
-                : 'bg-green-100 text-green-700 hover:bg-green-200'
-            } ${!isSupported || (error && error.code === 1) ? 'opacity-50 cursor-not-allowed' : ''}`}
-            title={coordinates ? 'Location found' : 'Find my location'}
-          >
-            {loading ? (
-              <Crosshair size={20} className="animate-pulse" />
-            ) : (
-              <MapPin size={20} />
-            )}
-            {coordinates && (
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 border-2 border-white rounded-full animate-pulse"></span>
-            )}
-          </button>
+            {/* Filter Toggle Button */}
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`px-3 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition flex items-center gap-1.5 relative ${
+                hasActiveFilters || showFilters
+                  ? 'bg-green-600 text-white'
+                  : 'bg-green-100 text-green-700 hover:bg-green-200'
+              }`}
+            >
+              <Filter size={16} />
+              Filter
+              {hasActiveFilters && !showFilters && (
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 border-2 border-white rounded-full"></span>
+              )}
+            </button>
+
+            {/* Location Button */}
+            <button
+              onClick={handleLocationClick}
+              disabled={!isSupported || (error !== null && error.code === 1)}
+              className={`ml-auto p-2 rounded-full transition relative flex items-center justify-center ${
+                coordinates
+                  ? 'bg-green-600 text-white hover:bg-green-700'
+                  : 'bg-green-100 text-green-700 hover:bg-green-200'
+              } ${!isSupported || (error && error.code === 1) ? 'opacity-50 cursor-not-allowed' : ''}`}
+              title={coordinates ? 'Location found' : 'Find my location'}
+            >
+              {loading ? (
+                <Crosshair size={20} className="animate-pulse" />
+              ) : (
+                <MapPin size={20} />
+              )}
+              {coordinates && (
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 border-2 border-white rounded-full animate-pulse"></span>
+              )}
+            </button>
+          </div>
         </div>
+
+        {/* Filter Panel */}
+        {showFilters && (
+          <div className="px-4 pb-4 pt-2 border-t border-green-100 animate-slide-up">
+            <div className="space-y-3">
+              {/* Price Range Filter */}
+              {uniquePriceRanges.length > 0 && (
+                <div>
+                  <h4 className="text-xs font-semibold text-gray-600 mb-2">Price Range</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {uniquePriceRanges.map(price => (
+                      <button
+                        key={price}
+                        onClick={() => togglePriceRange(price)}
+                        className={`px-3 py-1.5 rounded-full text-sm font-medium transition ${
+                          filters.priceRange.includes(price)
+                            ? 'bg-green-600 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        {price}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Rating Filter */}
+              <div>
+                <h4 className="text-xs font-semibold text-gray-600 mb-2">Minimum Rating</h4>
+                <div className="flex flex-wrap gap-2">
+                  {[7, 8, 9].map(rating => (
+                    <button
+                      key={rating}
+                      onClick={() => setMinRating(filters.minRating === rating ? null : rating)}
+                      className={`px-3 py-1.5 rounded-full text-sm font-medium transition ${
+                        filters.minRating === rating
+                          ? 'bg-green-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {rating}+
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Neighborhood Filter */}
+              <div>
+                <h4 className="text-xs font-semibold text-gray-600 mb-2">Neighborhood</h4>
+                <div className="flex flex-wrap gap-2">
+                  {uniqueNeighborhoods.map(neighborhood => (
+                    <button
+                      key={neighborhood}
+                      onClick={() => toggleNeighborhood(neighborhood)}
+                      className={`px-3 py-1.5 rounded-full text-sm font-medium transition ${
+                        filters.neighborhoods.includes(neighborhood)
+                          ? 'bg-green-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {neighborhood}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Clear Filters Button */}
+              {hasActiveFilters && (
+                <div className="pt-2">
+                  <button
+                    onClick={clearFilters}
+                    className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition flex items-center justify-center gap-2"
+                  >
+                    <X size={16} />
+                    Clear All Filters
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Location Permission Dialog */}
@@ -223,7 +412,18 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
 
       {/* Cafe List */}
       <div className="px-4 py-4 space-y-3">
-        {sortedCafes.map((cafe) => (
+        {filteredAndSortedCafes.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg mb-2">No cafes match your filters</p>
+            <button
+              onClick={clearFilters}
+              className="text-green-600 font-semibold hover:underline"
+            >
+              Clear filters
+            </button>
+          </div>
+        ) : (
+          filteredAndSortedCafes.map((cafe) => (
           <div key={cafe.id} className="bg-white rounded-2xl shadow-md border-2 border-green-100 overflow-hidden">
             <button
               onClick={() => onToggleExpand(expandedCard === cafe.id ? null : cafe.id)}
@@ -291,7 +491,8 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
               </div>
             )}
           </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   )
