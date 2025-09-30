@@ -87,3 +87,6 @@ coverage/
 
 # Local development files
 .astro-cache/
+
+# Local SSL certificates
+*.pem
