@@ -12,7 +12,8 @@ MatchaMap is a mobile-first web application providing a curated, map-based guide
 -   **Styling**: Tailwind CSS 3+ with custom design tokens
 -   **Routing**: React Router 6+ (client-side routing)
 -   **Maps**: Leaflet (vanilla JS in React components)
--   **Data**: JSON file with weekly manual updates
+-   **Backend**: Cloudflare Workers + D1 Database (SQLite at edge)
+-   **API**: REST API with itty-router + Drizzle ORM
 -   **Hosting**: Cloudflare Pages (edge deployment, global CDN)
 -   **TypeScript**: Strict mode enabled for type safety
 
@@ -146,19 +147,39 @@ src/hooks/
 
 ## Data Management
 
-### Current Approach
+### Backend Architecture (Phase 1+)
 
--   Single JSON file containing all cafe data
--   Manual weekly updates
--   Static site rebuilds on data changes
--   No database or CMS required
+-   **Database**: Cloudflare D1 (SQLite at the edge)
+-   **API**: Cloudflare Workers with REST endpoints
+-   **Admin**: Custom React admin UI (protected by Cloudflare Access)
+-   **Analytics**: Simple counter-based metrics (no external tools)
+
+### API Endpoints
+
+**Public API:**
+- `GET /api/cafes` - List all cafes
+- `GET /api/cafes/:id` - Single cafe details
+- `GET /api/feed` - News feed items
+- `GET /api/events` - Upcoming events
+
+**Admin API (Cloudflare Access protected):**
+- `POST /api/admin/cafes` - Create cafe
+- `PUT /api/admin/cafes/:id` - Update cafe
+- `DELETE /api/admin/cafes/:id` - Soft delete cafe
+- `GET /api/admin/cafe-stats` - Analytics dashboard
+
+**Analytics API (fire-and-forget):**
+- `POST /api/stats/cafe/:id/:stat` - Track cafe metrics
+- `POST /api/stats/feed/:id` - Track feed clicks
+- `POST /api/stats/event/:id` - Track event clicks
 
 ### Update Workflow
 
-1. Edit JSON file weekly
-2. Commit changes to repository
-3. Automatic rebuild and deploy via Netlify
-4. Cache invalidation handled automatically
+1. Login to admin UI (protected by Cloudflare Access)
+2. Edit cafe data via admin forms
+3. Changes saved to D1 database instantly
+4. Frontend fetches updated data from API
+5. No rebuild or deploy needed
 
 ## Code Organization & Location Rules
 
@@ -172,7 +193,11 @@ src/
 │   ├── AppRoutes.tsx
 │   ├── MapView.tsx
 │   ├── ListView.tsx
+│   ├── DetailView.tsx
 │   └── __tests__/      # Component tests
+├── admin/              # Admin UI components
+│   ├── StatsPage.tsx   # Analytics dashboard
+│   └── CafeEditor.tsx  # Cafe CRUD forms
 ├── hooks/              # Custom React hooks ONLY
 │   ├── useGeolocation.ts
 │   ├── useCafeSelection.ts
@@ -180,19 +205,29 @@ src/
 ├── stores/             # Zustand stores ONLY
 │   ├── locationStore.ts
 │   ├── uiStore.ts
-│   ├── authStore.ts
+│   ├── cityStore.ts
 │   └── visitedCafesStore.ts
 ├── utils/              # Pure utility functions ONLY
 │   ├── distanceCalculator.ts
-│   └── deviceDetection.ts
+│   ├── deviceDetection.ts
+│   └── analytics.ts    # Tracking utilities
 ├── types/              # TypeScript type definitions
 │   └── index.ts
-├── data/               # Static JSON data
-│   └── cafes.json
 ├── styles/             # Global CSS and Tailwind config
 │   └── index.css
 ├── App.tsx             # Root component (composition only)
 └── main.tsx            # React entry point
+
+workers/                # Backend (separate directory)
+├── src/
+│   ├── index.ts        # Workers entry point
+│   ├── routes/
+│   │   ├── cafes.ts    # Cafe CRUD endpoints
+│   │   ├── stats.ts    # Analytics endpoints
+│   │   └── admin.ts    # Admin endpoints
+│   └── db/
+│       └── schema.ts   # Drizzle ORM schema
+└── migrations/         # Database migrations
 ```
 
 ### Component Rules
@@ -438,14 +473,70 @@ SHOW_COMING_SOON: false
 4. Global CDN cache updated automatically
 5. Verify changes on production site
 
+## Analytics & Metrics
+
+### Simple Counter-Based Tracking
+
+**What we track (no external tools):**
+- Cafe views, direction clicks, passport marks
+- Social media clicks (Instagram, TikTok)
+- Feed article clicks
+- Event clicks
+
+**Implementation:**
+```typescript
+// Frontend: src/utils/analytics.ts
+export async function trackCafeStat(
+  cafeId: number,
+  stat: 'view' | 'directions' | 'passport' | 'instagram' | 'tiktok'
+): Promise<void> {
+  // Fire and forget - don't block UI
+  fetch(`/api/stats/cafe/${cafeId}/${stat}`, { method: 'POST' })
+    .catch(() => {}) // Ignore errors silently
+}
+
+// Usage in components
+useEffect(() => {
+  trackCafeStat(cafe.id, 'view')
+}, [cafe.id])
+```
+
+**Backend: Simple counter increments**
+```typescript
+// workers/src/routes/stats.ts
+await env.DB.prepare(`
+  INSERT INTO cafe_stats (cafe_id, views, updated_at)
+  VALUES (?, 1, CURRENT_TIMESTAMP)
+  ON CONFLICT(cafe_id)
+  DO UPDATE SET views = views + 1, updated_at = CURRENT_TIMESTAMP
+`).bind(cafeId).run()
+```
+
+**Admin Dashboard:**
+- Custom React component at `/admin/stats`
+- Sortable table showing views, CTR, passport usage
+- Protected by Cloudflare Access
+- See [metrics-tracking-prd.md](docs/metrics-tracking-prd.md)
+
+**What we DON'T track:**
+- User sessions or identities
+- Cross-session behavior
+- Personal information
+- Complex funnels or cohorts
+
+**When to add more:**
+- Session tracking → When you have 1000+ daily users
+- Discovery funnels → When optimizing user flows
+- Search terms → When you have 100+ cafes
+
 ## Future Considerations (V2+)
 
 -   User-submitted reviews
 -   Social features (favorites, sharing)
 -   Geographic expansion beyond Toronto
--   Content management system
--   Analytics integration
--   User accounts and enhanced passport features
+-   Advanced search (when > 200 cafes)
+-   User accounts and authentication
+-   Enhanced passport features with rewards
 
 ## Quick Reference
 
@@ -466,11 +557,19 @@ SHOW_COMING_SOON: false
 
 ### Key Dependencies
 
+**Frontend:**
 -   `react` - UI Framework
 -   `react-router-dom` - Client-side routing
+-   `zustand` - Lightweight state management
 -   `vite` - Build tool and dev server
 -   `tailwindcss` - Styling
 -   `leaflet` - Maps
+
+**Backend:**
+-   `@cloudflare/workers-types` - Workers TypeScript types
+-   `itty-router` - Minimal routing (~450 bytes)
+-   `drizzle-orm` - Type-safe ORM
+-   `drizzle-kit` - Database migrations
 
 ## Troubleshooting
 

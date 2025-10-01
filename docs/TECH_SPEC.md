@@ -1,431 +1,572 @@
 # MatchaMap Technical Specifications
 
+**Version:** 2.0
+**Date:** October 1, 2025
+**Status:** Updated for Full Stack Architecture
+
 ## System Architecture
 
 ### Overview
-MatchaMap is built as a React single-page application using Vite for build tooling, optimized for mobile-first performance and zero hosting costs.
+
+MatchaMap is a full-stack React application with Cloudflare edge infrastructure, optimized for mobile-first performance and global low-latency.
 
 ```
 ┌─────────────────────────────────────┐
-│             Frontend                │
+│           Frontend (SPA)            │
 │  ┌─────────┐ ┌─────────┐ ┌────────┐ │
-│  │  React  │ │Tailwind │ │ Vite   │ │
-│  │  Pages  │ │   CSS   │ │ Build  │ │
+│  │  React  │ │Tailwind │ │  Vite  │ │
+│  │  18.3+  │ │  CSS    │ │  Build │ │
 │  └─────────┘ └─────────┘ └────────┘ │
 └─────────────────────────────────────┘
-              │
-              ▼
+              ↕ REST API
 ┌─────────────────────────────────────┐
-│          Static Assets              │
+│         Backend (Edge API)          │
 │  ┌─────────┐ ┌─────────┐ ┌────────┐ │
-│  │  JSON   │ │ Images  │ │  CSS   │ │
-│  │  Data   │ │         │ │   JS   │ │
+│  │ Workers │ │itty-    │ │Drizzle │ │
+│  │   API   │ │router   │ │  ORM   │ │
 │  └─────────┘ └─────────┘ └────────┘ │
 └─────────────────────────────────────┘
-              │
-              ▼
+              ↕
 ┌─────────────────────────────────────┐
-│            CDN/Hosting              │
-│           (Netlify)                 │
+│          Data Layer (Edge)          │
+│  ┌─────────┐ ┌─────────┐           │
+│  │    D1   │ │   R2    │           │
+│  │ SQLite  │ │ Storage │           │
+│  └─────────┘ └─────────┘           │
 └─────────────────────────────────────┘
 ```
 
 ## Technical Stack
 
-### Core Technologies
-- **Framework**: React 18.x
+### Frontend
+- **Framework**: React 18.3+
 - **Build Tool**: Vite 5.x
 - **Routing**: React Router 6.x
+- **State**: Zustand (lightweight global state)
 - **Styling**: Tailwind CSS 3.x
 - **Maps**: Leaflet 1.9.x
-- **Language**: JavaScript/TypeScript
+- **Language**: TypeScript (strict mode)
 
-### Development Dependencies
+### Backend
+- **Runtime**: Cloudflare Workers
+- **Router**: itty-router (~450 bytes)
+- **ORM**: Drizzle ORM
+- **Migrations**: Drizzle Kit
+- **Language**: TypeScript
+
+### Data
+- **Database**: Cloudflare D1 (SQLite)
+- **Storage**: Cloudflare R2 (S3-compatible)
+- **Cache**: HTTP Cache-Control headers
+
+### Hosting
+- **Frontend**: Cloudflare Pages
+- **Backend**: Cloudflare Workers
+- **CDN**: Cloudflare global network
+- **Auth**: Cloudflare Access
+
+## Database Schema
+
+### Core Tables
+
+```sql
+CREATE TABLE cafes (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    slug TEXT UNIQUE NOT NULL,
+
+    -- Location
+    lat REAL NOT NULL,
+    lng REAL NOT NULL,
+    address TEXT NOT NULL,
+    city TEXT NOT NULL,
+    neighborhood_id INTEGER REFERENCES neighborhoods(id),
+
+    -- Content
+    score REAL NOT NULL,
+    review TEXT,
+    quick_note TEXT,
+
+    -- Contact
+    instagram TEXT,
+    tiktok TEXT,
+    google_maps_url TEXT,
+
+    -- Metadata
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
+);
+
+CREATE TABLE feed_items (
+    id INTEGER PRIMARY KEY,
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    type TEXT CHECK(type IN ('cafe_added', 'score_update', 'announcement')),
+    related_cafe_id INTEGER REFERENCES cafes(id),
+    published_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE events (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    start_time TIMESTAMP NOT NULL,
+    end_time TIMESTAMP,
+    location TEXT,
+    related_cafe_id INTEGER REFERENCES cafes(id)
+);
+
+CREATE TABLE cafe_stats (
+    cafe_id INTEGER PRIMARY KEY REFERENCES cafes(id),
+    views INTEGER DEFAULT 0,
+    directions_clicks INTEGER DEFAULT 0,
+    passport_marks INTEGER DEFAULT 0,
+    instagram_clicks INTEGER DEFAULT 0,
+    tiktok_clicks INTEGER DEFAULT 0,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+See [backend-prd.md](./backend-prd.md) for full schema.
+
+## API Architecture
+
+### Endpoints
+
+```
+Public API:
+GET  /api/cafes              # List all cafes
+GET  /api/cafes/:id          # Get single cafe
+GET  /api/feed               # News feed
+GET  /api/events             # Upcoming events
+
+Admin API (Cloudflare Access protected):
+POST   /api/admin/cafes      # Create cafe
+PUT    /api/admin/cafes/:id  # Update cafe
+DELETE /api/admin/cafes/:id  # Soft delete cafe
+GET    /api/admin/cafe-stats # Analytics dashboard
+
+Analytics API (fire-and-forget):
+POST /api/stats/cafe/:id/:stat   # Track cafe metric
+POST /api/stats/feed/:id         # Track feed click
+POST /api/stats/event/:id        # Track event click
+```
+
+### Response Format
+
 ```json
 {
-  "react": "^18.2.0",
-  "react-dom": "^18.2.0",
-  "react-router-dom": "^6.8.0",
-  "vite": "^5.0.8",
-  "@vitejs/plugin-react": "^4.2.1",
-  "tailwindcss": "^3.3.6",
-  "leaflet": "^1.9.4",
-  "@types/leaflet": "^1.9.8",
-  "typescript": "^5.2.2"
+  "data": { /* ... */ },
+  "error": null
+}
+
+// Error response
+{
+  "data": null,
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "Cafe not found"
+  }
 }
 ```
-
-## Data Architecture
-
-### Data Flow
-```
-JSON File → Vite Build → React SPA → CDN
-     ↓           ↓            ↓         ↓
-  Manual      Build Time   Runtime   Browser
-  Updates     Processing   Hydration  Display
-```
-
-### Storage Strategy
-- **Primary Data**: Single JSON file (`src/data/cafes.json`)
-- **Images**: Static assets in `public/images/`
-- **User Data**: Browser localStorage (Matcha Passport)
-- **No Database**: Static-first approach for V1
 
 ## Component Architecture
 
 ### React Component Strategy
-All components are React components with state management:
 
-1. **Interactive Map Component** (`InteractiveMap.jsx`)
-   - Leaflet map initialization
-   - Pin interactions and popover
-   - Geolocation handling
-   - View toggle functionality
+```
+src/
+├── components/
+│   ├── Header.tsx              # Top navigation
+│   ├── BottomNavigation.tsx    # Mobile tab bar
+│   ├── MapView.tsx             # Leaflet map
+│   ├── ListView.tsx            # Cafe list with filters
+│   ├── DetailView.tsx          # Cafe detail page
+│   └── __tests__/              # Component tests
+├── hooks/
+│   ├── useGeolocation.ts       # Browser geolocation
+│   ├── useCafeSelection.ts     # Cafe selection logic
+│   ├── useDistanceCalculation.ts
+│   └── useVisitedCafes.ts      # Passport wrapper
+├── stores/
+│   ├── locationStore.ts        # User location (Zustand)
+│   ├── uiStore.ts              # UI state
+│   └── cityStore.ts            # Multi-city support
+├── utils/
+│   ├── distanceCalculator.ts   # Haversine formula
+│   ├── mapsUrl.ts              # Platform-specific maps
+│   └── analytics.ts            # Tracking utilities
+└── types/
+    └── index.ts                # TypeScript definitions
+```
 
-2. **List Components** (`CafeList.jsx`, `ListFilters.jsx`)
-   - Sort and filter controls
-   - Search functionality
-   - State management for list view
+### State Management
 
-3. **Passport Components** (`PassportTracker.jsx`)
-   - localStorage visit tracking
-   - Progress visualization
-   - Check/uncheck interactions
+**Zustand Stores** (global state):
+- Location data (user coordinates)
+- UI state (modals, panels)
+- City selection
+- Visited cafes (persisted to localStorage)
 
-### Page Components
-Page-level components for routing:
-- HomePage - Map interface
-- ListPage - Cafe list view
-- CafeDetailPage - Individual cafe details
-- PassportPage - User progress tracking
-- NewsPage - Updates and blog
-- AboutPage - Information and FAQ
+**Local State** (useState/useReducer):
+- Component-specific interactions
+- Form inputs
+- Temporary UI state
 
 ## Performance Specifications
 
 ### Bundle Size Targets
-- **Base CSS**: ~20KB (Tailwind purged)
-- **Map Page JS**: ~45KB (Leaflet + custom)
-- **List Page JS**: ~15KB (filter/sort logic)
-- **Other Pages**: ~5KB (minimal interactions)
 
-### Core Web Vitals Targets
-- **LCP (Largest Contentful Paint)**: < 2.5s
-- **FID (First Input Delay)**: < 100ms
-- **CLS (Cumulative Layout Shift)**: < 0.1
+```
+Frontend:
+- Initial JS: < 50KB gzipped
+- CSS: < 20KB gzipped (Tailwind purged)
+- Map page: + 45KB (Leaflet)
+- Total (map page): < 115KB
 
-### Optimization Strategies
-1. **Code Splitting**: Islands load JS only when needed
-2. **Image Optimization**: Sharp processing with multiple formats
-3. **CSS Purging**: Tailwind removes unused styles
-4. **Static Generation**: No runtime server processing
-5. **CDN Caching**: Long-term caching for static assets
-
-## Mobile-First Design Specifications
-
-### Viewport and Breakpoints
-```css
-/* Mobile First Approach */
-/* Base: 320px-640px */
-.container { /* mobile styles */ }
-
-/* Tablet: 640px+ */
-@media (min-width: 640px) { /* sm: */ }
-
-/* Desktop: 1024px+ */
-@media (min-width: 1024px) { /* lg: */ }
+Backend:
+- Worker bundle: < 100KB
+- Cold start: < 10ms
+- Response time: < 50ms global avg
 ```
 
-### Touch Interface Requirements
-- **Minimum Touch Target**: 44px × 44px
-- **Touch Gestures**: Tap, scroll, pinch-to-zoom (map only)
-- **Hover States**: Graceful degradation on touch devices
-- **Active States**: Visual feedback for all interactive elements
+### Core Web Vitals Targets
 
-### Responsive Behavior
-- **Navigation**: Bottom tab bar on mobile, top nav on desktop
-- **Cards**: Single column on mobile, grid on tablet+
-- **Map**: Full viewport on mobile, sidebar layout on desktop
-- **Typography**: Fluid scaling with `clamp()` for optimal readability
+```
+LCP (Largest Contentful Paint): < 2.5s
+FID (First Input Delay): < 100ms
+CLS (Cumulative Layout Shift): < 0.1
+```
 
-## Map Implementation Specifications
+### Optimization Strategies
+
+**Frontend:**
+- Code splitting by route
+- Lazy loading for map/heavy components
+- Image optimization (WebP, proper sizing)
+- Tailwind CSS purging
+- Aggressive caching (1 year for assets)
+
+**Backend:**
+- Prepared SQL statements
+- Database query optimization
+- HTTP caching headers
+- Edge caching (Cloudflare CDN)
+
+## Mobile-First Design
+
+### Breakpoints
+
+```css
+/* Base: 320px-640px (mobile) */
+.container { /* mobile styles */ }
+
+/* sm: 640px+ (tablet) */
+@media (min-width: 640px) { }
+
+/* md: 768px+ (small desktop) */
+@media (min-width: 768px) { }
+
+/* lg: 1024px+ (desktop) */
+@media (min-width: 1024px) { }
+```
+
+### Touch Interface
+
+- **Min touch target**: 44px × 44px
+- **Gestures**: Tap, scroll, pinch (map only)
+- **No hover dependencies**: All interactions work on touch
+- **Active states**: Visual feedback on all interactions
+
+### Responsive Patterns
+
+```
+Navigation:
+- Mobile: Bottom tab bar (fixed)
+- Desktop: Top horizontal nav
+
+Layout:
+- Mobile: Single column, full width
+- Tablet: Grid with 2 columns
+- Desktop: Grid with 3 columns + sidebar
+
+Map:
+- Mobile: Full viewport
+- Desktop: Split view (map + sidebar)
+```
+
+## Maps Implementation
 
 ### Leaflet Configuration
-```javascript
-// Map initialization
+
+```typescript
 const map = L.map('map', {
-  center: [43.6532, -79.3832], // Toronto downtown
+  center: [43.6532, -79.3832], // Toronto
   zoom: 12,
-  zoomControl: false, // Custom controls
-  attributionControl: true,
+  zoomControl: false,
   scrollWheelZoom: true,
   touchZoom: true,
   doubleClickZoom: true,
-  boxZoom: false, // Disable on mobile
-});
+  boxZoom: false, // Disabled on mobile
+})
 
-// Tile layer
+// OpenStreetMap tiles
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '© OpenStreetMap contributors',
   maxZoom: 18,
-}).addTo(map);
+  attribution: '© OpenStreetMap contributors'
+}).addTo(map)
 ```
 
 ### Custom Markers
-- **Design**: Matcha-themed pin design
-- **States**: Default, hover, active, visited
-- **Clustering**: None for V1 (small dataset)
-- **Popover**: Custom HTML with cafe info
 
-### Geolocation Integration
-```javascript
-// Geolocation with fallback
-if (navigator.geolocation) {
-  navigator.geolocation.getCurrentPosition(
-    (position) => {
-      const userLat = position.coords.latitude;
-      const userLng = position.coords.longitude;
-      // Update map center and calculate distances
-    },
-    (error) => {
-      // Graceful fallback to Toronto center
-    },
-    { enableHighAccuracy: true, timeout: 10000 }
-  );
-}
+```typescript
+// Matcha-themed pin
+const matchaIcon = L.divIcon({
+  className: 'custom-marker',
+  html: `<div class="w-8 h-8 bg-matcha-500 rounded-full...">
+    <div class="w-3 h-3 bg-white rounded-full"></div>
+  </div>`,
+  iconSize: [32, 32],
+  iconAnchor: [16, 16]
+})
 ```
 
-## State Management
+### Geolocation
 
-### Client-Side State
-- **Map State**: Zoom level, center position, selected pin
-- **List State**: Sort order, filter criteria, expanded cards
-- **Passport State**: Visited locations (localStorage)
-- **User Preferences**: View mode, location permission
+```typescript
+// Platform-specific handling
+const options = getOptimalGeolocationOptions()
 
-### localStorage Schema
-```javascript
-// Matcha Passport data
-{
-  "matchaPassport": {
-    "visitedCafes": ["cafe-id-1", "cafe-id-2"],
-    "lastUpdated": "2024-01-15T10:30:00Z"
+navigator.geolocation.getCurrentPosition(
+  (position) => {
+    const { latitude, longitude } = position.coords
+    // Update map center, calculate distances
   },
-  "userPreferences": {
-    "defaultView": "map", // "map" | "list"
-    "locationPermission": "granted" // "granted" | "denied" | "prompt"
-  }
-}
+  (error) => {
+    // Graceful fallback to city center
+  },
+  options
+)
 ```
 
-## Route Structure
+## Security
 
-### Static Routes
-```
-/                    # Homepage (map view)
-/list               # List view
-/news               # News/blog feed
-/passport           # Matcha Passport
-/about              # FAQ/About section
-```
+### Content Security Policy
 
-### Dynamic Routes
 ```
-/cafe/[id]          # Individual cafe detail pages
+default-src 'self';
+script-src 'self' 'unsafe-inline' unpkg.com;
+style-src 'self' 'unsafe-inline' unpkg.com;
+img-src 'self' data: https:;
+connect-src 'self' https:;
 ```
 
-### Route Configuration
-```javascript
-// App.jsx
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+### Admin Authentication
 
-function App() {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/list" element={<ListPage />} />
-        <Route path="/cafe/:id" element={<CafeDetailPage />} />
-        <Route path="/passport" element={<PassportPage />} />
-        <Route path="/news" element={<NewsPage />} />
-        <Route path="/about" element={<AboutPage />} />
-      </Routes>
-    </Router>
-  )
-}
+```
+Cloudflare Access protects /admin/* routes
+- Email-based authentication
+- No custom auth code needed
+- Google/GitHub SSO integration
+```
+
+### Data Validation
+
+```typescript
+// Zod schema validation (backend)
+const CafeSchema = z.object({
+  name: z.string().min(1).max(100),
+  lat: z.number().min(43.0).max(44.0),
+  lng: z.number().min(-80.0).max(-79.0),
+  score: z.number().min(0).max(10),
+  // ...
+})
+```
+
+## Monitoring & Analytics
+
+### Cloudflare Analytics
+
+```
+Frontend (Pages):
+- Page views
+- Unique visitors
+- Core Web Vitals
+- Geographic distribution
+
+Backend (Workers):
+- Request count
+- Error rate
+- CPU time
+- Response time
+```
+
+### Custom Analytics
+
+```typescript
+// Frontend tracking
+trackCafeStat(cafeId, 'view')
+trackCafeStat(cafeId, 'directions')
+trackFeedClick(feedItemId)
+
+// Backend: Simple counter increments
+// See metrics-tracking-prd.md
 ```
 
 ## Build Process
 
-### Development Build
+### Development
+
 ```bash
-npm run dev
-# - Vite dev server with HMR
-# - React Fast Refresh
-# - Tailwind watch mode
-# - TypeScript checking
-# - Asset serving from public/
+# Frontend
+npm run dev         # Vite dev server (http://localhost:5173)
+
+# Backend
+cd workers && npm run dev  # Wrangler dev (http://localhost:8787)
+
+# Full stack
+npm run dev:all     # Run both concurrently
 ```
 
-### Production Build
+### Production
+
 ```bash
-npm run build
-# 1. TypeScript compilation
-# 2. React component bundling
-# 3. Tailwind CSS purging
-# 4. Asset optimization
-# 5. Code splitting and minification
-# 6. Output to dist/ directory
+# Frontend
+npm run build       # Vite build → dist/
+npm run preview     # Test production build
+
+# Backend
+cd workers && npm run build   # TypeScript → JS
+cd workers && npm run deploy  # Deploy to Cloudflare
+
+# Deployment
+git push origin main  # Auto-deploys frontend via Cloudflare Pages
 ```
-
-### Build Optimization
-- **Tree Shaking**: Remove unused JavaScript
-- **CSS Purging**: Remove unused Tailwind classes
-- **Image Optimization**: Multiple formats and sizes
-- **Asset Compression**: Gzip/Brotli compression
-- **Cache Headers**: Long-term caching strategy
-
-## API Integration
-
-### Distance Calculation
-```javascript
-// Haversine formula for distance calculation
-function calculateDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371; // Earth's radius in kilometers
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  return R * c; // Distance in kilometers
-}
-```
-
-### External Maps Integration
-```javascript
-// iOS Maps
-window.open(`maps://maps.apple.com/?q=${lat},${lng}`);
-
-// Google Maps (Android/Web)
-window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`);
-```
-
-## Security Considerations
-
-### Content Security Policy
-```
-Content-Security-Policy: 
-  default-src 'self';
-  script-src 'self' 'unsafe-inline';
-  style-src 'self' 'unsafe-inline';
-  img-src 'self' data: https:;
-  connect-src 'self' https:;
-  font-src 'self';
-```
-
-### Data Validation
-- JSON schema validation for cafe data
-- Input sanitization for any user-generated content
-- XSS prevention through React's built-in escaping
-
-## Monitoring and Analytics
-
-### Performance Monitoring
-- **Core Web Vitals**: Built-in browser APIs
-- **Bundle Analysis**: Vite build reports
-- **Lighthouse**: Automated performance testing
-
-### Error Handling
-```javascript
-// Client-side error boundary
-window.addEventListener('error', (event) => {
-  // Log errors for debugging
-  console.error('Client error:', event.error);
-});
-
-// Geolocation error handling
-navigator.geolocation.getCurrentPosition(
-  successCallback,
-  (error) => {
-    switch(error.code) {
-      case error.PERMISSION_DENIED:
-        // Handle permission denied
-        break;
-      case error.POSITION_UNAVAILABLE:
-        // Handle position unavailable
-        break;
-      case error.TIMEOUT:
-        // Handle timeout
-        break;
-    }
-  }
-);
-```
-
-## Deployment Specifications
-
-### Netlify Configuration
-```toml
-# netlify.toml
-[build]
-  publish = "dist"
-  command = "npm run build"
-
-[build.environment]
-  NODE_VERSION = "18"
-
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
-    X-Content-Type-Options = "nosniff"
-
-[[headers]]
-  for = "/images/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000"
-
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
-  status = 200
-```
-
-### Environment Variables
-None required for V1 (static site with no external APIs)
 
 ## Browser Support
 
-### Primary Support (Testing Required)
-- **iOS Safari**: 14+ (iPhone users)
-- **Chrome Mobile**: Latest 2 versions (Android users)
+### Primary (testing required)
+- **iOS Safari 14+** (primary mobile target)
+- **Chrome Mobile** (latest 2 versions)
 
-### Secondary Support (Best Effort)
-- **Desktop Chrome**: Latest version
-- **Desktop Safari**: Latest version
-- **Desktop Firefox**: Latest version
+### Secondary (best effort)
+- Chrome Desktop (latest)
+- Safari Desktop (latest)
+- Firefox Desktop (latest)
 
 ### Polyfills
-- **IntersectionObserver**: For lazy loading (if needed)
-- **ResizeObserver**: For responsive components (if needed)
+None required (ES2020+ baseline)
 
-## Future Technical Considerations
+## Cost Structure
 
-### Scalability Preparations
-- **Database Migration Path**: JSON → Headless CMS
-- **API Layer**: RESTful endpoints for dynamic features
-- **User Authentication**: Integration points for accounts
-- **Geographic Expansion**: Multi-city data architecture
+### Free Tier (Current)
 
-### Performance Monitoring
-- **Bundle Size Tracking**: Automated size regression testing
-- **Core Web Vitals**: Continuous performance monitoring
-- **Mobile Performance**: Real device testing pipeline
+```
+Cloudflare Pages:
+- 500 builds/month
+- Unlimited bandwidth
+- Cost: $0/month
+
+Cloudflare Workers:
+- 100K requests/day
+- 10ms CPU time/request
+- Cost: $0/month
+
+D1 Database:
+- 5GB storage
+- 5M reads/day
+- Cost: $0/month
+
+Total: $0/month for 100K+ requests/day
+```
+
+### Paid Tier (if needed)
+
+```
+Workers Paid ($5/month):
+- 10M requests/month
+- 50ms CPU time/request
+
+When to upgrade:
+- Exceeding 100K requests/day
+- Need more CPU time
+```
+
+## Development Workflow
+
+### Local Setup
+
+```bash
+# Clone repo
+git clone <repo-url>
+cd matchamap
+
+# Install frontend deps
+npm install
+
+# Install backend deps
+cd workers && npm install
+
+# Setup environment
+cp .env.example .env
+```
+
+### Testing
+
+```bash
+# Type checking
+npm run typecheck
+
+# Build test
+npm run build
+
+# Mobile testing
+npm run dev -- --host
+# Access from mobile device on same network
+```
+
+### Deployment
+
+```bash
+# Frontend (automatic)
+git push origin main
+
+# Backend (manual until CI/CD)
+cd workers && npm run deploy
+```
+
+## Future Considerations
+
+### Scalability
+
+```
+Database:
+- Current: D1 (5GB free)
+- When to migrate: > 3GB or slow queries
+- Migration path: D1 → PostgreSQL (via Drizzle)
+
+Search:
+- Current: Client-side filtering
+- When to add: > 200 cafes
+- Options: Algolia, MeiliSearch, Postgres FTS
+
+CDN:
+- Current: Cloudflare global network
+- Future: R2 for images, KV for cache
+```
+
+### Features (V2+)
+
+- User accounts (Cloudflare Access)
+- User-submitted reviews
+- Advanced search
+- Multi-city expansion
+- Mobile app (React Native)
 
 ---
 
-*Technical Specification Version: 1.0*
-*Last Updated: [Current Date]*
-*Status: V1 Development Phase*
+**Technical Specifications Version:** 2.0
+**Last Updated:** October 1, 2025
+**Status:** Full Stack Architecture
+**Stack:** React + Cloudflare Workers + D1

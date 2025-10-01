@@ -61,7 +61,7 @@ graph TB
     end
 
     subgraph "Admin (New)"
-        G[Retool] --> C
+        G[Admin React SPA] --> C
         H[CF Access Auth] --> G
     end
 ```
@@ -71,13 +71,13 @@ graph TB
 | Component     | Technology              | Rationale                      | When to Migrate                                |
 | ------------- | ----------------------- | ------------------------------ | ---------------------------------------------- |
 | Runtime       | Cloudflare Workers      | Edge performance, $0 free tier | Probably never                                 |
-| Database      | Cloudflare D1 (SQLite)  | 5GB free, 5M reads/day free    | When DB > 3GB or slow queries                  |
+| Database      | Cloudflare D1 (SQLite)  | 5GB free, free tier generous   | When DB > 3GB or slow queries                  |
 | Router        | itty-router (450 bytes) | Minimal bundle size            | When you need complex middleware               |
 | ORM           | Drizzle ORM             | Type safety + migrations       | Probably never                                 |
 | Image Storage | R2                      | $0.015/GB, free egress         | When you need auto-optimization                |
 | Cache         | HTTP Cache-Control      | Free, built-in                 | When you have performance issues               |
 | Admin Auth    | Cloudflare Access       | Free, your Google account      | Never (or custom when hiring untrusted people) |
-| Admin UI      | Retool                  | Free tier, no-code             | When Retool feels limiting                     |
+| Admin UI      | Custom React SPA        | Full control, same stack       | Probably never (just extend it)                |
 
 **Decision: Use Drizzle ORM** (not just Drizzle Kit) - the type safety is worth the tiny bundle size increase (~5KB) and makes development faster.
 
@@ -228,7 +228,7 @@ CREATE TABLE events (
 -   Items with `deleted_at` are excluded from all public queries
 -   Cascade behavior: When cafe is soft-deleted, drinks are also hidden
 -   Retention: Keep deleted items indefinitely (storage is cheap)
--   Un-delete: Manually set `deleted_at = NULL` via Retool if needed
+-   Un-delete: Manually set `deleted_at = NULL` via admin UI if needed
 
 ### Phase 3+ Schema (Social Features - Future)
 
@@ -538,7 +538,7 @@ _Note: Timelines intentionally omitted as they are not accurate at this stage._
 -   [ ] Set up migration pipeline with Drizzle Kit
 -   [ ] Seed data from cafes.json
 -   [ ] Configure Cloudflare Access for admin auth
--   [ ] Set up Retool admin interface
+-   [ ] Build basic admin UI (cafe list + create/edit forms)
 -   [ ] Implement health check endpoint
 -   [ ] Set up monitoring and alerting
 
@@ -575,7 +575,7 @@ _Note: Timelines intentionally omitted as they are not accurate at this stage._
 -   [ ] Multi-city routing and URL structure
 -   [ ] Review versioning system
 -   [ ] Feed automation tools
--   [ ] Analytics dashboard in Retool
+-   [ ] Analytics dashboard in admin UI
 -   [ ] City-specific landing pages
 
 **Deliverable:** Multi-city support with content management workflow
@@ -657,8 +657,8 @@ git push origin main
 **Pre-deploy checklist:**
 
 -   [ ] `npm run dev` works locally
--   [ ] Can add/edit cafe in Retool
--   [ ] Frontend shows data
+-   [ ] Can add/edit cafe in admin UI
+-   [ ] Frontend shows data from API
 -   [ ] No console errors
 
 Add automated tests when manual testing gets annoying.
@@ -706,8 +706,8 @@ Max size: 10MB. Allowed formats: JPEG, PNG, WebP. Figure out resizing later if i
 Before deploying:
 
 1. Does `npm run dev` work?
-2. Can you create/edit a cafe in Retool?
-3. Does the frontend show cafes?
+2. Can you create/edit a cafe in admin UI?
+3. Does the frontend show cafes from the API?
 4. No console errors?
 
 Ship it.
@@ -753,7 +753,7 @@ Drizzle ORM makes migrating to PostgreSQL straightforward when you get there.
 
 ### Launch Criteria (Phase 1)
 
--   [ ] Can create/edit cafes in Retool
+-   [ ] Can create/edit cafes in admin UI
 -   [ ] Frontend shows cafes from API
 -   [ ] Users don't complain it's slow
 -   [ ] Can rollback if needed
@@ -949,7 +949,7 @@ interface EventItem {
 
 -   ✅ Cloudflare Workers + D1 + Drizzle ORM
 -   ✅ Simple REST API with consistent response format
--   ✅ Retool admin (no custom admin build)
+-   ✅ Custom React admin UI (same stack as main app)
 -   ✅ Daily GitHub backups
 -   ✅ Manual testing until it's annoying
 -   ✅ Minimal monitoring (CF Analytics + UptimeRobot)
@@ -966,7 +966,7 @@ interface EventItem {
 1. Set up Cloudflare Workers project (30 min)
 2. Create D1 database with Drizzle (1 hour)
 3. Build basic cafe CRUD API (3 hours)
-4. Set up Retool admin (2 hours)
+4. Build admin UI (cafe list + forms) (4 hours)
 5. Connect frontend to API (2 hours)
 6. Ship it
 
