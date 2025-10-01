@@ -1,10 +1,10 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import Header from './components/Header'
 import BottomNavigation from './components/BottomNavigation'
 import AppRoutes from './components/AppRoutes'
 import ComingSoon from './components/ComingSoon'
 import { useDistanceCalculation } from './hooks/useDistanceCalculation'
-import { useFeatureToggle } from './hooks/useFeatureToggle'
+import { useAppFeatures } from './hooks/useAppFeatures'
 import { useCafeSelection } from './hooks/useCafeSelection'
 import { useUIStore } from './stores/uiStore'
 import { useAuthStore } from './stores/authStore'
@@ -16,11 +16,7 @@ import type { CafeData } from './types'
 
 export const App: React.FC = () => {
   // Feature toggles
-  const isPassportEnabled = useFeatureToggle('ENABLE_PASSPORT')
-  const isEventsEnabled = useFeatureToggle('ENABLE_EVENTS')
-  const isMenuEnabled = useFeatureToggle('ENABLE_MENU')
-  const isCitySelectorEnabled = useFeatureToggle('ENABLE_CITY_SELECTOR')
-  const showComingSoon = useFeatureToggle('SHOW_COMING_SOON')
+  const { showComingSoon } = useAppFeatures()
 
   // Zustand stores
   const { isAuthenticated, authenticate } = useAuthStore()
@@ -33,7 +29,7 @@ export const App: React.FC = () => {
   const [userCoordinates, setUserCoordinates] = useState<GeolocationCoordinates | null>(null)
 
   // Sync location store to local state
-  useEffect(() => {
+  React.useEffect(() => {
     setUserCoordinates(coordinates)
   }, [coordinates])
 
@@ -68,7 +64,7 @@ export const App: React.FC = () => {
 
   return (
     <div className="w-full h-screen bg-gradient-to-br from-green-50 to-green-100 flex flex-col">
-      <Header isMenuEnabled={isMenuEnabled} isCitySelectorEnabled={isCitySelectorEnabled} />
+      <Header />
 
       <AppRoutes
         cafesWithDistance={cafesWithDistance}
@@ -82,17 +78,12 @@ export const App: React.FC = () => {
         onToggleExpand={setExpandedCard}
         feedItems={feed}
         eventItems={events}
-        isEventsEnabled={isEventsEnabled}
         cafes={cafesWithDistance}
         onToggleStamp={toggleStamp}
-        isPassportEnabled={isPassportEnabled}
         onToggleVisited={toggleVisited}
       />
 
-      <BottomNavigation
-        isPassportEnabled={isPassportEnabled}
-        isEventsEnabled={isEventsEnabled}
-      />
+      <BottomNavigation />
     </div>
   )
 }

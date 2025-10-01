@@ -2,19 +2,14 @@ import React from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { MapPin, List, User } from 'lucide-react'
 import { getCurrentEnvironment } from '../hooks/useFeatureToggle'
+import { useFeatures } from '../contexts/FeatureContext'
 
-interface BottomNavigationProps {
-  isPassportEnabled?: boolean
-  isEventsEnabled?: boolean
-}
-
-export const BottomNavigation: React.FC<BottomNavigationProps> = ({
-  isPassportEnabled = false,
-  isEventsEnabled = false,
-}) => {
+export const BottomNavigation: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const currentEnv = getCurrentEnvironment()
+
+  const { isPassportEnabled, isEventsEnabled } = useFeatures()
 
   // Check if admin banner is shown (only in dev mode)
   const hasAdminBanner = currentEnv === 'dev'

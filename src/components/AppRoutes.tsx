@@ -8,6 +8,7 @@ import PassportView from './PassportView'
 import EventsView from './EventsView'
 import AdminPage from './AdminPage'
 import { useVisitedCafesStore } from '../stores/visitedCafesStore'
+import { useFeatures } from '../contexts/FeatureContext'
 import { useFeatureToggle } from '../hooks/useFeatureToggle'
 import type { CafeWithDistance, FeedItem, EventItem } from '../types'
 
@@ -32,12 +33,10 @@ interface AppRoutesProps {
 
   // Events props
   eventItems: EventItem[]
-  isEventsEnabled?: boolean
 
   // Passport props
   cafes: CafeWithDistance[]
   onToggleStamp: (id: number) => void
-  isPassportEnabled?: boolean
 
   // Detail props
   onToggleVisited: (id: number) => void
@@ -55,13 +54,12 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({
   onToggleExpand,
   feedItems,
   eventItems,
-  isEventsEnabled = false,
   cafes,
   onToggleStamp,
-  isPassportEnabled = false,
   onToggleVisited,
 }) => {
   const { stampedCafeIds, visitedCafeIds } = useVisitedCafesStore()
+  const { isEventsEnabled, isPassportEnabled } = useFeatures()
   const isAdminEnabled = useFeatureToggle('ENABLE_ADMIN_PANEL')
 
   return (
