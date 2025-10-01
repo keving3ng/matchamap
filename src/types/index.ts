@@ -14,6 +14,7 @@ export interface Cafe {
   hours?: string
   priceRange?: string
   menuHighlights?: string
+  googleMapsUrl?: string
   secondaryScores?: {
     value: number
     ambiance: number

@@ -6,9 +6,11 @@ import { useVisitedCafes } from '../hooks/useVisitedCafes'
 import { useCityStore } from '../stores/cityStore'
 import { CircleButton } from './CircleButton'
 import { getLocationRequestAdvice, getOptimalGeolocationOptions } from '../utils/deviceDetection'
+import { getMapsUrl } from '../utils/mapsUrl'
 import type { MapViewProps } from '../types'
 
 export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCafe, onPinClick, onViewDetails, onClosePopover }) => {
+  const mapsUrl = selectedCafe ? getMapsUrl(selectedCafe.address, selectedCafe.googleMapsUrl) : ''
   const { visitedCafeIds } = useVisitedCafes()
   const { getCity } = useCityStore()
   const currentCity = getCity()
@@ -204,12 +206,23 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                 <span>Tap location button above for distance</span>
               </div>
             )}
-            <button
-              onClick={() => onViewDetails(selectedCafe)}
-              className="w-full bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-green-600 transition shadow-md"
-            >
-              View Details
-            </button>
+            <div className="flex gap-2">
+              <a
+                href={mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 text-white py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-600 transition shadow-md flex items-center justify-center gap-2"
+              >
+                <Navigation size={18} />
+                Directions
+              </a>
+              <button
+                onClick={() => onViewDetails(selectedCafe)}
+                className="flex-1 bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-green-600 transition shadow-md"
+              >
+                View Details
+              </button>
+            </div>
           </div>
 
           {/* Tablet+ Sidebar */}
@@ -276,11 +289,15 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                   View Full Details
                 </button>
 
-                <button
-                  className="w-full bg-white border-2 border-green-300 text-green-600 py-3 rounded-xl font-semibold hover:bg-green-50 transition"
+                <a
+                  href={mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full bg-white border-2 border-green-300 text-green-600 py-3 rounded-xl font-semibold hover:bg-green-50 transition flex items-center justify-center gap-2"
                 >
+                  <Navigation size={18} />
                   Get Directions
-                </button>
+                </a>
               </div>
 
               {/* Social Links */}

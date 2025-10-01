@@ -1,11 +1,13 @@
 import React from 'react'
 import { MapPin, Navigation, Heart, CheckCircle, Instagram } from 'lucide-react'
 import { useFeatureStore } from '../stores/featureStore'
+import { getMapsUrl } from '../utils/mapsUrl'
 import type { DetailViewProps } from '../types'
 
 export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, onToggleVisited }) => {
   const { isPassportEnabled, isUserAccountsEnabled } = useFeatureStore()
   const isVisited: boolean = visitedLocations.includes(cafe.id)
+  const mapsUrl = getMapsUrl(cafe.address, cafe.googleMapsUrl)
 
   return (
     <div className="flex-1 overflow-y-auto pb-24 pt-0">
@@ -44,10 +46,15 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
               </div>
             )}
 
-          <button className="w-full bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-green-600 transition shadow-md flex items-center justify-center gap-2">
+          <a
+            href={mapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-green-600 transition shadow-md flex items-center justify-center gap-2"
+          >
             <Navigation size={20} />
             Get Directions
-          </button>
+          </a>
         </div>
 
         {/* Visited Checkbox - Only show if passport is enabled */}
