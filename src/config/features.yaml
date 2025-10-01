@@ -4,8 +4,8 @@
 # Matcha Passport - Visit tracking system
 # Allows users to track which cafes they've visited with a digital stamp collection
 ENABLE_PASSPORT:
-  dev: false
-  prod: false
+  dev: true
+  prod: true
 
 # News Feed - Updates and announcements
 # Displays latest cafe additions, score updates, and matcha-related announcements
@@ -41,19 +41,19 @@ SHOW_COMING_SOON:
 # Displays upcoming matcha-related events, workshops, and festivals in Toronto
 ENABLE_EVENTS:
   dev: true
-  prod: false
+  prod: true
 
 # Hamburger Menu
 # Top-right navigation menu for additional features and settings
 ENABLE_MENU:
   dev: true
-  prod: false
+  prod: true
 
 # City Selector
 # Dropdown to select different cities (Toronto, Montreal, Tokyo)
 ENABLE_CITY_SELECTOR:
   dev: true
-  prod: false
+  prod: true
 
 # User Accounts
 # User authentication and account features like favoriting cafes
@@ -65,13 +65,13 @@ ENABLE_USER_ACCOUNTS:
 # Contact form and information for users to reach out
 ENABLE_CONTACT:
   dev: true
-  prod: false
+  prod: true
 
 # About Us Page
 # Information about the project, mission, and reviewer
 ENABLE_ABOUT:
   dev: true
-  prod: false
+  prod: true
 
 # Store/Shop Page
 # E-commerce page for matcha-related products and merch
@@ -83,4 +83,4 @@ ENABLE_STORE:
 # User preferences and app settings
 ENABLE_SETTINGS:
   dev: true
-  prod: false
+  prod: true
