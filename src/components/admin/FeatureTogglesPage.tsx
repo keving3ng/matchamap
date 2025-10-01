@@ -43,14 +43,14 @@ export const FeatureTogglesPage: React.FC = () => {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-4 md:p-6">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-4 md:mb-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
             <div>
-              <h1 className="text-2xl font-bold text-green-800 mb-2">Feature Toggles</h1>
-              <p className="text-gray-600">
+              <h1 className="text-xl md:text-2xl font-bold text-green-800 mb-2">Feature Toggles</h1>
+              <p className="text-sm md:text-base text-gray-600">
                 Override feature toggles for testing. Changes are saved in localStorage.
               </p>
             </div>
@@ -58,14 +58,15 @@ export const FeatureTogglesPage: React.FC = () => {
             {/* Admin Mode Toggle */}
             <button
               onClick={() => setAdminModeActive(!adminModeActive)}
-              className={`flex items-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all ${
+              className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all whitespace-nowrap ${
                 adminModeActive
                   ? 'bg-green-500 text-white hover:bg-green-600 shadow-md'
                   : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
               }`}
             >
               <Power size={20} />
-              {adminModeActive ? 'Admin Mode: ON' : 'Admin Mode: OFF'}
+              <span className="hidden sm:inline">{adminModeActive ? 'Admin Mode: ON' : 'Admin Mode: OFF'}</span>
+              <span className="sm:hidden">{adminModeActive ? 'ON' : 'OFF'}</span>
             </button>
           </div>
 
@@ -81,17 +82,17 @@ export const FeatureTogglesPage: React.FC = () => {
           {adminModeActive && (
             <>
               {/* Environment Selector */}
-              <div className="flex items-center gap-4 mb-4">
-                <label className="font-medium text-gray-700">Environment:</label>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-4">
+                <label className="font-medium text-gray-700 text-sm sm:text-base">Environment:</label>
                 <select
                   value={environment}
                   onChange={(e) => setEnvironment(e.target.value as 'dev' | 'prod')}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm sm:text-base"
                 >
                   <option value="dev">Development</option>
                   <option value="prod">Production</option>
                 </select>
-                <span className="text-sm text-gray-500">
+                <span className="text-xs sm:text-sm text-gray-500">
                   (Actual: {currentEnv})
                 </span>
               </div>
@@ -100,7 +101,7 @@ export const FeatureTogglesPage: React.FC = () => {
               {Object.keys(featureOverrides).length > 0 && (
                 <button
                   onClick={clearAllOverrides}
-                  className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+                  className="flex items-center justify-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-sm sm:text-base w-full sm:w-auto"
                 >
                   <RotateCcw size={16} />
                   Clear All Overrides ({Object.keys(featureOverrides).length})
@@ -124,26 +125,26 @@ export const FeatureTogglesPage: React.FC = () => {
               return (
                 <div
                 key={featureName}
-                className={`bg-white rounded-lg shadow-md p-4 transition ${
+                className={`bg-white rounded-lg shadow-md p-3 md:p-4 transition ${
                   hasOverride ? 'ring-2 ring-orange-400' : ''
                 } ${isLocked ? 'opacity-50' : ''}`}
               >
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex flex-col gap-3">
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-800 mb-1 flex items-center gap-2">
-                      {featureName}
+                    <h3 className="font-semibold text-gray-800 mb-2 flex flex-wrap items-center gap-2 text-sm md:text-base">
+                      <span className="break-all">{featureName}</span>
                       {isProtected && (
-                        <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+                        <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded whitespace-nowrap">
                           Protected
                         </span>
                       )}
                     </h3>
-                    <div className="flex items-center gap-2 text-sm">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-xs sm:text-sm">
                       <span className="text-gray-600">
                         Config ({environment}):
                       </span>
                       <span
-                        className={`px-2 py-1 rounded ${
+                        className={`px-2 py-1 rounded inline-block ${
                           configValue
                             ? 'bg-green-100 text-green-800'
                             : 'bg-gray-100 text-gray-800'
@@ -154,12 +155,12 @@ export const FeatureTogglesPage: React.FC = () => {
 
                       {hasOverride && (
                         <>
-                          <span className="text-gray-400">→</span>
+                          <span className="text-gray-400 hidden sm:inline">→</span>
                           <span className="text-orange-600 font-medium">
                             Override:
                           </span>
                           <span
-                            className={`px-2 py-1 rounded ${
+                            className={`px-2 py-1 rounded inline-block ${
                               overrideValue
                                 ? 'bg-orange-100 text-orange-800'
                                 : 'bg-gray-100 text-gray-800'
@@ -172,10 +173,10 @@ export const FeatureTogglesPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     {/* Current Status Indicator */}
                     <div
-                      className={`w-3 h-3 rounded-full ${
+                      className={`w-3 h-3 rounded-full flex-shrink-0 ${
                         effectiveValue ? 'bg-green-500' : 'bg-gray-400'
                       }`}
                       title={effectiveValue ? 'Active' : 'Inactive'}
@@ -185,7 +186,7 @@ export const FeatureTogglesPage: React.FC = () => {
                     <button
                       onClick={() => handleToggle(featureName)}
                       disabled={isLocked}
-                      className={`px-4 py-2 rounded-lg font-medium transition ${
+                      className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg font-medium transition text-xs sm:text-sm ${
                         isLocked
                           ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                           : hasOverride
@@ -201,7 +202,7 @@ export const FeatureTogglesPage: React.FC = () => {
                     {hasOverride && !isLocked && (
                       <button
                         onClick={() => handleClearOverride(featureName)}
-                        className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+                        className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-xs sm:text-sm"
                       >
                         Clear
                       </button>
