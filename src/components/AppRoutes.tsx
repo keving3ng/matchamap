@@ -7,6 +7,15 @@ import FeedView from './FeedView'
 import PassportView from './PassportView'
 import EventsView from './EventsView'
 import AdminPage from './AdminPage'
+import AdminLayout from './admin/AdminLayout'
+import FeatureTogglesPage from './admin/FeatureTogglesPage'
+import CafeManagementPage from './admin/CafeManagementPage'
+import NewsfeedManagementPage from './admin/NewsfeedManagementPage'
+import EventManagementPage from './admin/EventManagementPage'
+import ApiManagementPage from './admin/ApiManagementPage'
+import UserManagementPage from './admin/UserManagementPage'
+import ProductsManagementPage from './admin/ProductsManagementPage'
+import MiscAdminPage from './admin/MiscAdminPage'
 import { useFeatureToggle } from '../hooks/useFeatureToggle'
 import { useDataStore } from '../stores/dataStore'
 import { useFeatureStore } from '../stores/featureStore'
@@ -63,7 +72,48 @@ export const AppRoutes: React.FC = () => {
         } />
       )}
       {isAdminEnabled && (
-        <Route path="/admin" element={<AdminPage />} />
+        <>
+          <Route path="/admin" element={
+            <AdminLayout>
+              <FeatureTogglesPage />
+            </AdminLayout>
+          } />
+          <Route path="/admin/cafes" element={
+            <AdminLayout>
+              <CafeManagementPage />
+            </AdminLayout>
+          } />
+          <Route path="/admin/newsfeed" element={
+            <AdminLayout>
+              <NewsfeedManagementPage />
+            </AdminLayout>
+          } />
+          <Route path="/admin/events" element={
+            <AdminLayout>
+              <EventManagementPage />
+            </AdminLayout>
+          } />
+          <Route path="/admin/users" element={
+            <AdminLayout>
+              <UserManagementPage />
+            </AdminLayout>
+          } />
+          <Route path="/admin/products" element={
+            <AdminLayout>
+              <ProductsManagementPage />
+            </AdminLayout>
+          } />
+          <Route path="/admin/api" element={
+            <AdminLayout>
+              <ApiManagementPage />
+            </AdminLayout>
+          } />
+          <Route path="/admin/misc" element={
+            <AdminLayout>
+              <MiscAdminPage />
+            </AdminLayout>
+          } />
+        </>
       )}
       <Route path="/cafe/:id" element={
         <DetailView

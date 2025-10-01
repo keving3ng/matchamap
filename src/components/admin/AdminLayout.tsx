@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Settings, ToggleLeft, Menu, X } from 'lucide-react'
+import { Settings, ToggleLeft, Menu, X, Coffee, Newspaper, Calendar, Code, Users, Package, Wrench } from 'lucide-react'
 
 interface AdminLayoutProps {
   children: React.ReactNode
@@ -20,13 +20,48 @@ const navItems: NavItem[] = [
     icon: <ToggleLeft size={20} />,
     path: '/admin',
   },
-  // Add more nav items here in the future
-  // {
-  //   id: 'analytics',
-  //   label: 'Analytics',
-  //   icon: <BarChart size={20} />,
-  //   path: '/admin/analytics',
-  // },
+  {
+    id: 'cafes',
+    label: 'Cafes',
+    icon: <Coffee size={20} />,
+    path: '/admin/cafes',
+  },
+  {
+    id: 'newsfeed',
+    label: 'Newsfeed',
+    icon: <Newspaper size={20} />,
+    path: '/admin/newsfeed',
+  },
+  {
+    id: 'events',
+    label: 'Events',
+    icon: <Calendar size={20} />,
+    path: '/admin/events',
+  },
+  {
+    id: 'users',
+    label: 'Users',
+    icon: <Users size={20} />,
+    path: '/admin/users',
+  },
+  {
+    id: 'products',
+    label: 'Products',
+    icon: <Package size={20} />,
+    path: '/admin/products',
+  },
+  {
+    id: 'api',
+    label: 'API',
+    icon: <Code size={20} />,
+    path: '/admin/api',
+  },
+  {
+    id: 'misc',
+    label: 'Misc',
+    icon: <Wrench size={20} />,
+    path: '/admin/misc',
+  },
 ]
 
 export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
