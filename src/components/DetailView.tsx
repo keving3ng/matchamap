@@ -1,23 +1,27 @@
 import React from 'react'
 import { MapPin, Navigation, Heart, CheckCircle, Instagram } from 'lucide-react'
+import { useFeatureStore } from '../stores/featureStore'
 import type { DetailViewProps } from '../types'
 
 export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, onToggleVisited }) => {
+  const { isPassportEnabled, isUserAccountsEnabled } = useFeatureStore()
   const isVisited: boolean = visitedLocations.includes(cafe.id)
 
   return (
-    <div className="flex-1 overflow-y-auto pb-24">
+    <div className="flex-1 overflow-y-auto pb-24 pt-0">
       {/* Hero Section */}
       <div className={`w-full h-48 bg-gradient-to-br ${cafe.color || 'from-green-400 to-green-600'} flex items-center justify-center relative`}>
         <span className="text-8xl">{cafe.emoji || '🍵'}</span>
-        <button className="absolute top-4 right-4 bg-white/90 p-2 rounded-full shadow-lg hover:bg-white transition">
-          <Heart size={24} className="text-green-600" />
-        </button>
+        {isUserAccountsEnabled && (
+          <button className="absolute top-4 right-4 bg-white/90 p-2 rounded-full shadow-lg hover:bg-white transition">
+            <Heart size={24} className="text-green-600" />
+          </button>
+        )}
       </div>
 
-      <div className="px-4">
+      <div className="px-4 relative">
         {/* Main Info Card */}
-        <div className="bg-white rounded-2xl shadow-lg -mt-6 p-5 border-2 border-green-100">
+        <div className="bg-white rounded-2xl shadow-lg -mt-6 p-5 border-2 border-green-100 relative z-10">
           <div className="flex justify-between items-start mb-3">
             <div>
               <h2 className="text-2xl font-bold text-gray-800">{cafe.name}</h2>
@@ -46,22 +50,24 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
           </button>
         </div>
 
-        {/* Visited Checkbox */}
-        <div className="mt-4 bg-green-50 rounded-xl p-4 border-2 border-green-200">
-          <button
-            onClick={() => onToggleVisited(cafe.id)}
-            className="flex items-center gap-3 w-full"
-          >
-            <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition ${
-              isVisited ? 'bg-green-600 border-green-600' : 'border-green-400'
-            }`}>
-              {isVisited && <CheckCircle size={20} className="text-white" strokeWidth={3} />}
-            </div>
-            <span className="font-semibold text-gray-700">
-              {isVisited ? "Visited! ✓" : "Mark as visited (Matcha Passport)"}
-            </span>
-          </button>
-        </div>
+        {/* Visited Checkbox - Only show if passport is enabled */}
+        {isPassportEnabled && (
+          <div className="mt-4 bg-green-50 rounded-xl p-4 border-2 border-green-200">
+            <button
+              onClick={() => onToggleVisited(cafe.id)}
+              className="flex items-center gap-3 w-full"
+            >
+              <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition ${
+                isVisited ? 'bg-green-600 border-green-600' : 'border-green-400'
+              }`}>
+                {isVisited && <CheckCircle size={20} className="text-white" strokeWidth={3} />}
+              </div>
+              <span className="font-semibold text-gray-700">
+                {isVisited ? "Visited! ✓" : "Mark as visited (Matcha Passport)"}
+              </span>
+            </button>
+          </div>
+        )}
 
         {/* Review Section */}
         {cafe.review && (

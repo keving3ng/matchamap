@@ -9,6 +9,7 @@ interface FeatureStore {
   isEventsEnabled: boolean
   isMenuEnabled: boolean
   isCitySelectorEnabled: boolean
+  isUserAccountsEnabled: boolean
   showComingSoon: boolean
 }
 
@@ -46,5 +47,6 @@ export const useFeatureStore = create<FeatureStore>(() => ({
   isEventsEnabled: getFeatureValue('ENABLE_EVENTS'),
   isMenuEnabled: getFeatureValue('ENABLE_MENU'),
   isCitySelectorEnabled: getFeatureValue('ENABLE_CITY_SELECTOR'),
+  isUserAccountsEnabled: getFeatureValue('ENABLE_USER_ACCOUNTS'),
   showComingSoon: getFeatureValue('SHOW_COMING_SOON'),
 }))

@@ -54,3 +54,9 @@ ENABLE_MENU:
 ENABLE_CITY_SELECTOR:
   dev: true
   prod: false
+
+# User Accounts
+# User authentication and account features like favoriting cafes
+ENABLE_USER_ACCOUNTS:
+  dev: false
+  prod: false
