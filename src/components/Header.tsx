@@ -56,7 +56,7 @@ export const Header: React.FC = () => {
             <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
               <span className="text-green-600 text-xl">🍵</span>
             </div>
-            <h1 className="text-xl font-bold tracking-wide">MatchaMap</h1>
+            <h1 className="text-xl font-bold tracking-wide hidden sm:block">MatchaMap</h1>
           </button>
         </div>
         <div className="flex items-center gap-2">

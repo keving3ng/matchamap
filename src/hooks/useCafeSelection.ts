@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useUIStore } from '../stores/uiStore'
+import { useCafeStore } from '../stores/cafeStore'
 import type { CafeWithDistance } from '../types'
 
 /**
@@ -8,12 +9,8 @@ import type { CafeWithDistance } from '../types'
  */
 export const useCafeSelection = (cafesWithDistance: CafeWithDistance[]) => {
   const navigate = useNavigate()
-  const {
-    selectedCafe,
-    setSelectedCafe,
-    setShowPopover,
-    closePopover,
-  } = useUIStore()
+  const { setShowPopover, closePopover } = useUIStore()
+  const { selectedCafe, setSelectedCafe } = useCafeStore()
 
   // Ensure selectedCafe always has the latest distance info
   const selectedCafeWithLatestInfo = useMemo(() => {

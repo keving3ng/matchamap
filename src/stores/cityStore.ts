@@ -6,6 +6,7 @@ export type CityKey = 'toronto' | 'montreal' | 'tokyo'
 export interface City {
   key: CityKey
   name: string
+  shortCode: string
   center: [number, number] // [lat, lng]
   zoom: number
 }
@@ -14,18 +15,21 @@ export const CITIES: Record<CityKey, City> = {
   toronto: {
     key: 'toronto',
     name: 'Toronto',
+    shortCode: 'TO',
     center: [43.6532, -79.3832],
     zoom: 13,
   },
   montreal: {
     key: 'montreal',
     name: 'Montreal',
+    shortCode: 'MTL',
     center: [45.5017, -73.5673],
     zoom: 13,
   },
   tokyo: {
     key: 'tokyo',
     name: 'Tokyo',
+    shortCode: 'TYO',
     center: [35.6762, 139.6503],
     zoom: 13,
   },
