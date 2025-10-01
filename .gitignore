@@ -1,9 +1,14 @@
 # Build outputs
 dist/
 .astro/
+frontend/dist/
+backend/dist/
 
 # Dependencies
 node_modules/
+frontend/node_modules/
+backend/node_modules/
+shared/node_modules/
 
 # Environment variables
 .env
@@ -90,3 +95,7 @@ coverage/
 
 # Local SSL certificates
 *.pem
+
+# Cloudflare Workers
+.wrangler/
+.dev.vars

@@ -70,7 +70,7 @@ MatchaMap is a mobile-first web application providing a curated, map-based guide
 
 **Store organization:**
 ```
-src/stores/
+frontend/src/stores/
 ├── locationStore.ts      # User geolocation
 ├── visitedCafesStore.ts  # Passport/visited tracking
 ├── uiStore.ts            # UI state (modals, panels)
@@ -93,7 +93,7 @@ src/stores/
 
 **Hook organization:**
 ```
-src/hooks/
+frontend/src/hooks/
 ├── useGeolocation.ts         # Browser geolocation
 ├── useDistanceCalculation.ts # Cafe distance math
 ├── useCafeSelection.ts       # Cafe selection logic
@@ -186,48 +186,66 @@ src/hooks/
 ### Directory Structure (STRICT)
 
 ```
-src/
-├── components/          # React components ONLY
-│   ├── Header.tsx
-│   ├── BottomNavigation.tsx
-│   ├── AppRoutes.tsx
-│   ├── MapView.tsx
-│   ├── ListView.tsx
-│   ├── DetailView.tsx
-│   └── __tests__/      # Component tests
-├── admin/              # Admin UI components
-│   ├── StatsPage.tsx   # Analytics dashboard
-│   └── CafeEditor.tsx  # Cafe CRUD forms
-├── hooks/              # Custom React hooks ONLY
-│   ├── useGeolocation.ts
-│   ├── useCafeSelection.ts
-│   └── useDistanceCalculation.ts
-├── stores/             # Zustand stores ONLY
-│   ├── locationStore.ts
-│   ├── uiStore.ts
-│   ├── cityStore.ts
-│   └── visitedCafesStore.ts
-├── utils/              # Pure utility functions ONLY
-│   ├── distanceCalculator.ts
-│   ├── deviceDetection.ts
-│   └── analytics.ts    # Tracking utilities
-├── types/              # TypeScript type definitions
-│   └── index.ts
-├── styles/             # Global CSS and Tailwind config
-│   └── index.css
-├── App.tsx             # Root component (composition only)
-└── main.tsx            # React entry point
-
-workers/                # Backend (separate directory)
-├── src/
-│   ├── index.ts        # Workers entry point
-│   ├── routes/
-│   │   ├── cafes.ts    # Cafe CRUD endpoints
-│   │   ├── stats.ts    # Analytics endpoints
-│   │   └── admin.ts    # Admin endpoints
-│   └── db/
-│       └── schema.ts   # Drizzle ORM schema
-└── migrations/         # Database migrations
+matchamap/              # Monorepo root
+├── frontend/           # React frontend application
+│   ├── src/
+│   │   ├── components/          # React components ONLY
+│   │   │   ├── Header.tsx
+│   │   │   ├── BottomNavigation.tsx
+│   │   │   ├── AppRoutes.tsx
+│   │   │   ├── MapView.tsx
+│   │   │   ├── ListView.tsx
+│   │   │   ├── DetailView.tsx
+│   │   │   └── __tests__/      # Component tests
+│   │   ├── admin/              # Admin UI components
+│   │   │   ├── StatsPage.tsx   # Analytics dashboard
+│   │   │   └── CafeEditor.tsx  # Cafe CRUD forms
+│   │   ├── hooks/              # Custom React hooks ONLY
+│   │   │   ├── useGeolocation.ts
+│   │   │   ├── useCafeSelection.ts
+│   │   │   └── useDistanceCalculation.ts
+│   │   ├── stores/             # Zustand stores ONLY
+│   │   │   ├── locationStore.ts
+│   │   │   ├── uiStore.ts
+│   │   │   ├── cityStore.ts
+│   │   │   └── visitedCafesStore.ts
+│   │   ├── utils/              # Pure utility functions ONLY
+│   │   │   ├── distanceCalculator.ts
+│   │   │   ├── deviceDetection.ts
+│   │   │   └── analytics.ts    # Tracking utilities
+│   │   ├── types/              # Frontend-specific types
+│   │   │   └── index.ts
+│   │   ├── styles/             # Global CSS and Tailwind config
+│   │   │   └── index.css
+│   │   ├── App.tsx             # Root component (composition only)
+│   │   └── main.tsx            # React entry point
+│   ├── public/                 # Static assets
+│   ├── index.html
+│   ├── vite.config.js
+│   ├── tailwind.config.js
+│   ├── tsconfig.json
+│   └── package.json
+├── backend/            # Cloudflare Workers API
+│   ├── src/
+│   │   ├── index.ts        # Workers entry point
+│   │   ├── routes/
+│   │   │   ├── cafes.ts    # Cafe CRUD endpoints
+│   │   │   ├── stats.ts    # Analytics endpoints
+│   │   │   └── admin.ts    # Admin endpoints
+│   │   └── db/
+│   │       └── schema.ts   # Drizzle ORM schema
+│   ├── migrations/         # Database migrations
+│   ├── wrangler.toml
+│   ├── tsconfig.json
+│   └── package.json
+├── shared/             # Shared types and utilities
+│   ├── types/
+│   │   └── index.ts        # Cafe, Event, API types
+│   ├── tsconfig.json
+│   └── package.json
+├── docs/               # Project documentation
+├── package.json        # Root workspace config
+└── README.md
 ```
 
 ### Component Rules
@@ -326,7 +344,9 @@ interface BadProps {
 ```
 
 **Type organization:**
--   Shared types → `src/types/index.ts`
+-   Shared types (API contracts) → `shared/types/index.ts`
+-   Frontend-specific types → `frontend/src/types/index.ts`
+-   Backend-specific types → `backend/src/types/` (if needed)
 -   Component-specific types → Same file as component
 -   Store types → Same file as store definition
 
@@ -335,10 +355,10 @@ interface BadProps {
 **To find a component:**
 ```bash
 # Search by component name
-glob "**/*ComponentName*.tsx"
+glob "frontend/**/*ComponentName*.tsx"
 
 # Search by functionality
-grep "functionName" --type ts
+grep "functionName" --type ts --path frontend/
 ```
 
 **To find where something is used:**
@@ -351,28 +371,41 @@ grep "ComponentName" --type tsx
 ```
 
 **Common locations:**
--   UI components → `src/components/`
--   Business logic → `src/hooks/`
--   Global state → `src/stores/`
--   Pure functions → `src/utils/`
--   Type definitions → `src/types/`
+-   UI components → `frontend/src/components/`
+-   Business logic → `frontend/src/hooks/`
+-   Global state → `frontend/src/stores/`
+-   Pure functions → `frontend/src/utils/`
+-   Frontend types → `frontend/src/types/`
+-   API endpoints → `backend/src/routes/`
+-   Database schema → `backend/src/db/`
+-   Shared types → `shared/types/`
 
 ## Common Commands
 
 ```bash
-# Development
-npm run dev              # Start dev server (Vite)
-npm run build           # Build for production
-npm run preview         # Preview built site
-npm run typecheck       # TypeScript type checking (MUST pass)
+# Development (from root)
+npm run dev              # Start frontend dev server (Vite)
+npm run dev:frontend     # Start frontend explicitly
+npm run dev:backend      # Start backend dev server (Wrangler)
+
+# Build & Deploy
+npm run build            # Build all workspaces
+npm run build:frontend   # Build frontend only
+npm run deploy:backend   # Deploy backend to Cloudflare
 
 # Quality checks (run before commit)
-npm run typecheck       # Check TypeScript types
-npm run build           # Ensure build succeeds
+npm run typecheck        # Check TypeScript types in all workspaces
+npm run lint             # Lint frontend code
 
 # Testing (when implemented)
-npm run test            # Run test suite
-npm run test:watch      # Run tests in watch mode
+npm run test             # Run test suite
+
+# Backend-specific (from backend/ directory)
+cd backend
+npm run db:generate      # Generate Drizzle migrations
+npm run db:push          # Push schema to D1
+npm run db:migrate       # Apply migrations
+npm run tail             # View live logs
 ```
 
 **Pre-commit checklist:**
@@ -431,47 +464,68 @@ style(ui): improve mobile navigation spacing
 
 ### Cloudflare Pages Configuration
 
-**Build Settings:**
+**Frontend (Cloudflare Pages):**
 -   Framework preset: Vite
--   Build command: `npm run build`
--   Build output directory: `dist`
+-   Build command: `cd frontend && npm run build`
+-   Build output directory: `frontend/dist`
+-   Root directory: `/` (monorepo root)
 -   Node version: 18+
+
+**Backend (Cloudflare Workers):**
+-   Deploy command: `cd backend && npm run deploy`
+-   Wrangler configuration: `backend/wrangler.toml`
+-   D1 database binding: `DB`
 
 **Environment Variables:**
 
-We use a YAML config file for feature toggles instead of env vars:
+Frontend uses a YAML config file for feature toggles:
 ```yaml
-# src/config/features.yaml
+# frontend/src/config/features.yaml
 ENABLE_PASSPORT: true
 ENABLE_EVENTS: false
 ENABLE_MENU: false
 SHOW_COMING_SOON: false
 ```
 
+Backend uses wrangler.toml for configuration:
+```toml
+# backend/wrangler.toml
+[vars]
+ALLOWED_ORIGINS = "https://matchamap.com"
+```
+
 **Why not .env?**
--   No secrets in this app (all public data)
+-   No secrets in frontend (all public data)
+-   Backend secrets managed by Wrangler
 -   Easier to track in version control
 -   Type-safe with TypeScript
--   No build-time variable injection needed
 
 **Deployment Process:**
+
+*Frontend:*
 1. Push to `main` branch
-2. Cloudflare Pages auto-builds
+2. Cloudflare Pages auto-builds frontend
 3. Deployed to global CDN edge
 4. Verify at production URL
 
+*Backend:*
+1. Deploy manually: `npm run deploy:backend`
+2. Or set up GitHub Actions for auto-deploy
+3. Backend deploys independently of frontend
+
 **Branch Previews:**
--   Every branch gets preview URL
--   Auto-deleted when branch is merged
+-   Every frontend branch gets preview URL
+-   Backend uses staging environment
 -   Perfect for testing before merge
 
-### Weekly Content Updates
+### Content Updates (V2+)
 
-1. Update `src/data/cafes.json`
-2. Commit to `main` branch
-3. Cloudflare auto-deploys in ~1 minute
-4. Global CDN cache updated automatically
-5. Verify changes on production site
+With the backend in place, content updates happen via:
+1. Login to admin UI (protected by Cloudflare Access)
+2. Edit cafe data via admin forms
+3. Changes saved to D1 database instantly
+4. Frontend fetches updated data from API
+5. No rebuild or deploy needed
 
 ## Analytics & Metrics
 
@@ -485,7 +539,7 @@ SHOW_COMING_SOON: false
 
 **Implementation:**
 ```typescript
-// Frontend: src/utils/analytics.ts
+// Frontend: frontend/src/utils/analytics.ts
 export async function trackCafeStat(
   cafeId: number,
   stat: 'view' | 'directions' | 'passport' | 'instagram' | 'tiktok'
@@ -503,7 +557,7 @@ useEffect(() => {
 
 **Backend: Simple counter increments**
 ```typescript
-// workers/src/routes/stats.ts
+// backend/src/routes/stats.ts
 await env.DB.prepare(`
   INSERT INTO cafe_stats (cafe_id, views, updated_at)
   VALUES (?, 1, CURRENT_TIMESTAMP)
@@ -513,7 +567,7 @@ await env.DB.prepare(`
 ```
 
 **Admin Dashboard:**
-- Custom React component at `/admin/stats`
+- Custom React component at `frontend/src/admin/StatsPage.tsx`
 - Sortable table showing views, CTR, passport usage
 - Protected by Cloudflare Access
 - See [metrics-tracking-prd.md](docs/metrics-tracking-prd.md)
