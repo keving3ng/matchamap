@@ -329,19 +329,15 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
         </>
       )}
 
-      {/* Location Control - Top right positioning */}
-      <div className="absolute top-4 right-4 z-[1001]">
+      {/* Zoom Controls and Location - Bottom right positioning */}
+      <div className="absolute bottom-4 right-4 flex flex-col gap-3 z-[1001]">
+        <CircleButton onClick={zoomIn}>+</CircleButton>
+        <CircleButton onClick={zoomOut}>−</CircleButton>
         <CircleButton
           icon={loading ? Crosshair : MapPin}
           onClick={handleLocationClick}
           className={`${!isSupported || error ? 'opacity-50 cursor-not-allowed' : ''} ${coordinates ? 'bg-green-100' : ''} ${loading ? 'animate-pulse' : ''}`}
         />
-      </div>
-
-      {/* Zoom Controls - Bottom right positioning */}
-      <div className="absolute bottom-4 right-4 flex flex-col gap-3 z-[1001]">
-        <CircleButton onClick={zoomIn}>+</CircleButton>
-        <CircleButton onClick={zoomOut}>−</CircleButton>
       </div>
     </div>
   )
