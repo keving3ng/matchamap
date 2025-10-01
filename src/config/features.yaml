@@ -46,7 +46,7 @@ ENABLE_EVENTS:
 # Hamburger Menu
 # Top-right navigation menu for additional features and settings
 ENABLE_MENU:
-  dev: false
+  dev: true
   prod: false
 
 # City Selector

@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import featureConfig from '../config/features.yaml';
+import { useAdminStore } from '../stores/adminStore'
 
 type Environment = 'dev' | 'prod'
 type FeatureKey = keyof typeof featureConfig
@@ -16,12 +17,21 @@ const getEnvironment = (): Environment => {
 
 /**
  * Hook to check if a feature is enabled based on the current environment
+ * Checks admin overrides first (only if admin mode is active), then falls back to feature config
  * @param featureName - The feature key from features.json
  * @returns boolean indicating if the feature is enabled
  */
 export const useFeatureToggle = (featureName: FeatureKey): boolean => {
+  const { adminModeActive, featureOverrides, environment } = useAdminStore()
+
   const isEnabled = useMemo(() => {
-    const env = getEnvironment()
+    // Only apply admin overrides if admin mode is active
+    if (adminModeActive && featureOverrides[featureName] !== undefined) {
+      return featureOverrides[featureName] as boolean
+    }
+
+    // Fall back to config file (use simulated environment if admin mode is active, otherwise use actual)
+    const env = (adminModeActive && environment) ? environment : getEnvironment()
     const feature = featureConfig[featureName]
 
     if (!feature) {
@@ -30,7 +40,7 @@ export const useFeatureToggle = (featureName: FeatureKey): boolean => {
     }
 
     return feature[env] ?? false
-  }, [featureName])
+  }, [featureName, adminModeActive, featureOverrides, environment])
 
   return isEnabled
 }

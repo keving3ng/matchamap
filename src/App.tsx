@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import Header from './components/Header'
 import BottomNavigation from './components/BottomNavigation'
 import AppRoutes from './components/AppRoutes'
@@ -33,19 +33,19 @@ export const App: React.FC = () => {
   const [userCoordinates, setUserCoordinates] = useState<GeolocationCoordinates | null>(null)
 
   // Sync location store to local state
-  React.useEffect(() => {
+  useEffect(() => {
     setUserCoordinates(coordinates)
   }, [coordinates])
 
   const { cafes: allCafes, feed, events } = cafeData as CafeData
 
   // Filter cafes by selected city
-  const cafes = React.useMemo(() => {
+  const cafes = useMemo(() => {
     return allCafes.filter(cafe => cafe.city === selectedCity)
   }, [allCafes, selectedCity])
 
   // Memoize user location to prevent unnecessary recalculations
-  const userLocation = React.useMemo(() => {
+  const userLocation = useMemo(() => {
     if (!userCoordinates) return null
     return {
       latitude: userCoordinates.latitude,

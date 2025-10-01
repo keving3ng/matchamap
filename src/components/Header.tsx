@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { ArrowLeft, Menu, Instagram } from 'lucide-react'
+import { ArrowLeft, Menu, Instagram, Settings } from 'lucide-react'
 import { CitySelector } from './CitySelector'
+import { useFeatureToggle } from '../hooks/useFeatureToggle'
 
 interface HeaderProps {
   isMenuEnabled?: boolean
@@ -11,12 +12,30 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ isMenuEnabled = false, isCitySelectorEnabled = false }) => {
   const navigate = useNavigate()
   const location = useLocation()
+  const [showMenu, setShowMenu] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+  const isAdminEnabled = useFeatureToggle('ENABLE_ADMIN_PANEL')
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowMenu(false)
+      }
+    }
+
+    if (showMenu) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showMenu])
 
   // Determine current view from URL path
   const currentView = location.pathname === '/list' ? 'list'
     : location.pathname === '/feed' ? 'feed'
     : location.pathname === '/passport' ? 'passport'
     : location.pathname === '/events' ? 'events'
+    : location.pathname === '/admin' ? 'admin'
     : location.pathname.startsWith('/cafe/') ? 'detail'
     : 'map'
 
@@ -32,12 +51,15 @@ export const Header: React.FC<HeaderProps> = ({ isMenuEnabled = false, isCitySel
               <ArrowLeft size={24} />
             </button>
           )}
-          <div className="flex items-center gap-2">
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2 hover:bg-green-700 rounded-lg px-2 py-1 transition"
+          >
             <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
               <span className="text-green-600 text-xl">🍵</span>
             </div>
             <h1 className="text-xl font-bold tracking-wide">MatchaMap</h1>
-          </div>
+          </button>
         </div>
         <div className="flex items-center gap-2">
           {/* Social Links */}
@@ -75,9 +97,32 @@ export const Header: React.FC<HeaderProps> = ({ isMenuEnabled = false, isCitySel
             <CitySelector />
           )}
           {isMenuEnabled && (
-            <button className="p-2 hover:bg-green-700 rounded-lg transition">
-              <Menu size={24} />
-            </button>
+            <div ref={menuRef} className="relative">
+              <button
+                onClick={() => setShowMenu(!showMenu)}
+                className="p-2 hover:bg-green-700 rounded-lg transition"
+              >
+                <Menu size={24} />
+              </button>
+
+              {/* Dropdown Menu */}
+              {showMenu && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-[9999]">
+                  {isAdminEnabled && (
+                    <button
+                      onClick={() => {
+                        navigate('/admin')
+                        setShowMenu(false)
+                      }}
+                      className="w-full px-4 py-2 text-left text-gray-700 hover:bg-green-50 flex items-center gap-2 transition"
+                    >
+                      <Settings size={18} />
+                      <span>Admin</span>
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>

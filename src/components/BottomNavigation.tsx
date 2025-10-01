@@ -1,6 +1,7 @@
 import React from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { MapPin, List, User } from 'lucide-react'
+import { getCurrentEnvironment } from '../hooks/useFeatureToggle'
 
 interface BottomNavigationProps {
   isPassportEnabled?: boolean
@@ -13,6 +14,10 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
 }) => {
   const navigate = useNavigate()
   const location = useLocation()
+  const currentEnv = getCurrentEnvironment()
+
+  // Check if admin banner is shown (only in dev mode)
+  const hasAdminBanner = currentEnv === 'dev'
 
   // Determine current view from URL path
   const currentView = location.pathname === '/list' ? 'list'
@@ -23,7 +28,12 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
     : 'map'
 
   return (
-    <div className="bg-white border-t-2 border-green-200 px-6 py-3 shadow-lg">
+    <div
+      className="bg-white border-t-2 border-green-200 px-6 py-3 shadow-lg"
+      style={{
+        paddingBottom: hasAdminBanner ? 'calc(0.75rem + var(--admin-banner-height, 0px))' : '0.75rem'
+      }}
+    >
       <div className="flex justify-around items-center">
         <button
           onClick={() => navigate('/')}
