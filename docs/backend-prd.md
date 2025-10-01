@@ -279,7 +279,7 @@ CREATE TABLE user_content (
 
 ```bash
 # Directory structure
-matchamap-backend/
+backend/
 ├── drizzle/
 │   ├── schema.ts         # Source of truth
 │   ├── migrations/
