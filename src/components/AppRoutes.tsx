@@ -6,7 +6,11 @@ import DetailView from './DetailView'
 import FeedView from './FeedView'
 import PassportView from './PassportView'
 import EventsView from './EventsView'
-import AdminPage from './AdminPage'
+import LoginPage from './LoginPage'
+import ContactPage from './ContactPage'
+import AboutPage from './AboutPage'
+import StorePage from './StorePage'
+import SettingsPage from './SettingsPage'
 import AdminLayout from './admin/AdminLayout'
 import FeatureTogglesPage from './admin/FeatureTogglesPage'
 import CafeManagementPage from './admin/CafeManagementPage'
@@ -25,8 +29,12 @@ import { useVisitedCafesStore } from '../stores/visitedCafesStore'
 import { useCafeSelection } from '../hooks/useCafeSelection'
 
 export const AppRoutes: React.FC = () => {
-  const { isEventsEnabled, isPassportEnabled } = useFeatureStore()
+  const { isEventsEnabled, isPassportEnabled, isUserAccountsEnabled } = useFeatureStore()
   const isAdminEnabled = useFeatureToggle('ENABLE_ADMIN_PANEL')
+  const isContactEnabled = useFeatureToggle('ENABLE_CONTACT')
+  const isAboutEnabled = useFeatureToggle('ENABLE_ABOUT')
+  const isStoreEnabled = useFeatureToggle('ENABLE_STORE')
+  const isSettingsEnabled = useFeatureToggle('ENABLE_SETTINGS')
 
   const { feedItems, eventItems } = useDataStore()
   const { cafesWithDistance, selectedCafe } = useCafeStore()
@@ -70,6 +78,21 @@ export const AppRoutes: React.FC = () => {
             onToggleStamp={toggleStamp}
           />
         } />
+      )}
+      {isUserAccountsEnabled && (
+        <Route path="/login" element={<LoginPage />} />
+      )}
+      {isContactEnabled && (
+        <Route path="/contact" element={<ContactPage />} />
+      )}
+      {isAboutEnabled && (
+        <Route path="/about" element={<AboutPage />} />
+      )}
+      {isStoreEnabled && (
+        <Route path="/store" element={<StorePage />} />
+      )}
+      {isSettingsEnabled && (
+        <Route path="/settings" element={<SettingsPage />} />
       )}
       {isAdminEnabled && (
         <>

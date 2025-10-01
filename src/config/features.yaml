@@ -60,3 +60,27 @@ ENABLE_CITY_SELECTOR:
 ENABLE_USER_ACCOUNTS:
   dev: false
   prod: false
+
+# Contact Us Page
+# Contact form and information for users to reach out
+ENABLE_CONTACT:
+  dev: true
+  prod: false
+
+# About Us Page
+# Information about the project, mission, and reviewer
+ENABLE_ABOUT:
+  dev: true
+  prod: false
+
+# Store/Shop Page
+# E-commerce page for matcha-related products and merch
+ENABLE_STORE:
+  dev: true
+  prod: false
+
+# Settings Page
+# User preferences and app settings
+ENABLE_SETTINGS:
+  dev: true
+  prod: false

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { ArrowLeft, Menu, Instagram, Settings } from 'lucide-react'
+import { ArrowLeft, Menu, Instagram, Settings, LogIn, LogOut, Mail, Info, ShoppingBag, Sliders } from 'lucide-react'
 import { CitySelector } from './CitySelector'
 import { useFeatureStore } from '../stores/featureStore'
 import { useFeatureToggle } from '../hooks/useFeatureToggle'
@@ -11,8 +11,15 @@ export const Header: React.FC = () => {
   const [showMenu, setShowMenu] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
-  const { isMenuEnabled, isCitySelectorEnabled } = useFeatureStore()
+  const { isMenuEnabled, isCitySelectorEnabled, isUserAccountsEnabled } = useFeatureStore()
   const isAdminEnabled = useFeatureToggle('ENABLE_ADMIN_PANEL')
+  const isContactEnabled = useFeatureToggle('ENABLE_CONTACT')
+  const isAboutEnabled = useFeatureToggle('ENABLE_ABOUT')
+  const isStoreEnabled = useFeatureToggle('ENABLE_STORE')
+  const isSettingsEnabled = useFeatureToggle('ENABLE_SETTINGS')
+
+  // TODO: Replace with actual auth state
+  const isLoggedIn = false
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -91,7 +98,7 @@ export const Header: React.FC = () => {
               />
             </svg>
           </a>
-          {isCitySelectorEnabled && (
+          {isCitySelectorEnabled && currentView === 'map' && (
             <CitySelector />
           )}
           {isMenuEnabled && (
@@ -106,6 +113,95 @@ export const Header: React.FC = () => {
               {/* Dropdown Menu */}
               {showMenu && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-[9999]">
+                  {/* Login/Logout */}
+                  {isUserAccountsEnabled && (
+                    isLoggedIn ? (
+                      <button
+                        onClick={() => {
+                          // TODO: Implement logout
+                          setShowMenu(false)
+                        }}
+                        className="w-full px-4 py-2 text-left text-gray-700 hover:bg-green-50 flex items-center gap-2 transition"
+                      >
+                        <LogOut size={18} />
+                        <span>Sign Out</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          navigate('/login')
+                          setShowMenu(false)
+                        }}
+                        className="w-full px-4 py-2 text-left text-gray-700 hover:bg-green-50 flex items-center gap-2 transition"
+                      >
+                        <LogIn size={18} />
+                        <span>Sign In</span>
+                      </button>
+                    )
+                  )}
+
+                  {/* About */}
+                  {isAboutEnabled && (
+                    <button
+                      onClick={() => {
+                        navigate('/about')
+                        setShowMenu(false)
+                      }}
+                      className="w-full px-4 py-2 text-left text-gray-700 hover:bg-green-50 flex items-center gap-2 transition"
+                    >
+                      <Info size={18} />
+                      <span>About</span>
+                    </button>
+                  )}
+
+                  {/* Store */}
+                  {isStoreEnabled && (
+                    <button
+                      onClick={() => {
+                        navigate('/store')
+                        setShowMenu(false)
+                      }}
+                      className="w-full px-4 py-2 text-left text-gray-700 hover:bg-green-50 flex items-center gap-2 transition"
+                    >
+                      <ShoppingBag size={18} />
+                      <span>Shop</span>
+                    </button>
+                  )}
+
+                  {/* Contact */}
+                  {isContactEnabled && (
+                    <button
+                      onClick={() => {
+                        navigate('/contact')
+                        setShowMenu(false)
+                      }}
+                      className="w-full px-4 py-2 text-left text-gray-700 hover:bg-green-50 flex items-center gap-2 transition"
+                    >
+                      <Mail size={18} />
+                      <span>Contact</span>
+                    </button>
+                  )}
+
+                  {/* Settings */}
+                  {isSettingsEnabled && isLoggedIn && (
+                    <button
+                      onClick={() => {
+                        navigate('/settings')
+                        setShowMenu(false)
+                      }}
+                      className="w-full px-4 py-2 text-left text-gray-700 hover:bg-green-50 flex items-center gap-2 transition"
+                    >
+                      <Sliders size={18} />
+                      <span>Settings</span>
+                    </button>
+                  )}
+
+                  {/* Divider before admin */}
+                  {isAdminEnabled && (isAboutEnabled || isStoreEnabled || isContactEnabled || isSettingsEnabled || isUserAccountsEnabled) && (
+                    <div className="my-2 border-t border-gray-200"></div>
+                  )}
+
+                  {/* Admin */}
                   {isAdminEnabled && (
                     <button
                       onClick={() => {
