@@ -16,6 +16,7 @@ interface AdminStore {
   clearFeatureOverride: (featureName: string) => void
   clearAllOverrides: () => void
   setEnvironment: (env: Environment) => void
+  applyEnvironmentSettings: (features: Record<string, boolean>) => void
 }
 
 export const useAdminStore = create<AdminStore>()(
@@ -44,6 +45,9 @@ export const useAdminStore = create<AdminStore>()(
       clearAllOverrides: () => set({ featureOverrides: {} }),
 
       setEnvironment: (env: Environment) => set({ environment: env }),
+
+      applyEnvironmentSettings: (features: Record<string, boolean>) =>
+        set({ featureOverrides: features }),
     }),
     {
       name: 'admin-storage',

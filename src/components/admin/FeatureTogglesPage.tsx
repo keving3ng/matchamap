@@ -7,7 +7,7 @@ import { RotateCcw, Info, Power } from 'lucide-react'
 type FeatureKey = keyof typeof featureConfig
 
 export const FeatureTogglesPage: React.FC = () => {
-  const { adminModeActive, featureOverrides, environment, setAdminModeActive, setFeatureOverride, clearFeatureOverride, clearAllOverrides, setEnvironment } = useAdminStore()
+  const { adminModeActive, featureOverrides, setAdminModeActive, setFeatureOverride, clearAllOverrides } = useAdminStore()
   const currentEnv = getCurrentEnvironment()
 
   const features = Object.keys(featureConfig) as FeatureKey[]
@@ -15,15 +15,17 @@ export const FeatureTogglesPage: React.FC = () => {
   const getFeatureStatus = (featureName: FeatureKey) => {
     const hasOverride = featureOverrides[featureName] !== undefined
     const overrideValue = featureOverrides[featureName]
-    const configValue = featureConfig[featureName][environment]
-    const actualEnv = environment || currentEnv
+    const devValue = featureConfig[featureName].dev
+    const prodValue = featureConfig[featureName].prod
+    const configValue = featureConfig[featureName][currentEnv]
 
     return {
       hasOverride,
       overrideValue,
       configValue,
+      devValue,
+      prodValue,
       effectiveValue: hasOverride ? overrideValue : configValue,
-      actualEnv,
     }
   }
 
@@ -38,8 +40,17 @@ export const FeatureTogglesPage: React.FC = () => {
     }
   }
 
-  const handleClearOverride = (featureName: FeatureKey) => {
-    clearFeatureOverride(featureName)
+  const applyEnvironmentSettings = (env: 'dev' | 'prod') => {
+    // Clear all overrides first
+    clearAllOverrides()
+
+    // Apply all features from the selected environment (including menu)
+    features.forEach((featureName) => {
+      if (featureName !== 'ENABLE_ADMIN_PANEL') {
+        const value = featureConfig[featureName][env]
+        setFeatureOverride(featureName, value)
+      }
+    })
   }
 
   return (
@@ -71,7 +82,7 @@ export const FeatureTogglesPage: React.FC = () => {
           </div>
 
           {!adminModeActive && (
-            <div className="mb-4 flex items-center gap-2 text-sm text-blue-700 bg-blue-50 border border-blue-200 px-4 py-3 rounded-lg">
+            <div className="flex items-center gap-2 text-sm text-blue-700 bg-blue-50 border border-blue-200 px-4 py-3 rounded-lg">
               <Info size={18} />
               <span>
                 <strong>Admin mode is disabled.</strong> Toggle it on to activate the control banner and enable feature overrides.
@@ -81,19 +92,29 @@ export const FeatureTogglesPage: React.FC = () => {
 
           {adminModeActive && (
             <>
-              {/* Environment Selector */}
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-4">
-                <label className="font-medium text-gray-700 text-sm sm:text-base">Environment:</label>
-                <select
-                  value={environment}
-                  onChange={(e) => setEnvironment(e.target.value as 'dev' | 'prod')}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm sm:text-base"
-                >
-                  <option value="dev">Development</option>
-                  <option value="prod">Production</option>
-                </select>
-                <span className="text-xs sm:text-sm text-gray-500">
-                  (Actual: {currentEnv})
+              {/* Environment Override Buttons */}
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 flex-1">
+                  <label className="font-medium text-gray-700 text-sm sm:text-base whitespace-nowrap">
+                    Apply Environment:
+                  </label>
+                  <div className="flex gap-2 w-full sm:w-auto">
+                    <button
+                      onClick={() => applyEnvironmentSettings('dev')}
+                      className="flex-1 sm:flex-none px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm sm:text-base font-medium"
+                    >
+                      Dev Settings
+                    </button>
+                    <button
+                      onClick={() => applyEnvironmentSettings('prod')}
+                      className="flex-1 sm:flex-none px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition text-sm sm:text-base font-medium"
+                    >
+                      Prod Settings
+                    </button>
+                  </div>
+                </div>
+                <span className="text-xs sm:text-sm text-gray-500 self-start sm:self-center whitespace-nowrap">
+                  Actual env: {currentEnv}
                 </span>
               </div>
 
@@ -112,126 +133,171 @@ export const FeatureTogglesPage: React.FC = () => {
         </div>
 
         {/* Feature Toggle List */}
-        {adminModeActive && (
-          <div className="space-y-3">
-            {features.filter(featureName => featureName !== 'ENABLE_ADMIN_PANEL').map((featureName) => {
-              const status = getFeatureStatus(featureName)
-              const { hasOverride, overrideValue, configValue, effectiveValue } = status
-              const isMenu = featureName === 'ENABLE_MENU'
-              const isProtected = isMenu
-              const isLocked = isMenu && !effectiveValue
+        {adminModeActive && (() => {
+          const filteredFeatures = features.filter(featureName => featureName !== 'ENABLE_ADMIN_PANEL')
 
-              return (
-                <div
-                key={featureName}
-                className={`bg-white rounded-lg shadow-md p-3 md:p-4 transition ${
-                  hasOverride ? 'ring-2 ring-orange-400' : ''
-                } ${isLocked ? 'opacity-50' : ''}`}
-              >
-                <div className="flex flex-col gap-3">
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-800 mb-2 flex flex-wrap items-center gap-2 text-sm md:text-base">
-                      <span className="break-all">{featureName}</span>
-                      {isProtected && (
-                        <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded whitespace-nowrap">
-                          Protected
-                        </span>
-                      )}
-                    </h3>
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-xs sm:text-sm">
-                      <span className="text-gray-600">
-                        Config ({environment}):
-                      </span>
-                      <span
-                        className={`px-2 py-1 rounded inline-block ${
-                          configValue
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-gray-100 text-gray-800'
+          // Sort features: ON/ON (dev and prod both enabled) go to bottom
+          const sortedFeatures = filteredFeatures.sort((a, b) => {
+            const aStatus = getFeatureStatus(a)
+            const bStatus = getFeatureStatus(b)
+
+            const aFullyEnabled = aStatus.devValue && aStatus.prodValue
+            const bFullyEnabled = bStatus.devValue && bStatus.prodValue
+
+            // If one is fully enabled and the other isn't, sort the non-enabled one first
+            if (aFullyEnabled && !bFullyEnabled) return 1
+            if (!aFullyEnabled && bFullyEnabled) return -1
+
+            // Otherwise maintain original order
+            return 0
+          })
+
+          const enabledFeatures = sortedFeatures.filter(f => {
+            const status = getFeatureStatus(f)
+            return status.devValue && status.prodValue
+          })
+          const otherFeatures = sortedFeatures.filter(f => {
+            const status = getFeatureStatus(f)
+            return !(status.devValue && status.prodValue)
+          })
+
+          return (
+            <div className="space-y-6">
+              {/* Other Features Section */}
+              {otherFeatures.length > 0 && (
+                <div className="space-y-3">
+                  {otherFeatures.map((featureName) => {
+                    const status = getFeatureStatus(featureName)
+                    const { hasOverride, devValue, prodValue, effectiveValue } = status
+
+                    return (
+                      <div
+                        key={featureName}
+                        className={`bg-white rounded-lg shadow-md p-3 md:p-4 transition ${
+                          hasOverride ? 'ring-2 ring-orange-400' : ''
                         }`}
                       >
-                        {configValue ? 'Enabled' : 'Disabled'}
-                      </span>
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                          {/* Feature name and environment values */}
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-gray-800 text-sm md:text-base mb-1 break-words">
+                              {featureName}
+                            </h3>
+                            <div className="text-xs sm:text-sm text-gray-600">
+                              <span className="font-medium">dev:</span>{' '}
+                              <span className={devValue ? 'text-green-600' : 'text-gray-500'}>
+                                {devValue ? 'ON' : 'OFF'}
+                              </span>
+                              <span className="mx-2">|</span>
+                              <span className="font-medium">prod:</span>{' '}
+                              <span className={prodValue ? 'text-green-600' : 'text-gray-500'}>
+                                {prodValue ? 'ON' : 'OFF'}
+                              </span>
+                            </div>
+                          </div>
 
-                      {hasOverride && (
-                        <>
-                          <span className="text-gray-400 hidden sm:inline">→</span>
-                          <span className="text-orange-600 font-medium">
-                            Override:
-                          </span>
-                          <span
-                            className={`px-2 py-1 rounded inline-block ${
-                              overrideValue
-                                ? 'bg-orange-100 text-orange-800'
-                                : 'bg-gray-100 text-gray-800'
-                            }`}
-                          >
-                            {overrideValue ? 'Enabled' : 'Disabled'}
-                          </span>
-                        </>
-                      )}
-                    </div>
+                          {/* Toggle switch */}
+                          <div className="flex items-center gap-3">
+                            {hasOverride && (
+                              <span className="text-xs text-orange-600 font-medium">Override</span>
+                            )}
+                            <button
+                              onClick={() => handleToggle(featureName)}
+                              aria-label={`Toggle ${featureName}`}
+                              className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
+                                effectiveValue ? 'bg-green-500' : 'bg-gray-300'
+                              }`}
+                            >
+                              <span
+                                className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
+                                  effectiveValue ? 'translate-x-7' : 'translate-x-1'
+                                }`}
+                              />
+                            </button>
+                            <span className={`text-sm font-medium ${effectiveValue ? 'text-green-600' : 'text-gray-500'}`}>
+                              {effectiveValue ? 'ON' : 'OFF'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+
+              {/* Enabled Features Section */}
+              {enabledFeatures.length > 0 && (
+                <div>
+                  <div className="mb-3">
+                    <h2 className="text-lg font-semibold text-gray-700 flex items-center gap-2">
+                      <span>Enabled Features</span>
+                      <span className="text-sm text-gray-500 font-normal">({enabledFeatures.length})</span>
+                    </h2>
+                    <p className="text-xs text-gray-500 mt-1">Features enabled in both dev and prod</p>
                   </div>
+                  <div className="space-y-3">
+                    {enabledFeatures.map((featureName) => {
+                      const status = getFeatureStatus(featureName)
+                      const { hasOverride, devValue, prodValue, effectiveValue } = status
 
-                  <div className="flex flex-wrap items-center gap-2">
-                    {/* Current Status Indicator */}
-                    <div
-                      className={`w-3 h-3 rounded-full flex-shrink-0 ${
-                        effectiveValue ? 'bg-green-500' : 'bg-gray-400'
-                      }`}
-                      title={effectiveValue ? 'Active' : 'Inactive'}
-                    />
+                      return (
+                        <div
+                          key={featureName}
+                          className={`bg-white rounded-lg shadow-md p-3 md:p-4 transition ${
+                            hasOverride ? 'ring-2 ring-orange-400' : ''
+                          }`}
+                        >
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                            {/* Feature name and environment values */}
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-gray-800 text-sm md:text-base mb-1 break-words">
+                                {featureName}
+                              </h3>
+                              <div className="text-xs sm:text-sm text-gray-600">
+                                <span className="font-medium">dev:</span>{' '}
+                                <span className={devValue ? 'text-green-600' : 'text-gray-500'}>
+                                  {devValue ? 'ON' : 'OFF'}
+                                </span>
+                                <span className="mx-2">|</span>
+                                <span className="font-medium">prod:</span>{' '}
+                                <span className={prodValue ? 'text-green-600' : 'text-gray-500'}>
+                                  {prodValue ? 'ON' : 'OFF'}
+                                </span>
+                              </div>
+                            </div>
 
-                    {/* Toggle Button */}
-                    <button
-                      onClick={() => handleToggle(featureName)}
-                      disabled={isLocked}
-                      className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg font-medium transition text-xs sm:text-sm ${
-                        isLocked
-                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                          : hasOverride
-                          ? 'bg-orange-500 text-white hover:bg-orange-600'
-                          : 'bg-green-500 text-white hover:bg-green-600'
-                      }`}
-                      title={isLocked ? 'Cannot disable admin panel' : ''}
-                    >
-                      {hasOverride ? 'Toggle Override' : 'Add Override'}
-                    </button>
-
-                    {/* Clear Override Button */}
-                    {hasOverride && !isLocked && (
-                      <button
-                        onClick={() => handleClearOverride(featureName)}
-                        className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-xs sm:text-sm"
-                      >
-                        Clear
-                      </button>
-                    )}
+                            {/* Toggle switch */}
+                            <div className="flex items-center gap-3">
+                              {hasOverride && (
+                                <span className="text-xs text-orange-600 font-medium">Override</span>
+                              )}
+                              <button
+                                onClick={() => handleToggle(featureName)}
+                                aria-label={`Toggle ${featureName}`}
+                                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
+                                  effectiveValue ? 'bg-green-500' : 'bg-gray-300'
+                                }`}
+                              >
+                                <span
+                                  className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
+                                    effectiveValue ? 'translate-x-7' : 'translate-x-1'
+                                  }`}
+                                />
+                              </button>
+                              <span className={`text-sm font-medium ${effectiveValue ? 'text-green-600' : 'text-gray-500'}`}>
+                                {effectiveValue ? 'ON' : 'OFF'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
                   </div>
                 </div>
-
-                {isProtected && effectiveValue && (
-                  <div className="mt-2 flex items-center gap-2 text-sm text-yellow-600 bg-yellow-50 px-3 py-2 rounded">
-                    <Info size={14} />
-                    <span>
-                      Menu cannot be disabled (needed to access admin panel)
-                    </span>
-                  </div>
-                )}
-
-                {hasOverride && !isProtected && (
-                  <div className="mt-2 flex items-center gap-2 text-sm text-orange-600 bg-orange-50 px-3 py-2 rounded">
-                    <Info size={14} />
-                    <span>
-                      This feature is currently overridden and will be{' '}
-                      {overrideValue ? 'enabled' : 'disabled'} regardless of config
-                    </span>
-                  </div>
-                )}
-              </div>
-              )
-            })}
-          </div>
-        )}
+              )}
+            </div>
+          )
+        })()}
 
         {/* Info Box */}
         {adminModeActive && (
@@ -241,11 +307,13 @@ export const FeatureTogglesPage: React.FC = () => {
               How it works
             </h3>
             <ul className="text-sm text-blue-700 space-y-1 list-disc list-inside">
-              <li>Admin mode activates the control banner and override system</li>
+              <li>Use the banner to enable/disable admin mode</li>
+              <li>Each feature shows its dev and prod settings from the YAML config</li>
+              <li>Toggle any feature ON/OFF to create an override</li>
+              <li>Click "Dev Settings" or "Prod Settings" to apply all settings from that environment (includes menu)</li>
               <li>Overrides are saved in localStorage and persist across sessions</li>
-              <li>Overrides take precedence over the YAML config file</li>
-              <li>Change the environment selector to test different configs</li>
-              <li>Clear individual overrides or all at once to restore defaults</li>
+              <li>Orange ring indicates an active override</li>
+              <li>Clear all overrides to restore default behavior</li>
             </ul>
           </div>
         )}

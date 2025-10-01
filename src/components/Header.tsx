@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { ArrowLeft, Menu, Instagram, Settings, LogIn, LogOut, Mail, Info, ShoppingBag, Sliders } from 'lucide-react'
 import { CitySelector } from './CitySelector'
-import { useFeatureStore } from '../stores/featureStore'
 import { useFeatureToggle } from '../hooks/useFeatureToggle'
 
 export const Header: React.FC = () => {
@@ -11,7 +10,9 @@ export const Header: React.FC = () => {
   const [showMenu, setShowMenu] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
-  const { isMenuEnabled, isCitySelectorEnabled, isUserAccountsEnabled } = useFeatureStore()
+  const isMenuEnabled = useFeatureToggle('ENABLE_MENU')
+  const isCitySelectorEnabled = useFeatureToggle('ENABLE_CITY_SELECTOR')
+  const isUserAccountsEnabled = useFeatureToggle('ENABLE_USER_ACCOUNTS')
   const isAdminEnabled = useFeatureToggle('ENABLE_ADMIN_PANEL')
   const isContactEnabled = useFeatureToggle('ENABLE_CONTACT')
   const isAboutEnabled = useFeatureToggle('ENABLE_ABOUT')
