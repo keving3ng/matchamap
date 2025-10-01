@@ -117,7 +117,9 @@ export const FeatureTogglesPage: React.FC = () => {
               const status = getFeatureStatus(featureName)
               const { hasOverride, overrideValue, configValue, effectiveValue } = status
               const isAdminPanel = featureName === 'ENABLE_ADMIN_PANEL'
-              const isLocked = isAdminPanel && !effectiveValue
+              const isMenu = featureName === 'ENABLE_MENU'
+              const isProtected = isAdminPanel || isMenu
+              const isLocked = (isAdminPanel && !effectiveValue) || (isMenu && !effectiveValue)
 
               return (
                 <div
@@ -130,7 +132,7 @@ export const FeatureTogglesPage: React.FC = () => {
                   <div className="flex-1">
                     <h3 className="font-semibold text-gray-800 mb-1 flex items-center gap-2">
                       {featureName}
-                      {isAdminPanel && (
+                      {isProtected && (
                         <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
                           Protected
                         </span>
@@ -207,16 +209,17 @@ export const FeatureTogglesPage: React.FC = () => {
                   </div>
                 </div>
 
-                {isAdminPanel && effectiveValue && (
+                {isProtected && effectiveValue && (
                   <div className="mt-2 flex items-center gap-2 text-sm text-yellow-600 bg-yellow-50 px-3 py-2 rounded">
                     <Info size={14} />
                     <span>
-                      Admin panel cannot be disabled to prevent lockout
+                      {isAdminPanel && 'Admin panel cannot be disabled to prevent lockout'}
+                      {isMenu && 'Menu cannot be disabled (needed to access admin panel)'}
                     </span>
                   </div>
                 )}
 
-                {hasOverride && !isAdminPanel && (
+                {hasOverride && !isProtected && (
                   <div className="mt-2 flex items-center gap-2 text-sm text-orange-600 bg-orange-50 px-3 py-2 rounded">
                     <Info size={14} />
                     <span>
