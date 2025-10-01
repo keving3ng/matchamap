@@ -1,5 +1,6 @@
 import React from 'react'
 import { TrendingUp } from 'lucide-react'
+import { ContentContainer } from './ContentContainer'
 import type { PassportViewProps } from '../types'
 
 export const PassportView: React.FC<PassportViewProps> = ({ cafes, visitedStamps, onToggleStamp }) => {
@@ -22,9 +23,10 @@ export const PassportView: React.FC<PassportViewProps> = ({ cafes, visitedStamps
         </div>
       </div>
 
-      {/* Progress Card */}
-      <div className="px-4 py-6">
-        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-lg p-6 text-white">
+      <ContentContainer maxWidth="lg">
+        {/* Progress Card */}
+        <div className="px-4 py-6">
+          <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-lg p-6 text-white">
           <div className="flex items-center justify-between mb-4">
             <div>
               <p className="text-sm opacity-90 mb-1">Your Progress</p>
@@ -89,7 +91,8 @@ export const PassportView: React.FC<PassportViewProps> = ({ cafes, visitedStamps
             )
           })}
         </div>
-      </div>
+        </div>
+      </ContentContainer>
     </div>
   )
 }

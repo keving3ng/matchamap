@@ -1,5 +1,6 @@
 import React from 'react'
 import { MapPinned, Star, Calendar } from 'lucide-react'
+import { ContentContainer } from './ContentContainer'
 import type { FeedViewProps } from '../types'
 
 export const FeedView: React.FC<FeedViewProps> = ({ feedItems }) => {
@@ -12,9 +13,10 @@ export const FeedView: React.FC<FeedViewProps> = ({ feedItems }) => {
       </div>
 
       {/* Feed Items */}
-      <div className="px-4 py-4 space-y-4">
-        {feedItems.map((item) => (
-          <article key={item.id} className="bg-white rounded-2xl shadow-md border-2 border-green-100 overflow-hidden">
+      <ContentContainer maxWidth="md">
+        <div className="px-4 py-4 space-y-4">
+          {feedItems.map((item) => (
+            <article key={item.id} className="bg-white rounded-2xl shadow-md border-2 border-green-100 overflow-hidden">
             <div className={`${
               item.type === 'new_location' ? 'bg-green-500' :
               item.type === 'score_update' ? 'bg-blue-500' :
@@ -60,8 +62,9 @@ export const FeedView: React.FC<FeedViewProps> = ({ feedItems }) => {
               <p className="text-gray-700 mt-3 leading-relaxed">{item.preview}</p>
             </div>
           </article>
-        ))}
-      </div>
+          ))}
+        </div>
+      </ContentContainer>
     </div>
   )
 }

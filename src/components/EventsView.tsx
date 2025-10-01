@@ -1,5 +1,6 @@
 import React from 'react'
 import { Calendar, Clock, MapPin, DollarSign, Star } from 'lucide-react'
+import { ContentContainer } from './ContentContainer'
 import type { EventsViewProps } from '../types'
 
 export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
@@ -12,14 +13,15 @@ export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
       </div>
 
       {/* Event Items */}
-      <div className="px-4 py-4 space-y-4">
-        {eventItems.map((event) => (
-          <article
-            key={event.id}
-            className={`bg-white rounded-2xl shadow-md border-2 ${
-              event.featured ? 'border-green-400' : 'border-green-100'
-            } overflow-hidden`}
-          >
+      <ContentContainer maxWidth="md">
+        <div className="px-4 py-4 space-y-4">
+          {eventItems.map((event) => (
+            <article
+              key={event.id}
+              className={`bg-white rounded-2xl shadow-md border-2 ${
+                event.featured ? 'border-green-400' : 'border-green-100'
+              } overflow-hidden`}
+            >
             {event.featured && (
               <div className="bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 flex items-center gap-2 text-sm font-semibold">
                 <Star size={16} fill="white" />
@@ -65,8 +67,9 @@ export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
               <p className="text-gray-700 mt-3 leading-relaxed">{event.description}</p>
             </div>
           </article>
-        ))}
-      </div>
+          ))}
+        </div>
+      </ContentContainer>
     </div>
   )
 }

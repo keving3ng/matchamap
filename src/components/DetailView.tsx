@@ -2,6 +2,7 @@ import React from 'react'
 import { MapPin, Navigation, Heart, CheckCircle, Instagram } from 'lucide-react'
 import { useFeatureStore } from '../stores/featureStore'
 import { getMapsUrl } from '../utils/mapsUrl'
+import { ContentContainer } from './ContentContainer'
 import type { DetailViewProps } from '../types'
 
 export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, onToggleVisited }) => {
@@ -21,7 +22,8 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
         )}
       </div>
 
-      <div className="px-4 relative">
+      <ContentContainer maxWidth="md">
+        <div className="px-4 relative">
         {/* Main Info Card */}
         <div className="bg-white rounded-2xl shadow-lg -mt-6 p-5 border-2 border-green-100 relative z-10">
           <div className="flex justify-between items-start mb-3">
@@ -123,7 +125,8 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
             )}
           </div>
         </div>
-      </div>
+        </div>
+      </ContentContainer>
     </div>
   )
 }

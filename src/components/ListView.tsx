@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react'
 import { Navigation, MapPin, ChevronDown, Crosshair, Filter, X, Search } from 'lucide-react'
 import { useGeolocation } from '../hooks/useGeolocation'
 import { getLocationRequestAdvice, getOptimalGeolocationOptions } from '../utils/deviceDetection'
+import { ContentContainer } from './ContentContainer'
 import type { ListViewProps } from '../types'
 
 type SortOption = 'rating' | 'distance' | 'area'
@@ -467,20 +468,21 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
       )}
 
       {/* Cafe List */}
-      <div className="px-4 py-4 space-y-3">
-        {filteredAndSortedCafes.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg mb-2">No cafes match your filters</p>
-            <button
-              onClick={clearFilters}
-              className="text-green-600 font-semibold hover:underline"
-            >
-              Clear filters
-            </button>
-          </div>
-        ) : (
-          filteredAndSortedCafes.map((cafe) => (
-          <div key={cafe.id} className="bg-white rounded-2xl shadow-md border-2 border-green-100 overflow-hidden">
+      <ContentContainer maxWidth="lg">
+        <div className="px-4 py-4 space-y-3">
+          {filteredAndSortedCafes.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-lg mb-2">No cafes match your filters</p>
+              <button
+                onClick={clearFilters}
+                className="text-green-600 font-semibold hover:underline"
+              >
+                Clear filters
+              </button>
+            </div>
+          ) : (
+            filteredAndSortedCafes.map((cafe) => (
+            <div key={cafe.id} className="bg-white rounded-2xl shadow-md border-2 border-green-100 overflow-hidden">
             <button
               onClick={() => onToggleExpand(expandedCard === cafe.id ? null : cafe.id)}
               className="w-full p-4 flex items-center justify-between"
@@ -549,7 +551,8 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
           </div>
           ))
         )}
-      </div>
+        </div>
+      </ContentContainer>
     </div>
   )
 }

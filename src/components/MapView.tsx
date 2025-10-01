@@ -201,10 +201,13 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                 <span>{selectedCafe.distanceInfo.formattedKm} • {selectedCafe.distanceInfo.walkTime} walk</span>
               </div>
             ) : (
-              <div className="flex items-center gap-2 text-sm text-gray-500 mb-3">
+              <button
+                onClick={handleLocationClick}
+                className="flex items-center gap-2 text-sm text-gray-500 mb-3 hover:text-gray-700 transition"
+              >
                 <MapPin size={16} className="text-gray-400" />
-                <span>Tap location button above for distance</span>
-              </div>
+                <span className="underline decoration-dotted">Enable location services</span>
+              </button>
             )}
             <div className="flex gap-2">
               <a
@@ -250,10 +253,13 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                     <span>{selectedCafe.distanceInfo.formattedKm} • {selectedCafe.distanceInfo.walkTime} walk</span>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2 text-gray-500">
+                  <button
+                    onClick={handleLocationClick}
+                    className="flex items-center gap-2 text-gray-500 hover:text-gray-700 transition"
+                  >
                     <MapPin size={18} className="text-gray-400" />
-                    <span>Tap location button above for distance</span>
-                  </div>
+                    <span className="underline decoration-dotted">Enable location services</span>
+                  </button>
                 )}
                 <p className="text-sm text-gray-700">{selectedCafe.address}</p>
               </div>
