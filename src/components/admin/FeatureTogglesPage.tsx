@@ -114,13 +114,12 @@ export const FeatureTogglesPage: React.FC = () => {
         {/* Feature Toggle List */}
         {adminModeActive && (
           <div className="space-y-3">
-            {features.map((featureName) => {
+            {features.filter(featureName => featureName !== 'ENABLE_ADMIN_PANEL').map((featureName) => {
               const status = getFeatureStatus(featureName)
               const { hasOverride, overrideValue, configValue, effectiveValue } = status
-              const isAdminPanel = featureName === 'ENABLE_ADMIN_PANEL'
               const isMenu = featureName === 'ENABLE_MENU'
-              const isProtected = isAdminPanel || isMenu
-              const isLocked = (isAdminPanel && !effectiveValue) || (isMenu && !effectiveValue)
+              const isProtected = isMenu
+              const isLocked = isMenu && !effectiveValue
 
               return (
                 <div
@@ -214,8 +213,7 @@ export const FeatureTogglesPage: React.FC = () => {
                   <div className="mt-2 flex items-center gap-2 text-sm text-yellow-600 bg-yellow-50 px-3 py-2 rounded">
                     <Info size={14} />
                     <span>
-                      {isAdminPanel && 'Admin panel cannot be disabled to prevent lockout'}
-                      {isMenu && 'Menu cannot be disabled (needed to access admin panel)'}
+                      Menu cannot be disabled (needed to access admin panel)
                     </span>
                   </div>
                 )}
