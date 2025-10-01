@@ -1,39 +1,31 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import Header from './components/Header'
 import BottomNavigation from './components/BottomNavigation'
 import AppRoutes from './components/AppRoutes'
 import ComingSoon from './components/ComingSoon'
 import { useDistanceCalculation } from './hooks/useDistanceCalculation'
-import { useAppFeatures } from './hooks/useAppFeatures'
-import { useCafeSelection } from './hooks/useCafeSelection'
-import { useUIStore } from './stores/uiStore'
 import { useAuthStore } from './stores/authStore'
-import { useVisitedCafesStore } from './stores/visitedCafesStore'
 import { useLocationStore } from './stores/locationStore'
 import { useCityStore } from './stores/cityStore'
-import cafeData from './data/cafes.json'
-import type { CafeData } from './types'
+import { useCafeStore } from './stores/cafeStore'
+import { useDataStore } from './stores/dataStore'
+import { useFeatureStore } from './stores/featureStore'
 
 export const App: React.FC = () => {
-  // Feature toggles
-  const { showComingSoon } = useAppFeatures()
+  // Feature and data stores
+  const { showComingSoon } = useFeatureStore()
+  const { allCafes } = useDataStore()
 
   // Zustand stores
   const { isAuthenticated, authenticate } = useAuthStore()
-  const { showPopover, expandedCard, setExpandedCard, closePopover } = useUIStore()
-  const { toggleVisited, toggleStamp } = useVisitedCafesStore()
   const { coordinates } = useLocationStore()
   const { selectedCity } = useCityStore()
+  const { setUserCoordinates, setCafesWithDistance } = useCafeStore()
 
-  // Local state for user coordinates (bridges between location store and distance calculation)
-  const [userCoordinates, setUserCoordinates] = useState<GeolocationCoordinates | null>(null)
-
-  // Sync location store to local state
-  React.useEffect(() => {
+  // Sync location store to cafe store
+  useEffect(() => {
     setUserCoordinates(coordinates)
-  }, [coordinates])
-
-  const { cafes: allCafes, feed, events } = cafeData as CafeData
+  }, [coordinates, setUserCoordinates])
 
   // Filter cafes by selected city
   const cafes = useMemo(() => {
@@ -42,12 +34,12 @@ export const App: React.FC = () => {
 
   // Memoize user location to prevent unnecessary recalculations
   const userLocation = useMemo(() => {
-    if (!userCoordinates) return null
+    if (!coordinates) return null
     return {
-      latitude: userCoordinates.latitude,
-      longitude: userCoordinates.longitude,
+      latitude: coordinates.latitude,
+      longitude: coordinates.longitude,
     }
-  }, [userCoordinates?.latitude, userCoordinates?.longitude])
+  }, [coordinates?.latitude, coordinates?.longitude])
 
   // Calculate distances from user location
   const { cafesWithDistance } = useDistanceCalculation({
@@ -55,8 +47,10 @@ export const App: React.FC = () => {
     userLocation,
   })
 
-  // Cafe selection hook
-  const { selectedCafe, handlePinClick, viewDetails } = useCafeSelection(cafesWithDistance)
+  // Update cafe store with calculated distances
+  useEffect(() => {
+    setCafesWithDistance(cafesWithDistance)
+  }, [cafesWithDistance, setCafesWithDistance])
 
   if (showComingSoon && !isAuthenticated) {
     return <ComingSoon onPasswordCorrect={authenticate} />
@@ -65,24 +59,7 @@ export const App: React.FC = () => {
   return (
     <div className="w-full h-screen bg-gradient-to-br from-green-50 to-green-100 flex flex-col">
       <Header />
-
-      <AppRoutes
-        cafesWithDistance={cafesWithDistance}
-        selectedCafe={selectedCafe}
-        onLocationChange={setUserCoordinates}
-        showPopover={showPopover}
-        onPinClick={handlePinClick}
-        onViewDetails={viewDetails}
-        onClosePopover={closePopover}
-        expandedCard={expandedCard}
-        onToggleExpand={setExpandedCard}
-        feedItems={feed}
-        eventItems={events}
-        cafes={cafesWithDistance}
-        onToggleStamp={toggleStamp}
-        onToggleVisited={toggleVisited}
-      />
-
+      <AppRoutes />
       <BottomNavigation />
     </div>
   )

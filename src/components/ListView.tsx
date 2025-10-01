@@ -12,7 +12,7 @@ interface FilterState {
   neighborhoods: string[]
 }
 
-export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggleExpand, onViewDetails, onLocationChange }) => {
+export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggleExpand, onViewDetails }) => {
   const [sortBy, setSortBy] = useState<SortOption>('rating')
   const [showFilters, setShowFilters] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
@@ -31,13 +31,6 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
     clearLocation,
     isSupported
   } = useGeolocation(getOptimalGeolocationOptions())
-
-  // Notify parent component of coordinate changes
-  React.useEffect(() => {
-    if (onLocationChange) {
-      onLocationChange(coordinates)
-    }
-  }, [coordinates, onLocationChange])
 
   const handleLocationClick = () => {
     // Always refresh location when clicked (cheap operation, useful for moving users)

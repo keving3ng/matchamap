@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { ArrowLeft, Menu, Instagram, Settings } from 'lucide-react'
 import { CitySelector } from './CitySelector'
-import { useFeatures } from '../contexts/FeatureContext'
+import { useFeatureStore } from '../stores/featureStore'
 import { useFeatureToggle } from '../hooks/useFeatureToggle'
 
 export const Header: React.FC = () => {
@@ -11,7 +11,7 @@ export const Header: React.FC = () => {
   const [showMenu, setShowMenu] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
-  const { isMenuEnabled, isCitySelectorEnabled } = useFeatures()
+  const { isMenuEnabled, isCitySelectorEnabled } = useFeatureStore()
   const isAdminEnabled = useFeatureToggle('ENABLE_ADMIN_PANEL')
 
   // Close menu when clicking outside

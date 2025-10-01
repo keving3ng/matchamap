@@ -7,60 +7,23 @@ import FeedView from './FeedView'
 import PassportView from './PassportView'
 import EventsView from './EventsView'
 import AdminPage from './AdminPage'
-import { useVisitedCafesStore } from '../stores/visitedCafesStore'
-import { useFeatures } from '../contexts/FeatureContext'
 import { useFeatureToggle } from '../hooks/useFeatureToggle'
-import type { CafeWithDistance, FeedItem, EventItem } from '../types'
+import { useDataStore } from '../stores/dataStore'
+import { useFeatureStore } from '../stores/featureStore'
+import { useCafeStore } from '../stores/cafeStore'
+import { useUIStore } from '../stores/uiStore'
+import { useVisitedCafesStore } from '../stores/visitedCafesStore'
+import { useCafeSelection } from '../hooks/useCafeSelection'
 
-interface AppRoutesProps {
-  // Map/List shared props
-  cafesWithDistance: CafeWithDistance[]
-  selectedCafe: CafeWithDistance | null
-  onLocationChange: (coords: GeolocationCoordinates | null) => void
-
-  // Map props
-  showPopover: boolean
-  onPinClick: (cafe: CafeWithDistance) => void
-  onViewDetails: (cafe: CafeWithDistance) => void
-  onClosePopover: () => void
-
-  // List props
-  expandedCard: number | null
-  onToggleExpand: (id: number | null) => void
-
-  // Feed props
-  feedItems: FeedItem[]
-
-  // Events props
-  eventItems: EventItem[]
-
-  // Passport props
-  cafes: CafeWithDistance[]
-  onToggleStamp: (id: number) => void
-
-  // Detail props
-  onToggleVisited: (id: number) => void
-}
-
-export const AppRoutes: React.FC<AppRoutesProps> = ({
-  cafesWithDistance,
-  selectedCafe,
-  onLocationChange,
-  showPopover,
-  onPinClick,
-  onViewDetails,
-  onClosePopover,
-  expandedCard,
-  onToggleExpand,
-  feedItems,
-  eventItems,
-  cafes,
-  onToggleStamp,
-  onToggleVisited,
-}) => {
-  const { stampedCafeIds, visitedCafeIds } = useVisitedCafesStore()
-  const { isEventsEnabled, isPassportEnabled } = useFeatures()
+export const AppRoutes: React.FC = () => {
+  const { isEventsEnabled, isPassportEnabled } = useFeatureStore()
   const isAdminEnabled = useFeatureToggle('ENABLE_ADMIN_PANEL')
+
+  const { feedItems, eventItems } = useDataStore()
+  const { cafesWithDistance, selectedCafe } = useCafeStore()
+  const { showPopover, expandedCard, setExpandedCard, closePopover } = useUIStore()
+  const { stampedCafeIds, visitedCafeIds, toggleVisited, toggleStamp } = useVisitedCafesStore()
+  const { handlePinClick, viewDetails } = useCafeSelection(cafesWithDistance)
 
   return (
     <Routes>
@@ -69,19 +32,17 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({
           cafes={cafesWithDistance}
           showPopover={showPopover}
           selectedCafe={selectedCafe}
-          onPinClick={onPinClick}
-          onViewDetails={onViewDetails}
-          onClosePopover={onClosePopover}
-          onLocationChange={onLocationChange}
+          onPinClick={handlePinClick}
+          onViewDetails={viewDetails}
+          onClosePopover={closePopover}
         />
       } />
       <Route path="/list" element={
         <ListView
           cafes={cafesWithDistance}
           expandedCard={expandedCard}
-          onToggleExpand={onToggleExpand}
-          onViewDetails={onViewDetails}
-          onLocationChange={onLocationChange}
+          onToggleExpand={setExpandedCard}
+          onViewDetails={viewDetails}
         />
       } />
       <Route path="/feed" element={
@@ -95,9 +56,9 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({
       {isPassportEnabled && (
         <Route path="/passport" element={
           <PassportView
-            cafes={cafes}
+            cafes={cafesWithDistance}
             visitedStamps={stampedCafeIds}
-            onToggleStamp={onToggleStamp}
+            onToggleStamp={toggleStamp}
           />
         } />
       )}
@@ -108,7 +69,7 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({
         <DetailView
           cafe={selectedCafe || cafesWithDistance[0]}
           visitedLocations={visitedCafeIds}
-          onToggleVisited={onToggleVisited}
+          onToggleVisited={toggleVisited}
         />
       } />
       <Route path="*" element={<Navigate to="/" replace />} />

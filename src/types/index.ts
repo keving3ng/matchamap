@@ -73,7 +73,6 @@ export interface MapViewProps {
   onPinClick: (cafe: CafeWithDistance) => void
   onViewDetails: (cafe: CafeWithDistance) => void
   onClosePopover: () => void
-  onLocationChange?: (coordinates: GeolocationCoordinates | null) => void
 }
 
 export interface ListViewProps {
@@ -81,7 +80,6 @@ export interface ListViewProps {
   expandedCard: number | null
   onToggleExpand: (id: number | null) => void
   onViewDetails: (cafe: CafeWithDistance) => void
-  onLocationChange?: (coordinates: GeolocationCoordinates | null) => void
 }
 
 export interface DetailViewProps {

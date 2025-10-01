@@ -8,7 +8,7 @@ import { CircleButton } from './CircleButton'
 import { getLocationRequestAdvice, getOptimalGeolocationOptions } from '../utils/deviceDetection'
 import type { MapViewProps } from '../types'
 
-export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCafe, onPinClick, onViewDetails, onClosePopover, onLocationChange }) => {
+export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCafe, onPinClick, onViewDetails, onClosePopover }) => {
   const { visitedCafeIds } = useVisitedCafes()
   const { getCity } = useCityStore()
   const currentCity = getCity()
@@ -54,11 +54,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
       removeUserLocationMarker()
       hasAutoCenteredRef.current = false // Reset if location is cleared
     }
-    // Notify parent component of coordinate changes
-    if (onLocationChange) {
-      onLocationChange(coordinates)
-    }
-  }, [coordinates, addUserLocationMarker, removeUserLocationMarker, onLocationChange, centerOnLocation])
+  }, [coordinates, addUserLocationMarker, removeUserLocationMarker, centerOnLocation])
 
   const handleLocationClick = () => {
     // Always refresh location when clicked (cheap operation, useful for moving users)
