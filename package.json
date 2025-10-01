@@ -1,50 +1,25 @@
 {
-  "name": "matchamap",
+  "name": "matchamap-monorepo",
   "version": "1.0.0",
-  "type": "module",
-  "description": "A curated, map-based guide to matcha cafes in Toronto",
+  "private": true,
+  "description": "MatchaMap - Curated guide to matcha cafes in Toronto",
+  "workspaces": [
+    "frontend",
+    "backend",
+    "shared"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "test": "vitest",
-    "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage",
-    "lint": "eslint . --ext js,jsx,ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "leaflet": "^1.9.4",
-    "lucide-react": "^0.544.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "react-router-dom": "^6.27.0",
-    "zustand": "^5.0.8"
+    "dev": "npm run dev --workspace=frontend",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "dev:backend": "npm run dev --workspace=backend",
+    "build": "npm run build --workspaces --if-present",
+    "build:frontend": "npm run build --workspace=frontend",
+    "deploy:backend": "npm run deploy --workspace=backend",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspace=frontend",
+    "lint": "npm run lint --workspace=frontend"
   },
   "devDependencies": {
-    "@rollup/plugin-yaml": "^4.1.2",
-    "@testing-library/jest-dom": "^6.1.6",
-    "@testing-library/react": "^16.3.0",
-    "@testing-library/user-event": "^14.5.1",
-    "@types/leaflet": "^1.9.8",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0",
-    "@vitejs/plugin-basic-ssl": "^1.2.0",
-    "@vitejs/plugin-react": "^4.2.1",
-    "@vitest/coverage-v8": "^1.1.0",
-    "@vitest/ui": "^1.1.0",
-    "autoprefixer": "^10.4.16",
-    "eslint": "^8.55.0",
-    "eslint-plugin-react": "^7.33.2",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.4.5",
-    "jsdom": "^23.0.1",
-    "postcss": "^8.4.32",
-    "tailwindcss": "^3.3.6",
-    "typescript": "^5.2.2",
-    "vite": "^5.0.8",
-    "vitest": "^1.1.0"
+    "typescript": "^5.2.2"
   }
 }

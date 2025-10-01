@@ -1,0 +1,23 @@
+name = "matchamap-api"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+node_compat = true
+
+# D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "matchamap-db"
+database_id = "" # Will be filled after creating D1 database
+
+# CORS settings for frontend
+[vars]
+ALLOWED_ORIGINS = "http://localhost:5173,https://matchamap.com"
+
+# Environment-specific configurations
+[env.production]
+name = "matchamap-api"
+vars = { ALLOWED_ORIGINS = "https://matchamap.com" }
+
+[env.staging]
+name = "matchamap-api-staging"
+vars = { ALLOWED_ORIGINS = "https://staging.matchamap.com" }

@@ -1,0 +1,13 @@
+{
+  "name": "@matchamap/shared",
+  "version": "1.0.0",
+  "description": "Shared types and utilities for MatchaMap frontend and backend",
+  "main": "types/index.ts",
+  "types": "types/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2"
+  }
+}
