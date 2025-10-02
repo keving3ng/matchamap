@@ -146,6 +146,21 @@ export const healthAPI = {
 }
 
 /**
+ * Places API endpoints (Google Maps lookup)
+ */
+export const placesAPI = {
+  /**
+   * Lookup place details from Google Maps URL
+   */
+  async lookup(googleMapsUrl: string): Promise<{ place: any }> {
+    return fetchAPI('/admin/places/lookup', {
+      method: 'POST',
+      body: JSON.stringify({ googleMapsUrl }),
+    })
+  },
+}
+
+/**
  * Export all APIs
  */
 export const api = {
@@ -153,6 +168,7 @@ export const api = {
   feed: feedAPI,
   events: eventsAPI,
   health: healthAPI,
+  places: placesAPI,
 }
 
 export default api

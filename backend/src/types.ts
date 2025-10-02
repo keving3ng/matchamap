@@ -3,6 +3,7 @@ export interface Env {
   DB: D1Database;
   ENVIRONMENT: string;
   ALLOWED_ORIGINS: string;
+  GOOGLE_PLACES_API_KEY?: string;
 }
 
 // API Response types
