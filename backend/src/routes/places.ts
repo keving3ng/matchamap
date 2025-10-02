@@ -156,7 +156,7 @@ export async function lookupPlace(request: IRequest, env: Env): Promise<Response
       latitude: data.location?.latitude || 0,
       longitude: data.location?.longitude || 0,
       hours: data.currentOpeningHours?.weekdayDescriptions
-        ? data.currentOpeningHours.weekdayDescriptions.join('\n')
+        ? JSON.stringify(data.currentOpeningHours.weekdayDescriptions)
         : '',
       phone: data.internationalPhoneNumber || '',
       website: data.websiteUri || '',
