@@ -43,16 +43,13 @@ export const useDataStore = create<DataStore>((set, get) => ({
         lng: cafe.longitude, // Backwards compatibility
         link: cafe.link,
         city: cafe.city,
-        score: cafe.score,
         displayScore: cafe.displayScore, // Calculated from drinks
         ambianceScore: cafe.ambianceScore,
-        otherDrinksScore: cafe.otherDrinksScore,
         drinks: cafe.drinks || [], // Include drinks from API
-        price: cafe.price,
-        chargeForAltMilk: cafe.chargeForAltMilk || false,
-        gramsUsed: cafe.gramsUsed,
+        chargeForAltMilk: cafe.chargeForAltMilk, // Number or null
         quickNote: cafe.quickNote || '',
         review: cafe.review || '',
+        source: cafe.source || '',
         instagram: cafe.instagram || '',
         instagramPostLink: cafe.instagramPostLink || '',
         tiktokPostLink: cafe.tiktokPostLink || '',

@@ -47,21 +47,18 @@ export interface Cafe {
   link: string // Google Maps link
   city: string
 
-  // Ratings (legacy - now calculated from drinks)
-  score?: number | null // Legacy cafe score, may be null
-  ambianceScore?: number | null
-  otherDrinksScore?: number | null
+  // Ratings
+  ambianceScore?: number | null // Cafe ambiance rating (0-10)
   displayScore?: number | null // Calculated from drinks (default OR highest)
 
   // Menu & Pricing
   drinks?: DrinkItem[] // All drink offerings
-  price?: number | null // Price value
-  chargeForAltMilk?: boolean // Whether they charge extra for alternative milk
-  gramsUsed?: number | null // Grams of matcha used in default drink
+  chargeForAltMilk?: number | null // Price charged for alt milk (null if free)
 
   // Reviews & Description
   quickNote: string // Short tagline/summary
   review?: string | null // Full review text
+  source?: string | null // Source of cafe info
 
   // Contact & Info
   instagram?: string | null

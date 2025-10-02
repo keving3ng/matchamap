@@ -40,8 +40,11 @@ export const CafeFormWizard: React.FC<CafeFormWizardProps> = ({ cafe, onSave, on
     address: '',
     hours: '',
     googleMapsUrl: '',
+    ambianceScore: 0,
+    chargeForAltMilk: null as number | null,
     quickNote: '',
     review: '',
+    source: '',
     instagram: '',
     instagramPostLink: '',
     tiktokPostLink: '',
@@ -103,8 +106,11 @@ export const CafeFormWizard: React.FC<CafeFormWizardProps> = ({ cafe, onSave, on
         latitude: formData.lat,
         longitude: formData.lng,
         city: formData.city,
+        ambianceScore: formData.ambianceScore || null,
+        chargeForAltMilk: formData.chargeForAltMilk,
         quickNote: formData.quickNote,
         review: formData.review,
+        source: formData.source || null,
         hours: formData.hours,
         instagram: formData.instagram,
         instagramPostLink: formData.instagramPostLink,
@@ -378,6 +384,62 @@ export const CafeFormWizard: React.FC<CafeFormWizardProps> = ({ cafe, onSave, on
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Ratings */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Ambiance Score (0-10)
+                  </label>
+                  <input
+                    type="number"
+                    name="ambianceScore"
+                    value={formData.ambianceScore}
+                    onChange={handleChange}
+                    min="0"
+                    max="10"
+                    step="0.1"
+                    placeholder="e.g., 8.5"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Rate the cafe's atmosphere and vibe</p>
+                </div>
+
+                {/* Alt Milk Charge */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Alt Milk Charge (leave empty if free)
+                  </label>
+                  <input
+                    type="number"
+                    name="chargeForAltMilk"
+                    value={formData.chargeForAltMilk || ''}
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
+                      chargeForAltMilk: e.target.value ? parseFloat(e.target.value) : null
+                    }))}
+                    min="0"
+                    step="0.25"
+                    placeholder="e.g., 1.00"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Price charged for alternative milk</p>
+                </div>
+
+                {/* Source */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Source (optional)
+                  </label>
+                  <input
+                    type="text"
+                    name="source"
+                    value={formData.source}
+                    onChange={handleChange}
+                    placeholder="e.g., Instagram, Friend recommendation, Google"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Where did you discover this cafe?</p>
+                </div>
+
                 {/* Content */}
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
