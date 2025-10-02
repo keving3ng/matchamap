@@ -32,12 +32,6 @@ export async function listCafes(request: IRequest, env: Env): Promise<Response> 
     conditions.push(eq(cafes.city, city));
 
     // Add optional filters
-    if (neighborhood) {
-      const neighborhoodId = parseInt(neighborhood);
-      if (!isNaN(neighborhoodId)) {
-        conditions.push(eq(cafes.neighborhoodId, neighborhoodId));
-      }
-    }
     if (minScore) {
       const score = parseFloat(minScore);
       if (isNaN(score) || score < 0 || score > 10) {
@@ -46,10 +40,11 @@ export async function listCafes(request: IRequest, env: Env): Promise<Response> 
       conditions.push(gte(cafes.score, score));
     }
     if (maxPrice) {
-      if (!['$', '$$', '$$$'].includes(maxPrice)) {
+      const priceValue = parseFloat(maxPrice);
+      if (isNaN(priceValue)) {
         return badRequestResponse('Invalid maxPrice parameter', request as Request, env);
       }
-      conditions.push(lte(cafes.priceRange, maxPrice));
+      conditions.push(lte(cafes.price, priceValue));
     }
 
     // Execute query with pagination
@@ -143,7 +138,7 @@ export async function createCafe(request: IRequest, env: Env): Promise<Response>
     const body = await request.json() as any;
 
     // Basic validation
-    if (!body.name || !body.lat || !body.lng || !body.score) {
+    if (!body.name || !body.latitude || !body.longitude || !body.score || !body.link) {
       return badRequestResponse('Missing required fields', request as Request, env);
     }
 
@@ -154,27 +149,23 @@ export async function createCafe(request: IRequest, env: Env): Promise<Response>
       .values({
         name: body.name,
         slug: body.slug || body.name.toLowerCase().replace(/\s+/g, '-'),
-        lat: body.lat,
-        lng: body.lng,
-        address: body.address,
+        link: body.link,
+        latitude: body.latitude,
+        longitude: body.longitude,
         city: body.city || 'toronto',
-        neighborhoodId: body.neighborhoodId,
         score: body.score,
-        valueScore: body.valueScore,
         ambianceScore: body.ambianceScore,
         otherDrinksScore: body.otherDrinksScore,
-        priceRange: body.priceRange,
+        price: body.price,
         chargeForAltMilk: body.chargeForAltMilk || false,
+        gramsUsed: body.gramsUsed,
         quickNote: body.quickNote,
         review: body.review,
-        comments: body.comments,
-        menuHighlights: body.menuHighlights,
         hours: body.hours,
         instagram: body.instagram,
-        tiktok: body.tiktok,
-        googleMapsUrl: body.googleMapsUrl,
-        emoji: body.emoji || '🍵',
-        color: body.color || '#7cb342',
+        instagramPostLink: body.instagramPostLink,
+        tiktokPostLink: body.tiktokPostLink,
+        images: body.images,
       })
       .returning();
 

@@ -93,37 +93,33 @@ CREATE TABLE cafes (
     slug TEXT UNIQUE NOT NULL,
 
     -- Location
-    lat REAL NOT NULL,
-    lng REAL NOT NULL,
-    address TEXT NOT NULL,
-    city TEXT NOT NULL CHECK(city IN ('toronto', 'montreal', 'tokyo')),
-    neighborhood_id INTEGER REFERENCES neighborhoods(id),
+    link TEXT NOT NULL, -- Google Maps link
+    latitude REAL NOT NULL,
+    longitude REAL NOT NULL,
+    city TEXT NOT NULL, -- toronto, montreal, tokyo (for filtering/navigation only)
 
     -- Ratings
     score REAL NOT NULL CHECK(score >= 0 AND score <= 10),
-    value_score REAL CHECK(value_score >= 0 AND value_score <= 10),
     ambiance_score REAL CHECK(ambiance_score >= 0 AND ambiance_score <= 10),
     other_drinks_score REAL CHECK(other_drinks_score >= 0 AND other_drinks_score <= 10),
 
     -- Pricing
-    price_range TEXT CHECK(price_range IN ('$', '$$', '$$$')),
+    price REAL, -- Price value (e.g., 7.0)
     charge_for_alt_milk BOOLEAN DEFAULT false,
+    grams_used INTEGER, -- Grams of matcha used
 
     -- Content
     quick_note TEXT NOT NULL,
     review TEXT,
-    comments TEXT,
-    menu_highlights TEXT,
 
-    -- Contact
-    hours TEXT, -- JSON or text format
-    instagram TEXT,
-    tiktok TEXT,
-    google_maps_url TEXT,
+    -- Contact/Social
+    hours TEXT, -- JSON object from Google Maps API
+    instagram TEXT, -- Handle (e.g., @matchahaven)
+    instagram_post_link TEXT, -- Direct post URL
+    tiktok_post_link TEXT, -- Direct post URL
 
-    -- Display
-    emoji TEXT NOT NULL,
-    color TEXT NOT NULL,
+    -- Media
+    images TEXT, -- Image URLs (likely from Google Maps or uploaded)
 
     -- Metadata
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -132,8 +128,8 @@ CREATE TABLE cafes (
 
     -- Indexes
     INDEX idx_city (city),
-    INDEX idx_neighborhood (neighborhood_id),
-    INDEX idx_deleted (deleted_at)
+    INDEX idx_deleted (deleted_at),
+    INDEX idx_slug (slug)
 );
 
 CREATE TABLE drinks (
@@ -153,17 +149,6 @@ CREATE TABLE drinks (
 
     INDEX idx_cafe_drinks (cafe_id),
     INDEX idx_default (is_default)
-);
-
-CREATE TABLE neighborhoods (
-    id INTEGER PRIMARY KEY,
-    name TEXT NOT NULL,
-    city TEXT NOT NULL,
-    bounds TEXT, -- JSON: geographic boundaries
-
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    UNIQUE(name, city)
 );
 
 CREATE TABLE feed_items (
@@ -229,6 +214,12 @@ CREATE TABLE events (
 -   Cascade behavior: When cafe is soft-deleted, drinks are also hidden
 -   Retention: Keep deleted items indefinitely (storage is cheap)
 -   Un-delete: Manually set `deleted_at = NULL` via admin UI if needed
+
+**City as Navigation Concept:**
+
+-   Cities (toronto, montreal, tokyo) are used for filtering and navigation only
+-   Not a data division or separation mechanism
+-   Neighborhoods removed - city is sufficient for geographic organization
 
 ### Phase 3+ Schema (Social Features - Future)
 
@@ -398,9 +389,8 @@ Returns list of cafes with optional filtering.
 // Query params
 interface CafeFilters {
   city?: "toronto" | "montreal" | "tokyo"
-  neighborhood?: string
   minScore?: number
-  maxPrice?: "$" | "$$" | "$$$"
+  maxPrice?: number // Max price value (e.g., 8.0)
   limit?: number // default: 100, max: 500
   offset?: number // for pagination
 }
@@ -430,22 +420,6 @@ interface CafeFilters {
 // Error (404 Not Found)
 {
   "error": "Cafe not found"
-}
-```
-
-#### GET /api/neighborhoods
-
-```typescript
-// Response (200 OK)
-{
-  "neighborhoods": [
-    {
-      "id": 1,
-      "name": "Downtown",
-      "city": "toronto",
-      "cafeCount": 15
-    }
-  ]
 }
 ```
 
@@ -533,14 +507,15 @@ _Note: Timelines intentionally omitted as they are not accurate at this stage._
 
 -   [ ] Set up Cloudflare Workers project
 -   [ ] Configure D1 database
--   [ ] Create initial schema (cafes, drinks, neighborhoods, feed, events, admins, audit log)
+-   [ ] Create initial schema (cafes, drinks, feed, events)
 -   [ ] Implement basic CRUD API with error handling
 -   [ ] Set up migration pipeline with Drizzle Kit
--   [ ] Seed data from cafes.json
 -   [ ] Configure Cloudflare Access for admin auth
 -   [ ] Build basic admin UI (cafe list + create/edit forms)
 -   [ ] Implement health check endpoint
 -   [ ] Set up monitoring and alerting
+
+**Note:** Neighborhoods removed - city field is sufficient for geographic filtering
 
 **Deliverable:** Backend API with admin interface, data migrated from JSON
 
@@ -561,8 +536,7 @@ _Note: Timelines intentionally omitted as they are not accurate at this stage._
 
 -   [ ] Map filtering endpoints (price, rating, alt milk, open now)
 -   [ ] Quick filter support
--   [ ] Neighborhood boundaries and geospatial queries
--   [ ] Search functionality (cafe name, neighborhood)
+-   [ ] Search functionality (cafe name, city)
 -   [ ] Image upload to R2 with optimization
 -   [ ] Performance optimization (query indexes, caching)
 -   [ ] Analytics integration
@@ -795,9 +769,9 @@ router.post("/api/admin/cafes", async (request, env) => {
     const cafe = await request.json();
 
     const result = await env.DB.prepare(
-        "INSERT INTO cafes (name, lat, lng, ...) VALUES (?, ?, ?, ...)"
+        "INSERT INTO cafes (name, slug, link, latitude, longitude, city, score, quick_note) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
     )
-        .bind(cafe.name, cafe.lat, cafe.lng)
+        .bind(cafe.name, cafe.slug, cafe.link, cafe.latitude, cafe.longitude, cafe.city, cafe.score, cafe.quick_note)
         .run();
 
     return new Response(JSON.stringify({ id: result.meta.last_row_id }), {
@@ -866,33 +840,37 @@ interface Cafe {
     id: number;
     name: string;
     slug: string;
-    lat: number;
-    lng: number;
-    address: string;
-    city: "toronto" | "montreal" | "tokyo";
-    neighborhood_id: number;
 
+    // Location
+    link: string; // Google Maps URL
+    latitude: number;
+    longitude: number;
+    city: "toronto" | "montreal" | "tokyo";
+
+    // Ratings
     score: number;
-    value_score?: number;
     ambiance_score?: number;
     other_drinks_score?: number;
 
-    price_range: "$" | "$$" | "$$$";
+    // Pricing
+    price?: number;
     charge_for_alt_milk: boolean;
+    grams_used?: number;
 
+    // Content
     quick_note: string;
     review?: string;
-    comments?: string;
-    menu_highlights?: string;
 
-    hours?: string;
+    // Contact/Social
+    hours?: string; // JSON from Google Maps
     instagram?: string;
-    tiktok?: string;
-    google_maps_url?: string;
+    instagram_post_link?: string;
+    tiktok_post_link?: string;
 
-    emoji: string;
-    color: string;
+    // Media
+    images?: string;
 
+    // Metadata
     created_at: string;
     updated_at: string;
     deleted_at?: string;
@@ -940,6 +918,8 @@ interface EventItem {
 ```
 
 ---
+
+\*\*
 
 ## Summary
 

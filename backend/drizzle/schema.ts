@@ -1,17 +1,6 @@
 import { sql } from 'drizzle-orm';
 import { sqliteTable, text, integer, real, index } from 'drizzle-orm/sqlite-core';
 
-// Neighborhoods table
-export const neighborhoods = sqliteTable('neighborhoods', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  name: text('name').notNull(),
-  city: text('city').notNull(),
-  bounds: text('bounds'), // JSON: geographic boundaries
-  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
-}, (table) => ({
-  nameCity: index('neighborhoods_name_city_idx').on(table.name, table.city),
-}));
-
 // Cafes table
 export const cafes = sqliteTable('cafes', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -19,37 +8,33 @@ export const cafes = sqliteTable('cafes', {
   slug: text('slug').notNull().unique(),
 
   // Location
-  lat: real('lat').notNull(),
-  lng: real('lng').notNull(),
-  address: text('address').notNull(),
-  city: text('city').notNull(), // toronto, montreal, tokyo
-  neighborhoodId: integer('neighborhood_id').references(() => neighborhoods.id),
+  link: text('link').notNull(), // Google Maps link
+  latitude: real('latitude').notNull(),
+  longitude: real('longitude').notNull(),
+  city: text('city').notNull(), // toronto, montreal, tokyo (for filtering/navigation only)
 
   // Ratings
   score: real('score').notNull(),
-  valueScore: real('value_score'),
   ambianceScore: real('ambiance_score'),
   otherDrinksScore: real('other_drinks_score'),
 
   // Pricing
-  priceRange: text('price_range'), // $, $$, $$$
+  price: real('price'), // Price value (e.g., 7)
   chargeForAltMilk: integer('charge_for_alt_milk', { mode: 'boolean' }).default(false),
+  gramsUsed: integer('grams_used'), // Grams used (e.g., 5)
 
   // Content
   quickNote: text('quick_note').notNull(),
   review: text('review'),
-  comments: text('comments'),
-  menuHighlights: text('menu_highlights'),
 
-  // Contact
-  hours: text('hours'), // JSON or text format
+  // Contact/Social
+  hours: text('hours'), // JSON object from Google Maps API
   instagram: text('instagram'),
-  tiktok: text('tiktok'),
-  googleMapsUrl: text('google_maps_url'),
+  instagramPostLink: text('instagram_post_link'),
+  tiktokPostLink: text('tiktok_post_link'),
 
-  // Display
-  emoji: text('emoji').notNull(),
-  color: text('color').notNull(),
+  // Media
+  images: text('images'), // Link/URL to images
 
   // Metadata
   createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
@@ -57,7 +42,6 @@ export const cafes = sqliteTable('cafes', {
   deletedAt: text('deleted_at'),
 }, (table) => ({
   cityIdx: index('cafes_city_idx').on(table.city),
-  neighborhoodIdx: index('cafes_neighborhood_idx').on(table.neighborhoodId),
   deletedIdx: index('cafes_deleted_idx').on(table.deletedAt),
   slugIdx: index('cafes_slug_idx').on(table.slug),
 }));
@@ -146,5 +130,3 @@ export type FeedItem = typeof feedItems.$inferSelect;
 export type NewFeedItem = typeof feedItems.$inferInsert;
 export type Event = typeof events.$inferSelect;
 export type NewEvent = typeof events.$inferInsert;
-export type Neighborhood = typeof neighborhoods.$inferSelect;
-export type NewNeighborhood = typeof neighborhoods.$inferInsert;

@@ -2,54 +2,48 @@ import { drizzle } from 'drizzle-orm/d1';
 import * as schema from './schema';
 
 // Sample seed data for testing
-const sampleNeighborhoods = [
-  { name: 'Downtown', city: 'toronto' },
-  { name: 'Annex', city: 'toronto' },
-  { name: 'Queen West', city: 'toronto' },
-  { name: 'Leslieville', city: 'toronto' },
-];
-
 const sampleCafes = [
   {
-    name: 'Matcha Haven',
-    slug: 'matcha-haven',
-    lat: 43.6532,
-    lng: -79.3832,
-    address: '123 Queen St W, Toronto, ON',
+    name: 'Matcha Cafe',
+    slug: 'matcha-cafe',
+    link: 'https://gmaps.com/m2lk3',
+    latitude: 43.6532,
+    longitude: -79.3825,
     city: 'toronto',
     score: 8.5,
-    valueScore: 8.0,
     ambianceScore: 9.0,
     otherDrinksScore: 7.5,
-    priceRange: '$$',
-    chargeForAltMilk: false,
+    price: 7.0,
+    chargeForAltMilk: true,
+    gramsUsed: 5,
     quickNote: 'Cozy spot with exceptional ceremonial grade matcha',
     review: 'One of the best matcha experiences in Toronto. They source directly from Uji and you can taste the difference.',
-    hours: JSON.stringify({ mon: '8-6', tue: '8-6', wed: '8-6', thu: '8-6', fri: '8-6', sat: '9-5', sun: 'closed' }),
+    hours: JSON.stringify({ mon: '8-8', tue: '8-8', wed: '8-8', thu: '8-8', fri: '8-8', sat: '9-7', sun: '9-6' }),
     instagram: '@matchahaven',
-    emoji: '🍵',
-    color: '#7cb342',
+    instagramPostLink: 'https://instagram.com/p/example1',
+    tiktokPostLink: 'https://tiktok.com/@matchahaven/video/1',
+    images: 'https://example.com/matcha-cafe.jpg',
   },
   {
     name: 'Green Leaf Cafe',
     slug: 'green-leaf-cafe',
-    lat: 43.6590,
-    lng: -79.3977,
-    address: '456 Bloor St W, Toronto, ON',
+    link: 'https://gmaps.com/grnlf',
+    latitude: 43.6590,
+    longitude: -79.3977,
     city: 'toronto',
     score: 7.8,
-    valueScore: 8.5,
     ambianceScore: 7.0,
     otherDrinksScore: 8.0,
-    priceRange: '$',
+    price: 5.5,
     chargeForAltMilk: true,
+    gramsUsed: 4,
     quickNote: 'Budget-friendly with solid quality',
     review: 'Great for students and daily matcha drinkers. Not the fanciest, but consistent quality.',
     hours: JSON.stringify({ mon: '7-7', tue: '7-7', wed: '7-7', thu: '7-7', fri: '7-7', sat: '8-6', sun: '9-5' }),
     instagram: '@greenleafto',
-    tiktok: '@greenleafcafe',
-    emoji: '🌿',
-    color: '#8bc34a',
+    instagramPostLink: 'https://instagram.com/p/example2',
+    tiktokPostLink: 'https://tiktok.com/@greenleafto/video/1',
+    images: 'https://example.com/green-leaf.jpg',
   },
 ];
 
@@ -121,22 +115,19 @@ async function seed() {
 
   // Note: This script is meant to be run with wrangler or a similar setup
   // For now, it serves as documentation of the seed data structure
-  console.log('Sample neighborhoods:', sampleNeighborhoods.length);
   console.log('Sample cafes:', sampleCafes.length);
   console.log('Sample drinks:', sampleDrinks.length);
   console.log('Sample feed items:', sampleFeedItems.length);
   console.log('Sample events:', sampleEvents.length);
 
-  console.log('\n⚠️  To seed the database, run:');
-  console.log('   wrangler d1 execute matchamap-db --local --file=./drizzle/migrations/seed.sql');
-  console.log('\n   Or use the admin UI to add cafes manually.');
+  console.log('\n⚠️  To seed the database, use the admin UI to add cafes manually.');
+  console.log('   Or create a seed SQL file based on the sample data above.');
 }
 
 seed().catch(console.error);
 
 // Export for use in actual seeding
 export {
-  sampleNeighborhoods,
   sampleCafes,
   sampleDrinks,
   sampleFeedItems,

@@ -38,14 +38,14 @@ database_name = "matchamap-db"
 database_id = "paste-your-database-id-here"  # <-- Update this line
 ```
 
-### 4. Run Migrations & Seed
+### 4. Run Migrations
 
 ```bash
 # Apply database schema
 npm run db:migrate:local
 
-# Add sample data
-wrangler d1 execute matchamap-db --local --file=./drizzle/migrations/seed.sql
+# Note: Sample data is in drizzle/seed.ts for reference
+# Use the admin UI to add cafes, or manually insert data
 ```
 
 ### 5. Start Dev Server
@@ -69,9 +69,6 @@ curl http://localhost:8787/api/cafes
 
 # Get specific cafe with drinks
 curl http://localhost:8787/api/cafes/1
-
-# List neighborhoods
-curl http://localhost:8787/api/neighborhoods
 
 # List feed items
 curl http://localhost:8787/api/feed
@@ -120,11 +117,11 @@ backend/
 │   ├── routes/               # API endpoints
 │   │   ├── cafes.ts         # Cafe CRUD
 │   │   ├── feed.ts          # Feed items
-│   │   ├── events.ts        # Events
-│   │   └── neighborhoods.ts  # Neighborhoods
+│   │   └── events.ts        # Events
 │   └── utils/               # Helpers (CORS, responses)
 ├── drizzle/
 │   ├── schema.ts            # Database schema
+│   ├── seed.ts              # Sample data reference
 │   └── migrations/          # SQL migrations
 └── wrangler.toml            # Cloudflare config
 ```
