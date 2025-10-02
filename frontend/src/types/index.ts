@@ -53,6 +53,8 @@ export interface Cafe {
   drinks: DrinkItem[] // All drink offerings
   priceRange: PriceRange // General price tier
   chargeForAltMilk: boolean // Whether they charge extra for alternative milk
+  price?: number // Actual price value
+  gramsUsed?: number // Grams of matcha used in default drink
   menuHighlights?: string // Other notable menu items
 
   // Reviews & Description
@@ -62,9 +64,12 @@ export interface Cafe {
 
   // Contact & Info
   instagram?: string
+  instagramPostLink?: string
   tiktok?: string
+  tiktokPostLink?: string
   hours?: string
   googleMapsUrl?: string
+  images?: string
 
   // UI/Display
   emoji: string
