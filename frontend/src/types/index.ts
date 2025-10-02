@@ -44,12 +44,18 @@ export interface Cafe {
   // Location
   latitude: number
   longitude: number
+  lat?: number // Backwards compatibility alias
+  lng?: number // Backwards compatibility alias
   link: string // Google Maps link
+  address: string // Formatted address
   city: string
+  neighborhood?: string // Backwards compatibility
+  googleMapsUrl?: string // Backwards compatibility alias for link
 
   // Ratings
   ambianceScore?: number | null // Cafe ambiance rating (0-10)
   displayScore?: number | null // Calculated from drinks (default OR highest)
+  score?: number | null // Backwards compatibility fallback
 
   // Menu & Pricing
   drinks?: DrinkItem[] // All drink offerings
@@ -64,6 +70,7 @@ export interface Cafe {
   instagram?: string | null
   instagramPostLink?: string | null
   tiktokPostLink?: string | null
+  tiktok?: string | null // Backwards compatibility
   hours?: string | null
   images?: string | null
 

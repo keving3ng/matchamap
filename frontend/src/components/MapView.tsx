@@ -1,5 +1,5 @@
 import React from 'react'
-import { MapPin, Navigation, Crosshair } from 'lucide-react'
+import { MapPin, Navigation, Crosshair, Instagram, Star, Coffee } from 'lucide-react'
 import { useLeafletMap } from '../hooks/useLeafletMap'
 import { useGeolocation } from '../hooks/useGeolocation'
 import { useVisitedCafes } from '../hooks/useVisitedCafes'
@@ -7,10 +7,11 @@ import { useCityStore } from '../stores/cityStore'
 import { CircleButton } from './CircleButton'
 import { getLocationRequestAdvice, getOptimalGeolocationOptions } from '../utils/deviceDetection'
 import { getMapsUrl } from '../utils/mapsUrl'
+import { formatHoursCompact } from '../utils/formatHours'
 import type { MapViewProps } from '../types'
 
 export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCafe, onPinClick, onViewDetails, onClosePopover }) => {
-  const mapsUrl = selectedCafe ? getMapsUrl(selectedCafe.address, selectedCafe.googleMapsUrl) : ''
+  const mapsUrl = selectedCafe ? getMapsUrl(selectedCafe.address || '', selectedCafe.googleMapsUrl || selectedCafe.link) : ''
   const { visitedCafeIds } = useVisitedCafes()
   const { getCity } = useCityStore()
   const currentCity = getCity()
@@ -180,54 +181,128 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
 
           {/* Mobile Bottom Sheet */}
           <div
-            className="absolute bottom-4 left-4 right-4 bg-white rounded-2xl shadow-2xl p-4 z-[9999] border-2 border-green-200 map-popover md:hidden transform transition-all duration-300 ease-out animate-slide-up"
+            className="absolute bottom-4 left-4 right-4 bg-white rounded-2xl shadow-2xl p-4 z-[9999] border-2 border-green-200 map-popover md:hidden transform transition-all duration-300 ease-out animate-slide-up max-h-[70vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Handle indicator */}
             <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-3 animate-scale-in" style={{ animationDelay: '0.1s' }}></div>
 
+            {/* Image */}
+            {selectedCafe.images && (
+              <div className="mb-3 -mx-4 -mt-4">
+                <img
+                  src={selectedCafe.images}
+                  alt={selectedCafe.name}
+                  className="w-full h-32 object-cover rounded-t-2xl"
+                />
+              </div>
+            )}
+
             <div className="flex justify-between items-start mb-2">
-              <div>
+              <div className="flex-1">
                 <h3 className="font-bold text-lg text-gray-800">{selectedCafe.name}</h3>
-                <p className="text-sm text-gray-500">{selectedCafe.neighborhood}</p>
+                {selectedCafe.address && (
+                  <p className="text-xs text-gray-500 mt-1">{selectedCafe.address}</p>
+                )}
               </div>
               {(selectedCafe.displayScore || selectedCafe.score) && (
-                <div className="bg-green-500 text-white px-3 py-1 rounded-full font-bold text-lg">
+                <div className="bg-green-500 text-white px-3 py-1 rounded-full font-bold text-lg ml-2 flex-shrink-0">
                   {(selectedCafe.displayScore || selectedCafe.score)!.toFixed(1)}
                 </div>
               )}
             </div>
+
+            {/* Distance */}
             {selectedCafe.distanceInfo ? (
-              <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-                <Navigation size={16} className="text-green-600" />
+              <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+                <Navigation size={14} className="text-green-600" />
                 <span>{selectedCafe.distanceInfo.formattedKm} • {selectedCafe.distanceInfo.walkTime} walk</span>
               </div>
             ) : (
               <button
                 onClick={handleLocationClick}
-                className="flex items-center gap-2 text-sm text-gray-500 mb-3 hover:text-gray-700 transition"
+                className="flex items-center gap-2 text-xs text-gray-500 mb-2 hover:text-gray-700 transition"
               >
-                <MapPin size={16} className="text-gray-400" />
+                <MapPin size={14} className="text-gray-400" />
                 <span className="underline decoration-dotted">Enable location services</span>
               </button>
             )}
-            <div className="flex gap-2">
+
+            {/* Quick Note */}
+            {selectedCafe.quickNote && (
+              <p className="text-sm text-gray-600 italic mb-3">"{selectedCafe.quickNote}"</p>
+            )}
+
+            {/* Drinks List */}
+            {selectedCafe.drinks && selectedCafe.drinks.length > 0 && (
+              <div className="mb-3">
+                <div className="flex items-center gap-1 text-xs font-semibold text-gray-700 mb-1">
+                  <Coffee size={12} />
+                  Drinks
+                </div>
+                <div className="space-y-1">
+                  {selectedCafe.drinks
+                    .filter(d => d.isDefault)
+                    .concat(selectedCafe.drinks.filter(d => !d.isDefault).sort((a, b) => b.score - a.score))
+                    .slice(0, 3)
+                    .map(drink => (
+                      <div key={drink.id} className="flex items-center justify-between text-xs">
+                        <span className="text-gray-700">{drink.name}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-500">${drink.priceAmount.toFixed(2)}</span>
+                          <div className="flex items-center gap-0.5">
+                            <Star size={10} className="text-green-600 fill-green-600" />
+                            <span className="font-semibold text-green-600">{drink.score.toFixed(1)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
+
+            {/* Hours */}
+            {selectedCafe.hours && (() => {
+              const hoursData = formatHoursCompact(selectedCafe.hours)
+              return hoursData && hoursData.todayHours ? (
+                <div className="mb-3">
+                  <p className="text-xs font-semibold text-gray-700 mb-1">Hours</p>
+                  <p className="text-xs text-gray-600">
+                    <span className="font-semibold text-green-600">Today: </span>
+                    {hoursData.todayHours.split(': ')[1]}
+                  </p>
+                </div>
+              ) : null
+            })()}
+
+            {/* Action Buttons */}
+            <div className="flex gap-2 mb-2">
               <a
                 href={mapsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 text-white py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-600 transition shadow-md flex items-center justify-center gap-2"
+                className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 text-white py-2.5 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-600 transition shadow-md flex items-center justify-center gap-2 text-sm"
               >
-                <Navigation size={18} />
+                <Navigation size={16} />
                 Directions
               </a>
-              <button
-                onClick={() => onViewDetails(selectedCafe)}
-                className="flex-1 bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-green-600 transition shadow-md"
-              >
-                View Details
-              </button>
+              {selectedCafe.instagram && (
+                <a
+                  href={`https://instagram.com/${selectedCafe.instagram.replace('@', '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-gradient-to-br from-purple-500 to-pink-500 text-white p-2.5 rounded-xl hover:from-purple-600 hover:to-pink-600 transition shadow-md flex items-center justify-center"
+                >
+                  <Instagram size={16} />
+                </a>
+              )}
             </div>
+            <button
+              onClick={() => onViewDetails(selectedCafe)}
+              className="w-full bg-gradient-to-r from-green-600 to-green-500 text-white py-2.5 rounded-xl font-semibold hover:from-green-700 hover:to-green-600 transition shadow-md text-sm"
+            >
+              View Full Details
+            </button>
           </div>
 
           {/* Tablet+ Sidebar */}
@@ -236,37 +311,47 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
             onClick={(e) => e.stopPropagation()}
           >
             <div className="space-y-4">
+              {/* Image */}
+              {selectedCafe.images && (
+                <div className="-mx-6 -mt-6 mb-4">
+                  <img
+                    src={selectedCafe.images}
+                    alt={selectedCafe.name}
+                    className="w-full h-48 object-cover rounded-t-2xl"
+                  />
+                </div>
+              )}
+
               {/* Header */}
               <div className="flex justify-between items-start">
-                <div>
+                <div className="flex-1">
                   <h3 className="font-bold text-xl text-gray-800">{selectedCafe.name}</h3>
-                  <p className="text-gray-500 mt-1">{selectedCafe.neighborhood}</p>
+                  {selectedCafe.address && (
+                    <p className="text-sm text-gray-500 mt-1">{selectedCafe.address}</p>
+                  )}
                 </div>
                 {(selectedCafe.displayScore || selectedCafe.score) && (
-                  <div className="bg-green-500 text-white px-4 py-2 rounded-full font-bold text-xl">
+                  <div className="bg-green-500 text-white px-4 py-2 rounded-full font-bold text-xl ml-3 flex-shrink-0">
                     {(selectedCafe.displayScore || selectedCafe.score)!.toFixed(1)}
                   </div>
                 )}
               </div>
 
-              {/* Location Info */}
-              <div className="space-y-2">
-                {selectedCafe.distanceInfo ? (
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <Navigation size={18} className="text-green-600" />
-                    <span>{selectedCafe.distanceInfo.formattedKm} • {selectedCafe.distanceInfo.walkTime} walk</span>
-                  </div>
-                ) : (
-                  <button
-                    onClick={handleLocationClick}
-                    className="flex items-center gap-2 text-gray-500 hover:text-gray-700 transition"
-                  >
-                    <MapPin size={18} className="text-gray-400" />
-                    <span className="underline decoration-dotted">Enable location services</span>
-                  </button>
-                )}
-                <p className="text-sm text-gray-700">{selectedCafe.address}</p>
-              </div>
+              {/* Distance */}
+              {selectedCafe.distanceInfo ? (
+                <div className="flex items-center gap-2 text-gray-600">
+                  <Navigation size={16} className="text-green-600" />
+                  <span className="text-sm">{selectedCafe.distanceInfo.formattedKm} • {selectedCafe.distanceInfo.walkTime} walk</span>
+                </div>
+              ) : (
+                <button
+                  onClick={handleLocationClick}
+                  className="flex items-center gap-2 text-gray-500 hover:text-gray-700 transition"
+                >
+                  <MapPin size={16} className="text-gray-400" />
+                  <span className="text-sm underline decoration-dotted">Enable location services</span>
+                </button>
+              )}
 
               {/* Quick Note */}
               {selectedCafe.quickNote && (
@@ -275,23 +360,67 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                 </div>
               )}
 
-              {/* Additional Info for larger screens */}
-              {selectedCafe.hours && (
+              {/* Drinks List */}
+              {selectedCafe.drinks && selectedCafe.drinks.length > 0 && (
                 <div>
-                  <h4 className="font-semibold text-gray-800 mb-2">Hours</h4>
-                  <p className="text-sm text-gray-600">{selectedCafe.hours}</p>
+                  <div className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-2">
+                    <Coffee size={16} />
+                    Drinks
+                  </div>
+                  <div className="space-y-2">
+                    {selectedCafe.drinks
+                      .filter(d => d.isDefault)
+                      .concat(selectedCafe.drinks.filter(d => !d.isDefault).sort((a, b) => b.score - a.score))
+                      .slice(0, 4)
+                      .map(drink => (
+                        <div key={drink.id} className="flex items-center justify-between text-sm bg-gray-50 rounded-lg p-2">
+                          <span className="text-gray-700 font-medium">{drink.name}</span>
+                          <div className="flex items-center gap-3">
+                            <span className="text-gray-600">${drink.priceAmount.toFixed(2)}</span>
+                            <div className="flex items-center gap-1">
+                              <Star size={12} className="text-green-600 fill-green-600" />
+                              <span className="font-semibold text-green-600">{drink.score.toFixed(1)}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
                 </div>
               )}
 
-              {selectedCafe.priceRange && (
-                <div>
-                  <h4 className="font-semibold text-gray-800 mb-2">Price Range</h4>
-                  <p className="text-sm text-gray-600">{selectedCafe.priceRange}</p>
-                </div>
-              )}
+              {/* Hours */}
+              {selectedCafe.hours && (() => {
+                const hoursData = formatHoursCompact(selectedCafe.hours)
+                const today = new Date().getDay()
+                const dayMap = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+                const todayName = dayMap[today]
+
+                return hoursData && hoursData.allHours.length > 0 ? (
+                  <div>
+                    <h4 className="font-semibold text-gray-800 mb-2 text-sm">Hours</h4>
+                    <div className="space-y-1">
+                      {hoursData.allHours.map((hours, index) => {
+                        const isToday = hours.startsWith(todayName)
+                        return (
+                          <p
+                            key={index}
+                            className={`text-xs ${
+                              isToday
+                                ? 'font-semibold text-green-600 bg-green-50 px-2 py-1 rounded'
+                                : 'text-gray-600'
+                            }`}
+                          >
+                            {hours}
+                          </p>
+                        )
+                      })}
+                    </div>
+                  </div>
+                ) : null
+              })()}
 
               {/* Action Buttons */}
-              <div className="space-y-3 pt-4">
+              <div className="space-y-2 pt-2">
                 <button
                   onClick={() => onViewDetails(selectedCafe)}
                   className="w-full bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-green-600 transition shadow-md"
@@ -299,41 +428,28 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                   View Full Details
                 </button>
 
-                <a
-                  href={mapsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full bg-white border-2 border-green-300 text-green-600 py-3 rounded-xl font-semibold hover:bg-green-50 transition flex items-center justify-center gap-2"
-                >
-                  <Navigation size={18} />
-                  Get Directions
-                </a>
-              </div>
-
-              {/* Social Links */}
-              {(selectedCafe.instagram || selectedCafe.tiktok) && (
-                <div>
-                  <h4 className="font-semibold text-gray-800 mb-3">Follow</h4>
-                  <div className="flex gap-2">
-                    {selectedCafe.instagram && (
-                      <a
-                        href="#"
-                        className="flex-1 bg-gradient-to-br from-purple-500 to-pink-500 text-white py-2 px-3 rounded-lg font-medium text-center hover:from-purple-600 hover:to-pink-600 transition text-sm"
-                      >
-                        Instagram
-                      </a>
-                    )}
-                    {selectedCafe.tiktok && (
-                      <a
-                        href="#"
-                        className="flex-1 bg-gray-800 text-white py-2 px-3 rounded-lg font-medium text-center hover:bg-gray-900 transition text-sm"
-                      >
-                        TikTok
-                      </a>
-                    )}
-                  </div>
+                <div className="flex gap-2">
+                  <a
+                    href={mapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 bg-white border-2 border-blue-300 text-blue-600 py-2.5 rounded-xl font-semibold hover:bg-blue-50 transition flex items-center justify-center gap-2 text-sm"
+                  >
+                    <Navigation size={16} />
+                    Directions
+                  </a>
+                  {selectedCafe.instagram && (
+                    <a
+                      href={`https://instagram.com/${selectedCafe.instagram.replace('@', '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-gradient-to-br from-purple-500 to-pink-500 text-white p-2.5 rounded-xl hover:from-purple-600 hover:to-pink-600 transition shadow-md flex items-center justify-center"
+                    >
+                      <Instagram size={16} />
+                    </a>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </>

@@ -42,8 +42,12 @@ export const useDataStore = create<DataStore>((set, get) => ({
         lat: cafe.latitude, // Backwards compatibility
         lng: cafe.longitude, // Backwards compatibility
         link: cafe.link,
+        googleMapsUrl: cafe.link, // Backwards compatibility alias
         city: cafe.city,
+        address: cafe.address || '',
+        neighborhood: '', // Backwards compatibility - not in new schema
         displayScore: cafe.displayScore, // Calculated from drinks
+        score: cafe.displayScore, // Backwards compatibility fallback
         ambianceScore: cafe.ambianceScore,
         drinks: cafe.drinks || [], // Include drinks from API
         chargeForAltMilk: cafe.chargeForAltMilk, // Number or null
@@ -53,6 +57,7 @@ export const useDataStore = create<DataStore>((set, get) => ({
         instagram: cafe.instagram || '',
         instagramPostLink: cafe.instagramPostLink || '',
         tiktokPostLink: cafe.tiktokPostLink || '',
+        tiktok: '', // Backwards compatibility - not in new schema
         hours: cafe.hours || '',
         images: cafe.images || '',
         createdAt: cafe.createdAt,

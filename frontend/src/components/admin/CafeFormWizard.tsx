@@ -103,6 +103,7 @@ export const CafeFormWizard: React.FC<CafeFormWizardProps> = ({ cafe, onSave, on
         name: formData.name,
         slug,
         link: formData.googleMapsUrl,
+        address: formData.address || '',
         latitude: formData.lat,
         longitude: formData.lng,
         city: formData.city,
