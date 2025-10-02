@@ -4,6 +4,7 @@ import { useDataStore } from '../../stores/dataStore'
 import { api } from '../../utils/api'
 import { CafeForm } from './CafeForm'
 import { CafeFormWizard } from './CafeFormWizard'
+import { DrinksManagement } from './DrinksManagement'
 import type { Cafe } from '../../types'
 
 export const CafeManagementPage: React.FC = () => {
@@ -13,6 +14,7 @@ export const CafeManagementPage: React.FC = () => {
   const [editingCafe, setEditingCafe] = useState<Cafe | null>(null)
   const [filterCity, setFilterCity] = useState<string>('all')
   const [isDeleting, setIsDeleting] = useState<number | null>(null)
+  const [managingDrinksCafe, setManagingDrinksCafe] = useState<Cafe | null>(null)
 
   useEffect(() => {
     fetchCafes()
@@ -157,9 +159,11 @@ export const CafeManagementPage: React.FC = () => {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="font-bold text-lg text-gray-800">{cafe.name}</h3>
-                      <span className="bg-green-500 text-white px-2.5 py-0.5 rounded-full font-bold text-sm">
-                        {cafe.score.toFixed(1)}
-                      </span>
+                      {(cafe.displayScore || cafe.score) && (
+                        <span className="bg-green-500 text-white px-2.5 py-0.5 rounded-full font-bold text-sm">
+                          {(cafe.displayScore || cafe.score)!.toFixed(1)}
+                        </span>
+                      )}
                       <span className="text-sm text-gray-500 capitalize">{cafe.city}</span>
                     </div>
                     <p className="text-sm text-gray-600 mb-1 italic">"{cafe.quickNote}"</p>
@@ -168,7 +172,14 @@ export const CafeManagementPage: React.FC = () => {
                     )}
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => setManagingDrinksCafe(cafe)}
+                      className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition"
+                    >
+                      <Coffee size={16} />
+                      Drinks
+                    </button>
                     <button
                       onClick={() => handleEditCafe(cafe)}
                       className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
@@ -216,6 +227,15 @@ export const CafeManagementPage: React.FC = () => {
           onCancel={() => setShowForm(false)}
         />
       ) : null}
+
+      {/* Drinks Management Modal */}
+      {managingDrinksCafe && (
+        <DrinksManagement
+          cafeId={managingDrinksCafe.id}
+          cafeName={managingDrinksCafe.name}
+          onClose={() => setManagingDrinksCafe(null)}
+        />
+      )}
     </div>
   )
 }

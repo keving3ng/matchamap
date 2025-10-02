@@ -13,8 +13,8 @@ export const cafes = sqliteTable('cafes', {
   longitude: real('longitude').notNull(),
   city: text('city').notNull(), // toronto, montreal, tokyo (for filtering/navigation only)
 
-  // Ratings
-  score: real('score').notNull(),
+  // Ratings (legacy - calculated from drinks now)
+  score: real('score'), // Kept for backwards compatibility, use drinks.score instead
   ambianceScore: real('ambiance_score'),
   otherDrinksScore: real('other_drinks_score'),
 
@@ -53,6 +53,7 @@ export const drinks = sqliteTable('drinks', {
 
   type: text('type').notNull(),
   name: text('name').notNull(),
+  score: real('score').notNull(), // Individual drink score (0-10)
   priceAmount: integer('price_amount').notNull(),
   priceCurrency: text('price_currency').notNull().default('CAD'), // CAD, USD, JPY
   gramsUsed: integer('grams_used'),

@@ -21,59 +21,59 @@ export enum DrinkType {
 }
 
 export interface DrinkItem {
-  type: DrinkType
+  id: number
+  cafeId: number
+  type: string // Drink type (e.g., "matcha_latte", "iced_matcha_latte")
   name: string // Display name (e.g., "Matcha Latte", "Ceremonial Matcha")
-  price: number // Price in cents to avoid float issues
-  gramsUsed?: number // Grams of matcha powder used
+  score: number // Individual drink score (0-10)
+  priceAmount: number // Price amount
+  priceCurrency: string // Currency code (CAD, USD, JPY)
+  gramsUsed?: number | null // Grams of matcha powder used
   isDefault: boolean // The primary drink reviewed/recommended
-  notes?: string // Specific notes about this drink
+  notes?: string | null // Specific notes about this drink
+  createdAt?: string
+  updatedAt?: string
 }
 
 export interface Cafe {
   // Core identification
   id: number
   name: string
+  slug: string
 
   // Location
-  lat: number
-  lng: number
-  neighborhood: string
-  address: string
-  city: City
+  latitude: number
+  longitude: number
+  link: string // Google Maps link
+  city: string
 
-  // Ratings
-  score: number // Overall matcha quality rating
-  secondaryScores?: {
-    value: number
-    ambiance: number
-    otherDrinks: number
-  }
+  // Ratings (legacy - now calculated from drinks)
+  score?: number | null // Legacy cafe score, may be null
+  ambianceScore?: number | null
+  otherDrinksScore?: number | null
+  displayScore?: number | null // Calculated from drinks (default OR highest)
 
   // Menu & Pricing
-  drinks: DrinkItem[] // All drink offerings
-  priceRange: PriceRange // General price tier
-  chargeForAltMilk: boolean // Whether they charge extra for alternative milk
-  price?: number // Actual price value
-  gramsUsed?: number // Grams of matcha used in default drink
-  menuHighlights?: string // Other notable menu items
+  drinks?: DrinkItem[] // All drink offerings
+  price?: number | null // Price value
+  chargeForAltMilk?: boolean // Whether they charge extra for alternative milk
+  gramsUsed?: number | null // Grams of matcha used in default drink
 
   // Reviews & Description
   quickNote: string // Short tagline/summary
-  review?: string // Full review text
-  comments?: string // Additional notes/observations
+  review?: string | null // Full review text
 
   // Contact & Info
-  instagram?: string
-  instagramPostLink?: string
-  tiktok?: string
-  tiktokPostLink?: string
-  hours?: string
-  googleMapsUrl?: string
-  images?: string
+  instagram?: string | null
+  instagramPostLink?: string | null
+  tiktokPostLink?: string | null
+  hours?: string | null
+  images?: string | null
 
-  // UI/Display
-  emoji: string
-  color: string
+  // Metadata
+  createdAt?: string
+  updatedAt?: string
+  deletedAt?: string | null
 }
 
 // Re-export distance types for convenience

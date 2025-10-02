@@ -161,6 +161,47 @@ export const placesAPI = {
 }
 
 /**
+ * Drinks API endpoints
+ */
+export const drinksAPI = {
+  /**
+   * Get all drinks for a cafe
+   */
+  async getAll(cafeId: number): Promise<{ drinks: any[] }> {
+    return fetchAPI(`/admin/cafes/${cafeId}/drinks`)
+  },
+
+  /**
+   * Create new drink (admin only)
+   */
+  async create(cafeId: number, drink: any): Promise<{ drink: any }> {
+    return fetchAPI(`/admin/cafes/${cafeId}/drinks`, {
+      method: 'POST',
+      body: JSON.stringify(drink),
+    })
+  },
+
+  /**
+   * Update drink (admin only)
+   */
+  async update(id: number, drink: any): Promise<{ drink: any }> {
+    return fetchAPI(`/admin/drinks/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(drink),
+    })
+  },
+
+  /**
+   * Delete drink (admin only)
+   */
+  async delete(id: number): Promise<{ message: string }> {
+    return fetchAPI(`/admin/drinks/${id}`, {
+      method: 'DELETE',
+    })
+  },
+}
+
+/**
  * Export all APIs
  */
 export const api = {
@@ -169,6 +210,7 @@ export const api = {
   events: eventsAPI,
   health: healthAPI,
   places: placesAPI,
+  drinks: drinksAPI,
 }
 
 export default api

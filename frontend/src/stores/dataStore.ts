@@ -36,35 +36,31 @@ export const useDataStore = create<DataStore>((set, get) => ({
       const cafes = response.cafes.map((cafe: any) => ({
         id: cafe.id,
         name: cafe.name,
-        lat: cafe.latitude,
-        lng: cafe.longitude,
-        neighborhood: '', // Not in new schema
-        address: '', // Not in new schema
+        slug: cafe.slug,
+        latitude: cafe.latitude,
+        longitude: cafe.longitude,
+        lat: cafe.latitude, // Backwards compatibility
+        lng: cafe.longitude, // Backwards compatibility
+        link: cafe.link,
         city: cafe.city,
         score: cafe.score,
-        secondaryScores: {
-          value: 0, // Not in new schema
-          ambiance: cafe.ambianceScore || 0,
-          otherDrinks: cafe.otherDrinksScore || 0,
-        },
-        drinks: [], // Will be fetched separately if needed
-        priceRange: (cafe.price ? (cafe.price < 6 ? '$' : cafe.price < 8 ? '$$' : '$$$') : '$$') as any,
+        displayScore: cafe.displayScore, // Calculated from drinks
+        ambianceScore: cafe.ambianceScore,
+        otherDrinksScore: cafe.otherDrinksScore,
+        drinks: cafe.drinks || [], // Include drinks from API
         price: cafe.price,
         chargeForAltMilk: cafe.chargeForAltMilk || false,
         gramsUsed: cafe.gramsUsed,
-        menuHighlights: '',
         quickNote: cafe.quickNote || '',
         review: cafe.review || '',
-        comments: '',
         instagram: cafe.instagram || '',
         instagramPostLink: cafe.instagramPostLink || '',
-        tiktok: '', // Not in new schema
         tiktokPostLink: cafe.tiktokPostLink || '',
         hours: cafe.hours || '',
-        googleMapsUrl: cafe.link || '',
         images: cafe.images || '',
-        emoji: '🍵', // Default emoji
-        color: '#7cb342', // Default color
+        createdAt: cafe.createdAt,
+        updatedAt: cafe.updatedAt,
+        deletedAt: cafe.deletedAt,
       }))
 
       set({ allCafes: cafes, isLoading: false })
