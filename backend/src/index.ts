@@ -11,6 +11,7 @@ import { listAllEvents, getEvent, createEvent, updateEvent, deleteEvent } from '
 import { lookupPlace } from './routes/places';
 import { bulkImportCafes, exportCafes } from './routes/import';
 import { register, login, logout, getCurrentUser, refreshToken } from './routes/auth';
+import { joinWaitlist } from './routes/waitlist';
 import { requireAuth, requireAdminAuth } from './middleware/auth';
 import { notFoundResponse } from './utils/response';
 
@@ -24,6 +25,7 @@ router.get('/api/cafes', listCafes);
 router.get('/api/cafes/:id', getCafe);
 router.get('/api/feed', listFeedItems);
 router.get('/api/events', listEvents);
+router.post('/api/waitlist', joinWaitlist);
 
 // Auth endpoints
 router.post('/api/auth/register', register);

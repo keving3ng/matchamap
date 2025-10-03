@@ -43,6 +43,13 @@
       "when": 1759506595328,
       "tag": "0006_add_users_sessions",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1759519099808,
+      "tag": "0006_brief_trish_tilby",
+      "breakpoints": true
     }
   ]
 }

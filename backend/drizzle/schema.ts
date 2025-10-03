@@ -146,6 +146,20 @@ export const sessions = sqliteTable('sessions', {
   expiresIdx: index('sessions_expires_idx').on(table.expiresAt),
 }));
 
+// Waitlist table
+export const waitlist = sqliteTable('waitlist', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  email: text('email').notNull().unique(),
+  referralSource: text('referral_source'), // Optional - how they found us
+  converted: integer('converted', { mode: 'boolean' }).default(false), // Track if converted to user
+  userId: integer('user_id').references(() => users.id), // Link to user if converted
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  convertedAt: text('converted_at'),
+}, (table) => ({
+  emailIdx: index('waitlist_email_idx').on(table.email),
+  convertedIdx: index('waitlist_converted_idx').on(table.converted),
+}));
+
 // Type exports for use in the application
 export type Cafe = typeof cafes.$inferSelect;
 export type NewCafe = typeof cafes.$inferInsert;
@@ -159,3 +173,5 @@ export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Session = typeof sessions.$inferSelect;
 export type NewSession = typeof sessions.$inferInsert;
+export type Waitlist = typeof waitlist.$inferSelect;
+export type NewWaitlist = typeof waitlist.$inferInsert;
