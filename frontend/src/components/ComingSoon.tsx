@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { isValidEmail } from '../utils/validation'
 
 interface ComingSoonProps {
   onPasswordCorrect: () => void
@@ -25,15 +26,16 @@ export const ComingSoon: React.FC<ComingSoonProps> = ({ onPasswordCorrect }) => 
   const handleWaitlistSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    // Basic email validation
-    if (!email || !email.includes('@')) {
+    // Email validation
+    if (!email || !isValidEmail(email)) {
       return
     }
 
     setIsSubmitting(true)
 
     try {
-      const response = await fetch('http://localhost:8787/api/waitlist', {
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8787'
+      const response = await fetch(`${API_BASE_URL}/api/waitlist`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

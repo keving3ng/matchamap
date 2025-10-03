@@ -15,8 +15,8 @@ export async function joinWaitlist(request: IRequest, env: Env): Promise<Respons
 
     const email = body.email.toLowerCase().trim();
 
-    // Basic email validation
-    if (!email.includes('@') || email.length < 5) {
+    // Email validation - check for @ and . and length constraints
+    if (!email.includes('@') || !email.includes('.') || email.length < 5 || email.length > 254) {
       return errorResponse('Invalid email address', 400, request as Request, env);
     }
 
