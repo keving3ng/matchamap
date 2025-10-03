@@ -131,6 +131,32 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
           </div>
         )}
 
+        {/* Cafe Details Section */}
+        {(cafe.ambianceScore || cafe.chargeForAltMilk !== undefined) && (
+          <div className="mt-6">
+            <h3 className="text-lg font-bold text-gray-800 mb-3">Cafe Details</h3>
+            <div className="bg-white rounded-xl shadow p-4 border border-green-100 space-y-3">
+              {cafe.ambianceScore && (
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-700">Ambiance</span>
+                  <div className="flex items-center gap-2">
+                    <Star size={16} className="text-yellow-500 fill-yellow-500" />
+                    <span className="font-semibold text-green-600">{cafe.ambianceScore.toFixed(1)}/10</span>
+                  </div>
+                </div>
+              )}
+              {cafe.chargeForAltMilk !== null && cafe.chargeForAltMilk !== undefined && (
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-700">Alternative Milk</span>
+                  <span className="font-semibold text-gray-800">
+                    {cafe.chargeForAltMilk > 0 ? `+$${cafe.chargeForAltMilk.toFixed(2)}` : 'Free'}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Review Section */}
         {cafe.review && (
           <div className="mt-6">

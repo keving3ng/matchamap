@@ -13,19 +13,16 @@ export const cafes = sqliteTable('cafes', {
   longitude: real('longitude').notNull(),
   city: text('city').notNull(), // toronto, montreal, tokyo (for filtering/navigation only)
 
-  // Ratings (legacy - calculated from drinks now)
-  score: real('score'), // Kept for backwards compatibility, use drinks.score instead
-  ambianceScore: real('ambiance_score'),
-  otherDrinksScore: real('other_drinks_score'),
+  // Ratings
+  ambianceScore: real('ambiance_score'), // Cafe ambiance rating (0-10)
 
   // Pricing
-  price: real('price'), // Price value (e.g., 7)
-  chargeForAltMilk: integer('charge_for_alt_milk', { mode: 'boolean' }).default(false),
-  gramsUsed: integer('grams_used'), // Grams used (e.g., 5)
+  chargeForAltMilk: real('charge_for_alt_milk'), // Price charged for alt milk (null if free)
 
   // Content
   quickNote: text('quick_note').notNull(),
   review: text('review'),
+  source: text('source'), // Source of cafe info (e.g., "Google", "Instagram", "Friend recommendation")
 
   // Contact/Social
   hours: text('hours'), // JSON object from Google Maps API
