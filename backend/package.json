@@ -1,26 +1,29 @@
 {
-  "name": "@matchamap/backend",
+  "name": "matchamap-backend",
   "version": "1.0.0",
-  "description": "MatchaMap backend - Cloudflare Workers + D1",
-  "main": "src/index.ts",
+  "type": "module",
+  "private": true,
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "tail": "wrangler tail",
-    "typecheck": "tsc --noEmit",
-    "db:generate": "drizzle-kit generate:sqlite",
-    "db:push": "drizzle-kit push:sqlite",
-    "db:studio": "drizzle-kit studio",
-    "db:migrate": "wrangler d1 migrations apply matchamap-db"
+    "deploy:production": "wrangler deploy --env production",
+    "db:create": "wrangler d1 create matchamap-db",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate:local": "wrangler d1 migrations apply matchamap-db --local",
+    "db:migrate:prod": "wrangler d1 migrations apply matchamap-db --remote",
+    "db:seed": "tsx drizzle/seed.ts",
+    "db:export": "tsx drizzle/export.ts",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "drizzle-orm": "^0.29.0",
-    "itty-router": "^4.0.0"
+    "drizzle-orm": "^0.36.4",
+    "itty-router": "^5.0.18"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20231025.0",
-    "drizzle-kit": "^0.20.0",
-    "typescript": "^5.2.2",
-    "wrangler": "^3.0.0"
+    "@cloudflare/workers-types": "^4.20240925.0",
+    "drizzle-kit": "^0.28.1",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3",
+    "wrangler": "^4.40.3"
   }
 }
