@@ -1,24 +1,23 @@
 import { IRequest } from 'itty-router';
 import { eq } from 'drizzle-orm';
 import { Env } from '../types';
-import { jsonResponse, errorResponse } from '../utils/response';
+import { jsonResponse, errorResponse, badRequestResponse } from '../utils/response';
 import { drizzle } from 'drizzle-orm/d1';
 import { waitlist } from '../../drizzle/schema';
+import { safeValidate, waitlistSchema } from '../validators';
 
 export async function joinWaitlist(request: IRequest, env: Env): Promise<Response> {
   try {
-    const body = await request.json?.() as { email?: string; referralSource?: string };
+    const body = await request.json?.();
 
-    if (!body || !body.email) {
-      return errorResponse('Email is required', 400, request as Request, env);
+    // Validate input using Zod schema
+    const validation = safeValidate(waitlistSchema, body);
+    if (!validation.success) {
+      return badRequestResponse(validation.error, request as Request, env);
     }
 
-    const email = body.email.toLowerCase().trim();
-
-    // Email validation - check for @ and . and length constraints
-    if (!email.includes('@') || !email.includes('.') || email.length < 5 || email.length > 254) {
-      return errorResponse('Invalid email address', 400, request as Request, env);
-    }
+    const { email, referralSource } = validation.data;
+    const normalizedEmail = email.toLowerCase().trim();
 
     const db = drizzle(env.DB);
 
@@ -26,7 +25,7 @@ export async function joinWaitlist(request: IRequest, env: Env): Promise<Respons
     const existingEntry = await db
       .select()
       .from(waitlist)
-      .where(eq(waitlist.email, email))
+      .where(eq(waitlist.email, normalizedEmail))
       .get();
 
     if (existingEntry) {
@@ -44,8 +43,8 @@ export async function joinWaitlist(request: IRequest, env: Env): Promise<Respons
 
     // Insert new waitlist entry
     await db.insert(waitlist).values({
-      email,
-      referralSource: body.referralSource || null,
+      email: normalizedEmail,
+      referralSource: referralSource || null,
     });
 
     return jsonResponse(

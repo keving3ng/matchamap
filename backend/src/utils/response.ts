@@ -1,5 +1,6 @@
 import { Env } from '../types';
 import { getCorsHeaders } from './cors';
+import { getSecurityHeaders } from '../middleware/securityHeaders';
 
 export function jsonResponse(
   data: unknown,
@@ -11,6 +12,7 @@ export function jsonResponse(
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...getCorsHeaders(request, env),
+    ...getSecurityHeaders(env),
   };
 
   if (cacheControl) {
