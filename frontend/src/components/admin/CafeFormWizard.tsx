@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { X, Save, MapPin, DollarSign, Star, Coffee, ArrowRight, ArrowLeft, Search } from 'lucide-react'
 import { api } from '../../utils/api'
+import { formatHoursList } from '../../utils/formatHours'
 import type { Cafe } from '../../types'
 
 interface CafeFormWizardProps {
@@ -332,13 +333,20 @@ export const CafeFormWizard: React.FC<CafeFormWizardProps> = ({ cafe, onSave, on
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Hours
                   </label>
-                  <textarea
-                    name="hours"
-                    value={formData.hours}
-                    onChange={handleChange}
-                    rows={3}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  />
+                  {formData.hours ? (
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <div className="text-sm text-gray-700 space-y-1">
+                        {formatHoursList(formData.hours).map((hours, index) => (
+                          <div key={index}>{hours}</div>
+                        ))}
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2">
+                        Automatically imported from Google Maps
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500 italic">No hours available</p>
+                  )}
                 </div>
               </div>
 

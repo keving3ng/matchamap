@@ -1,14 +1,18 @@
-import React from 'react'
-import { MapPin, Navigation, Heart, CheckCircle, Instagram } from 'lucide-react'
+import React, { useState } from 'react'
+import { MapPin, Navigation, Heart, CheckCircle, Instagram, ChevronDown, ChevronUp } from 'lucide-react'
 import { useFeatureStore } from '../stores/featureStore'
 import { getMapsUrl } from '../utils/mapsUrl'
 import { ContentContainer } from './ContentContainer'
+import { formatHoursCompact } from '../utils/formatHours'
 import type { DetailViewProps } from '../types'
 
 export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, onToggleVisited }) => {
   const { isPassportEnabled, isUserAccountsEnabled } = useFeatureStore()
   const isVisited: boolean = visitedLocations.includes(cafe.id)
   const mapsUrl = getMapsUrl(cafe.address, cafe.googleMapsUrl)
+  const [showAllHours, setShowAllHours] = useState(false)
+
+  const hoursData = cafe.hours ? formatHoursCompact(cafe.hours) : null
 
   return (
     <div className="flex-1 overflow-y-auto pb-24 pt-0">
@@ -89,11 +93,49 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
         )}
 
         {/* Additional Info Sections */}
-        {cafe.hours && (
+        {hoursData && hoursData.allHours.length > 0 && (
           <div className="mt-6">
             <h3 className="text-lg font-bold text-gray-800 mb-3">Hours</h3>
             <div className="bg-white rounded-xl shadow p-4 border border-green-100">
-              <p className="text-gray-700">{cafe.hours}</p>
+              {/* Today's hours - always show */}
+              {hoursData.todayHours && (
+                <div className="mb-2">
+                  <span className="font-semibold text-green-600">Today: </span>
+                  <span className="text-gray-700">{hoursData.todayHours.split(': ')[1]}</span>
+                </div>
+              )}
+
+              {/* Full week hours - expandable */}
+              {hoursData.allHours.length > 1 && (
+                <>
+                  <button
+                    onClick={() => setShowAllHours(!showAllHours)}
+                    className="text-sm text-green-600 hover:text-green-700 flex items-center gap-1 mt-2"
+                  >
+                    {showAllHours ? (
+                      <>
+                        <ChevronUp size={16} />
+                        Show less
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown size={16} />
+                        Show full week
+                      </>
+                    )}
+                  </button>
+
+                  {showAllHours && (
+                    <div className="mt-3 pt-3 border-t border-gray-200 space-y-1">
+                      {hoursData.allHours.map((hours, index) => (
+                        <div key={index} className="text-sm text-gray-700">
+                          {hours}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </div>
         )}
