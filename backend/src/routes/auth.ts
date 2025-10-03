@@ -25,10 +25,9 @@ export async function register(request: IRequest, env: Env): Promise<Response> {
       email: string;
       username: string;
       password: string;
-      role?: 'admin' | 'user';
     };
 
-    const { email, username, password, role = 'user' } = body;
+    const { email, username, password } = body;
 
     // Validate input
     if (!email || !username || !password) {
@@ -79,14 +78,14 @@ export async function register(request: IRequest, env: Env): Promise<Response> {
     // Hash password
     const passwordHash = await hashPassword(password);
 
-    // Create user
+    // Create user (always as regular user - admins must be promoted via database)
     const result = await db
       .insert(users)
       .values({
         email: email.toLowerCase(),
         username,
         passwordHash,
-        role,
+        role: 'user',
       })
       .returning()
       .get();
