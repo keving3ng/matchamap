@@ -3,6 +3,7 @@ import { Coffee, Plus, Search, Edit, Trash2, Loader } from 'lucide-react'
 import { useDataStore } from '../../stores/dataStore'
 import { api } from '../../utils/api'
 import { CafeForm } from './CafeForm'
+import { CafeFormWizard } from './CafeFormWizard'
 import type { Cafe } from '../../types'
 
 export const CafeManagementPage: React.FC = () => {
@@ -202,14 +203,19 @@ export const CafeManagementPage: React.FC = () => {
         )}
       </div>
 
-      {/* Cafe Form Modal */}
-      {showForm && (
+      {/* Cafe Form Modal - Use wizard for adding, regular form for editing */}
+      {showForm && editingCafe === null ? (
+        <CafeFormWizard
+          onSave={handleSaveCafe}
+          onCancel={() => setShowForm(false)}
+        />
+      ) : showForm && editingCafe ? (
         <CafeForm
           cafe={editingCafe}
           onSave={handleSaveCafe}
           onCancel={() => setShowForm(false)}
         />
-      )}
+      ) : null}
     </div>
   )
 }

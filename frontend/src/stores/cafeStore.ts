@@ -53,6 +53,11 @@ export const useCafeStore = create<CafeStore>((set, get) => ({
   },
 }))
 
+// Subscribe to data store changes (when cafes are fetched)
+useDataStore.subscribe((state) => {
+  useCafeStore.getState()._recalculateCafes()
+})
+
 // Subscribe to location store changes
 useLocationStore.subscribe((state) => {
   useCafeStore.getState()._recalculateCafes()

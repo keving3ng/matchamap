@@ -5,6 +5,7 @@ import { handleHealth } from './routes/health';
 import { listCafes, getCafe, createCafe, updateCafe, deleteCafe } from './routes/cafes';
 import { listFeedItems } from './routes/feed';
 import { listEvents } from './routes/events';
+import { lookupPlace } from './routes/places';
 import { notFoundResponse } from './utils/response';
 
 const router = Router();
@@ -22,6 +23,7 @@ router.get('/api/events', listEvents);
 router.post('/api/admin/cafes', createCafe);
 router.put('/api/admin/cafes/:id', updateCafe);
 router.delete('/api/admin/cafes/:id', deleteCafe);
+router.post('/api/admin/places/lookup', lookupPlace);
 
 // Handle OPTIONS for CORS preflight
 router.options('*', (request, env: Env) => handleCorsPreflightRequest(request, env));
