@@ -1,6 +1,6 @@
 import { IRequest } from 'itty-router'
 import { drizzle } from 'drizzle-orm/d1'
-import { eq } from 'drizzle-orm'
+import { eq, isNull } from 'drizzle-orm'
 import { cafes, drinks } from '../../drizzle/schema'
 import { Env } from '../types'
 import { jsonResponse, badRequestResponse, errorResponse } from '../utils/response'
@@ -176,6 +176,72 @@ export async function bulkImportCafes(request: IRequest, env: Env) {
     )
   } catch (error) {
     console.error('Bulk import error:', error)
+    return errorResponse((error as Error).message, 500, request as Request, env)
+  }
+}
+
+/**
+ * Export all cafes and drinks to JSON format
+ * GET /api/admin/export/cafes
+ */
+export async function exportCafes(request: IRequest, env: Env) {
+  try {
+    const db = drizzle(env.DB)
+
+    // Fetch all non-deleted cafes
+    const allCafes = await db
+      .select()
+      .from(cafes)
+      .where(isNull(cafes.deletedAt))
+
+    // Fetch all drinks for these cafes
+    const exportData = await Promise.all(
+      allCafes.map(async (cafe) => {
+        const cafeDrinks = await db
+          .select()
+          .from(drinks)
+          .where(eq(drinks.cafeId, cafe.id))
+
+        return {
+          name: cafe.name,
+          slug: cafe.slug,
+          link: cafe.link,
+          address: cafe.address || undefined,
+          latitude: cafe.latitude,
+          longitude: cafe.longitude,
+          city: cafe.city,
+          ambianceScore: cafe.ambianceScore ?? undefined,
+          chargeForAltMilk: cafe.chargeForAltMilk ?? undefined,
+          quickNote: cafe.quickNote,
+          review: cafe.review || undefined,
+          source: cafe.source || undefined,
+          hours: cafe.hours || undefined,
+          instagram: cafe.instagram || undefined,
+          instagramPostLink: cafe.instagramPostLink || undefined,
+          tiktokPostLink: cafe.tiktokPostLink || undefined,
+          images: cafe.images || undefined,
+          drinks: cafeDrinks.map((drink) => ({
+            name: drink.name,
+            score: drink.score,
+            priceAmount: drink.priceAmount ?? undefined,
+            priceCurrency: drink.priceCurrency ?? undefined,
+            gramsUsed: drink.gramsUsed ?? undefined,
+            isDefault: drink.isDefault,
+            notes: drink.notes || undefined,
+          })),
+        }
+      })
+    )
+
+    return jsonResponse(
+      { cafes: exportData },
+      200,
+      request as Request,
+      env,
+      'no-store'
+    )
+  } catch (error) {
+    console.error('Export error:', error)
     return errorResponse((error as Error).message, 500, request as Request, env)
   }
 }

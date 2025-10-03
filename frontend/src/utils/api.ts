@@ -98,6 +98,28 @@ export const cafeAPI = {
       method: 'DELETE',
     })
   },
+
+  /**
+   * Export all cafes and drinks (admin only)
+   */
+  async export(): Promise<{ cafes: any[] }> {
+    return fetchAPI('/admin/export/cafes')
+  },
+
+  /**
+   * Import cafes and drinks (admin only)
+   */
+  async import(data: { cafes: any[] }): Promise<{
+    success: number
+    failed: number
+    message: string
+    errors?: string[]
+  }> {
+    return fetchAPI('/admin/import/cafes', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  },
 }
 
 /**
