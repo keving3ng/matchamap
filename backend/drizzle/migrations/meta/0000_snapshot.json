@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "c5133257-b10e-4bd5-98bc-42d90543296f",
+  "id": "0741c298-7c39-4cf4-9344-afa663d60c50",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "cafes": {
@@ -56,13 +56,6 @@
           "notNull": true,
           "autoincrement": false
         },
-        "score": {
-          "name": "score",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
         "ambiance_score": {
           "name": "ambiance_score",
           "type": "real",
@@ -70,31 +63,9 @@
           "notNull": false,
           "autoincrement": false
         },
-        "other_drinks_score": {
-          "name": "other_drinks_score",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "price": {
-          "name": "price",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
         "charge_for_alt_milk": {
           "name": "charge_for_alt_milk",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": false
-        },
-        "grams_used": {
-          "name": "grams_used",
-          "type": "integer",
+          "type": "real",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
@@ -108,6 +79,13 @@
         },
         "review": {
           "name": "review",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "source": {
+          "name": "source",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
@@ -224,16 +202,16 @@
           "notNull": true,
           "autoincrement": false
         },
-        "type": {
-          "name": "type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
         "name": {
           "name": "name",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "score": {
+          "name": "score",
+          "type": "real",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -242,16 +220,15 @@
           "name": "price_amount",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "autoincrement": false
         },
         "price_currency": {
           "name": "price_currency",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "'CAD'"
+          "notNull": false,
+          "autoincrement": false
         },
         "grams_used": {
           "name": "grams_used",

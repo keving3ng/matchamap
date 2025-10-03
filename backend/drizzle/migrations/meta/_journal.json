@@ -5,36 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1759375702511,
-      "tag": "0000_naive_rogue",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1759382403606,
-      "tag": "0001_flimsy_slapstick",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1759500000000,
-      "tag": "0002_add_source_simplify_cafes",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1759500100000,
-      "tag": "0003_add_address_field",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1759600000000,
-      "tag": "0004_remove_drink_type",
+      "when": 1759506595328,
+      "tag": "0000_fantastic_hitman",
       "breakpoints": true
     }
   ]
