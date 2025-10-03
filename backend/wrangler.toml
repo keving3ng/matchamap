@@ -16,7 +16,9 @@ migrations_dir = "drizzle/migrations"
 [vars]
 ENVIRONMENT = "development"
 ALLOWED_ORIGINS = "http://localhost:3000,http://localhost:5173,http://localhost:5174"
-GOOGLE_PLACES_API_KEY = "AIzaSyALvcACvh6wktGtNYS5ctd-jg3QdLHx2n8"  # Replace with your actual API key
+# SECURITY: API keys should be set as secrets, not committed to git
+# Set locally with: npx wrangler secret put GOOGLE_PLACES_API_KEY
+# For development, you can use .dev.vars file (which is gitignored)
 JWT_SECRET = "dev-secret-change-in-production-use-wrangler-secret"  # For local development only
 
 # Production environment

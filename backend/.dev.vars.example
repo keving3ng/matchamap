@@ -1,0 +1,6 @@
+# Local development secrets example
+# Copy this file to .dev.vars and fill in your actual values
+# .dev.vars is gitignored and will not be committed
+
+# Google Places API Key (get from Google Cloud Console)
+GOOGLE_PLACES_API_KEY=your_google_places_api_key_here
