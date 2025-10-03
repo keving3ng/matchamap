@@ -1,16 +1,26 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Header from './components/Header'
 import BottomNavigation from './components/BottomNavigation'
 import AppRoutes from './components/AppRoutes'
 import ComingSoon from './components/ComingSoon'
 import { useFeatureStore } from './stores/featureStore'
 
+const SESSION_KEY = 'matchamap_unlocked'
+
 export const App: React.FC = () => {
   const { showComingSoon } = useFeatureStore()
-  const [hasEnteredPassword, setHasEnteredPassword] = useState(false)
+  const [hasEnteredPassword, setHasEnteredPassword] = useState(() => {
+    // Check sessionStorage on mount
+    return sessionStorage.getItem(SESSION_KEY) === 'true'
+  })
+
+  const handlePasswordCorrect = () => {
+    sessionStorage.setItem(SESSION_KEY, 'true')
+    setHasEnteredPassword(true)
+  }
 
   if (showComingSoon && !hasEnteredPassword) {
-    return <ComingSoon onPasswordCorrect={() => setHasEnteredPassword(true)} />
+    return <ComingSoon onPasswordCorrect={handlePasswordCorrect} />
   }
 
   return (
