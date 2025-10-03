@@ -26,10 +26,11 @@ ENABLE_GEOLOCATION:
   prod: true
 
 # Admin Panel
-# Internal tools for managing content and viewing analytics (dev only for security)
+# Internal tools for managing content and viewing analytics
+# SECURITY: Backend enforces JWT auth + admin role check - UI just shows/hides routes
 ENABLE_ADMIN_PANEL:
   dev: true
-  prod: false
+  prod: true
 
 # Coming Soon Page
 # Password-protected splash page shown before public launch
