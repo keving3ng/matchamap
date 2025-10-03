@@ -23,7 +23,6 @@ export enum DrinkType {
 export interface DrinkItem {
   id: number
   cafeId: number
-  type: string // Drink type (e.g., "matcha_latte", "iced_matcha_latte")
   name: string // Display name (e.g., "Matcha Latte", "Ceremonial Matcha")
   score: number // Individual drink score (0-10)
   priceAmount: number // Price amount

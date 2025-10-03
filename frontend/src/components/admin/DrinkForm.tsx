@@ -12,7 +12,6 @@ interface DrinkFormProps {
 
 export const DrinkForm: React.FC<DrinkFormProps> = ({ cafeId, drink, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
-    type: drink?.type || 'matcha_latte',
     name: drink?.name || '',
     score: drink?.score || 0,
     priceAmount: drink?.priceAmount || 0,
@@ -82,27 +81,6 @@ export const DrinkForm: React.FC<DrinkFormProps> = ({ cafeId, drink, onSave, onC
           )}
 
           <div className="space-y-4">
-            {/* Drink Type */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Drink Type *
-              </label>
-              <select
-                name="type"
-                value={formData.type}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              >
-                <option value="matcha_latte">Matcha Latte</option>
-                <option value="iced_matcha_latte">Iced Matcha Latte</option>
-                <option value="ceremonial_matcha">Ceremonial Matcha</option>
-                <option value="matcha_espresso">Matcha Espresso</option>
-                <option value="matcha_soft_serve">Matcha Soft Serve</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-
             {/* Drink Name */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">

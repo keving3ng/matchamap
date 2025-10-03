@@ -1,16 +1,14 @@
 import React, { useState, useMemo } from 'react'
-import { Navigation, MapPin, ChevronDown, Crosshair, Filter, X, Search } from 'lucide-react'
+import { Navigation, MapPin, ChevronDown, Crosshair, Filter, X, Search, Coffee, Star } from 'lucide-react'
 import { useGeolocation } from '../hooks/useGeolocation'
 import { getLocationRequestAdvice, getOptimalGeolocationOptions } from '../utils/deviceDetection'
 import { ContentContainer } from './ContentContainer'
 import type { ListViewProps } from '../types'
 
-type SortOption = 'rating' | 'distance' | 'area'
+type SortOption = 'rating' | 'distance'
 
 interface FilterState {
-  priceRange: string[]
   minRating: number | null
-  neighborhoods: string[]
 }
 
 export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggleExpand, onViewDetails }) => {
@@ -19,9 +17,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
   const [showSearch, setShowSearch] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [filters, setFilters] = useState<FilterState>({
-    priceRange: [],
-    minRating: null,
-    neighborhoods: []
+    minRating: null
   })
 
   const {
@@ -45,55 +41,19 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
     }
   }, [sortBy, coordinates, loading, error, requestLocation])
 
-  // Get unique neighborhoods for filter options
-  const uniqueNeighborhoods = useMemo(() => {
-    const neighborhoods = cafes.map(cafe => cafe.neighborhood)
-    return Array.from(new Set(neighborhoods)).sort()
-  }, [cafes])
-
-  // Get unique price ranges for filter options
-  const uniquePriceRanges = useMemo(() => {
-    const priceRanges = cafes
-      .map(cafe => cafe.priceRange)
-      .filter((price): price is string => price !== undefined)
-    return Array.from(new Set(priceRanges)).sort()
-  }, [cafes])
-
   // Check if any filters or search are active
-  const hasActiveFilters = filters.priceRange.length > 0 ||
-                          filters.minRating !== null ||
-                          filters.neighborhoods.length > 0
+  const hasActiveFilters = filters.minRating !== null
 
   const hasActiveSearch = searchQuery.trim().length > 0
 
   // Toggle filter helpers
-  const togglePriceRange = (price: string) => {
-    setFilters(prev => ({
-      ...prev,
-      priceRange: prev.priceRange.includes(price)
-        ? prev.priceRange.filter(p => p !== price)
-        : [...prev.priceRange, price]
-    }))
-  }
-
-  const toggleNeighborhood = (neighborhood: string) => {
-    setFilters(prev => ({
-      ...prev,
-      neighborhoods: prev.neighborhoods.includes(neighborhood)
-        ? prev.neighborhoods.filter(n => n !== neighborhood)
-        : [...prev.neighborhoods, neighborhood]
-    }))
-  }
-
   const setMinRating = (rating: number | null) => {
     setFilters(prev => ({ ...prev, minRating: rating }))
   }
 
   const clearFilters = () => {
     setFilters({
-      priceRange: [],
-      minRating: null,
-      neighborhoods: []
+      minRating: null
     })
   }
 
@@ -109,18 +69,18 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
           return true
         }
 
-        // Search in neighborhood
-        if (cafe.neighborhood.toLowerCase().includes(query)) {
-          return true
-        }
-
         // Search in quick note (keywords/tags)
         if (cafe.quickNote && cafe.quickNote.toLowerCase().includes(query)) {
           return true
         }
 
         // Search in address
-        if (cafe.address.toLowerCase().includes(query)) {
+        if (cafe.address && cafe.address.toLowerCase().includes(query)) {
+          return true
+        }
+
+        // Search in drink names
+        if (cafe.drinks && cafe.drinks.some(drink => drink.name.toLowerCase().includes(query))) {
           return true
         }
 
@@ -131,23 +91,10 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
 
     // Then apply filters
     filtered = filtered.filter(cafe => {
-      // Price range filter
-      if (filters.priceRange.length > 0) {
-        if (!cafe.priceRange || !filters.priceRange.includes(cafe.priceRange)) {
-          return false
-        }
-      }
-
       // Rating filter
       if (filters.minRating !== null) {
-        if (cafe.score < filters.minRating) {
-          return false
-        }
-      }
-
-      // Neighborhood filter
-      if (filters.neighborhoods.length > 0) {
-        if (!filters.neighborhoods.includes(cafe.neighborhood)) {
+        const cafeScore = cafe.displayScore ?? cafe.score ?? 0
+        if (cafeScore < filters.minRating) {
           return false
         }
       }
@@ -160,8 +107,12 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
 
     switch (sortBy) {
       case 'rating':
-        // Sort by score (highest first)
-        return cafesCopy.sort((a, b) => b.score - a.score)
+        // Sort by displayScore or score (highest first)
+        return cafesCopy.sort((a, b) => {
+          const scoreA = a.displayScore ?? a.score ?? 0
+          const scoreB = b.displayScore ?? b.score ?? 0
+          return scoreB - scoreA
+        })
 
       case 'distance':
         // Sort by distance (nearest first)
@@ -172,10 +123,6 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
           if (!b.distanceInfo) return -1
           return a.distanceInfo.kilometers - b.distanceInfo.kilometers
         })
-
-      case 'area':
-        // Sort alphabetically by neighborhood
-        return cafesCopy.sort((a, b) => a.neighborhood.localeCompare(b.neighborhood))
 
       default:
         return cafesCopy
@@ -198,7 +145,6 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
               >
                 <option value="rating">Sort: Rating</option>
                 <option value="distance">Sort: Distance</option>
-                <option value="area">Sort: Area</option>
               </select>
               <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-white pointer-events-none" />
             </div>
@@ -297,28 +243,6 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
         {showFilters && (
           <div className="px-4 pb-4 pt-3 border-t border-green-100 overflow-hidden transition-all duration-300 ease-in-out animate-slide-down">
             <div className="space-y-3">
-              {/* Price Range Filter */}
-              {uniquePriceRanges.length > 0 && (
-                <div>
-                  <h4 className="text-xs font-semibold text-gray-600 mb-2">Price Range</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {uniquePriceRanges.map(price => (
-                      <button
-                        key={price}
-                        onClick={() => togglePriceRange(price)}
-                        className={`px-3 py-1.5 rounded-full text-sm font-medium transition ${
-                          filters.priceRange.includes(price)
-                            ? 'bg-green-600 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
-                      >
-                        {price}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               {/* Rating Filter */}
               <div>
                 <h4 className="text-xs font-semibold text-gray-600 mb-2">Minimum Rating</h4>
@@ -334,26 +258,6 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                       }`}
                     >
                       {rating}+
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Neighborhood Filter */}
-              <div>
-                <h4 className="text-xs font-semibold text-gray-600 mb-2">Neighborhood</h4>
-                <div className="flex flex-wrap gap-2">
-                  {uniqueNeighborhoods.map(neighborhood => (
-                    <button
-                      key={neighborhood}
-                      onClick={() => toggleNeighborhood(neighborhood)}
-                      className={`px-3 py-1.5 rounded-full text-sm font-medium transition ${
-                        filters.neighborhoods.includes(neighborhood)
-                          ? 'bg-green-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                    >
-                      {neighborhood}
                     </button>
                   ))}
                 </div>
@@ -490,22 +394,22 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
               <div className="flex-1 text-left">
                 <div className="flex items-center gap-3 mb-1">
                   <h3 className="font-bold text-lg text-gray-800">{cafe.name}</h3>
-                  <div className="bg-green-500 text-white px-2.5 py-0.5 rounded-full font-bold text-sm">
-                    {cafe.score}
-                  </div>
+                  {(cafe.displayScore || cafe.score) && (
+                    <div className="bg-green-500 text-white px-2.5 py-0.5 rounded-full font-bold text-sm">
+                      {(cafe.displayScore || cafe.score)!.toFixed(1)}
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center gap-3 text-sm text-gray-600">
-                  <span className="font-medium">{cafe.neighborhood}</span>
-                  <span>•</span>
                   {cafe.distanceInfo ? (
                     <span className="flex items-center gap-1">
                       <Navigation size={14} />
                       {cafe.distanceInfo.formattedKm}
                     </span>
                   ) : (
-                    <span className="flex items-center gap-1 text-gray-400 cursor-pointer hover:text-gray-600 transition" title="Click map location button to enable">
+                    <span className="flex items-center gap-1 text-gray-400">
                       <MapPin size={14} />
-                      Tap location button for distance
+                      Tap location for distance
                     </span>
                   )}
                 </div>
@@ -528,14 +432,44 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                       {cafe.distanceInfo ? (
                         <p className="text-xs text-gray-500">{cafe.distanceInfo.walkTime} walk</p>
                       ) : (
-                        <p className="text-xs text-gray-400">Tap map location button for walk time</p>
+                        <p className="text-xs text-gray-400">Tap location button for walk time</p>
                       )}
                     </div>
                   </div>
 
-                  <div className="bg-green-50 rounded-lg p-3 border border-green-200">
-                    <p className="text-sm text-gray-700 italic">"{cafe.quickNote}"</p>
-                  </div>
+                  {cafe.quickNote && (
+                    <div className="bg-green-50 rounded-lg p-3 border border-green-200">
+                      <p className="text-sm text-gray-700 italic">"{cafe.quickNote}"</p>
+                    </div>
+                  )}
+
+                  {/* Drinks List */}
+                  {cafe.drinks && cafe.drinks.length > 0 && (
+                    <div>
+                      <div className="flex items-center gap-1 text-xs font-semibold text-gray-700 mb-2">
+                        <Coffee size={14} />
+                        Drinks
+                      </div>
+                      <div className="space-y-2">
+                        {cafe.drinks
+                          .filter(d => d.isDefault)
+                          .concat(cafe.drinks.filter(d => !d.isDefault).sort((a, b) => b.score - a.score))
+                          .slice(0, 3)
+                          .map(drink => (
+                            <div key={drink.id} className="flex items-center justify-between text-sm bg-gray-50 rounded-lg p-2">
+                              <span className="text-gray-700 font-medium">{drink.name}</span>
+                              <div className="flex items-center gap-3">
+                                <span className="text-gray-600">${drink.priceAmount.toFixed(2)}</span>
+                                <div className="flex items-center gap-1">
+                                  <Star size={12} className="text-green-600 fill-green-600" />
+                                  <span className="font-semibold text-green-600">{drink.score.toFixed(1)}</span>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="flex gap-2 pt-2">
                     <button

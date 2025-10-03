@@ -3,6 +3,7 @@ import { Plus, Edit, Trash2, Coffee, Star } from 'lucide-react'
 import { api } from '../../utils/api'
 import type { DrinkItem } from '../../types'
 import { DrinkForm } from './DrinkForm'
+import { useDataStore } from '../../stores/dataStore'
 
 interface DrinksManagementProps {
   cafeId: number
@@ -16,6 +17,7 @@ export const DrinksManagement: React.FC<DrinksManagementProps> = ({ cafeId, cafe
   const [error, setError] = useState<string | null>(null)
   const [showDrinkForm, setShowDrinkForm] = useState(false)
   const [editingDrink, setEditingDrink] = useState<DrinkItem | null>(null)
+  const { fetchCafes } = useDataStore()
 
   useEffect(() => {
     loadDrinks()
@@ -39,6 +41,8 @@ export const DrinksManagement: React.FC<DrinksManagementProps> = ({ cafeId, cafe
     try {
       await api.drinks.delete(drinkId)
       await loadDrinks()
+      // Refresh cafe data in the store to update map view
+      await fetchCafes()
     } catch (err) {
       setError((err as Error).message)
     }
@@ -54,10 +58,12 @@ export const DrinksManagement: React.FC<DrinksManagementProps> = ({ cafeId, cafe
     setShowDrinkForm(true)
   }
 
-  const handleFormClose = () => {
+  const handleFormClose = async () => {
     setShowDrinkForm(false)
     setEditingDrink(null)
-    loadDrinks()
+    await loadDrinks()
+    // Refresh cafe data in the store to update map view
+    await fetchCafes()
   }
 
   return (
@@ -140,14 +146,7 @@ export const DrinksManagement: React.FC<DrinksManagementProps> = ({ cafeId, cafe
                           )}
                         </div>
 
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                          <div>
-                            <span className="text-gray-600">Type:</span>
-                            <p className="font-medium text-gray-800 capitalize">
-                              {drink.type.replace(/_/g, ' ')}
-                            </p>
-                          </div>
-
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                           <div>
                             <span className="text-gray-600">Score:</span>
                             <p className="font-medium text-gray-800 flex items-center gap-1">

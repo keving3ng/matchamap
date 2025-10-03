@@ -31,9 +31,11 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
         {/* Main Info Card */}
         <div className="bg-white rounded-2xl shadow-lg -mt-6 p-5 border-2 border-green-100 relative z-10">
           <div className="flex justify-between items-start mb-3">
-            <div>
+            <div className="flex-1">
               <h2 className="text-2xl font-bold text-gray-800">{cafe.name}</h2>
-              <p className="text-gray-600 mt-1">{cafe.neighborhood}</p>
+              {cafe.city && (
+                <p className="text-gray-600 mt-1">{cafe.city}</p>
+              )}
             </div>
             {(cafe.displayScore || cafe.score) && (
               <div className="bg-gradient-to-br from-green-500 to-green-600 text-white px-4 py-2 rounded-xl font-bold text-2xl shadow-md">
@@ -92,11 +94,14 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
               Drinks Menu
             </h3>
             <div className="bg-white rounded-xl shadow border border-green-100 divide-y divide-gray-100">
-              {cafe.drinks.map((drink) => (
+              {cafe.drinks
+                .filter(d => d.isDefault)
+                .concat(cafe.drinks.filter(d => !d.isDefault).sort((a, b) => b.score - a.score))
+                .map((drink) => (
                 <div key={drink.id} className={`p-4 ${drink.isDefault ? 'bg-green-50' : ''}`}>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-2 mb-2">
                         <h4 className="font-semibold text-gray-800">{drink.name}</h4>
                         {drink.isDefault && (
                           <span className="px-2 py-0.5 bg-green-500 text-white text-xs rounded">
@@ -104,9 +109,6 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
                           </span>
                         )}
                       </div>
-                      <p className="text-sm text-gray-600 capitalize mb-2">
-                        {drink.type.replace(/_/g, ' ')}
-                      </p>
                       {drink.notes && (
                         <p className="text-sm text-gray-600 italic">{drink.notes}</p>
                       )}
@@ -215,33 +217,45 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
           </div>
         )}
 
-        {cafe.menuHighlights && (
+        {cafe.quickNote && (
           <div className="mt-6">
-            <h3 className="text-lg font-bold text-gray-800 mb-3">Menu Highlights</h3>
-            <div className="bg-white rounded-xl shadow p-4 border border-green-100">
-              <p className="text-gray-700">{cafe.menuHighlights}</p>
+            <h3 className="text-lg font-bold text-gray-800 mb-3">Quick Note</h3>
+            <div className="bg-green-50 rounded-xl shadow p-4 border border-green-200">
+              <p className="text-gray-700 italic">"{cafe.quickNote}"</p>
             </div>
           </div>
         )}
 
         {/* Social Media */}
-        <div className="mt-6">
-          <h3 className="text-lg font-bold text-gray-800 mb-3">Social Media</h3>
-          <div className="flex gap-3">
-            {cafe.instagram && (
-              <a href="#" className="flex-1 bg-gradient-to-br from-purple-500 to-pink-500 text-white py-3 rounded-xl font-semibold shadow-md flex items-center justify-center gap-2 hover:from-purple-600 hover:to-pink-600 transition">
-                <Instagram size={20} />
-                Instagram
-              </a>
-            )}
-            {cafe.tiktok && (
-              <a href="#" className="flex-1 bg-gray-800 text-white py-3 rounded-xl font-semibold shadow-md flex items-center justify-center gap-2 hover:bg-gray-900 transition">
-                <span className="text-xl">🎵</span>
-                TikTok
-              </a>
-            )}
+        {(cafe.instagram || cafe.instagramPostLink || cafe.tiktokPostLink) && (
+          <div className="mt-6">
+            <h3 className="text-lg font-bold text-gray-800 mb-3">Social Media</h3>
+            <div className="flex gap-3">
+              {cafe.instagram && (
+                <a
+                  href={`https://instagram.com/${cafe.instagram.replace('@', '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 bg-gradient-to-br from-purple-500 to-pink-500 text-white py-3 rounded-xl font-semibold shadow-md flex items-center justify-center gap-2 hover:from-purple-600 hover:to-pink-600 transition"
+                >
+                  <Instagram size={20} />
+                  Instagram
+                </a>
+              )}
+              {cafe.tiktokPostLink && (
+                <a
+                  href={cafe.tiktokPostLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 bg-gray-800 text-white py-3 rounded-xl font-semibold shadow-md flex items-center justify-center gap-2 hover:bg-gray-900 transition"
+                >
+                  <span className="text-xl">🎵</span>
+                  TikTok
+                </a>
+              )}
+            </div>
           </div>
-        </div>
+        )}
         </div>
       </ContentContainer>
     </div>

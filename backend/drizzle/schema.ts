@@ -48,7 +48,6 @@ export const drinks = sqliteTable('drinks', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   cafeId: integer('cafe_id').notNull().references(() => cafes.id, { onDelete: 'cascade' }),
 
-  type: text('type').notNull(),
   name: text('name').notNull(),
   score: real('score').notNull(), // Individual drink score (0-10)
   priceAmount: integer('price_amount').notNull(),
