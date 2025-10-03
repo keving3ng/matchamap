@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useUIStore } from '../stores/uiStore'
 import { useCafeStore } from '../stores/cafeStore'
+import { getCafeUrlPath } from '../utils/cityMapping'
 import type { CafeWithDistance } from '../types'
 
 /**
@@ -25,7 +26,12 @@ export const useCafeSelection = (cafesWithDistance: CafeWithDistance[]) => {
 
   const viewDetails = (cafe: CafeWithDistance): void => {
     setSelectedCafe(cafe)
-    navigate(`/cafe/${cafe.id}`)
+
+    // Generate slug from cafe name
+    const slug = cafe.name.toLowerCase().replace(/\s+/g, '-')
+    const urlPath = getCafeUrlPath(cafe.city, slug)
+
+    navigate(urlPath)
     closePopover()
   }
 

@@ -13,23 +13,24 @@ import {
 export async function listCafes(request: IRequest, env: Env): Promise<Response> {
   try {
     const url = new URL(request.url);
-    const city = url.searchParams.get('city') || 'toronto';
-    const neighborhood = url.searchParams.get('neighborhood');
+    const city = url.searchParams.get('city'); // Optional - no default
     const minScore = url.searchParams.get('minScore');
     const maxPrice = url.searchParams.get('maxPrice');
-    const limit = Math.min(parseInt(url.searchParams.get('limit') || '100'), 500);
+    const limit = Math.min(parseInt(url.searchParams.get('limit') || '500'), 500);
     const offset = parseInt(url.searchParams.get('offset') || '0');
 
     const db = getDb(env.DB);
 
-    // Build query conditions
+    // Build query conditions - only exclude deleted
     const conditions = [isNull(cafes.deletedAt)];
 
-    // Validate and add city filter
-    if (!['toronto', 'montreal', 'tokyo'].includes(city)) {
-      return badRequestResponse('Invalid city parameter', request as Request, env);
+    // Add optional city filter if provided
+    if (city) {
+      if (!['toronto', 'montreal', 'tokyo'].includes(city)) {
+        return badRequestResponse('Invalid city parameter', request as Request, env);
+      }
+      conditions.push(eq(cafes.city, city));
     }
-    conditions.push(eq(cafes.city, city));
 
     // Add optional filters
     if (minScore) {
@@ -144,29 +145,31 @@ export async function createCafe(request: IRequest, env: Env): Promise<Response>
 
     const db = getDb(env.DB);
 
+    const cafeData = {
+      name: body.name,
+      slug: body.slug || body.name.toLowerCase().replace(/\s+/g, '-'),
+      link: body.link,
+      latitude: body.latitude,
+      longitude: body.longitude,
+      city: body.city || 'toronto',
+      score: body.score,
+      ambianceScore: body.ambianceScore,
+      otherDrinksScore: body.otherDrinksScore,
+      price: body.price,
+      chargeForAltMilk: body.chargeForAltMilk || false,
+      gramsUsed: body.gramsUsed,
+      quickNote: body.quickNote,
+      review: body.review,
+      hours: body.hours,
+      instagram: body.instagram,
+      instagramPostLink: body.instagramPostLink,
+      tiktokPostLink: body.tiktokPostLink,
+      images: body.images,
+    };
+
     const newCafe = await db
       .insert(cafes)
-      .values({
-        name: body.name,
-        slug: body.slug || body.name.toLowerCase().replace(/\s+/g, '-'),
-        link: body.link,
-        latitude: body.latitude,
-        longitude: body.longitude,
-        city: body.city || 'toronto',
-        score: body.score,
-        ambianceScore: body.ambianceScore,
-        otherDrinksScore: body.otherDrinksScore,
-        price: body.price,
-        chargeForAltMilk: body.chargeForAltMilk || false,
-        gramsUsed: body.gramsUsed,
-        quickNote: body.quickNote,
-        review: body.review,
-        hours: body.hours,
-        instagram: body.instagram,
-        instagramPostLink: body.instagramPostLink,
-        tiktokPostLink: body.tiktokPostLink,
-        images: body.images,
-      })
+      .values(cafeData)
       .returning();
 
     return jsonResponse(

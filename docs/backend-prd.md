@@ -383,15 +383,15 @@ Health check endpoint for monitoring.
 
 #### GET /api/cafes
 
-Returns list of cafes with optional filtering.
+Returns list of cafes with optional filtering. **By default, returns all cafes from all cities.**
 
 ```typescript
 // Query params
 interface CafeFilters {
-  city?: "toronto" | "montreal" | "tokyo"
+  city?: "toronto" | "montreal" | "tokyo" // Optional - filter by city
   minScore?: number
   maxPrice?: number // Max price value (e.g., 8.0)
-  limit?: number // default: 100, max: 500
+  limit?: number // default: 500, max: 500
   offset?: number // for pagination
 }
 

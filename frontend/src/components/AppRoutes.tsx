@@ -1,5 +1,5 @@
-import React from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import React, { useEffect } from 'react'
+import { Routes, Route, Navigate, useParams } from 'react-router-dom'
 import MapView from './MapView'
 import ListView from './ListView'
 import DetailView from './DetailView'
@@ -28,6 +28,32 @@ import { useUIStore } from '../stores/uiStore'
 import { useVisitedCafesStore } from '../stores/visitedCafesStore'
 import { useCafeSelection } from '../hooks/useCafeSelection'
 
+// Wrapper component for cafe detail view with URL params
+const CafeDetailWrapper: React.FC = () => {
+  const { slug } = useParams<{ cityShortcode: string; slug: string }>()
+  const { cafesWithDistance } = useCafeStore()
+  const { visitedCafeIds, toggleVisited } = useVisitedCafesStore()
+
+  // Find cafe by slug
+  const cafe = cafesWithDistance.find(c => {
+    // Create slug from cafe name for comparison
+    const cafeSlug = c.name.toLowerCase().replace(/\s+/g, '-')
+    return cafeSlug === slug
+  })
+
+  if (!cafe) {
+    return <Navigate to="/" replace />
+  }
+
+  return (
+    <DetailView
+      cafe={cafe}
+      visitedLocations={visitedCafeIds}
+      onToggleVisited={toggleVisited}
+    />
+  )
+}
+
 export const AppRoutes: React.FC = () => {
   const { isEventsEnabled, isPassportEnabled, isUserAccountsEnabled } = useFeatureStore()
   const isAdminEnabled = useFeatureToggle('ENABLE_ADMIN_PANEL')
@@ -36,11 +62,16 @@ export const AppRoutes: React.FC = () => {
   const isStoreEnabled = useFeatureToggle('ENABLE_STORE')
   const isSettingsEnabled = useFeatureToggle('ENABLE_SETTINGS')
 
-  const { feedItems, eventItems } = useDataStore()
+  const { feedItems, eventItems, fetchAll } = useDataStore()
   const { cafesWithDistance, selectedCafe } = useCafeStore()
   const { showPopover, expandedCard, setExpandedCard, closePopover } = useUIStore()
-  const { stampedCafeIds, visitedCafeIds, toggleVisited, toggleStamp } = useVisitedCafesStore()
+  const { stampedCafeIds, toggleStamp } = useVisitedCafesStore()
   const { handlePinClick, viewDetails } = useCafeSelection(cafesWithDistance)
+
+  // Fetch data on mount - get all cafes regardless of location
+  useEffect(() => {
+    fetchAll() // Fetch all cafes from all cities
+  }, [])
 
   return (
     <Routes>
@@ -138,13 +169,13 @@ export const AppRoutes: React.FC = () => {
           } />
         </>
       )}
-      <Route path="/cafe/:id" element={
-        <DetailView
-          cafe={selectedCafe || cafesWithDistance[0]}
-          visitedLocations={visitedCafeIds}
-          onToggleVisited={toggleVisited}
-        />
-      } />
+      {/* New URL pattern: /{city-shortcode}/{cafe-slug} */}
+      <Route path="/:cityShortcode/:slug" element={<CafeDetailWrapper />} />
+
+      {/* Legacy route for backwards compatibility - redirect to new format */}
+      <Route path="/cafe/:id" element={<Navigate to="/" replace />} />
+
+      {/* Catch-all redirect */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
