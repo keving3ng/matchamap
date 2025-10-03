@@ -7,6 +7,7 @@ import { listDrinks, createDrink, updateDrink, deleteDrink } from './routes/drin
 import { listFeedItems } from './routes/feed';
 import { listEvents } from './routes/events';
 import { lookupPlace } from './routes/places';
+import { bulkImportCafes } from './routes/import';
 import { notFoundResponse } from './utils/response';
 
 const router = Router();
@@ -31,6 +32,9 @@ router.get('/api/admin/cafes/:cafeId/drinks', listDrinks);
 router.post('/api/admin/cafes/:cafeId/drinks', createDrink);
 router.put('/api/admin/drinks/:id', updateDrink);
 router.delete('/api/admin/drinks/:id', deleteDrink);
+
+// Bulk import endpoint
+router.post('/api/admin/import/cafes', bulkImportCafes);
 
 // Handle OPTIONS for CORS preflight
 router.options('*', (request, env: Env) => handleCorsPreflightRequest(request, env));

@@ -20,6 +20,7 @@ import ApiManagementPage from './admin/ApiManagementPage'
 import UserManagementPage from './admin/UserManagementPage'
 import ProductsManagementPage from './admin/ProductsManagementPage'
 import MiscAdminPage from './admin/MiscAdminPage'
+import BulkImporterPage from './admin/BulkImporterPage'
 import { useFeatureToggle } from '../hooks/useFeatureToggle'
 import { useDataStore } from '../stores/dataStore'
 import { useFeatureStore } from '../stores/featureStore'
@@ -165,6 +166,11 @@ export const AppRoutes: React.FC = () => {
           <Route path="/admin/misc" element={
             <AdminLayout>
               <MiscAdminPage />
+            </AdminLayout>
+          } />
+          <Route path="/admin/import" element={
+            <AdminLayout>
+              <BulkImporterPage />
             </AdminLayout>
           } />
         </>

@@ -202,6 +202,26 @@ export const drinksAPI = {
 }
 
 /**
+ * Admin API endpoints
+ */
+export const adminAPI = {
+  /**
+   * Bulk import cafes and drinks from CSV
+   */
+  async bulkImportCafes(data: { cafes: any[] }): Promise<{
+    success: number
+    failed: number
+    message: string
+    errors?: string[]
+  }> {
+    return fetchAPI('/admin/import/cafes', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  },
+}
+
+/**
  * Export all APIs
  */
 export const api = {
@@ -211,6 +231,7 @@ export const api = {
   health: healthAPI,
   places: placesAPI,
   drinks: drinksAPI,
+  admin: adminAPI,
 }
 
 export default api

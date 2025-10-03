@@ -61,7 +61,7 @@ export async function createDrink(request: IRequest, env: Env): Promise<Response
     const body = await request.json() as any;
 
     // Validation
-    if (!body.name || !body.type || body.score === undefined || !body.priceAmount) {
+    if (!body.name || body.score === undefined || !body.priceAmount) {
       return badRequestResponse('Missing required fields', request as Request, env);
     }
 
@@ -89,7 +89,6 @@ export async function createDrink(request: IRequest, env: Env): Promise<Response
     const drinkData = {
       cafeId,
       name: body.name,
-      type: body.type,
       score: body.score,
       priceAmount: body.priceAmount,
       priceCurrency: body.priceCurrency || 'CAD',
