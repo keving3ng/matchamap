@@ -112,6 +112,59 @@ export const feedAPI = {
     const query = params.toString() ? `?${params.toString()}` : ''
     return fetchAPI(`/feed${query}`)
   },
+
+  /**
+   * Get all feed items including unpublished (admin only)
+   */
+  async getAllAdmin(filters?: {
+    published?: boolean
+    limit?: number
+    offset?: number
+  }): Promise<{ items: any[]; hasMore: boolean }> {
+    const params = new URLSearchParams()
+    if (filters?.published !== undefined) params.append('published', filters.published.toString())
+    if (filters?.limit) params.append('limit', filters.limit.toString())
+    if (filters?.offset) params.append('offset', filters.offset.toString())
+
+    const query = params.toString() ? `?${params.toString()}` : ''
+    return fetchAPI(`/admin/feed${query}`)
+  },
+
+  /**
+   * Get single feed item by ID (admin only)
+   */
+  async getById(id: number): Promise<any> {
+    return fetchAPI(`/admin/feed/${id}`)
+  },
+
+  /**
+   * Create new feed item (admin only)
+   */
+  async create(feedItem: any): Promise<any> {
+    return fetchAPI('/admin/feed', {
+      method: 'POST',
+      body: JSON.stringify(feedItem),
+    })
+  },
+
+  /**
+   * Update feed item (admin only)
+   */
+  async update(id: number, feedItem: any): Promise<any> {
+    return fetchAPI(`/admin/feed/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(feedItem),
+    })
+  },
+
+  /**
+   * Delete feed item (admin only)
+   */
+  async delete(id: number): Promise<{ success: boolean; message: string }> {
+    return fetchAPI(`/admin/feed/${id}`, {
+      method: 'DELETE',
+    })
+  },
 }
 
 /**
@@ -133,6 +186,59 @@ export const eventsAPI = {
 
     const query = params.toString() ? `?${params.toString()}` : ''
     return fetchAPI(`/events${query}`)
+  },
+
+  /**
+   * Get all events including unpublished (admin only)
+   */
+  async getAllAdmin(filters?: {
+    published?: boolean
+    limit?: number
+    offset?: number
+  }): Promise<{ events: any[]; hasMore: boolean }> {
+    const params = new URLSearchParams()
+    if (filters?.published !== undefined) params.append('published', filters.published.toString())
+    if (filters?.limit) params.append('limit', filters.limit.toString())
+    if (filters?.offset) params.append('offset', filters.offset.toString())
+
+    const query = params.toString() ? `?${params.toString()}` : ''
+    return fetchAPI(`/admin/events${query}`)
+  },
+
+  /**
+   * Get single event by ID (admin only)
+   */
+  async getById(id: number): Promise<any> {
+    return fetchAPI(`/admin/events/${id}`)
+  },
+
+  /**
+   * Create new event (admin only)
+   */
+  async create(event: any): Promise<any> {
+    return fetchAPI('/admin/events', {
+      method: 'POST',
+      body: JSON.stringify(event),
+    })
+  },
+
+  /**
+   * Update event (admin only)
+   */
+  async update(id: number, event: any): Promise<any> {
+    return fetchAPI(`/admin/events/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(event),
+    })
+  },
+
+  /**
+   * Delete event (admin only)
+   */
+  async delete(id: number): Promise<{ success: boolean; message: string }> {
+    return fetchAPI(`/admin/events/${id}`, {
+      method: 'DELETE',
+    })
   },
 }
 

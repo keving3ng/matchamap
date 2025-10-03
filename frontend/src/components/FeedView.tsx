@@ -15,7 +15,14 @@ export const FeedView: React.FC<FeedViewProps> = ({ feedItems }) => {
       {/* Feed Items */}
       <ContentContainer maxWidth="md">
         <div className="px-4 py-4 space-y-4">
-          {feedItems.map((item) => (
+          {feedItems.length === 0 ? (
+            <div className="bg-white rounded-2xl shadow-md border-2 border-green-100 p-8 text-center">
+              <Star size={48} className="mx-auto text-gray-300 mb-3" />
+              <p className="text-gray-500 text-lg font-medium">No news items yet</p>
+              <p className="text-gray-400 text-sm mt-2">Stay tuned for updates from the matcha scene!</p>
+            </div>
+          ) : (
+            feedItems.map((item) => (
             <article key={item.id} className="bg-white rounded-2xl shadow-md border-2 border-green-100 overflow-hidden">
             <div className={`${
               item.type === 'new_location' ? 'bg-green-500' :
@@ -62,7 +69,8 @@ export const FeedView: React.FC<FeedViewProps> = ({ feedItems }) => {
               <p className="text-gray-700 mt-3 leading-relaxed">{item.preview}</p>
             </div>
           </article>
-          ))}
+            ))
+          )}
         </div>
       </ContentContainer>
     </div>
