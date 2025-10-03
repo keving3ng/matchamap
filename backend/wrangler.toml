@@ -23,7 +23,7 @@ JWT_SECRET = "dev-secret-change-in-production-use-wrangler-secret"  # For local 
 
 # Production environment
 [env.production]
-name = "matchamap-api-production"
+# Use same worker name, different environment
 vars = { ENVIRONMENT = "production", ALLOWED_ORIGINS = "https://matchamap.pages.dev,https://matchamap-api.kevingeng33.workers.dev" }
 # SECURITY: JWT_SECRET MUST be set as a Wrangler secret in production
 # NEVER commit JWT_SECRET to git - it must be set via Wrangler CLI:
