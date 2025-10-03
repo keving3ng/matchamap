@@ -6,7 +6,7 @@
 import { useAuthStore } from '../stores/authStore'
 import type { Cafe, Drink, FeedItem, Event } from '../../../shared/types'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8787'
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 /**
  * Generic fetch wrapper with error handling
