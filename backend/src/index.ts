@@ -5,7 +5,9 @@ import { handleHealth } from './routes/health';
 import { listCafes, getCafe, createCafe, updateCafe, deleteCafe } from './routes/cafes';
 import { listDrinks, createDrink, updateDrink, deleteDrink } from './routes/drinks';
 import { listFeedItems } from './routes/feed';
+import { listAllFeedItems, getFeedItem, createFeedItem, updateFeedItem, deleteFeedItem } from './routes/admin-feed';
 import { listEvents } from './routes/events';
+import { listAllEvents, getEvent, createEvent, updateEvent, deleteEvent } from './routes/admin-events';
 import { lookupPlace } from './routes/places';
 import { bulkImportCafes } from './routes/import';
 import { notFoundResponse } from './utils/response';
@@ -35,6 +37,20 @@ router.delete('/api/admin/drinks/:id', deleteDrink);
 
 // Bulk import endpoint
 router.post('/api/admin/import/cafes', bulkImportCafes);
+
+// Feed admin endpoints
+router.get('/api/admin/feed', listAllFeedItems);
+router.get('/api/admin/feed/:id', getFeedItem);
+router.post('/api/admin/feed', createFeedItem);
+router.put('/api/admin/feed/:id', updateFeedItem);
+router.delete('/api/admin/feed/:id', deleteFeedItem);
+
+// Events admin endpoints
+router.get('/api/admin/events', listAllEvents);
+router.get('/api/admin/events/:id', getEvent);
+router.post('/api/admin/events', createEvent);
+router.put('/api/admin/events/:id', updateEvent);
+router.delete('/api/admin/events/:id', deleteEvent);
 
 // Handle OPTIONS for CORS preflight
 router.options('*', (request, env: Env) => handleCorsPreflightRequest(request, env));

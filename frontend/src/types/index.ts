@@ -127,6 +127,7 @@ export interface EventItem {
   image: string
   price: string
   featured: boolean
+  published?: boolean
 }
 
 export interface CafeData {

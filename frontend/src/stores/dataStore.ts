@@ -74,19 +74,19 @@ export const useDataStore = create<DataStore>((set, get) => ({
       // Transform API response to frontend format
       const feedItems = response.items.map((item: any) => ({
         id: item.id,
-        type: item.type,
+        type: item.type as any, // API returns string, type system expects enum
         title: item.title,
         date: item.date,
         preview: item.preview,
-        content: item.content,
-        cafeId: item.cafe_id,
-        cafeName: item.cafe_name,
+        content: item.content || '',
+        cafeId: item.cafeId,
+        cafeName: item.cafeName,
         score: item.score,
-        previousScore: item.previous_score,
+        previousScore: item.previousScore,
         neighborhood: item.neighborhood,
-        image: item.image,
+        image: item.image || '',
         author: item.author,
-        tags: item.tags ? JSON.parse(item.tags) : [],
+        tags: item.tags ? (typeof item.tags === 'string' ? JSON.parse(item.tags) : item.tags) : [],
         published: item.published,
       }))
 
@@ -113,6 +113,7 @@ export const useDataStore = create<DataStore>((set, get) => ({
         image: event.image || '',
         price: event.price || '',
         featured: event.featured || false,
+        published: event.published !== false, // Default to true if not specified
       }))
 
       set({ eventItems, isLoading: false })

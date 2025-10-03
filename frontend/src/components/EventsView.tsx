@@ -15,7 +15,14 @@ export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
       {/* Event Items */}
       <ContentContainer maxWidth="md">
         <div className="px-4 py-4 space-y-4">
-          {eventItems.map((event) => (
+          {eventItems.length === 0 ? (
+            <div className="bg-white rounded-2xl shadow-md border-2 border-green-100 p-8 text-center">
+              <Calendar size={48} className="mx-auto text-gray-300 mb-3" />
+              <p className="text-gray-500 text-lg font-medium">No upcoming events</p>
+              <p className="text-gray-400 text-sm mt-2">Check back soon for matcha community gatherings!</p>
+            </div>
+          ) : (
+            eventItems.map((event) => (
             <article
               key={event.id}
               className={`bg-white rounded-2xl shadow-md border-2 ${
@@ -67,7 +74,8 @@ export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
               <p className="text-gray-700 mt-3 leading-relaxed">{event.description}</p>
             </div>
           </article>
-          ))}
+            ))
+          )}
         </div>
       </ContentContainer>
     </div>
