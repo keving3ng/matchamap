@@ -5,136 +5,229 @@
  * type safety and consistency in the API contract.
  */
 
-// Cafe Types
+// ============================================================================
+// DRINK TYPES
+// ============================================================================
+
+export interface Drink {
+  id: number
+  cafeId: number
+  name?: string | null // Display name - defaults to "Iced Matcha Latte" if not provided
+  score: number // Individual drink score (0-10) - REQUIRED
+  priceAmount?: number | null // Price in cents - optional
+  priceCurrency?: string | null // Currency code (CAD, USD, JPY) - optional
+  gramsUsed?: number | null // Grams of matcha powder used
+  isDefault: boolean // The primary drink reviewed/recommended
+  notes?: string | null // Specific notes about this drink
+  createdAt?: string
+  updatedAt?: string
+}
+
+// ============================================================================
+// CAFE TYPES
+// ============================================================================
+
 export interface Cafe {
-  id: number;
-  name: string;
-  slug: string;
-  address: string;
-  neighborhood: string;
-  latitude: number;
-  longitude: number;
-  googleMapsUrl: string;
-  instagramHandle?: string;
-  tiktokHandle?: string;
-  website?: string;
-  primaryScore: number;
-  secondaryScore: number;
-  overallRating: number;
-  reviewSummary: string;
-  detailedReview: string;
-  photos: string[];
-  tags: string[];
-  createdAt: string;
-  updatedAt: string;
+  // Core identification
+  id: number
+  name: string
+  slug: string
+
+  // Location
+  latitude: number
+  longitude: number
+  link: string // Google Maps link
+  address?: string | null
+  city: string // toronto, montreal, tokyo (for filtering/navigation only)
+
+  // Ratings
+  ambianceScore?: number | null // Cafe ambiance rating (0-10)
+  displayScore?: number | null // Calculated from drinks (default OR highest)
+
+  // Menu & Pricing
+  drinks?: Drink[] // All drink offerings
+  chargeForAltMilk?: number | null // Price charged for alt milk (null if free, 0 if free explicitly)
+
+  // Reviews & Description
+  quickNote: string // Short tagline/summary - REQUIRED
+  review?: string | null // Full review text
+  source?: string | null // Source of cafe info (e.g., "Google", "Instagram", "Friend recommendation")
+
+  // Contact & Social
+  instagram?: string | null
+  instagramPostLink?: string | null
+  tiktokPostLink?: string | null
+  hours?: string | null // JSON object from Google Maps API
+  images?: string | null // Link/URL to images
+
+  // Metadata
+  createdAt?: string
+  updatedAt?: string
+  deletedAt?: string | null
 }
 
 export interface CafeWithDistance extends Cafe {
-  distance?: number; // Distance in kilometers from user's location
+  distanceInfo?: {
+    kilometers: number
+    miles: number
+    formattedKm: string
+    formattedMiles: string
+    walkTime: string
+  } | null
 }
 
-// Feed/News Types
+// ============================================================================
+// FEED/NEWS TYPES
+// ============================================================================
+
+export type FeedItemType = 'new_location' | 'score_update' | 'announcement' | 'menu_update' | 'closure'
+
 export interface FeedItem {
-  id: number;
-  title: string;
-  slug: string;
-  summary: string;
-  content: string;
-  coverImage?: string;
-  publishedAt: string;
-  tags: string[];
+  id: number
+  type: FeedItemType
+  title: string
+  date: string // ISO 8601 format for database storage
+  preview: string // Short preview text - REQUIRED
+  content?: string | null // Full article/announcement content
+
+  // Related cafe (if applicable)
+  cafeId?: number | null
+  cafeName?: string | null
+
+  // Score updates
+  score?: number | null
+  previousScore?: number | null
+
+  // Location info
+  neighborhood?: string | null
+
+  // Media
+  image?: string | null
+
+  // Metadata
+  author?: string | null
+  tags?: string[] | null // JSON array
+  published: boolean // For draft/published states
+  createdAt?: string
+  updatedAt?: string
 }
 
-// Event Types
+// ============================================================================
+// EVENT TYPES
+// ============================================================================
+
 export interface Event {
-  id: number;
-  title: string;
-  description: string;
-  cafeId: number;
-  eventDate: string;
-  eventUrl?: string;
-  createdAt: string;
+  id: number
+  title: string
+  date: string // ISO date format
+  time: string
+  location: string
+  venue: string
+  description: string
+  image?: string | null
+  price?: string | null
+  featured: boolean
+  published: boolean
+  cafeId?: number | null // Optional reference to cafe
+  createdAt?: string
+  updatedAt?: string
 }
 
-// Analytics Types
-export type CafeStat = 'view' | 'directions' | 'passport' | 'instagram' | 'tiktok';
+// ============================================================================
+// USER/AUTH TYPES
+// ============================================================================
 
-export interface CafeStats {
-  cafeId: number;
-  views: number;
-  directions: number;
-  passportMarks: number;
-  instagramClicks: number;
-  tiktokClicks: number;
-  updatedAt: string;
-}
-
-// API Response Types
-export interface ApiResponse<T> {
-  data?: T;
-  error?: string;
-  message?: string;
-}
-
-export interface PaginatedResponse<T> {
-  data: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-}
-
-// Admin Types
-export interface CafeFormData extends Omit<Cafe, 'id' | 'createdAt' | 'updatedAt'> {
-  id?: number;
-}
-
-export interface FeedItemFormData extends Omit<FeedItem, 'id' | 'publishedAt'> {
-  id?: number;
-}
-
-// Auth Types
-export type UserRole = 'admin' | 'user';
+export type UserRole = 'admin' | 'user'
 
 export interface User {
-  id: number;
-  email: string;
-  username: string;
-  role: UserRole;
-  createdAt: string;
-  updatedAt: string;
+  id: number
+  email: string
+  username: string
+  role: UserRole
+  createdAt: string
+  updatedAt: string
 }
 
 export interface LoginRequest {
-  email: string;
-  password: string;
+  email: string
+  password: string
 }
 
 export interface LoginResponse {
-  accessToken: string;
-  refreshToken: string;
-  user: User;
+  accessToken: string
+  refreshToken: string
+  user: User
 }
 
 export interface RegisterRequest {
-  email: string;
-  username: string;
-  password: string;
-  role?: UserRole;
+  email: string
+  username: string
+  password: string
+  role?: UserRole
 }
 
 export interface RegisterResponse {
-  message: string;
-  user: User;
+  message: string
+  user: User
 }
 
 export interface RefreshTokenRequest {
-  refreshToken: string;
+  refreshToken: string
 }
 
 export interface RefreshTokenResponse {
-  accessToken: string;
+  accessToken: string
 }
 
 export interface AuthError {
-  error: string;
+  error: string
+}
+
+// ============================================================================
+// ANALYTICS TYPES
+// ============================================================================
+
+export type CafeStat = 'view' | 'directions' | 'passport' | 'instagram' | 'tiktok'
+
+export interface CafeStats {
+  cafeId: number
+  views: number
+  directions: number
+  passportMarks: number
+  instagramClicks: number
+  tiktokClicks: number
+  updatedAt: string
+}
+
+// ============================================================================
+// API RESPONSE TYPES
+// ============================================================================
+
+export interface ApiResponse<T> {
+  data?: T
+  error?: string
+  message?: string
+}
+
+export interface PaginatedResponse<T> {
+  data: T[]
+  total: number
+  page: number
+  pageSize: number
+}
+
+// ============================================================================
+// ADMIN TYPES
+// ============================================================================
+
+export interface CafeFormData extends Omit<Cafe, 'id' | 'createdAt' | 'updatedAt' | 'displayScore' | 'drinks'> {
+  id?: number
+}
+
+export interface FeedItemFormData extends Omit<FeedItem, 'id' | 'createdAt' | 'updatedAt'> {
+  id?: number
+}
+
+export interface EventFormData extends Omit<Event, 'id' | 'createdAt' | 'updatedAt'> {
+  id?: number
 }

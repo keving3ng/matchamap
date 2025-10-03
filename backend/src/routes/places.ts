@@ -110,7 +110,7 @@ export async function lookupPlace(request: IRequest, env: Env): Promise<Response
         throw new Error(`Google Places API returned ${searchResponse.status}`);
       }
 
-      const searchData = await searchResponse.json();
+      const searchData = await searchResponse.json() as { places?: any[] };
       if (!searchData.places || searchData.places.length === 0) {
         throw new Error('Place not found');
       }

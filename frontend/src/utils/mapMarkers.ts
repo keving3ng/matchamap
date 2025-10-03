@@ -45,7 +45,7 @@ export const createMatchaMarker = (cafe: Cafe, state: MarkerState = { isSelected
     return 'bg-gradient-to-r from-matcha-300 to-matcha-400 text-matcha-800'
   }
 
-  const scoreBadgeStyle = getScoreBadgeStyle(cafe.displayScore ?? cafe.score)
+  const scoreBadgeStyle = getScoreBadgeStyle(cafe.displayScore)
 
   return `
     <div class="relative flex items-center justify-center">
@@ -66,13 +66,15 @@ export const createMatchaMarker = (cafe: Cafe, state: MarkerState = { isSelected
         <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 ${colors.bg} rotate-45"></div>
       </div>
 
+      ${cafe.displayScore ? `
       <!-- Score badge -->
       <div class="absolute -top-3 -right-2 ${scoreBadgeStyle}
                   px-2 py-0.5 rounded-full text-xs font-bold shadow-md
                   border border-white/20 min-w-[2rem] text-center
                   transition-all duration-200 z-10">
-        ${cafe.score}
+        ${cafe.displayScore.toFixed(1)}
       </div>
+      ` : ''}
 
       <!-- Visited checkmark -->
       ${isVisited ? `

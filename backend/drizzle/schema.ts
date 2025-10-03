@@ -9,6 +9,7 @@ export const cafes = sqliteTable('cafes', {
 
   // Location
   link: text('link').notNull(), // Google Maps link
+  address: text('address'),
   latitude: real('latitude').notNull(),
   longitude: real('longitude').notNull(),
   city: text('city').notNull(), // toronto, montreal, tokyo (for filtering/navigation only)

@@ -68,18 +68,20 @@ export const PassportView: React.FC<PassportViewProps> = ({ cafes, visitedStamps
                   isVisited ? 'scale-100 shadow-lg' : 'opacity-40 grayscale scale-95'
                 }`}
               >
-                <div className={`w-full h-full bg-gradient-to-br ${cafe.color} rounded-2xl p-3 flex flex-col items-center justify-center relative overflow-hidden`}>
+                <div className="w-full h-full bg-gradient-to-br from-green-400 to-green-600 rounded-2xl p-3 flex flex-col items-center justify-center relative overflow-hidden">
                   {isVisited && (
                     <div className="absolute inset-0 border-4 border-white/40 rounded-2xl pointer-events-none" />
                   )}
 
-                  <div className="text-4xl mb-2 drop-shadow-md">{cafe.emoji}</div>
+                  <div className="text-4xl mb-2 drop-shadow-md">🍵</div>
                   <p className="text-white font-bold text-xs text-center leading-tight drop-shadow-md">
                     {cafe.name}
                   </p>
-                  <div className="mt-1.5 bg-white/90 backdrop-blur px-2 py-0.5 rounded-full">
-                    <p className="text-xs font-bold text-gray-800">{cafe.score}</p>
-                  </div>
+                  {cafe.displayScore && (
+                    <div className="mt-1.5 bg-white/90 backdrop-blur px-2 py-0.5 rounded-full">
+                      <p className="text-xs font-bold text-gray-800">{cafe.displayScore.toFixed(1)}</p>
+                    </div>
+                  )}
 
                   {isVisited && (
                     <div className="absolute top-1 right-1 bg-white rounded-full w-6 h-6 flex items-center justify-center shadow-md">

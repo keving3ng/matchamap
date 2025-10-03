@@ -1,17 +1,16 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Header from './components/Header'
 import BottomNavigation from './components/BottomNavigation'
 import AppRoutes from './components/AppRoutes'
 import ComingSoon from './components/ComingSoon'
-import { useAuthStore } from './stores/authStore'
 import { useFeatureStore } from './stores/featureStore'
 
 export const App: React.FC = () => {
   const { showComingSoon } = useFeatureStore()
-  const { isAuthenticated, authenticate } = useAuthStore()
+  const [hasEnteredPassword, setHasEnteredPassword] = useState(false)
 
-  if (showComingSoon && !isAuthenticated) {
-    return <ComingSoon onPasswordCorrect={authenticate} />
+  if (showComingSoon && !hasEnteredPassword) {
+    return <ComingSoon onPasswordCorrect={() => setHasEnteredPassword(true)} />
   }
 
   return (

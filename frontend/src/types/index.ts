@@ -43,7 +43,10 @@ export interface Cafe {
   // Location
   latitude: number
   longitude: number
+  lat?: number // Backwards compatibility with distance calculations
+  lng?: number // Backwards compatibility with distance calculations
   link: string // Google Maps link
+  address?: string | null
   city: string
 
   // Ratings

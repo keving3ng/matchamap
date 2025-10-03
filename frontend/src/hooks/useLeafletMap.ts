@@ -91,7 +91,7 @@ export const useLeafletMap = ({
         popupAnchor: [0, -44],
       })
 
-      const marker = L.marker([cafe.lat, cafe.lng], { icon: customIcon })
+      const marker = L.marker([cafe.lat ?? cafe.latitude, cafe.lng ?? cafe.longitude], { icon: customIcon })
         .addTo(mapRef.current!)
         .on('click', () => onPinClick(cafe))
 

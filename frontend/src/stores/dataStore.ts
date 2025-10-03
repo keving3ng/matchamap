@@ -42,6 +42,7 @@ export const useDataStore = create<DataStore>((set, get) => ({
         lat: cafe.latitude, // Backwards compatibility
         lng: cafe.longitude, // Backwards compatibility
         link: cafe.link,
+        address: cafe.address || null,
         city: cafe.city,
         displayScore: cafe.displayScore, // Calculated from drinks
         ambianceScore: cafe.ambianceScore,

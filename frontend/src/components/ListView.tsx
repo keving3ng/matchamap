@@ -93,7 +93,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
     filtered = filtered.filter(cafe => {
       // Rating filter
       if (filters.minRating !== null) {
-        const cafeScore = cafe.displayScore ?? cafe.score ?? 0
+        const cafeScore = cafe.displayScore ?? 0
         if (cafeScore < filters.minRating) {
           return false
         }
@@ -107,10 +107,10 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
 
     switch (sortBy) {
       case 'rating':
-        // Sort by displayScore or score (highest first)
+        // Sort by displayScore (highest first)
         return cafesCopy.sort((a, b) => {
-          const scoreA = a.displayScore ?? a.score ?? 0
-          const scoreB = b.displayScore ?? b.score ?? 0
+          const scoreA = a.displayScore ?? 0
+          const scoreB = b.displayScore ?? 0
           return scoreB - scoreA
         })
 
@@ -394,9 +394,9 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
               <div className="flex-1 text-left">
                 <div className="flex items-center gap-3 mb-1">
                   <h3 className="font-bold text-lg text-gray-800">{cafe.name}</h3>
-                  {(cafe.displayScore || cafe.score) && (
+                  {cafe.displayScore && (
                     <div className="bg-green-500 text-white px-2.5 py-0.5 rounded-full font-bold text-sm">
-                      {(cafe.displayScore || cafe.score)!.toFixed(1)}
+                      {cafe.displayScore.toFixed(1)}
                     </div>
                   )}
                 </div>

@@ -172,9 +172,9 @@ export const CafeManagementPage: React.FC = () => {
                           />
                         </span>
                       )}
-                      {(cafe.displayScore || cafe.score) && (
+                      {cafe.displayScore && (
                         <span className="bg-green-500 text-white px-2.5 py-0.5 rounded-full font-bold text-sm">
-                          {(cafe.displayScore || cafe.score)!.toFixed(1)}
+                          {cafe.displayScore.toFixed(1)}
                         </span>
                       )}
                       <span className="text-sm text-gray-500 capitalize">{cafe.city}</span>

@@ -11,7 +11,7 @@ import { formatHoursCompact } from '../utils/hoursFormatter'
 import type { MapViewProps } from '../types'
 
 export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCafe, onPinClick, onViewDetails, onClosePopover }) => {
-  const mapsUrl = selectedCafe ? getMapsUrl(selectedCafe.address, selectedCafe.googleMapsUrl) : ''
+  const mapsUrl = selectedCafe ? getMapsUrl(selectedCafe.address || '', selectedCafe.link) : ''
   const { visitedCafeIds } = useVisitedCafes()
   const { getCity } = useCityStore()
   const currentCity = getCity()
@@ -190,11 +190,11 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
             <div className="flex justify-between items-start mb-2">
               <div>
                 <h3 className="font-bold text-lg text-gray-800">{selectedCafe.name}</h3>
-                <p className="text-sm text-gray-500">{selectedCafe.neighborhood}</p>
+                {selectedCafe.address && <p className="text-sm text-gray-500">{selectedCafe.address}</p>}
               </div>
-              {(selectedCafe.displayScore || selectedCafe.score) && (
+              {selectedCafe.displayScore && (
                 <div className="bg-green-500 text-white px-3 py-1 rounded-full font-bold text-lg">
-                  {(selectedCafe.displayScore || selectedCafe.score)!.toFixed(1)}
+                  {selectedCafe.displayScore.toFixed(1)}
                 </div>
               )}
             </div>
@@ -292,11 +292,11 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
               <div className="flex justify-between items-start">
                 <div>
                   <h3 className="font-bold text-xl text-gray-800">{selectedCafe.name}</h3>
-                  <p className="text-gray-500 mt-1">{selectedCafe.neighborhood}</p>
+                  {selectedCafe.address && <p className="text-gray-500 mt-1">{selectedCafe.address}</p>}
                 </div>
-                {(selectedCafe.displayScore || selectedCafe.score) && (
+                {selectedCafe.displayScore && (
                   <div className="bg-green-500 text-white px-4 py-2 rounded-full font-bold text-xl">
-                    {(selectedCafe.displayScore || selectedCafe.score)!.toFixed(1)}
+                    {selectedCafe.displayScore.toFixed(1)}
                   </div>
                 )}
               </div>
@@ -371,13 +371,6 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                 ) : null
               })()}
 
-              {selectedCafe.priceRange && (
-                <div>
-                  <h4 className="font-semibold text-gray-800 mb-2">Price Range</h4>
-                  <p className="text-sm text-gray-600">{selectedCafe.priceRange}</p>
-                </div>
-              )}
-
               {/* Action Buttons */}
               <div className="space-y-3 pt-4">
                 <button
@@ -399,21 +392,25 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
               </div>
 
               {/* Social Links */}
-              {(selectedCafe.instagram || selectedCafe.tiktok) && (
+              {(selectedCafe.instagram || selectedCafe.instagramPostLink || selectedCafe.tiktokPostLink) && (
                 <div>
                   <h4 className="font-semibold text-gray-800 mb-3">Follow</h4>
                   <div className="flex gap-2">
-                    {selectedCafe.instagram && (
+                    {(selectedCafe.instagram || selectedCafe.instagramPostLink) && (
                       <a
-                        href="#"
+                        href={selectedCafe.instagramPostLink || `https://instagram.com/${selectedCafe.instagram?.replace('@', '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="flex-1 bg-gradient-to-br from-purple-500 to-pink-500 text-white py-2 px-3 rounded-lg font-medium text-center hover:from-purple-600 hover:to-pink-600 transition text-sm"
                       >
                         Instagram
                       </a>
                     )}
-                    {selectedCafe.tiktok && (
+                    {selectedCafe.tiktokPostLink && (
                       <a
-                        href="#"
+                        href={selectedCafe.tiktokPostLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="flex-1 bg-gray-800 text-white py-2 px-3 rounded-lg font-medium text-center hover:bg-gray-900 transition text-sm"
                       >
                         TikTok

@@ -9,7 +9,7 @@ import type { DetailViewProps } from '../types'
 export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, onToggleVisited }) => {
   const { isPassportEnabled, isUserAccountsEnabled } = useFeatureStore()
   const isVisited: boolean = visitedLocations.includes(cafe.id)
-  const mapsUrl = getMapsUrl(cafe.address, cafe.googleMapsUrl)
+  const mapsUrl = getMapsUrl(cafe.address || '', cafe.link)
   const [showAllHours, setShowAllHours] = useState(false)
 
   const hoursData = cafe.hours ? formatHoursCompact(cafe.hours) : null
@@ -17,8 +17,8 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
   return (
     <div className="flex-1 overflow-y-auto pb-24 pt-0">
       {/* Hero Section */}
-      <div className={`w-full h-48 bg-gradient-to-br ${cafe.color || 'from-green-400 to-green-600'} flex items-center justify-center relative`}>
-        <span className="text-8xl">{cafe.emoji || '🍵'}</span>
+      <div className="w-full h-48 bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center relative">
+        <span className="text-8xl">🍵</span>
         {isUserAccountsEnabled && (
           <button className="absolute top-4 right-4 bg-white/90 p-2 rounded-full shadow-lg hover:bg-white transition">
             <Heart size={24} className="text-green-600" />
@@ -37,9 +37,9 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
                 <p className="text-gray-600 mt-1">{cafe.city}</p>
               )}
             </div>
-            {(cafe.displayScore || cafe.score) && (
+            {cafe.displayScore && (
               <div className="bg-gradient-to-br from-green-500 to-green-600 text-white px-4 py-2 rounded-xl font-bold text-2xl shadow-md">
-                {(cafe.displayScore || cafe.score)!.toFixed(1)}
+                {cafe.displayScore.toFixed(1)}
               </div>
             )}
           </div>

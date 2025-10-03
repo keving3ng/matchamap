@@ -99,7 +99,7 @@ export const calculateWalkTime = (distanceKm: number): string => {
 /**
  * Calculate distances for multiple cafes from user location
  */
-export const calculateCafeDistances = <T extends { lat: number; lng: number }>(
+export const calculateCafeDistances = <T extends { lat?: number; lng?: number; latitude: number; longitude: number }>(
   userLocation: Coordinates | null,
   cafes: T[]
 ): (T & { distanceInfo: DistanceResult | null })[] => {
@@ -112,8 +112,8 @@ export const calculateCafeDistances = <T extends { lat: number; lng: number }>(
 
   return cafes.map(cafe => {
     const distanceInfo = getDistanceInfo(userLocation, {
-      latitude: cafe.lat,
-      longitude: cafe.lng,
+      latitude: cafe.lat ?? cafe.latitude,
+      longitude: cafe.lng ?? cafe.longitude,
     })
 
     return {
