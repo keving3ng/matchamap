@@ -9,7 +9,7 @@ import { listAllFeedItems, getFeedItem, createFeedItem, updateFeedItem, deleteFe
 import { listEvents } from './routes/events';
 import { listAllEvents, getEvent, createEvent, updateEvent, deleteEvent } from './routes/admin-events';
 import { lookupPlace } from './routes/places';
-import { bulkImportCafes } from './routes/import';
+import { bulkImportCafes, exportCafes } from './routes/import';
 import { register, login, logout, getCurrentUser, refreshToken } from './routes/auth';
 import { requireAuth, requireAdminAuth } from './middleware/auth';
 import { notFoundResponse } from './utils/response';
@@ -44,8 +44,9 @@ router.post('/api/admin/cafes/:cafeId/drinks', requireAdminAuth(), createDrink);
 router.put('/api/admin/drinks/:id', requireAdminAuth(), updateDrink);
 router.delete('/api/admin/drinks/:id', requireAdminAuth(), deleteDrink);
 
-// Bulk import endpoint
+// Bulk import/export endpoints
 router.post('/api/admin/import/cafes', requireAdminAuth(), bulkImportCafes);
+router.get('/api/admin/export/cafes', requireAdminAuth(), exportCafes);
 
 // Feed admin endpoints
 router.get('/api/admin/feed', requireAdminAuth(), listAllFeedItems);

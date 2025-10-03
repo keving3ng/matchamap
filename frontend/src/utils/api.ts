@@ -3,6 +3,8 @@
  * Handles all communication with Cloudflare Workers API
  */
 
+import { useAuthStore } from '../stores/authStore'
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8787'
 
 /**
@@ -18,12 +20,23 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit & { bustCache
       url += `${separator}_=${Date.now()}`
     }
 
+    // Get auth token from store
+    const token = useAuthStore.getState().accessToken
+
+    // Build headers
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...options?.headers as Record<string, string>,
+    }
+
+    // Add Authorization header if token exists
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
+    }
+
     const response = await fetch(url, {
       ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...options?.headers,
-      },
+      headers,
     })
 
     if (!response.ok) {
