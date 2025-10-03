@@ -144,10 +144,18 @@ export async function createCafe(request: IRequest, env: Env): Promise<Response>
     }
 
     const db = getDb(env.DB);
+    const slug = body.slug || body.name.toLowerCase().replace(/\s+/g, '-');
+
+    // Check if a cafe with this slug already exists (including soft-deleted)
+    const existing = await db
+      .select()
+      .from(cafes)
+      .where(eq(cafes.slug, slug))
+      .limit(1);
 
     const cafeData = {
       name: body.name,
-      slug: body.slug || body.name.toLowerCase().replace(/\s+/g, '-'),
+      slug,
       link: body.link,
       latitude: body.latitude,
       longitude: body.longitude,
@@ -167,6 +175,33 @@ export async function createCafe(request: IRequest, env: Env): Promise<Response>
       images: body.images,
     };
 
+    // If cafe exists and is soft-deleted, undelete and update it
+    if (existing.length > 0 && existing[0].deletedAt) {
+      const updated = await db
+        .update(cafes)
+        .set({
+          ...cafeData,
+          deletedAt: null,
+          updatedAt: sql`CURRENT_TIMESTAMP`,
+        })
+        .where(eq(cafes.id, existing[0].id))
+        .returning();
+
+      return jsonResponse(
+        { cafe: updated[0] },
+        201,
+        request as Request,
+        env,
+        'no-store'
+      );
+    }
+
+    // If cafe exists and is NOT deleted, return error
+    if (existing.length > 0) {
+      return errorResponse('Cafe with this slug already exists', 409, request as Request, env);
+    }
+
+    // Otherwise, insert new cafe
     const newCafe = await db
       .insert(cafes)
       .values(cafeData)
