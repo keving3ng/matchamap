@@ -41,8 +41,8 @@ export const DrinksManagement: React.FC<DrinksManagementProps> = ({ cafeId, cafe
     try {
       await api.drinks.delete(drinkId)
       await loadDrinks()
-      // Refresh cafe data in the store to update map view
-      await fetchCafes()
+      // Refresh cafe data in the store to update map view with cache busting
+      await fetchCafes(undefined, true)
     } catch (err) {
       setError((err as Error).message)
     }
@@ -62,8 +62,8 @@ export const DrinksManagement: React.FC<DrinksManagementProps> = ({ cafeId, cafe
     setShowDrinkForm(false)
     setEditingDrink(null)
     await loadDrinks()
-    // Refresh cafe data in the store to update map view
-    await fetchCafes()
+    // Refresh cafe data in the store to update map view with cache busting
+    await fetchCafes(undefined, true)
   }
 
   return (
@@ -137,7 +137,7 @@ export const DrinksManagement: React.FC<DrinksManagementProps> = ({ cafeId, cafe
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           <h3 className="font-semibold text-lg text-gray-800">
-                            {drink.name}
+                            {drink.name || 'Iced Matcha Latte'}
                           </h3>
                           {drink.isDefault && (
                             <span className="px-2 py-1 bg-green-500 text-white text-xs rounded">
@@ -155,13 +155,15 @@ export const DrinksManagement: React.FC<DrinksManagementProps> = ({ cafeId, cafe
                             </p>
                           </div>
 
-                          <div>
-                            <span className="text-gray-600">Price:</span>
-                            <p className="font-medium text-gray-800">
-                              {drink.priceCurrency === 'CAD' ? '$' : drink.priceCurrency === 'USD' ? '$' : '¥'}
-                              {drink.priceAmount.toFixed(2)}
-                            </p>
-                          </div>
+                          {drink.priceAmount !== null && drink.priceAmount !== undefined && drink.priceCurrency && (
+                            <div>
+                              <span className="text-gray-600">Price:</span>
+                              <p className="font-medium text-gray-800">
+                                {drink.priceCurrency === 'CAD' ? '$' : drink.priceCurrency === 'USD' ? '$' : '¥'}
+                                {drink.priceAmount.toFixed(2)}
+                              </p>
+                            </div>
+                          )}
 
                           {drink.gramsUsed && (
                             <div>

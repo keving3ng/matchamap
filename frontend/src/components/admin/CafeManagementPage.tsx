@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Coffee, Plus, Search, Edit, Trash2, Loader } from 'lucide-react'
+import { Coffee, Plus, Search, Edit, Trash2, Loader, AlertCircle } from 'lucide-react'
 import { useDataStore } from '../../stores/dataStore'
 import { api } from '../../utils/api'
 import { CafeForm } from './CafeForm'
@@ -17,7 +17,7 @@ export const CafeManagementPage: React.FC = () => {
   const [managingDrinksCafe, setManagingDrinksCafe] = useState<Cafe | null>(null)
 
   useEffect(() => {
-    fetchCafes()
+    fetchCafes(undefined, true) // Bust cache on mount for admin
   }, [])
 
   const handleAddCafe = () => {
@@ -37,7 +37,7 @@ export const CafeManagementPage: React.FC = () => {
       } else {
         await api.cafes.create(cafeData)
       }
-      await fetchCafes()
+      await fetchCafes(undefined, true) // Bust cache after save
     } catch (error) {
       throw error
     }
@@ -51,8 +51,8 @@ export const CafeManagementPage: React.FC = () => {
     try {
       setIsDeleting(cafeId)
       await api.cafes.delete(cafeId)
-      // Refresh cafe list
-      await fetchCafes()
+      // Refresh cafe list with cache busting
+      await fetchCafes(undefined, true)
     } catch (error) {
       alert(`Failed to delete cafe: ${(error as Error).message}`)
     } finally {
@@ -69,6 +69,11 @@ export const CafeManagementPage: React.FC = () => {
 
     return matchesSearch && matchesCity
   })
+
+  // Check if cafe is missing location information
+  const isMissingLocation = (cafe: Cafe) => {
+    return !cafe.address || cafe.latitude === 0 || cafe.longitude === 0
+  }
 
   return (
     <div className="p-4 md:p-6">
@@ -159,6 +164,14 @@ export const CafeManagementPage: React.FC = () => {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="font-bold text-lg text-gray-800">{cafe.name}</h3>
+                      {isMissingLocation(cafe) && (
+                        <span title="Missing location information (address, latitude, or longitude)">
+                          <AlertCircle
+                            size={16}
+                            className="text-orange-500"
+                          />
+                        </span>
+                      )}
                       {(cafe.displayScore || cafe.score) && (
                         <span className="bg-green-500 text-white px-2.5 py-0.5 rounded-full font-bold text-sm">
                           {(cafe.displayScore || cafe.score)!.toFixed(1)}

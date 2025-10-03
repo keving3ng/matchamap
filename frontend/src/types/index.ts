@@ -23,10 +23,10 @@ export enum DrinkType {
 export interface DrinkItem {
   id: number
   cafeId: number
-  name: string // Display name (e.g., "Matcha Latte", "Ceremonial Matcha")
-  score: number // Individual drink score (0-10)
-  priceAmount: number // Price amount
-  priceCurrency: string // Currency code (CAD, USD, JPY)
+  name?: string | null // Display name - defaults to "Iced Matcha Latte" if not provided
+  score: number // Individual drink score (0-10) - REQUIRED
+  priceAmount?: number | null // Price amount - optional
+  priceCurrency?: string | null // Currency code (CAD, USD, JPY) - optional
   gramsUsed?: number | null // Grams of matcha powder used
   isDefault: boolean // The primary drink reviewed/recommended
   notes?: string | null // Specific notes about this drink

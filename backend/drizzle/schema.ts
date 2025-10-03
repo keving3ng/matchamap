@@ -48,11 +48,11 @@ export const drinks = sqliteTable('drinks', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   cafeId: integer('cafe_id').notNull().references(() => cafes.id, { onDelete: 'cascade' }),
 
-  name: text('name').notNull(),
-  score: real('score').notNull(), // Individual drink score (0-10)
-  priceAmount: integer('price_amount').notNull(),
-  priceCurrency: text('price_currency').notNull().default('CAD'), // CAD, USD, JPY
-  gramsUsed: integer('grams_used'),
+  name: text('name'), // Optional - defaults to "Iced Matcha Latte" if not provided
+  score: real('score').notNull(), // Individual drink score (0-10) - required
+  priceAmount: integer('price_amount'), // Optional - price in cents
+  priceCurrency: text('price_currency'), // Optional - CAD, USD, JPY, etc.
+  gramsUsed: integer('grams_used'), // Optional - grams of matcha used
   isDefault: integer('is_default', { mode: 'boolean' }).default(false),
   notes: text('notes'),
 

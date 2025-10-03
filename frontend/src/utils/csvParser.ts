@@ -25,13 +25,13 @@ export interface CsvCafe {
 }
 
 export interface CsvDrink {
-  name: string
-  score: number
-  priceAmount: number
-  priceCurrency: string
-  gramsUsed?: number
+  name?: string | null // Optional - defaults to "Iced Matcha Latte"
+  score: number // Required
+  priceAmount?: number | null // Optional
+  priceCurrency?: string | null // Optional
+  gramsUsed?: number | null
   isDefault: boolean
-  notes?: string
+  notes?: string | null
 }
 
 export interface ParseResult {
@@ -61,6 +61,19 @@ const headerMappings: Record<string, string[]> = {
   'drink_name': ['drink name', 'drink_name', 'drink'],
   'drink_score': ['score', 'drink_score', 'drink score', 'rating'],
   'drink_price_amount': ['price', 'drink_price', 'price_amount', 'cost'],
+}
+
+/**
+ * Generate a URL-safe slug from a cafe name
+ */
+function generateSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '') // Remove special characters
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Replace multiple hyphens with single
+    .replace(/^-+|-+$/g, '') // Remove leading/trailing hyphens
 }
 
 /**
@@ -175,36 +188,43 @@ export function parseCsvToCafes(csvText: string): ParseResult {
       return csvHeader ? row[csvHeader] || '' : ''
     }
 
-    // Check if this is a new cafe (name is filled)
-    const name = getValue('name')
-    if (name) {
+    // Check if this is a new cafe (link is present = new cafe, since link is unique)
+    const link = getValue('link')
+    if (link) {
       // Save previous cafe if exists
       if (currentCafe) {
         cafes.push(currentCafe)
       }
 
-      const link = getValue('link')
+      const name = getValue('name')
       const city = getValue('city')
-      const quickNote = getValue('quick_note')
+      // Fall back to review if quick_note is empty
+      const quickNote = getValue('quick_note') || getValue('review')
 
       // Validate required cafe fields (we'll skip slug, lat, lng for now - will be enriched later)
-      if (!link || !city || !quickNote) {
-        errors.push(`Row ${i + 1}: Missing required cafe fields (Link, City, or Quick Note)`)
+      if (!name || !city || !quickNote) {
+        errors.push(`Row ${i + 1}: Missing required cafe fields (Name, City, or Quick Note/Review)`)
         currentCafe = null
         continue
       }
 
-      // Create new cafe (slug, lat, lng will be filled by enrichment step)
+      // Create new cafe (lat, lng will be filled by enrichment step)
       currentCafe = {
         name,
-        slug: '', // Will be generated from name or fetched from Places API
+        slug: generateSlug(name), // Generate slug from cafe name
         link,
         address: undefined,
         latitude: 0, // Will be fetched from Places API
         longitude: 0, // Will be fetched from Places API
-        city,
+        city: city.toLowerCase(), // Normalize to lowercase
         ambianceScore: getValue('ambiance_score') ? parseFloat(getValue('ambiance_score')) : undefined,
-        chargeForAltMilk: getValue('charge_for_alt_milk') ? parseFloat(getValue('charge_for_alt_milk')) : undefined,
+        chargeForAltMilk: (() => {
+          const altMilkValue = getValue('charge_for_alt_milk')?.toLowerCase().trim()
+          if (!altMilkValue) return undefined // Unknown - no data provided
+          if (altMilkValue === 'free' || altMilkValue === '0') return 0 // Free
+          const parsed = parseFloat(altMilkValue)
+          return isNaN(parsed) ? undefined : parsed
+        })(),
         quickNote,
         review: getValue('review') || undefined,
         source: getValue('source') || undefined,
@@ -217,67 +237,70 @@ export function parseCsvToCafes(csvText: string): ParseResult {
       }
     }
 
-    // Add drink to current cafe
-    const drinkName = getValue('drink_name')
-    if (currentCafe && drinkName) {
-      const drinkScore = getValue('drink_score')
-      const drinkPrice = getValue('drink_price_amount')
-
-      if (!drinkScore) {
-        errors.push(`Row ${i + 1}: Missing Score field`)
-        continue
-      }
-
-      if (!drinkPrice) {
-        errors.push(`Row ${i + 1}: Missing Price field`)
-        continue
-      }
-
-      // Parse score
+    // Add drink to current cafe - only if score exists
+    const drinkScore = getValue('drink_score')
+    if (currentCafe && drinkScore) {
+      // Parse score (only required field for drinks)
       const score = parseFloat(drinkScore)
       if (isNaN(score)) {
         errors.push(`Row ${i + 1}: Invalid score "${drinkScore}"`)
         continue
       }
 
-      // Parse price - handle various formats
-      let priceAmount = 0
-      let priceCurrency = 'CAD' // Default
+      // Default drink name to "Iced Matcha Latte" if not provided
+      const drinkName = getValue('drink_name') || 'Iced Matcha Latte'
 
-      // Try to parse price
-      const priceStr = drinkPrice.toLowerCase().trim()
-      if (priceStr === 'free' || priceStr.includes('free')) {
-        priceAmount = 0
-      } else {
-        // Extract number from string like "7", "7 usd", "$7.50"
-        const priceMatch = priceStr.match(/[\d.]+/)
-        if (priceMatch) {
-          priceAmount = parseFloat(priceMatch[0])
+      // Parse price - OPTIONAL
+      let priceAmount: number | null = null
+      let priceCurrency: string | null = null
+      const drinkPrice = getValue('drink_price_amount')
+
+      if (drinkPrice && drinkPrice.trim()) {
+        // Try to parse price
+        const priceStr = drinkPrice.toLowerCase().trim()
+        if (priceStr === 'free' || priceStr.includes('free')) {
+          priceAmount = 0
         } else {
-          errors.push(`Row ${i + 1}: Could not parse price "${drinkPrice}"`)
-          continue
+          // Extract number from string like "7", "7 usd", "$7.50", "8.5 (I think...)"
+          const priceMatch = priceStr.match(/[\d.]+/)
+          if (priceMatch) {
+            priceAmount = parseFloat(priceMatch[0])
+
+            // Infer currency from price text or city
+            if (priceStr.includes('usd') || priceStr.includes('$')) {
+              priceCurrency = 'USD'
+            } else if (priceStr.includes('jpy') || priceStr.includes('¥')) {
+              priceCurrency = 'JPY'
+            } else {
+              // Infer from city
+              if (currentCafe.city.toLowerCase().includes('new york') || currentCafe.city.toLowerCase() === 'nyc') {
+                priceCurrency = 'USD'
+              } else if (currentCafe.city.toLowerCase().includes('tokyo')) {
+                priceCurrency = 'JPY'
+              } else {
+                priceCurrency = 'CAD' // Toronto, Montreal, etc.
+              }
+            }
+          }
+          // If we can't parse price, leave it as null (don't error)
         }
       }
 
-      // Infer currency from city if not specified
-      if (currentCafe.city.toLowerCase().includes('new york') || currentCafe.city.toLowerCase() === 'nyc') {
-        priceCurrency = 'USD'
-      } else if (currentCafe.city.toLowerCase().includes('tokyo')) {
-        priceCurrency = 'JPY'
-      } else {
-        priceCurrency = 'CAD' // Toronto, Montreal, etc.
-      }
+      // Parse grams - OPTIONAL
+      const gramsValue = getValue('grams')
+      const gramsUsed = gramsValue ? parseInt(gramsValue) : null
 
       currentCafe.drinks.push({
         name: drinkName,
         score,
         priceAmount,
         priceCurrency,
-        gramsUsed: getValue('grams') ? parseInt(getValue('grams')) : undefined,
+        gramsUsed,
         isDefault: true, // First drink is default
-        notes: undefined
+        notes: null
       })
     }
+    // If no score, we don't add a drink - cafe can exist without drinks
   }
 
   // Add last cafe
@@ -309,10 +332,11 @@ export function validateCafe(cafe: CsvCafe): string[] {
 export function validateDrink(drink: CsvDrink): string[] {
   const errors: string[] = []
 
-  if (!drink.name) errors.push('Missing name')
+  // Only score is required for drinks
   if (drink.score === undefined || drink.score === null || isNaN(drink.score)) errors.push('Invalid score')
-  if (drink.priceAmount === undefined || drink.priceAmount === null || isNaN(drink.priceAmount)) errors.push('Invalid price_amount')
-  if (!drink.priceCurrency) errors.push('Missing price_currency')
+
+  // Name defaults to "Iced Matcha Latte" so it's always valid
+  // Price and currency are optional - no validation needed
 
   return errors
 }

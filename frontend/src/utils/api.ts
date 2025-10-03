@@ -8,9 +8,17 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8787/api'
 /**
  * Generic fetch wrapper with error handling
  */
-async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> {
+async function fetchAPI<T>(endpoint: string, options?: RequestInit & { bustCache?: boolean }): Promise<T> {
   try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    let url = `${API_BASE_URL}${endpoint}`
+
+    // Add cache-busting parameter for GET requests when bustCache is true
+    if (options?.bustCache && (!options?.method || options.method === 'GET')) {
+      const separator = url.includes('?') ? '&' : '?'
+      url += `${separator}_=${Date.now()}`
+    }
+
+    const response = await fetch(url, {
       ...options,
       headers: {
         'Content-Type': 'application/json',
@@ -43,7 +51,7 @@ export const cafeAPI = {
     maxPrice?: number
     limit?: number
     offset?: number
-  }): Promise<{ cafes: any[]; total: number; hasMore: boolean }> {
+  }, bustCache = false): Promise<{ cafes: any[]; total: number; hasMore: boolean }> {
     const params = new URLSearchParams()
     if (filters?.city) params.append('city', filters.city)
     if (filters?.minScore) params.append('minScore', filters.minScore.toString())
@@ -52,7 +60,7 @@ export const cafeAPI = {
     if (filters?.offset) params.append('offset', filters.offset.toString())
 
     const query = params.toString() ? `?${params.toString()}` : ''
-    return fetchAPI(`/cafes${query}`)
+    return fetchAPI(`/cafes${query}`, { bustCache })
   },
 
   /**
@@ -103,14 +111,14 @@ export const feedAPI = {
     type?: string
     limit?: number
     offset?: number
-  }): Promise<{ items: any[]; hasMore: boolean }> {
+  }, bustCache = false): Promise<{ items: any[]; hasMore: boolean }> {
     const params = new URLSearchParams()
     if (filters?.type) params.append('type', filters.type)
     if (filters?.limit) params.append('limit', filters.limit.toString())
     if (filters?.offset) params.append('offset', filters.offset.toString())
 
     const query = params.toString() ? `?${params.toString()}` : ''
-    return fetchAPI(`/feed${query}`)
+    return fetchAPI(`/feed${query}`, { bustCache })
   },
 
   /**
@@ -178,14 +186,14 @@ export const eventsAPI = {
     upcoming?: boolean
     featured?: boolean
     limit?: number
-  }): Promise<{ events: any[] }> {
+  }, bustCache = false): Promise<{ events: any[] }> {
     const params = new URLSearchParams()
     if (filters?.upcoming !== undefined) params.append('upcoming', filters.upcoming.toString())
     if (filters?.featured !== undefined) params.append('featured', filters.featured.toString())
     if (filters?.limit) params.append('limit', filters.limit.toString())
 
     const query = params.toString() ? `?${params.toString()}` : ''
-    return fetchAPI(`/events${query}`)
+    return fetchAPI(`/events${query}`, { bustCache })
   },
 
   /**

@@ -10,10 +10,10 @@ interface DataStore {
   error: string | null
 
   // Actions
-  fetchCafes: (city?: string) => Promise<void>
-  fetchFeed: () => Promise<void>
-  fetchEvents: () => Promise<void>
-  fetchAll: (city?: string) => Promise<void>
+  fetchCafes: (city?: string, bustCache?: boolean) => Promise<void>
+  fetchFeed: (bustCache?: boolean) => Promise<void>
+  fetchEvents: (bustCache?: boolean) => Promise<void>
+  fetchAll: (city?: string, bustCache?: boolean) => Promise<void>
 }
 
 /**
@@ -27,10 +27,10 @@ export const useDataStore = create<DataStore>((set, get) => ({
   isLoading: false,
   error: null,
 
-  fetchCafes: async (city?: string) => {
+  fetchCafes: async (city?: string, bustCache = false) => {
     try {
       set({ isLoading: true, error: null })
-      const response = await api.cafes.getAll({ city, limit: 500 })
+      const response = await api.cafes.getAll({ city, limit: 500 }, bustCache)
 
       // Transform API response to frontend format
       const cafes = response.cafes.map((cafe: any) => ({
@@ -66,10 +66,10 @@ export const useDataStore = create<DataStore>((set, get) => ({
     }
   },
 
-  fetchFeed: async () => {
+  fetchFeed: async (bustCache = false) => {
     try {
       set({ isLoading: true, error: null })
-      const response = await api.feed.getAll({ limit: 100 })
+      const response = await api.feed.getAll({ limit: 100 }, bustCache)
 
       // Transform API response to frontend format
       const feedItems = response.items.map((item: any) => ({
@@ -96,10 +96,10 @@ export const useDataStore = create<DataStore>((set, get) => ({
     }
   },
 
-  fetchEvents: async () => {
+  fetchEvents: async (bustCache = false) => {
     try {
       set({ isLoading: true, error: null })
-      const response = await api.events.getAll({ upcoming: true, limit: 50 })
+      const response = await api.events.getAll({ upcoming: true, limit: 50 }, bustCache)
 
       // Transform API response to frontend format
       const eventItems = response.events.map((event: any) => ({
@@ -122,12 +122,12 @@ export const useDataStore = create<DataStore>((set, get) => ({
     }
   },
 
-  fetchAll: async (city?: string) => {
+  fetchAll: async (city?: string, bustCache = false) => {
     const { fetchCafes, fetchFeed, fetchEvents } = get()
     await Promise.all([
-      fetchCafes(city),
-      fetchFeed(),
-      fetchEvents(),
+      fetchCafes(city, bustCache),
+      fetchFeed(bustCache),
+      fetchEvents(bustCache),
     ])
   },
 }))

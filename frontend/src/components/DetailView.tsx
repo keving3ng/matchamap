@@ -102,7 +102,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <h4 className="font-semibold text-gray-800">{drink.name}</h4>
+                        <h4 className="font-semibold text-gray-800">{drink.name || 'Iced Matcha Latte'}</h4>
                         {drink.isDefault && (
                           <span className="px-2 py-0.5 bg-green-500 text-white text-xs rounded">
                             Featured
@@ -118,10 +118,12 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
                         <Star size={16} className="fill-green-600" />
                         {drink.score.toFixed(1)}
                       </div>
-                      <div className="text-sm text-gray-600">
-                        {drink.priceCurrency === 'CAD' ? '$' : drink.priceCurrency === 'USD' ? '$' : '¥'}
-                        {drink.priceAmount.toFixed(2)}
-                      </div>
+                      {drink.priceAmount !== null && drink.priceAmount !== undefined && drink.priceCurrency && (
+                        <div className="text-sm text-gray-600">
+                          {drink.priceCurrency === 'CAD' ? '$' : drink.priceCurrency === 'USD' ? '$' : '¥'}
+                          {drink.priceAmount.toFixed(2)}
+                        </div>
+                      )}
                       {drink.gramsUsed && (
                         <div className="text-xs text-gray-500 mt-1">{drink.gramsUsed}g matcha</div>
                       )}
@@ -134,10 +136,9 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
         )}
 
         {/* Cafe Details Section */}
-        {(cafe.ambianceScore || cafe.chargeForAltMilk !== undefined) && (
-          <div className="mt-6">
-            <h3 className="text-lg font-bold text-gray-800 mb-3">Cafe Details</h3>
-            <div className="bg-white rounded-xl shadow p-4 border border-green-100 space-y-3">
+        <div className="mt-6">
+          <h3 className="text-lg font-bold text-gray-800 mb-3">Cafe Details</h3>
+          <div className="bg-white rounded-xl shadow p-4 border border-green-100 space-y-3">
               {cafe.ambianceScore && (
                 <div className="flex items-center justify-between">
                   <span className="text-gray-700">Ambiance</span>
@@ -147,17 +148,19 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
                   </div>
                 </div>
               )}
-              {cafe.chargeForAltMilk !== null && cafe.chargeForAltMilk !== undefined && (
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-700">Alternative Milk</span>
-                  <span className="font-semibold text-gray-800">
-                    {cafe.chargeForAltMilk > 0 ? `+$${cafe.chargeForAltMilk.toFixed(2)}` : 'Free'}
-                  </span>
-                </div>
-              )}
+              <div className="flex items-center justify-between">
+                <span className="text-gray-700">Alternative Milk</span>
+                <span className="font-semibold text-gray-800">
+                  {cafe.chargeForAltMilk === null || cafe.chargeForAltMilk === undefined
+                    ? <span className="text-gray-400 font-normal">Unknown</span>
+                    : cafe.chargeForAltMilk === 0
+                    ? 'Free'
+                    : `+$${cafe.chargeForAltMilk.toFixed(2)}`}
+                </span>
+              </div>
             </div>
           </div>
-        )}
+        </div>
 
         {/* Review Section */}
         {cafe.review && (
@@ -256,7 +259,6 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
             </div>
           </div>
         )}
-        </div>
       </ContentContainer>
     </div>
   )

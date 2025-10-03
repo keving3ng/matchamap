@@ -32,21 +32,8 @@ export async function listCafes(request: IRequest, env: Env): Promise<Response> 
       conditions.push(eq(cafes.city, city));
     }
 
-    // Add optional filters
-    if (minScore) {
-      const score = parseFloat(minScore);
-      if (isNaN(score) || score < 0 || score > 10) {
-        return badRequestResponse('Invalid minScore parameter', request as Request, env);
-      }
-      conditions.push(gte(cafes.score, score));
-    }
-    if (maxPrice) {
-      const priceValue = parseFloat(maxPrice);
-      if (isNaN(priceValue)) {
-        return badRequestResponse('Invalid maxPrice parameter', request as Request, env);
-      }
-      conditions.push(lte(cafes.price, priceValue));
-    }
+    // Note: Score and price filters removed - these are now at drink level, not cafe level
+    // TODO: Implement filtering by drink scores/prices if needed
 
     // Execute query with pagination
     const results = await db
@@ -67,8 +54,8 @@ export async function listCafes(request: IRequest, env: Env): Promise<Response> 
           .from(drinks)
           .where(eq(drinks.cafeId, cafe.id));
 
-        // Calculate display score: default drink OR highest score OR legacy cafe.score
-        let displayScore = cafe.score || null;
+        // Calculate display score: default drink OR highest score
+        let displayScore: number | null = null;
         if (cafeDrinks.length > 0) {
           const defaultDrink = cafeDrinks.find(d => d.isDefault);
           if (defaultDrink) {
@@ -184,22 +171,20 @@ export async function createCafe(request: IRequest, env: Env): Promise<Response>
       name: body.name,
       slug,
       link: body.link,
+      address: body.address || null,
       latitude: body.latitude,
       longitude: body.longitude,
-      city: body.city || 'toronto',
-      score: body.score,
-      ambianceScore: body.ambianceScore,
-      otherDrinksScore: body.otherDrinksScore,
-      price: body.price,
-      chargeForAltMilk: body.chargeForAltMilk || false,
-      gramsUsed: body.gramsUsed,
+      city: (body.city || 'toronto').toLowerCase(), // Normalize to lowercase
+      ambianceScore: body.ambianceScore ?? null,
+      chargeForAltMilk: body.chargeForAltMilk ?? null,
       quickNote: body.quickNote,
-      review: body.review,
-      hours: body.hours,
-      instagram: body.instagram,
-      instagramPostLink: body.instagramPostLink,
-      tiktokPostLink: body.tiktokPostLink,
-      images: body.images,
+      review: body.review || null,
+      source: body.source || null,
+      hours: body.hours || null,
+      instagram: body.instagram || null,
+      instagramPostLink: body.instagramPostLink || null,
+      tiktokPostLink: body.tiktokPostLink || null,
+      images: body.images || null,
     };
 
     // If cafe exists and is soft-deleted, undelete and update it
@@ -269,12 +254,46 @@ export async function updateCafe(request: IRequest, env: Env): Promise<Response>
       return notFoundResponse(request as Request, env);
     }
 
+    // Build update object with only valid cafe fields (matching current schema)
+    const updateData: Record<string, any> = {};
+
+    // Basic fields
+    if (body.name !== undefined) updateData.name = body.name;
+    if (body.slug !== undefined) updateData.slug = body.slug;
+
+    // Location
+    if (body.link !== undefined) updateData.link = body.link;
+    if (body.address !== undefined) updateData.address = body.address || null;
+    if (body.latitude !== undefined) updateData.latitude = body.latitude;
+    if (body.longitude !== undefined) updateData.longitude = body.longitude;
+    if (body.city !== undefined) updateData.city = body.city.toLowerCase(); // Normalize to lowercase
+
+    // Ratings
+    if (body.ambianceScore !== undefined) updateData.ambianceScore = body.ambianceScore ?? null;
+
+    // Pricing
+    if (body.chargeForAltMilk !== undefined) updateData.chargeForAltMilk = body.chargeForAltMilk ?? null;
+
+    // Content
+    if (body.quickNote !== undefined) updateData.quickNote = body.quickNote;
+    if (body.review !== undefined) updateData.review = body.review || null;
+    if (body.source !== undefined) updateData.source = body.source || null;
+
+    // Contact/Social
+    if (body.hours !== undefined) updateData.hours = body.hours || null;
+    if (body.instagram !== undefined) updateData.instagram = body.instagram || null;
+    if (body.instagramPostLink !== undefined) updateData.instagramPostLink = body.instagramPostLink || null;
+    if (body.tiktokPostLink !== undefined) updateData.tiktokPostLink = body.tiktokPostLink || null;
+
+    // Media
+    if (body.images !== undefined) updateData.images = body.images || null;
+
+    // Always update timestamp
+    updateData.updatedAt = sql`CURRENT_TIMESTAMP`;
+
     const updated = await db
       .update(cafes)
-      .set({
-        ...(body as Record<string, any>),
-        updatedAt: sql`CURRENT_TIMESTAMP`,
-      })
+      .set(updateData)
       .where(eq(cafes.id, cafeId))
       .returning();
 

@@ -80,7 +80,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
         }
 
         // Search in drink names
-        if (cafe.drinks && cafe.drinks.some(drink => drink.name.toLowerCase().includes(query))) {
+        if (cafe.drinks && cafe.drinks.some(drink => drink.name?.toLowerCase().includes(query))) {
           return true
         }
 
@@ -457,9 +457,11 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                           .slice(0, 3)
                           .map(drink => (
                             <div key={drink.id} className="flex items-center justify-between text-sm bg-gray-50 rounded-lg p-2">
-                              <span className="text-gray-700 font-medium">{drink.name}</span>
+                              <span className="text-gray-700 font-medium">{drink.name || 'Iced Matcha Latte'}</span>
                               <div className="flex items-center gap-3">
-                                <span className="text-gray-600">${drink.priceAmount.toFixed(2)}</span>
+                                {drink.priceAmount !== null && drink.priceAmount !== undefined && (
+                                  <span className="text-gray-600">${drink.priceAmount.toFixed(2)}</span>
+                                )}
                                 <div className="flex items-center gap-1">
                                   <Star size={12} className="text-green-600 fill-green-600" />
                                   <span className="font-semibold text-green-600">{drink.score.toFixed(1)}</span>

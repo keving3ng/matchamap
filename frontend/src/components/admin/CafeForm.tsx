@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { X, Save, MapPin, DollarSign, Star, Coffee } from 'lucide-react'
+import { X, Save, MapPin, Coffee, RefreshCw } from 'lucide-react'
+import { api } from '../../utils/api'
 import type { Cafe } from '../../types'
 
 interface CafeFormProps {
@@ -12,47 +13,45 @@ export const CafeForm: React.FC<CafeFormProps> = ({ cafe, onSave, onCancel }) =>
   const [formData, setFormData] = useState({
     name: '',
     city: 'toronto',
-    lat: 0,
-    lng: 0,
-    score: 0,
+    latitude: 0,
+    longitude: 0,
+    address: '',
+    link: '',
     ambianceScore: 0,
-    otherDrinksScore: 0,
-    price: 0,
-    chargeForAltMilk: false,
-    gramsUsed: 0,
+    chargeForAltMilk: null as number | null,
     quickNote: '',
     review: '',
+    source: '',
     hours: '',
     instagram: '',
     instagramPostLink: '',
     tiktokPostLink: '',
-    googleMapsUrl: '',
     images: '',
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [refreshError, setRefreshError] = useState<string | null>(null)
 
   useEffect(() => {
     if (cafe) {
       setFormData({
         name: cafe.name,
         city: cafe.city,
-        lat: cafe.lat,
-        lng: cafe.lng,
-        score: cafe.score,
-        ambianceScore: cafe.secondaryScores?.ambiance || 0,
-        otherDrinksScore: cafe.secondaryScores?.otherDrinks || 0,
-        price: cafe.price || 0,
-        chargeForAltMilk: cafe.chargeForAltMilk,
-        gramsUsed: cafe.gramsUsed || 0,
+        latitude: cafe.latitude,
+        longitude: cafe.longitude,
+        address: cafe.address || '',
+        link: cafe.link,
+        ambianceScore: cafe.ambianceScore || 0,
+        chargeForAltMilk: cafe.chargeForAltMilk ?? null,
         quickNote: cafe.quickNote,
         review: cafe.review || '',
+        source: cafe.source || '',
         hours: cafe.hours || '',
         instagram: cafe.instagram || '',
         instagramPostLink: cafe.instagramPostLink || '',
         tiktokPostLink: cafe.tiktokPostLink || '',
-        googleMapsUrl: cafe.googleMapsUrl || '',
         images: cafe.images || '',
       })
     } else {
@@ -60,21 +59,19 @@ export const CafeForm: React.FC<CafeFormProps> = ({ cafe, onSave, onCancel }) =>
       setFormData({
         name: '',
         city: 'toronto',
-        lat: 0,
-        lng: 0,
-        score: 0,
+        latitude: 0,
+        longitude: 0,
+        address: '',
+        link: '',
         ambianceScore: 0,
-        otherDrinksScore: 0,
-        price: 0,
-        chargeForAltMilk: false,
-        gramsUsed: 0,
+        chargeForAltMilk: null,
         quickNote: '',
         review: '',
+        source: '',
         hours: '',
         instagram: '',
         instagramPostLink: '',
         tiktokPostLink: '',
-        googleMapsUrl: '',
         images: '',
       })
     }
@@ -90,6 +87,38 @@ export const CafeForm: React.FC<CafeFormProps> = ({ cafe, onSave, onCancel }) =>
     }))
   }
 
+  const handleRefreshFromGoogleMaps = async () => {
+    if (!formData.link) {
+      setRefreshError('Please enter a Google Maps URL first')
+      return
+    }
+
+    setIsRefreshing(true)
+    setRefreshError(null)
+
+    try {
+      const response = await api.places.lookup(formData.link)
+      const place = response.place
+
+      // Update form with fresh data from Google Maps
+      setFormData(prev => ({
+        ...prev,
+        address: place.address || prev.address,
+        latitude: place.latitude,
+        longitude: place.longitude,
+        hours: place.hours || prev.hours,
+      }))
+
+      // Show success briefly
+      setRefreshError('✓ Updated from Google Maps!')
+      setTimeout(() => setRefreshError(null), 3000)
+    } catch (err) {
+      setRefreshError((err as Error).message)
+    } finally {
+      setIsRefreshing(false)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
@@ -97,29 +126,27 @@ export const CafeForm: React.FC<CafeFormProps> = ({ cafe, onSave, onCancel }) =>
 
     try {
       // Generate slug from name
-      const slug = formData.name.toLowerCase().replace(/\s+/g, '-')
+      const slug = formData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '')
 
       // Transform to backend API format (matching Drizzle schema)
       const payload = {
         name: formData.name,
         slug,
-        link: formData.googleMapsUrl,
-        latitude: formData.lat,
-        longitude: formData.lng,
+        link: formData.link,
+        address: formData.address || null,
+        latitude: formData.latitude,
+        longitude: formData.longitude,
         city: formData.city,
-        score: formData.score,
-        ambianceScore: formData.ambianceScore,
-        otherDrinksScore: formData.otherDrinksScore,
-        price: formData.price,
+        ambianceScore: formData.ambianceScore || null,
         chargeForAltMilk: formData.chargeForAltMilk,
-        gramsUsed: formData.gramsUsed,
         quickNote: formData.quickNote,
-        review: formData.review,
-        hours: formData.hours,
-        instagram: formData.instagram,
-        instagramPostLink: formData.instagramPostLink,
-        tiktokPostLink: formData.tiktokPostLink,
-        images: formData.images,
+        review: formData.review || null,
+        source: formData.source || null,
+        hours: formData.hours || null,
+        instagram: formData.instagram || null,
+        instagramPostLink: formData.instagramPostLink || null,
+        tiktokPostLink: formData.tiktokPostLink || null,
+        images: formData.images || null,
       }
 
       await onSave(payload as any)
@@ -205,14 +232,60 @@ export const CafeForm: React.FC<CafeFormProps> = ({ cafe, onSave, onCancel }) =>
               </h3>
             </div>
 
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Google Maps URL *
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  name="link"
+                  value={formData.link}
+                  onChange={handleChange}
+                  required
+                  placeholder="https://maps.google.com/..."
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                />
+                <button
+                  type="button"
+                  onClick={handleRefreshFromGoogleMaps}
+                  disabled={isRefreshing || !formData.link}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  title="Refresh latitude, longitude, and hours from Google Maps"
+                >
+                  <RefreshCw size={18} className={isRefreshing ? 'animate-spin' : ''} />
+                  {isRefreshing ? 'Refreshing...' : 'Refresh'}
+                </button>
+              </div>
+              {refreshError && (
+                <p className={`text-sm mt-1 ${refreshError.startsWith('✓') ? 'text-green-600' : 'text-red-600'}`}>
+                  {refreshError}
+                </p>
+              )}
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Address
+              </label>
+              <input
+                type="text"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                placeholder="Auto-filled from Google Maps"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              />
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Latitude *
               </label>
               <input
                 type="number"
-                name="lat"
-                value={formData.lat}
+                name="latitude"
+                value={formData.latitude}
                 onChange={handleChange}
                 step="0.000001"
                 required
@@ -226,8 +299,8 @@ export const CafeForm: React.FC<CafeFormProps> = ({ cafe, onSave, onCancel }) =>
               </label>
               <input
                 type="number"
-                name="lng"
-                value={formData.lng}
+                name="longitude"
+                value={formData.longitude}
                 onChange={handleChange}
                 step="0.000001"
                 required
@@ -235,44 +308,12 @@ export const CafeForm: React.FC<CafeFormProps> = ({ cafe, onSave, onCancel }) =>
               />
             </div>
 
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Google Maps URL *
-              </label>
-              <input
-                type="url"
-                name="googleMapsUrl"
-                value={formData.googleMapsUrl}
-                onChange={handleChange}
-                required
-                placeholder="https://maps.google.com/..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              />
-            </div>
-
-            {/* Ratings */}
+            {/* Cafe Details */}
             <div className="md:col-span-2">
               <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <Star size={20} />
-                Ratings
+                <Coffee size={20} />
+                Cafe Details
               </h3>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Overall Score * (0-10)
-              </label>
-              <input
-                type="number"
-                name="score"
-                value={formData.score}
-                onChange={handleChange}
-                min="0"
-                max="10"
-                step="0.1"
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              />
             </div>
 
             <div>
@@ -282,81 +323,46 @@ export const CafeForm: React.FC<CafeFormProps> = ({ cafe, onSave, onCancel }) =>
               <input
                 type="number"
                 name="ambianceScore"
-                value={formData.ambianceScore}
+                value={formData.ambianceScore || ''}
                 onChange={handleChange}
                 min="0"
                 max="10"
                 step="0.1"
+                placeholder="Optional"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Other Drinks Score (0-10)
+                Charge for Alt Milk ($)
               </label>
               <input
                 type="number"
-                name="otherDrinksScore"
-                value={formData.otherDrinksScore}
-                onChange={handleChange}
-                min="0"
-                max="10"
-                step="0.1"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              />
-            </div>
-
-            {/* Pricing */}
-            <div className="md:col-span-2">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <DollarSign size={20} />
-                Pricing
-              </h3>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Price (e.g., 7.50)
-              </label>
-              <input
-                type="number"
-                name="price"
-                value={formData.price}
+                name="chargeForAltMilk"
+                value={formData.chargeForAltMilk ?? ''}
                 onChange={handleChange}
                 min="0"
                 step="0.01"
+                placeholder="Leave empty if unknown"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Grams of Matcha Used
-              </label>
-              <input
-                type="number"
-                name="gramsUsed"
-                value={formData.gramsUsed}
-                onChange={handleChange}
-                min="0"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              />
+              <p className="text-xs text-gray-500 mt-1">Price charged for alternative milk (0 = free, empty = unknown)</p>
             </div>
 
             <div className="md:col-span-2">
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  name="chargeForAltMilk"
-                  checked={formData.chargeForAltMilk}
-                  onChange={handleChange}
-                  className="w-4 h-4 text-green-600 rounded focus:ring-green-500"
-                />
-                <span className="text-sm font-medium text-gray-700">
-                  Charges for alternative milk
-                </span>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Source
               </label>
+              <input
+                type="text"
+                name="source"
+                value={formData.source}
+                onChange={handleChange}
+                placeholder="e.g., Uji, Kyoto, Instagram"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              />
+              <p className="text-xs text-gray-500 mt-1">Where did you learn about this cafe or matcha source?</p>
             </div>
 
             {/* Content */}

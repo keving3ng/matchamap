@@ -14,8 +14,8 @@ export const DrinkForm: React.FC<DrinkFormProps> = ({ cafeId, drink, onSave, onC
   const [formData, setFormData] = useState({
     name: drink?.name || '',
     score: drink?.score || 0,
-    priceAmount: drink?.priceAmount || 0,
-    priceCurrency: drink?.priceCurrency || 'CAD',
+    priceAmount: drink?.priceAmount ?? null,
+    priceCurrency: drink?.priceCurrency || '',
     gramsUsed: drink?.gramsUsed || null,
     isDefault: drink?.isDefault || false,
     notes: drink?.notes || '',
@@ -30,7 +30,11 @@ export const DrinkForm: React.FC<DrinkFormProps> = ({ cafeId, drink, onSave, onC
 
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : type === 'number' ? parseFloat(value) || 0 : value
+      [name]: type === 'checkbox'
+        ? checked
+        : type === 'number'
+          ? (value === '' ? null : parseFloat(value) || 0)
+          : (value === '' ? null : value)
     }))
   }
 
@@ -84,17 +88,19 @@ export const DrinkForm: React.FC<DrinkFormProps> = ({ cafeId, drink, onSave, onC
             {/* Drink Name */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Drink Name *
+                Drink Name (optional)
               </label>
               <input
                 type="text"
                 name="name"
-                value={formData.name}
+                value={formData.name || ''}
                 onChange={handleChange}
-                required
-                placeholder="e.g., Ceremonial Matcha Latte"
+                placeholder="Defaults to 'Iced Matcha Latte' if not provided"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               />
+              <p className="text-xs text-gray-500 mt-1">
+                Leave blank to use default name
+              </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -119,16 +125,16 @@ export const DrinkForm: React.FC<DrinkFormProps> = ({ cafeId, drink, onSave, onC
               {/* Price */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Price Amount * (e.g., 7.50)
+                  Price Amount (optional)
                 </label>
                 <input
                   type="number"
                   name="priceAmount"
-                  value={formData.priceAmount}
+                  value={formData.priceAmount ?? ''}
                   onChange={handleChange}
                   min="0"
                   step="0.01"
-                  required
+                  placeholder="e.g., 7.50"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 />
               </div>
@@ -136,15 +142,15 @@ export const DrinkForm: React.FC<DrinkFormProps> = ({ cafeId, drink, onSave, onC
               {/* Currency */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Currency *
+                  Currency (optional)
                 </label>
                 <select
                   name="priceCurrency"
-                  value={formData.priceCurrency}
+                  value={formData.priceCurrency || ''}
                   onChange={handleChange}
-                  required
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 >
+                  <option value="">-- None --</option>
                   <option value="CAD">CAD ($)</option>
                   <option value="USD">USD ($)</option>
                   <option value="JPY">JPY (¥)</option>
