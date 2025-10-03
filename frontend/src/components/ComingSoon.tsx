@@ -32,13 +32,26 @@ export const ComingSoon: React.FC<ComingSoonProps> = ({ onPasswordCorrect }) => 
 
     setIsSubmitting(true)
 
-    // TODO: Backend integration will be added later
-    // For now, just simulate a submission
-    setTimeout(() => {
-      setIsSubmitted(true)
+    try {
+      const response = await fetch('http://localhost:8787/api/waitlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      })
+
+      if (response.ok) {
+        setIsSubmitted(true)
+        setEmail('')
+      } else {
+        console.error('Failed to join waitlist')
+      }
+    } catch (error) {
+      console.error('Error joining waitlist:', error)
+    } finally {
       setIsSubmitting(false)
-      setEmail('')
-    }, 500)
+    }
   }
 
   return (

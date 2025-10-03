@@ -34,7 +34,7 @@ ENABLE_ADMIN_PANEL:
 # Coming Soon Page
 # Password-protected splash page shown before public launch
 SHOW_COMING_SOON:
-  dev: true
+  dev: false
   prod: true
 
 # Events Page - Community gatherings and workshops
