@@ -6,7 +6,8 @@ import DetailView from './DetailView'
 import FeedView from './FeedView'
 import PassportView from './PassportView'
 import EventsView from './EventsView'
-import LoginPage from './LoginPage'
+import LoginPage from './auth/LoginPage'
+import ProtectedRoute from './auth/ProtectedRoute'
 import ContactPage from './ContactPage'
 import AboutPage from './AboutPage'
 import StorePage from './StorePage'
@@ -111,9 +112,8 @@ export const AppRoutes: React.FC = () => {
           />
         } />
       )}
-      {isUserAccountsEnabled && (
-        <Route path="/login" element={<LoginPage />} />
-      )}
+      {/* Login route - always available */}
+      <Route path="/login" element={<LoginPage />} />
       {isContactEnabled && (
         <Route path="/contact" element={<ContactPage />} />
       )}
@@ -129,49 +129,67 @@ export const AppRoutes: React.FC = () => {
       {isAdminEnabled && (
         <>
           <Route path="/admin" element={
-            <AdminLayout>
-              <FeatureTogglesPage />
-            </AdminLayout>
+            <ProtectedRoute requireAdmin={true}>
+              <AdminLayout>
+                <FeatureTogglesPage />
+              </AdminLayout>
+            </ProtectedRoute>
           } />
           <Route path="/admin/cafes" element={
-            <AdminLayout>
-              <CafeManagementPage />
-            </AdminLayout>
+            <ProtectedRoute requireAdmin={true}>
+              <AdminLayout>
+                <CafeManagementPage />
+              </AdminLayout>
+            </ProtectedRoute>
           } />
           <Route path="/admin/newsfeed" element={
-            <AdminLayout>
-              <NewsfeedManagementPage />
-            </AdminLayout>
+            <ProtectedRoute requireAdmin={true}>
+              <AdminLayout>
+                <NewsfeedManagementPage />
+              </AdminLayout>
+            </ProtectedRoute>
           } />
           <Route path="/admin/events" element={
-            <AdminLayout>
-              <EventManagementPage />
-            </AdminLayout>
+            <ProtectedRoute requireAdmin={true}>
+              <AdminLayout>
+                <EventManagementPage />
+              </AdminLayout>
+            </ProtectedRoute>
           } />
           <Route path="/admin/users" element={
-            <AdminLayout>
-              <UserManagementPage />
-            </AdminLayout>
+            <ProtectedRoute requireAdmin={true}>
+              <AdminLayout>
+                <UserManagementPage />
+              </AdminLayout>
+            </ProtectedRoute>
           } />
           <Route path="/admin/products" element={
-            <AdminLayout>
-              <ProductsManagementPage />
-            </AdminLayout>
+            <ProtectedRoute requireAdmin={true}>
+              <AdminLayout>
+                <ProductsManagementPage />
+              </AdminLayout>
+            </ProtectedRoute>
           } />
           <Route path="/admin/api" element={
-            <AdminLayout>
-              <ApiManagementPage />
-            </AdminLayout>
+            <ProtectedRoute requireAdmin={true}>
+              <AdminLayout>
+                <ApiManagementPage />
+              </AdminLayout>
+            </ProtectedRoute>
           } />
           <Route path="/admin/misc" element={
-            <AdminLayout>
-              <MiscAdminPage />
-            </AdminLayout>
+            <ProtectedRoute requireAdmin={true}>
+              <AdminLayout>
+                <MiscAdminPage />
+              </AdminLayout>
+            </ProtectedRoute>
           } />
           <Route path="/admin/import" element={
-            <AdminLayout>
-              <BulkImporterPage />
-            </AdminLayout>
+            <ProtectedRoute requireAdmin={true}>
+              <AdminLayout>
+                <BulkImporterPage />
+              </AdminLayout>
+            </ProtectedRoute>
           } />
         </>
       )}

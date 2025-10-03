@@ -118,6 +118,33 @@ export const events = sqliteTable('events', {
   featuredIdx: index('events_featured_idx').on(table.featured),
 }));
 
+// Users table
+export const users = sqliteTable('users', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  email: text('email').notNull().unique(),
+  username: text('username').notNull().unique(),
+  passwordHash: text('password_hash').notNull(),
+  role: text('role', { enum: ['admin', 'user'] }).notNull().default('user'),
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+  emailIdx: index('users_email_idx').on(table.email),
+  usernameIdx: index('users_username_idx').on(table.username),
+}));
+
+// Sessions table
+export const sessions = sqliteTable('sessions', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  token: text('token').notNull().unique(),
+  expiresAt: text('expires_at').notNull(),
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+  tokenIdx: index('sessions_token_idx').on(table.token),
+  userIdx: index('sessions_user_idx').on(table.userId),
+  expiresIdx: index('sessions_expires_idx').on(table.expiresAt),
+}));
+
 // Type exports for use in the application
 export type Cafe = typeof cafes.$inferSelect;
 export type NewCafe = typeof cafes.$inferInsert;
@@ -127,3 +154,7 @@ export type FeedItem = typeof feedItems.$inferSelect;
 export type NewFeedItem = typeof feedItems.$inferInsert;
 export type Event = typeof events.$inferSelect;
 export type NewEvent = typeof events.$inferInsert;
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;
+export type Session = typeof sessions.$inferSelect;
+export type NewSession = typeof sessions.$inferInsert;

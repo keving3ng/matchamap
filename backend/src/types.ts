@@ -4,6 +4,7 @@ export interface Env {
   ENVIRONMENT: string;
   ALLOWED_ORIGINS: string;
   GOOGLE_PLACES_API_KEY?: string;
+  JWT_SECRET: string;
 }
 
 // API Response types

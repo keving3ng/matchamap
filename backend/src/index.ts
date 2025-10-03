@@ -10,6 +10,8 @@ import { listEvents } from './routes/events';
 import { listAllEvents, getEvent, createEvent, updateEvent, deleteEvent } from './routes/admin-events';
 import { lookupPlace } from './routes/places';
 import { bulkImportCafes } from './routes/import';
+import { register, login, logout, getCurrentUser, refreshToken } from './routes/auth';
+import { requireAuth, requireAdminAuth } from './middleware/auth';
 import { notFoundResponse } from './utils/response';
 
 const router = Router();
@@ -23,34 +25,41 @@ router.get('/api/cafes/:id', getCafe);
 router.get('/api/feed', listFeedItems);
 router.get('/api/events', listEvents);
 
-// Admin API endpoints (protected by Cloudflare Access)
-router.post('/api/admin/cafes', createCafe);
-router.put('/api/admin/cafes/:id', updateCafe);
-router.delete('/api/admin/cafes/:id', deleteCafe);
-router.post('/api/admin/places/lookup', lookupPlace);
+// Auth endpoints
+router.post('/api/auth/register', register);
+router.post('/api/auth/login', login);
+router.post('/api/auth/logout', requireAuth(), logout);
+router.get('/api/auth/me', requireAuth(), getCurrentUser);
+router.post('/api/auth/refresh', refreshToken);
+
+// Admin API endpoints (protected by JWT authentication)
+router.post('/api/admin/cafes', requireAdminAuth(), createCafe);
+router.put('/api/admin/cafes/:id', requireAdminAuth(), updateCafe);
+router.delete('/api/admin/cafes/:id', requireAdminAuth(), deleteCafe);
+router.post('/api/admin/places/lookup', requireAdminAuth(), lookupPlace);
 
 // Drinks management endpoints
-router.get('/api/admin/cafes/:cafeId/drinks', listDrinks);
-router.post('/api/admin/cafes/:cafeId/drinks', createDrink);
-router.put('/api/admin/drinks/:id', updateDrink);
-router.delete('/api/admin/drinks/:id', deleteDrink);
+router.get('/api/admin/cafes/:cafeId/drinks', requireAdminAuth(), listDrinks);
+router.post('/api/admin/cafes/:cafeId/drinks', requireAdminAuth(), createDrink);
+router.put('/api/admin/drinks/:id', requireAdminAuth(), updateDrink);
+router.delete('/api/admin/drinks/:id', requireAdminAuth(), deleteDrink);
 
 // Bulk import endpoint
-router.post('/api/admin/import/cafes', bulkImportCafes);
+router.post('/api/admin/import/cafes', requireAdminAuth(), bulkImportCafes);
 
 // Feed admin endpoints
-router.get('/api/admin/feed', listAllFeedItems);
-router.get('/api/admin/feed/:id', getFeedItem);
-router.post('/api/admin/feed', createFeedItem);
-router.put('/api/admin/feed/:id', updateFeedItem);
-router.delete('/api/admin/feed/:id', deleteFeedItem);
+router.get('/api/admin/feed', requireAdminAuth(), listAllFeedItems);
+router.get('/api/admin/feed/:id', requireAdminAuth(), getFeedItem);
+router.post('/api/admin/feed', requireAdminAuth(), createFeedItem);
+router.put('/api/admin/feed/:id', requireAdminAuth(), updateFeedItem);
+router.delete('/api/admin/feed/:id', requireAdminAuth(), deleteFeedItem);
 
 // Events admin endpoints
-router.get('/api/admin/events', listAllEvents);
-router.get('/api/admin/events/:id', getEvent);
-router.post('/api/admin/events', createEvent);
-router.put('/api/admin/events/:id', updateEvent);
-router.delete('/api/admin/events/:id', deleteEvent);
+router.get('/api/admin/events', requireAdminAuth(), listAllEvents);
+router.get('/api/admin/events/:id', requireAdminAuth(), getEvent);
+router.post('/api/admin/events', requireAdminAuth(), createEvent);
+router.put('/api/admin/events/:id', requireAdminAuth(), updateEvent);
+router.delete('/api/admin/events/:id', requireAdminAuth(), deleteEvent);
 
 // Handle OPTIONS for CORS preflight
 router.options('*', (request, env: Env) => handleCorsPreflightRequest(request, env));

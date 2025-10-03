@@ -3,14 +3,14 @@
  * Handles all communication with Cloudflare Workers API
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8787/api'
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8787'
 
 /**
  * Generic fetch wrapper with error handling
  */
 async function fetchAPI<T>(endpoint: string, options?: RequestInit & { bustCache?: boolean }): Promise<T> {
   try {
-    let url = `${API_BASE_URL}${endpoint}`
+    let url = `${API_BASE_URL}/api${endpoint}`
 
     // Add cache-busting parameter for GET requests when bustCache is true
     if (options?.bustCache && (!options?.method || options.method === 'GET')) {

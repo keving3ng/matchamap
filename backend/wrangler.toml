@@ -14,8 +14,12 @@ migrations_dir = "drizzle/migrations"
 ENVIRONMENT = "development"
 ALLOWED_ORIGINS = "http://localhost:3000,http://localhost:5173,http://localhost:5174"
 GOOGLE_PLACES_API_KEY = "AIzaSyALvcACvh6wktGtNYS5ctd-jg3QdLHx2n8"  # Replace with your actual API key
+JWT_SECRET = "dev-secret-change-in-production-use-wrangler-secret"  # For local development only
 
 # Production environment
 [env.production]
 name = "matchamap-api-production"
 vars = { ENVIRONMENT = "production", ALLOWED_ORIGINS = "https://matchamap.pages.dev,https://*.matchamap.pages.dev" }
+# JWT_SECRET should be set as a Wrangler secret in production:
+# Run: npx wrangler secret put JWT_SECRET --env production
+# Generate a secure secret with: openssl rand -base64 32

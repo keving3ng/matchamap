@@ -91,3 +91,50 @@ export interface CafeFormData extends Omit<Cafe, 'id' | 'createdAt' | 'updatedAt
 export interface FeedItemFormData extends Omit<FeedItem, 'id' | 'publishedAt'> {
   id?: number;
 }
+
+// Auth Types
+export type UserRole = 'admin' | 'user';
+
+export interface User {
+  id: number;
+  email: string;
+  username: string;
+  role: UserRole;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
+  user: User;
+}
+
+export interface RegisterRequest {
+  email: string;
+  username: string;
+  password: string;
+  role?: UserRole;
+}
+
+export interface RegisterResponse {
+  message: string;
+  user: User;
+}
+
+export interface RefreshTokenRequest {
+  refreshToken: string;
+}
+
+export interface RefreshTokenResponse {
+  accessToken: string;
+}
+
+export interface AuthError {
+  error: string;
+}
