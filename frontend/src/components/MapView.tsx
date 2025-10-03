@@ -1,5 +1,5 @@
 import React from 'react'
-import { MapPin, Navigation, Crosshair } from 'lucide-react'
+import { MapPin, Navigation, Crosshair, Coffee, Star } from 'lucide-react'
 import { useLeafletMap } from '../hooks/useLeafletMap'
 import { useGeolocation } from '../hooks/useGeolocation'
 import { useVisitedCafes } from '../hooks/useVisitedCafes'
@@ -7,6 +7,7 @@ import { useCityStore } from '../stores/cityStore'
 import { CircleButton } from './CircleButton'
 import { getLocationRequestAdvice, getOptimalGeolocationOptions } from '../utils/deviceDetection'
 import { getMapsUrl } from '../utils/mapsUrl'
+import { formatHoursCompact } from '../utils/hoursFormatter'
 import type { MapViewProps } from '../types'
 
 export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCafe, onPinClick, onViewDetails, onClosePopover }) => {
@@ -211,7 +212,58 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                 <span className="underline decoration-dotted">Enable location services</span>
               </button>
             )}
-            <div className="flex gap-2">
+
+            {/* Quick Note */}
+            {selectedCafe.quickNote && (
+              <p className="text-sm text-gray-600 italic mb-3">"{selectedCafe.quickNote}"</p>
+            )}
+
+            {/* Drinks List */}
+            {selectedCafe.drinks && selectedCafe.drinks.length > 0 && (
+              <div className="mb-3">
+                <div className="flex items-center gap-1 text-xs font-semibold text-gray-700 mb-1">
+                  <Coffee size={12} />
+                  Drinks
+                </div>
+                <div className="space-y-1">
+                  {selectedCafe.drinks
+                    .filter(d => d.isDefault)
+                    .concat(selectedCafe.drinks.filter(d => !d.isDefault).sort((a, b) => b.score - a.score))
+                    .slice(0, 3)
+                    .map(drink => (
+                      <div key={drink.id} className="flex items-center justify-between text-xs">
+                        <span className="text-gray-700">{drink.name || 'Iced Matcha Latte'}</span>
+                        <div className="flex items-center gap-2">
+                          {drink.priceAmount !== null && drink.priceAmount !== undefined && (
+                            <span className="text-gray-500">${drink.priceAmount.toFixed(2)}</span>
+                          )}
+                          <div className="flex items-center gap-0.5">
+                            <Star size={10} className="text-green-600 fill-green-600" />
+                            <span className="font-semibold text-green-600">{drink.score.toFixed(1)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
+
+            {/* Hours */}
+            {selectedCafe.hours && (() => {
+              const hoursData = formatHoursCompact(selectedCafe.hours)
+              return hoursData && hoursData.todayHours ? (
+                <div className="mb-3">
+                  <p className="text-xs font-semibold text-gray-700 mb-1">Hours</p>
+                  <p className="text-xs text-gray-600">
+                    <span className="font-semibold text-green-600">Today: </span>
+                    {hoursData.todayHours.split(': ')[1]}
+                  </p>
+                </div>
+              ) : null
+            })()}
+
+            {/* Action Buttons */}
+            <div className="flex gap-2 mb-2">
               <a
                 href={mapsUrl}
                 target="_blank"
@@ -275,13 +327,49 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                 </div>
               )}
 
-              {/* Additional Info for larger screens */}
-              {selectedCafe.hours && (
+              {/* Drinks List for larger screens */}
+              {selectedCafe.drinks && selectedCafe.drinks.length > 0 && (
                 <div>
-                  <h4 className="font-semibold text-gray-800 mb-2">Hours</h4>
-                  <p className="text-sm text-gray-600">{selectedCafe.hours}</p>
+                  <div className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-2">
+                    <Coffee size={16} />
+                    Drinks
+                  </div>
+                  <div className="space-y-2">
+                    {selectedCafe.drinks
+                      .filter(d => d.isDefault)
+                      .concat(selectedCafe.drinks.filter(d => !d.isDefault).sort((a, b) => b.score - a.score))
+                      .slice(0, 4)
+                      .map(drink => (
+                        <div key={drink.id} className="flex items-center justify-between text-sm bg-gray-50 rounded-lg p-2">
+                          <span className="text-gray-700 font-medium">{drink.name || 'Iced Matcha Latte'}</span>
+                          <div className="flex items-center gap-3">
+                            {drink.priceAmount !== null && drink.priceAmount !== undefined && (
+                              <span className="text-gray-600">${drink.priceAmount.toFixed(2)}</span>
+                            )}
+                            <div className="flex items-center gap-1">
+                              <Star size={12} className="text-green-600 fill-green-600" />
+                              <span className="font-semibold text-green-600">{drink.score.toFixed(1)}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
                 </div>
               )}
+
+              {/* Hours */}
+              {selectedCafe.hours && (() => {
+                const hoursData = formatHoursCompact(selectedCafe.hours)
+                return hoursData && hoursData.todayHours ? (
+                  <div>
+                    <h4 className="font-semibold text-gray-800 mb-2">Hours</h4>
+                    <p className="text-sm text-gray-600">
+                      <span className="font-semibold text-green-600">Today: </span>
+                      {hoursData.todayHours}
+                    </p>
+                  </div>
+                ) : null
+              })()}
 
               {selectedCafe.priceRange && (
                 <div>

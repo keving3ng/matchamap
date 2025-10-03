@@ -29,8 +29,11 @@ export const useCafeStore = create<CafeStore>((set, get) => ({
     const { selectedCity } = useCityStore.getState()
     const { coordinates } = useLocationStore.getState()
 
-    // Filter cafes by selected city
-    const filteredCafes = allCafes.filter(cafe => cafe.city === selectedCity)
+    // Filter cafes by selected city (case-insensitive)
+    const filteredCafes = allCafes.filter(cafe => {
+      if (!cafe.city) return false // Skip cafes without city
+      return cafe.city.toLowerCase() === selectedCity.toLowerCase()
+    })
 
     // Calculate distances if we have user location
     let cafesWithDistance: CafeWithDistance[]

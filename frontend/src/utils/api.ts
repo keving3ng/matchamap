@@ -8,9 +8,17 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8787/api'
 /**
  * Generic fetch wrapper with error handling
  */
-async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> {
+async function fetchAPI<T>(endpoint: string, options?: RequestInit & { bustCache?: boolean }): Promise<T> {
   try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    let url = `${API_BASE_URL}${endpoint}`
+
+    // Add cache-busting parameter for GET requests when bustCache is true
+    if (options?.bustCache && (!options?.method || options.method === 'GET')) {
+      const separator = url.includes('?') ? '&' : '?'
+      url += `${separator}_=${Date.now()}`
+    }
+
+    const response = await fetch(url, {
       ...options,
       headers: {
         'Content-Type': 'application/json',
@@ -43,7 +51,7 @@ export const cafeAPI = {
     maxPrice?: number
     limit?: number
     offset?: number
-  }): Promise<{ cafes: any[]; total: number; hasMore: boolean }> {
+  }, bustCache = false): Promise<{ cafes: any[]; total: number; hasMore: boolean }> {
     const params = new URLSearchParams()
     if (filters?.city) params.append('city', filters.city)
     if (filters?.minScore) params.append('minScore', filters.minScore.toString())
@@ -52,7 +60,7 @@ export const cafeAPI = {
     if (filters?.offset) params.append('offset', filters.offset.toString())
 
     const query = params.toString() ? `?${params.toString()}` : ''
-    return fetchAPI(`/cafes${query}`)
+    return fetchAPI(`/cafes${query}`, { bustCache })
   },
 
   /**
@@ -103,14 +111,67 @@ export const feedAPI = {
     type?: string
     limit?: number
     offset?: number
-  }): Promise<{ items: any[]; hasMore: boolean }> {
+  }, bustCache = false): Promise<{ items: any[]; hasMore: boolean }> {
     const params = new URLSearchParams()
     if (filters?.type) params.append('type', filters.type)
     if (filters?.limit) params.append('limit', filters.limit.toString())
     if (filters?.offset) params.append('offset', filters.offset.toString())
 
     const query = params.toString() ? `?${params.toString()}` : ''
-    return fetchAPI(`/feed${query}`)
+    return fetchAPI(`/feed${query}`, { bustCache })
+  },
+
+  /**
+   * Get all feed items including unpublished (admin only)
+   */
+  async getAllAdmin(filters?: {
+    published?: boolean
+    limit?: number
+    offset?: number
+  }): Promise<{ items: any[]; hasMore: boolean }> {
+    const params = new URLSearchParams()
+    if (filters?.published !== undefined) params.append('published', filters.published.toString())
+    if (filters?.limit) params.append('limit', filters.limit.toString())
+    if (filters?.offset) params.append('offset', filters.offset.toString())
+
+    const query = params.toString() ? `?${params.toString()}` : ''
+    return fetchAPI(`/admin/feed${query}`)
+  },
+
+  /**
+   * Get single feed item by ID (admin only)
+   */
+  async getById(id: number): Promise<any> {
+    return fetchAPI(`/admin/feed/${id}`)
+  },
+
+  /**
+   * Create new feed item (admin only)
+   */
+  async create(feedItem: any): Promise<any> {
+    return fetchAPI('/admin/feed', {
+      method: 'POST',
+      body: JSON.stringify(feedItem),
+    })
+  },
+
+  /**
+   * Update feed item (admin only)
+   */
+  async update(id: number, feedItem: any): Promise<any> {
+    return fetchAPI(`/admin/feed/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(feedItem),
+    })
+  },
+
+  /**
+   * Delete feed item (admin only)
+   */
+  async delete(id: number): Promise<{ success: boolean; message: string }> {
+    return fetchAPI(`/admin/feed/${id}`, {
+      method: 'DELETE',
+    })
   },
 
   /**
@@ -178,14 +239,67 @@ export const eventsAPI = {
     upcoming?: boolean
     featured?: boolean
     limit?: number
-  }): Promise<{ events: any[] }> {
+  }, bustCache = false): Promise<{ events: any[] }> {
     const params = new URLSearchParams()
     if (filters?.upcoming !== undefined) params.append('upcoming', filters.upcoming.toString())
     if (filters?.featured !== undefined) params.append('featured', filters.featured.toString())
     if (filters?.limit) params.append('limit', filters.limit.toString())
 
     const query = params.toString() ? `?${params.toString()}` : ''
-    return fetchAPI(`/events${query}`)
+    return fetchAPI(`/events${query}`, { bustCache })
+  },
+
+  /**
+   * Get all events including unpublished (admin only)
+   */
+  async getAllAdmin(filters?: {
+    published?: boolean
+    limit?: number
+    offset?: number
+  }): Promise<{ events: any[]; hasMore: boolean }> {
+    const params = new URLSearchParams()
+    if (filters?.published !== undefined) params.append('published', filters.published.toString())
+    if (filters?.limit) params.append('limit', filters.limit.toString())
+    if (filters?.offset) params.append('offset', filters.offset.toString())
+
+    const query = params.toString() ? `?${params.toString()}` : ''
+    return fetchAPI(`/admin/events${query}`)
+  },
+
+  /**
+   * Get single event by ID (admin only)
+   */
+  async getById(id: number): Promise<any> {
+    return fetchAPI(`/admin/events/${id}`)
+  },
+
+  /**
+   * Create new event (admin only)
+   */
+  async create(event: any): Promise<any> {
+    return fetchAPI('/admin/events', {
+      method: 'POST',
+      body: JSON.stringify(event),
+    })
+  },
+
+  /**
+   * Update event (admin only)
+   */
+  async update(id: number, event: any): Promise<any> {
+    return fetchAPI(`/admin/events/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(event),
+    })
+  },
+
+  /**
+   * Delete event (admin only)
+   */
+  async delete(id: number): Promise<{ success: boolean; message: string }> {
+    return fetchAPI(`/admin/events/${id}`, {
+      method: 'DELETE',
+    })
   },
 
   /**

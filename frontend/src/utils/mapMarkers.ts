@@ -37,14 +37,15 @@ export const createMatchaMarker = (cafe: Cafe, state: MarkerState = { isSelected
   const colors = getMarkerColors()
 
   // Score badge styling based on score
-  const getScoreBadgeStyle = (score: number) => {
+  const getScoreBadgeStyle = (score: number | null | undefined) => {
+    if (!score) return 'bg-gradient-to-r from-gray-300 to-gray-400 text-gray-800'
     if (score >= 9.0) return 'bg-gradient-to-r from-matcha-600 to-matcha-700 text-white'
     if (score >= 8.0) return 'bg-gradient-to-r from-matcha-500 to-matcha-600 text-white'
     if (score >= 7.0) return 'bg-gradient-to-r from-matcha-400 to-matcha-500 text-white'
     return 'bg-gradient-to-r from-matcha-300 to-matcha-400 text-matcha-800'
   }
 
-  const scoreBadgeStyle = getScoreBadgeStyle(cafe.score)
+  const scoreBadgeStyle = getScoreBadgeStyle(cafe.displayScore ?? cafe.score)
 
   return `
     <div class="relative flex items-center justify-center">

@@ -60,10 +60,13 @@ export async function createDrink(request: IRequest, env: Env): Promise<Response
 
     const body = await request.json() as any;
 
-    // Validation
-    if (!body.name || body.score === undefined || !body.priceAmount) {
-      return badRequestResponse('Missing required fields', request as Request, env);
+    // Validation - only score is required
+    if (body.score === undefined || body.score === null) {
+      return badRequestResponse('Score is required', request as Request, env);
     }
+
+    // Default name to "Iced Matcha Latte" if not provided
+    const drinkName = body.name || 'Iced Matcha Latte';
 
     const db = getDb(env.DB);
 
@@ -88,13 +91,13 @@ export async function createDrink(request: IRequest, env: Env): Promise<Response
 
     const drinkData = {
       cafeId,
-      name: body.name,
+      name: drinkName,
       score: body.score,
-      priceAmount: body.priceAmount,
-      priceCurrency: body.priceCurrency || 'CAD',
-      gramsUsed: body.gramsUsed,
+      priceAmount: body.priceAmount || null,
+      priceCurrency: body.priceCurrency || null,
+      gramsUsed: body.gramsUsed || null,
       isDefault: body.isDefault || false,
-      notes: body.notes,
+      notes: body.notes || null,
     };
 
     const newDrink = await db
@@ -147,12 +150,16 @@ export async function updateDrink(request: IRequest, env: Env): Promise<Response
         .where(and(eq(drinks.cafeId, drink.cafeId), eq(drinks.id, drinkId)));
     }
 
+    // Default name to "Iced Matcha Latte" if explicitly set to null/empty
+    const updateData = {
+      ...body,
+      ...(body.name === '' || body.name === null ? { name: 'Iced Matcha Latte' } : {}),
+      updatedAt: sql`CURRENT_TIMESTAMP`,
+    };
+
     const updated = await db
       .update(drinks)
-      .set({
-        ...body,
-        updatedAt: sql`CURRENT_TIMESTAMP`,
-      })
+      .set(updateData)
       .where(eq(drinks.id, drinkId))
       .returning();
 

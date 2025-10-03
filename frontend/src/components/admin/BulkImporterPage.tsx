@@ -60,8 +60,8 @@ export const BulkImporterPage: React.FC = () => {
         message: response.message || 'Import completed'
       })
 
-      // Refresh cafe data
-      await fetchCafes()
+      // Refresh cafe data with cache busting
+      await fetchCafes(undefined, true)
 
       // Clear changelog after successful import
       if (response.success > 0) {
