@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useAuthStore } from '../../stores/authStore'
+import { sanitizeText } from '../../utils/sanitize'
 
 interface LoginFormProps {
   onSuccess?: () => void
@@ -15,7 +16,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
     clearError()
 
     try {
-      await login({ email, password })
+      // Sanitize inputs before sending to API
+      await login({
+        email: sanitizeText(email.trim()),
+        password: password, // Don't sanitize password - send as-is
+      })
       if (onSuccess) {
         onSuccess()
       }

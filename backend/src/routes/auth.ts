@@ -6,14 +6,12 @@ import { jsonResponse, errorResponse, badRequestResponse } from '../utils/respon
 import {
   hashPassword,
   verifyPassword,
-  validatePassword,
-  validateEmail,
-  validateUsername,
   signToken,
   generateSessionToken,
   JWTPayload,
 } from '../utils/auth';
 import { AuthenticatedRequest } from '../middleware/auth';
+import { safeValidate, registerSchema, loginSchema, refreshTokenSchema } from '../validators';
 
 /**
  * POST /api/auth/register
@@ -21,35 +19,15 @@ import { AuthenticatedRequest } from '../middleware/auth';
  */
 export async function register(request: IRequest, env: Env): Promise<Response> {
   try {
-    const body = await request.json() as {
-      email: string;
-      username: string;
-      password: string;
-    };
+    const body = await request.json();
 
-    const { email, username, password } = body;
-
-    // Validate input
-    if (!email || !username || !password) {
-      return badRequestResponse('Email, username, and password are required', request as Request, env);
+    // Validate input using Zod schema
+    const validation = safeValidate(registerSchema, body);
+    if (!validation.success) {
+      return badRequestResponse(validation.error, request as Request, env);
     }
 
-    // Validate email
-    if (!validateEmail(email)) {
-      return badRequestResponse('Invalid email format', request as Request, env);
-    }
-
-    // Validate username
-    const usernameValidation = validateUsername(username);
-    if (!usernameValidation.valid) {
-      return badRequestResponse(usernameValidation.error!, request as Request, env);
-    }
-
-    // Validate password
-    const passwordValidation = validatePassword(password);
-    if (!passwordValidation.valid) {
-      return badRequestResponse(passwordValidation.error!, request as Request, env);
-    }
+    const { email, username, password } = validation.data;
 
     const db = getDb(env.DB);
 
@@ -114,16 +92,15 @@ export async function register(request: IRequest, env: Env): Promise<Response> {
  */
 export async function login(request: IRequest, env: Env): Promise<Response> {
   try {
-    const body = await request.json() as {
-      email: string;
-      password: string;
-    };
+    const body = await request.json();
 
-    const { email, password } = body;
-
-    if (!email || !password) {
-      return badRequestResponse('Email and password are required', request as Request, env);
+    // Validate input using Zod schema
+    const validation = safeValidate(loginSchema, body);
+    if (!validation.success) {
+      return badRequestResponse(validation.error, request as Request, env);
     }
+
+    const { email, password } = validation.data;
 
     const db = getDb(env.DB);
 
@@ -250,15 +227,17 @@ export async function getCurrentUser(request: AuthenticatedRequest, env: Env): P
  */
 export async function refreshToken(request: IRequest, env: Env): Promise<Response> {
   try {
-    const body = await request.json() as { refreshToken: string };
+    const body = await request.json();
 
-    if (!body.refreshToken) {
-      return badRequestResponse('Refresh token is required', request as Request, env);
+    // Validate input using Zod schema
+    const validation = safeValidate(refreshTokenSchema, body);
+    if (!validation.success) {
+      return badRequestResponse(validation.error, request as Request, env);
     }
 
     // Verify refresh token
     const { verifyToken } = await import('../utils/auth');
-    const payload = await verifyToken(body.refreshToken, env.JWT_SECRET);
+    const payload = await verifyToken(validation.data.refreshToken, env.JWT_SECRET);
 
     if (!payload) {
       return errorResponse('Invalid or expired refresh token', 401, request as Request, env);

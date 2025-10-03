@@ -179,12 +179,26 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'matchamap-auth',
+      // Use sessionStorage instead of localStorage for better security
+      // Tokens will be cleared when browser tab closes
+      storage: {
+        getItem: (name) => {
+          const str = sessionStorage.getItem(name);
+          return str ? JSON.parse(str) : null;
+        },
+        setItem: (name, value) => {
+          sessionStorage.setItem(name, JSON.stringify(value));
+        },
+        removeItem: (name) => {
+          sessionStorage.removeItem(name);
+        },
+      },
       partialize: (state) => ({
         user: state.user,
         accessToken: state.accessToken,
         refreshToken: state.refreshToken,
         isAuthenticated: state.isAuthenticated,
-      }),
+      }) as Pick<AuthState, 'user' | 'accessToken' | 'refreshToken' | 'isAuthenticated'>,
     }
   )
 )

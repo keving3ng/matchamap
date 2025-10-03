@@ -4,6 +4,7 @@ import { useFeatureStore } from '../stores/featureStore'
 import { getMapsUrl } from '../utils/mapsUrl'
 import { ContentContainer } from './ContentContainer'
 import { formatHoursCompact } from '../utils/formatHours'
+import { sanitizeText } from '../utils/sanitize'
 import type { DetailViewProps } from '../types'
 
 export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, onToggleVisited }) => {
@@ -32,9 +33,9 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
         <div className="bg-white rounded-2xl shadow-lg -mt-6 p-5 border-2 border-green-100 relative z-10">
           <div className="flex justify-between items-start mb-3">
             <div className="flex-1">
-              <h2 className="text-2xl font-bold text-gray-800">{cafe.name}</h2>
+              <h2 className="text-2xl font-bold text-gray-800">{sanitizeText(cafe.name)}</h2>
               {cafe.city && (
-                <p className="text-gray-600 mt-1">{cafe.city}</p>
+                <p className="text-gray-600 mt-1">{sanitizeText(cafe.city)}</p>
               )}
             </div>
             {cafe.displayScore && (
@@ -46,7 +47,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
 
           <div className="flex items-start gap-2 text-gray-700 mb-2">
             <MapPin size={18} className="text-green-600 mt-0.5 flex-shrink-0" />
-            <span className="text-sm">{cafe.address}</span>
+            <span className="text-sm">{sanitizeText(cafe.address || '')}</span>
           </div>
 
             {cafe.distanceInfo && (
