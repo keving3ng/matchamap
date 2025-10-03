@@ -59,6 +59,33 @@ export async function listCafes(request: IRequest, env: Env): Promise<Response> 
     const hasMore = results.length > limit;
     const cafesList = hasMore ? results.slice(0, limit) : results;
 
+    // Fetch drinks for all cafes and calculate display scores
+    const cafesWithScores = await Promise.all(
+      cafesList.map(async (cafe) => {
+        const cafeDrinks = await db
+          .select()
+          .from(drinks)
+          .where(eq(drinks.cafeId, cafe.id));
+
+        // Calculate display score: default drink OR highest score OR legacy cafe.score
+        let displayScore = cafe.score || null;
+        if (cafeDrinks.length > 0) {
+          const defaultDrink = cafeDrinks.find(d => d.isDefault);
+          if (defaultDrink) {
+            displayScore = defaultDrink.score;
+          } else {
+            displayScore = Math.max(...cafeDrinks.map(d => d.score));
+          }
+        }
+
+        return {
+          ...cafe,
+          displayScore,
+          drinks: cafeDrinks,
+        };
+      })
+    );
+
     // Get total count for this filter
     const countResult = await db
       .select({ count: sql<number>`count(*)` })
@@ -68,7 +95,7 @@ export async function listCafes(request: IRequest, env: Env): Promise<Response> 
     const total = countResult[0]?.count || 0;
 
     const response = {
-      cafes: cafesList,
+      cafes: cafesWithScores,
       total,
       hasMore,
     };
@@ -139,7 +166,7 @@ export async function createCafe(request: IRequest, env: Env): Promise<Response>
     const body = await request.json() as any;
 
     // Basic validation
-    if (!body.name || !body.latitude || !body.longitude || !body.score || !body.link) {
+    if (!body.name || !body.latitude || !body.longitude || !body.link) {
       return badRequestResponse('Missing required fields', request as Request, env);
     }
 

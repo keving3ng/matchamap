@@ -191,9 +191,11 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                 <h3 className="font-bold text-lg text-gray-800">{selectedCafe.name}</h3>
                 <p className="text-sm text-gray-500">{selectedCafe.neighborhood}</p>
               </div>
-              <div className="bg-green-500 text-white px-3 py-1 rounded-full font-bold text-lg">
-                {selectedCafe.score}
-              </div>
+              {(selectedCafe.displayScore || selectedCafe.score) && (
+                <div className="bg-green-500 text-white px-3 py-1 rounded-full font-bold text-lg">
+                  {(selectedCafe.displayScore || selectedCafe.score)!.toFixed(1)}
+                </div>
+              )}
             </div>
             {selectedCafe.distanceInfo ? (
               <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
@@ -240,9 +242,11 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                   <h3 className="font-bold text-xl text-gray-800">{selectedCafe.name}</h3>
                   <p className="text-gray-500 mt-1">{selectedCafe.neighborhood}</p>
                 </div>
-                <div className="bg-green-500 text-white px-4 py-2 rounded-full font-bold text-xl">
-                  {selectedCafe.score}
-                </div>
+                {(selectedCafe.displayScore || selectedCafe.score) && (
+                  <div className="bg-green-500 text-white px-4 py-2 rounded-full font-bold text-xl">
+                    {(selectedCafe.displayScore || selectedCafe.score)!.toFixed(1)}
+                  </div>
+                )}
               </div>
 
               {/* Location Info */}

@@ -40,12 +40,6 @@ export const CafeFormWizard: React.FC<CafeFormWizardProps> = ({ cafe, onSave, on
     address: '',
     hours: '',
     googleMapsUrl: '',
-    score: 0,
-    ambianceScore: 0,
-    otherDrinksScore: 0,
-    price: 0,
-    chargeForAltMilk: false,
-    gramsUsed: 0,
     quickNote: '',
     review: '',
     instagram: '',
@@ -109,12 +103,6 @@ export const CafeFormWizard: React.FC<CafeFormWizardProps> = ({ cafe, onSave, on
         latitude: formData.lat,
         longitude: formData.lng,
         city: formData.city,
-        score: formData.score,
-        ambianceScore: formData.ambianceScore,
-        otherDrinksScore: formData.otherDrinksScore,
-        price: formData.price,
-        chargeForAltMilk: formData.chargeForAltMilk,
-        gramsUsed: formData.gramsUsed,
         quickNote: formData.quickNote,
         review: formData.review,
         hours: formData.hours,
@@ -383,102 +371,13 @@ export const CafeFormWizard: React.FC<CafeFormWizardProps> = ({ cafe, onSave, on
                 </p>
               </div>
 
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <p className="text-sm text-blue-800">
+                  ℹ️ <strong>Note:</strong> Drink scores, pricing, and details will be managed separately after creating the cafe. You'll be able to add multiple drinks with individual scores.
+                </p>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Ratings */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Overall Score * (0-10)
-                  </label>
-                  <input
-                    type="number"
-                    name="score"
-                    value={formData.score}
-                    onChange={handleChange}
-                    min="0"
-                    max="10"
-                    step="0.1"
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Ambiance Score (0-10)
-                  </label>
-                  <input
-                    type="number"
-                    name="ambianceScore"
-                    value={formData.ambianceScore}
-                    onChange={handleChange}
-                    min="0"
-                    max="10"
-                    step="0.1"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Other Drinks Score (0-10)
-                  </label>
-                  <input
-                    type="number"
-                    name="otherDrinksScore"
-                    value={formData.otherDrinksScore}
-                    onChange={handleChange}
-                    min="0"
-                    max="10"
-                    step="0.1"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  />
-                </div>
-
-                {/* Pricing */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Price (e.g., 7.50)
-                  </label>
-                  <input
-                    type="number"
-                    name="price"
-                    value={formData.price}
-                    onChange={handleChange}
-                    min="0"
-                    step="0.01"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Grams of Matcha Used
-                  </label>
-                  <input
-                    type="number"
-                    name="gramsUsed"
-                    value={formData.gramsUsed}
-                    onChange={handleChange}
-                    min="0"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      name="chargeForAltMilk"
-                      checked={formData.chargeForAltMilk}
-                      onChange={handleChange}
-                      className="w-4 h-4 text-green-600 rounded focus:ring-green-500"
-                    />
-                    <span className="text-sm font-medium text-gray-700">
-                      Charges for alternative milk
-                    </span>
-                  </label>
-                </div>
-
                 {/* Content */}
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">

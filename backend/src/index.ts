@@ -3,6 +3,7 @@ import { Env } from './types';
 import { handleCorsPreflightRequest } from './utils/cors';
 import { handleHealth } from './routes/health';
 import { listCafes, getCafe, createCafe, updateCafe, deleteCafe } from './routes/cafes';
+import { listDrinks, createDrink, updateDrink, deleteDrink } from './routes/drinks';
 import { listFeedItems } from './routes/feed';
 import { listEvents } from './routes/events';
 import { lookupPlace } from './routes/places';
@@ -24,6 +25,12 @@ router.post('/api/admin/cafes', createCafe);
 router.put('/api/admin/cafes/:id', updateCafe);
 router.delete('/api/admin/cafes/:id', deleteCafe);
 router.post('/api/admin/places/lookup', lookupPlace);
+
+// Drinks management endpoints
+router.get('/api/admin/cafes/:cafeId/drinks', listDrinks);
+router.post('/api/admin/cafes/:cafeId/drinks', createDrink);
+router.put('/api/admin/drinks/:id', updateDrink);
+router.delete('/api/admin/drinks/:id', deleteDrink);
 
 // Handle OPTIONS for CORS preflight
 router.options('*', (request, env: Env) => handleCorsPreflightRequest(request, env));
