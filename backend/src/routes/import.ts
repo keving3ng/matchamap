@@ -1,54 +1,42 @@
 import { IRequest } from 'itty-router'
 import { drizzle } from 'drizzle-orm/d1'
-import { eq } from 'drizzle-orm'
+import { eq, isNull, inArray } from 'drizzle-orm'
 import { cafes, drinks } from '../../drizzle/schema'
 import { Env } from '../types'
 import { jsonResponse, badRequestResponse, errorResponse } from '../utils/response'
 import { enrichCafeFromGoogleMaps } from '../utils/placesEnrichment'
-
-interface CsvCafe {
-  name: string
-  slug: string
-  link: string
-  address?: string
-  latitude: number
-  longitude: number
-  city: string
-  ambianceScore?: number
-  chargeForAltMilk?: number
-  quickNote: string
-  review?: string
-  source?: string
-  hours?: string
-  instagram?: string
-  instagramPostLink?: string
-  tiktokPostLink?: string
-  images?: string
-  drinks: CsvDrink[]
-}
-
-interface CsvDrink {
-  name?: string | null // Optional - defaults to "Iced Matcha Latte"
-  score: number // Required
-  priceAmount?: number | null // Optional
-  priceCurrency?: string | null // Optional
-  gramsUsed?: number | null
-  isDefault: boolean
-  notes?: string | null
-}
+import {
+  bulkImportSchema,
+  DEFAULT_DRINK_NAME,
+  DEFAULT_CITY,
+  type ValidatedCafe,
+} from '../utils/validation'
+import { ZodError } from 'zod'
 
 /**
  * Bulk import cafes and drinks from CSV data
  * POST /api/admin/import/cafes
+ *
+ * @description Validates input data, enriches with Google Maps data, and performs atomic database operations
  */
 export async function bulkImportCafes(request: IRequest, env: Env) {
   try {
-    const body = await request.json() as { cafes: CsvCafe[] }
+    // Parse and validate request body
+    const rawBody = await request.json()
+    const validationResult = bulkImportSchema.safeParse(rawBody)
 
-    if (!body.cafes || !Array.isArray(body.cafes)) {
-      return badRequestResponse('Invalid request: cafes array required', request as Request, env)
+    if (!validationResult.success) {
+      const errors = validationResult.error.errors.map(
+        (err) => `${err.path.join('.')}: ${err.message}`
+      )
+      return badRequestResponse(
+        `Validation failed: ${errors.join(', ')}`,
+        request as Request,
+        env
+      )
     }
 
+    const { cafes: validatedCafes } = validationResult.data
     const db = drizzle(env.DB)
 
     let successCount = 0
@@ -56,21 +44,21 @@ export async function bulkImportCafes(request: IRequest, env: Env) {
     const errors: string[] = []
 
     // Process each cafe
-    for (const csvCafe of body.cafes) {
+    for (const csvCafe of validatedCafes) {
       try {
         // Enrich cafe data from Google Maps API
-        console.log(`Enriching cafe: ${csvCafe.name} from ${csvCafe.link}`);
-        const placeData = await enrichCafeFromGoogleMaps(csvCafe.link, env);
+        console.log(`Enriching cafe: ${csvCafe.name} from ${csvCafe.link}`)
+        const placeData = await enrichCafeFromGoogleMaps(csvCafe.link, env)
 
         // Merge enriched data with CSV data (CSV data takes precedence if present)
-        const enrichedCafe = {
+        const enrichedCafe: ValidatedCafe = {
           ...csvCafe,
-          city: (csvCafe.city || 'toronto').toLowerCase(), // Normalize to lowercase
+          city: (csvCafe.city || DEFAULT_CITY).toLowerCase(),
           address: placeData?.address || csvCafe.address,
           latitude: placeData?.latitude || csvCafe.latitude || 0,
           longitude: placeData?.longitude || csvCafe.longitude || 0,
           hours: placeData?.hours || csvCafe.hours,
-        };
+        }
 
         // Check if cafe exists by Google Maps link (unique identifier)
         const existingCafe = await db
@@ -136,23 +124,23 @@ export async function bulkImportCafes(request: IRequest, env: Env) {
         }
 
         // Handle drinks - delete existing and recreate
-        // This ensures we have exactly what's in the CSV
+        // This ensures we have exactly what's in the import data
         await db.delete(drinks).where(eq(drinks.cafeId, cafeId))
 
-        // Insert all drinks from CSV
+        // Insert all drinks - batch insert for better performance
         if (enrichedCafe.drinks && enrichedCafe.drinks.length > 0) {
-          for (const csvDrink of enrichedCafe.drinks) {
-            await db.insert(drinks).values({
-              cafeId,
-              name: csvDrink.name || 'Iced Matcha Latte', // Default if not provided
-              score: csvDrink.score,
-              priceAmount: csvDrink.priceAmount ?? null,
-              priceCurrency: csvDrink.priceCurrency ?? null,
-              gramsUsed: csvDrink.gramsUsed ?? null,
-              isDefault: csvDrink.isDefault,
-              notes: csvDrink.notes || null,
-            })
-          }
+          const drinkValues = enrichedCafe.drinks.map((csvDrink) => ({
+            cafeId,
+            name: csvDrink.name || DEFAULT_DRINK_NAME,
+            score: csvDrink.score,
+            priceAmount: csvDrink.priceAmount ?? null,
+            priceCurrency: csvDrink.priceCurrency ?? null,
+            gramsUsed: csvDrink.gramsUsed ?? null,
+            isDefault: csvDrink.isDefault,
+            notes: csvDrink.notes || null,
+          }))
+
+          await db.insert(drinks).values(drinkValues)
         }
 
         successCount++
@@ -176,6 +164,88 @@ export async function bulkImportCafes(request: IRequest, env: Env) {
     )
   } catch (error) {
     console.error('Bulk import error:', error)
+    return errorResponse((error as Error).message, 500, request as Request, env)
+  }
+}
+
+/**
+ * Export all cafes and drinks to JSON format
+ * GET /api/admin/export/cafes
+ *
+ * @description Efficiently exports all cafe data with drinks in a single query to avoid N+1 problem
+ */
+export async function exportCafes(request: IRequest, env: Env) {
+  try {
+    const db = drizzle(env.DB)
+
+    // Fetch all non-deleted cafes
+    const allCafes = await db
+      .select()
+      .from(cafes)
+      .where(isNull(cafes.deletedAt))
+
+    // Fetch all drinks for these cafes in one query (fixes N+1 problem)
+    const cafeIds = allCafes.map((cafe) => cafe.id)
+
+    const allDrinks = cafeIds.length > 0
+      ? await db
+          .select()
+          .from(drinks)
+          .where(inArray(drinks.cafeId, cafeIds))
+      : []
+
+    // Group drinks by cafe ID
+    const drinksByCafeId = new Map<number, typeof allDrinks>()
+    for (const drink of allDrinks) {
+      if (!drinksByCafeId.has(drink.cafeId)) {
+        drinksByCafeId.set(drink.cafeId, [])
+      }
+      drinksByCafeId.get(drink.cafeId)!.push(drink)
+    }
+
+    // Build export data
+    const exportData = allCafes.map((cafe) => {
+      const cafeDrinks = drinksByCafeId.get(cafe.id) || []
+
+      return {
+        name: cafe.name,
+        slug: cafe.slug,
+        link: cafe.link,
+        address: cafe.address || undefined,
+        latitude: cafe.latitude,
+        longitude: cafe.longitude,
+        city: cafe.city,
+        ambianceScore: cafe.ambianceScore ?? undefined,
+        chargeForAltMilk: cafe.chargeForAltMilk ?? undefined,
+        quickNote: cafe.quickNote,
+        review: cafe.review || undefined,
+        source: cafe.source || undefined,
+        hours: cafe.hours || undefined,
+        instagram: cafe.instagram || undefined,
+        instagramPostLink: cafe.instagramPostLink || undefined,
+        tiktokPostLink: cafe.tiktokPostLink || undefined,
+        images: cafe.images || undefined,
+        drinks: cafeDrinks.map((drink) => ({
+          name: drink.name,
+          score: drink.score,
+          priceAmount: drink.priceAmount ?? undefined,
+          priceCurrency: drink.priceCurrency ?? undefined,
+          gramsUsed: drink.gramsUsed ?? undefined,
+          isDefault: drink.isDefault,
+          notes: drink.notes || undefined,
+        })),
+      }
+    })
+
+    return jsonResponse(
+      { cafes: exportData },
+      200,
+      request as Request,
+      env,
+      'no-store'
+    )
+  } catch (error) {
+    console.error('Export error:', error)
     return errorResponse((error as Error).message, 500, request as Request, env)
   }
 }

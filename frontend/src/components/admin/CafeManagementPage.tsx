@@ -92,13 +92,15 @@ export const CafeManagementPage: React.FC = () => {
               </p>
             </div>
 
-            <button
-              onClick={handleAddCafe}
-              className="flex items-center justify-center gap-2 px-4 py-3 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition"
-            >
-              <Plus size={20} />
-              Add New Cafe
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={handleAddCafe}
+                className="flex items-center justify-center gap-2 px-4 py-3 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition"
+              >
+                <Plus size={20} />
+                Add New Cafe
+              </button>
+            </div>
           </div>
 
           {/* Search and Filters */}

@@ -3,6 +3,9 @@
  * Handles all communication with Cloudflare Workers API
  */
 
+import { useAuthStore } from '../stores/authStore'
+import type { Cafe, Drink, FeedItem, Event } from '../../../shared/types'
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8787'
 
 /**
@@ -18,12 +21,23 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit & { bustCache
       url += `${separator}_=${Date.now()}`
     }
 
+    // Get auth token from store
+    const token = useAuthStore.getState().accessToken
+
+    // Build headers
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...options?.headers as Record<string, string>,
+    }
+
+    // Add Authorization header if token exists
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
+    }
+
     const response = await fetch(url, {
       ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...options?.headers,
-      },
+      headers,
     })
 
     if (!response.ok) {
@@ -51,7 +65,7 @@ export const cafeAPI = {
     maxPrice?: number
     limit?: number
     offset?: number
-  }, bustCache = false): Promise<{ cafes: any[]; total: number; hasMore: boolean }> {
+  }, bustCache = false): Promise<{ cafes: Cafe[]; total: number; hasMore: boolean }> {
     const params = new URLSearchParams()
     if (filters?.city) params.append('city', filters.city)
     if (filters?.minScore) params.append('minScore', filters.minScore.toString())
@@ -66,14 +80,14 @@ export const cafeAPI = {
   /**
    * Get single cafe by ID with drinks
    */
-  async getById(id: number): Promise<{ cafe: any; drinks: any[] }> {
+  async getById(id: number): Promise<{ cafe: Cafe; drinks: Drink[] }> {
     return fetchAPI(`/cafes/${id}`)
   },
 
   /**
    * Create new cafe (admin only)
    */
-  async create(cafe: any): Promise<{ cafe: any }> {
+  async create(cafe: Partial<Cafe>): Promise<{ cafe: Cafe }> {
     return fetchAPI('/admin/cafes', {
       method: 'POST',
       body: JSON.stringify(cafe),
@@ -83,7 +97,7 @@ export const cafeAPI = {
   /**
    * Update cafe (admin only)
    */
-  async update(id: number, cafe: any): Promise<{ cafe: any }> {
+  async update(id: number, cafe: Partial<Cafe>): Promise<{ cafe: Cafe }> {
     return fetchAPI(`/admin/cafes/${id}`, {
       method: 'PUT',
       body: JSON.stringify(cafe),
@@ -96,6 +110,28 @@ export const cafeAPI = {
   async delete(id: number): Promise<{ message: string }> {
     return fetchAPI(`/admin/cafes/${id}`, {
       method: 'DELETE',
+    })
+  },
+
+  /**
+   * Export all cafes and drinks (admin only)
+   */
+  async export(): Promise<{ cafes: Cafe[] }> {
+    return fetchAPI('/admin/export/cafes')
+  },
+
+  /**
+   * Import cafes and drinks (admin only)
+   */
+  async import(data: { cafes: Partial<Cafe>[] }): Promise<{
+    success: number
+    failed: number
+    message: string
+    errors?: string[]
+  }> {
+    return fetchAPI('/admin/import/cafes', {
+      method: 'POST',
+      body: JSON.stringify(data),
     })
   },
 }
@@ -111,7 +147,7 @@ export const feedAPI = {
     type?: string
     limit?: number
     offset?: number
-  }, bustCache = false): Promise<{ items: any[]; hasMore: boolean }> {
+  }, bustCache = false): Promise<{ items: FeedItem[]; hasMore: boolean }> {
     const params = new URLSearchParams()
     if (filters?.type) params.append('type', filters.type)
     if (filters?.limit) params.append('limit', filters.limit.toString())
@@ -128,7 +164,7 @@ export const feedAPI = {
     published?: boolean
     limit?: number
     offset?: number
-  }): Promise<{ items: any[]; hasMore: boolean }> {
+  }): Promise<{ items: FeedItem[]; hasMore: boolean }> {
     const params = new URLSearchParams()
     if (filters?.published !== undefined) params.append('published', filters.published.toString())
     if (filters?.limit) params.append('limit', filters.limit.toString())
@@ -141,14 +177,14 @@ export const feedAPI = {
   /**
    * Get single feed item by ID (admin only)
    */
-  async getById(id: number): Promise<any> {
+  async getById(id: number): Promise<FeedItem> {
     return fetchAPI(`/admin/feed/${id}`)
   },
 
   /**
    * Create new feed item (admin only)
    */
-  async create(feedItem: any): Promise<any> {
+  async create(feedItem: Partial<FeedItem>): Promise<FeedItem> {
     return fetchAPI('/admin/feed', {
       method: 'POST',
       body: JSON.stringify(feedItem),
@@ -158,7 +194,7 @@ export const feedAPI = {
   /**
    * Update feed item (admin only)
    */
-  async update(id: number, feedItem: any): Promise<any> {
+  async update(id: number, feedItem: Partial<FeedItem>): Promise<FeedItem> {
     return fetchAPI(`/admin/feed/${id}`, {
       method: 'PUT',
       body: JSON.stringify(feedItem),
@@ -186,7 +222,7 @@ export const eventsAPI = {
     upcoming?: boolean
     featured?: boolean
     limit?: number
-  }, bustCache = false): Promise<{ events: any[] }> {
+  }, bustCache = false): Promise<{ events: Event[] }> {
     const params = new URLSearchParams()
     if (filters?.upcoming !== undefined) params.append('upcoming', filters.upcoming.toString())
     if (filters?.featured !== undefined) params.append('featured', filters.featured.toString())
@@ -203,7 +239,7 @@ export const eventsAPI = {
     published?: boolean
     limit?: number
     offset?: number
-  }): Promise<{ events: any[]; hasMore: boolean }> {
+  }): Promise<{ events: Event[]; hasMore: boolean }> {
     const params = new URLSearchParams()
     if (filters?.published !== undefined) params.append('published', filters.published.toString())
     if (filters?.limit) params.append('limit', filters.limit.toString())
@@ -216,14 +252,14 @@ export const eventsAPI = {
   /**
    * Get single event by ID (admin only)
    */
-  async getById(id: number): Promise<any> {
+  async getById(id: number): Promise<Event> {
     return fetchAPI(`/admin/events/${id}`)
   },
 
   /**
    * Create new event (admin only)
    */
-  async create(event: any): Promise<any> {
+  async create(event: Partial<Event>): Promise<Event> {
     return fetchAPI('/admin/events', {
       method: 'POST',
       body: JSON.stringify(event),
@@ -233,7 +269,7 @@ export const eventsAPI = {
   /**
    * Update event (admin only)
    */
-  async update(id: number, event: any): Promise<any> {
+  async update(id: number, event: Partial<Event>): Promise<Event> {
     return fetchAPI(`/admin/events/${id}`, {
       method: 'PUT',
       body: JSON.stringify(event),
@@ -262,11 +298,19 @@ export const healthAPI = {
 /**
  * Places API endpoints (Google Maps lookup)
  */
+interface PlaceData {
+  name: string
+  address: string
+  latitude: number
+  longitude: number
+  hours?: string
+}
+
 export const placesAPI = {
   /**
    * Lookup place details from Google Maps URL
    */
-  async lookup(googleMapsUrl: string): Promise<{ place: any }> {
+  async lookup(googleMapsUrl: string): Promise<{ place: PlaceData }> {
     return fetchAPI('/admin/places/lookup', {
       method: 'POST',
       body: JSON.stringify({ googleMapsUrl }),
@@ -281,14 +325,14 @@ export const drinksAPI = {
   /**
    * Get all drinks for a cafe
    */
-  async getAll(cafeId: number): Promise<{ drinks: any[] }> {
+  async getAll(cafeId: number): Promise<{ drinks: Drink[] }> {
     return fetchAPI(`/admin/cafes/${cafeId}/drinks`)
   },
 
   /**
    * Create new drink (admin only)
    */
-  async create(cafeId: number, drink: any): Promise<{ drink: any }> {
+  async create(cafeId: number, drink: Partial<Drink>): Promise<{ drink: Drink }> {
     return fetchAPI(`/admin/cafes/${cafeId}/drinks`, {
       method: 'POST',
       body: JSON.stringify(drink),
@@ -298,7 +342,7 @@ export const drinksAPI = {
   /**
    * Update drink (admin only)
    */
-  async update(id: number, drink: any): Promise<{ drink: any }> {
+  async update(id: number, drink: Partial<Drink>): Promise<{ drink: Drink }> {
     return fetchAPI(`/admin/drinks/${id}`, {
       method: 'PUT',
       body: JSON.stringify(drink),
@@ -322,7 +366,7 @@ export const adminAPI = {
   /**
    * Bulk import cafes and drinks from CSV
    */
-  async bulkImportCafes(data: { cafes: any[] }): Promise<{
+  async bulkImportCafes(data: { cafes: Partial<Cafe>[] }): Promise<{
     success: number
     failed: number
     message: string

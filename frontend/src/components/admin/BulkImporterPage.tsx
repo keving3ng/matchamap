@@ -1,15 +1,20 @@
 import React, { useState, useMemo } from 'react'
-import { Upload, CheckCircle, AlertCircle, FileText, Loader } from 'lucide-react'
+import { Upload, CheckCircle, AlertCircle, FileText, Loader, Download } from 'lucide-react'
 import { parseCsvToCafes } from '../../utils/csvParser'
+import { parseJsonToCafes } from '../../utils/jsonParser'
 import { generateChangelog, type ImportChangelog } from '../../utils/importDiffEngine'
 import { useDataStore } from '../../stores/dataStore'
 import { api } from '../../utils/api'
+
+type ImportMode = 'csv' | 'json'
 
 export const BulkImporterPage: React.FC = () => {
   // Use selector to only subscribe to allCafes
   const allCafes = useDataStore((state) => state.allCafes)
   const fetchCafes = useDataStore((state) => state.fetchCafes)
+  const [importMode, setImportMode] = useState<ImportMode>('csv')
   const [csvText, setCsvText] = useState('')
+  const [jsonText, setJsonText] = useState('')
   const [changelog, setChangelog] = useState<ImportChangelog | null>(null)
   const [parseErrors, setParseErrors] = useState<string[]>([])
   const [isExecuting, setIsExecuting] = useState(false)
@@ -18,13 +23,16 @@ export const BulkImporterPage: React.FC = () => {
     failed: number
     message: string
   } | null>(null)
+  const [isExporting, setIsExporting] = useState(false)
 
   const handleParse = () => {
     setParseErrors([])
     setChangelog(null)
     setExecutionResult(null)
 
-    const { cafes, errors } = parseCsvToCafes(csvText)
+    const { cafes, errors } = importMode === 'csv'
+      ? parseCsvToCafes(csvText)
+      : parseJsonToCafes(jsonText)
 
     if (errors.length > 0) {
       setParseErrors(errors)
@@ -34,6 +42,13 @@ export const BulkImporterPage: React.FC = () => {
     // Generate changelog by comparing against existing cafes
     const log = generateChangelog(cafes, allCafes)
     setChangelog(log)
+  }
+
+  const handleModeChange = (mode: ImportMode) => {
+    setImportMode(mode)
+    setParseErrors([])
+    setChangelog(null)
+    setExecutionResult(null)
   }
 
   const handleExecute = async () => {
@@ -67,6 +82,7 @@ export const BulkImporterPage: React.FC = () => {
       if (response.success > 0) {
         setChangelog(null)
         setCsvText('')
+        setJsonText('')
       }
     } catch (error) {
       setExecutionResult({
@@ -79,6 +95,29 @@ export const BulkImporterPage: React.FC = () => {
     }
   }
 
+  const handleExport = async () => {
+    setIsExporting(true)
+    try {
+      const response = await api.cafes.export()
+
+      // Convert to JSON and download
+      const jsonString = JSON.stringify(response.cafes, null, 2)
+      const blob = new Blob([jsonString], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `matchamap-cafes-export-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      alert(`Export failed: ${(error as Error).message}`)
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
   const totalChanges = useMemo(() => {
     return changelog
       ? changelog.existingChanges.length + changelog.newAdditions.length
@@ -87,41 +126,98 @@ export const BulkImporterPage: React.FC = () => {
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">Bulk CSV Importer</h1>
-        <p className="text-gray-600">
-          Import or update multiple cafes and drinks from a CSV spreadsheet
-        </p>
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">Bulk Import/Export</h1>
+          <p className="text-gray-600">
+            Import or update multiple cafes and drinks from a CSV spreadsheet, or export existing data
+          </p>
+        </div>
+        <button
+          onClick={handleExport}
+          disabled={isExporting}
+          className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition flex items-center gap-2"
+        >
+          {isExporting ? (
+            <>
+              <Loader className="animate-spin" size={20} />
+              Exporting...
+            </>
+          ) : (
+            <>
+              <Download size={20} />
+              Export All Cafes
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* Import Mode Toggle */}
+      <div className="flex gap-2 mb-6">
+        <button
+          onClick={() => handleModeChange('csv')}
+          className={`px-6 py-3 rounded-lg font-semibold transition ${
+            importMode === 'csv'
+              ? 'bg-green-600 text-white shadow-md'
+              : 'bg-white text-gray-700 hover:bg-gray-100'
+          }`}
+        >
+          CSV Import
+        </button>
+        <button
+          onClick={() => handleModeChange('json')}
+          className={`px-6 py-3 rounded-lg font-semibold transition ${
+            importMode === 'json'
+              ? 'bg-green-600 text-white shadow-md'
+              : 'bg-white text-gray-700 hover:bg-gray-100'
+          }`}
+        >
+          JSON Import
+        </button>
       </div>
 
       {/* Instructions */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-        <h3 className="font-semibold text-blue-800 mb-2">CSV Format Instructions</h3>
-        <ul className="text-sm text-blue-700 space-y-1">
-          <li>• <strong>Required headers:</strong> Name, Link (Google Maps URL), City, Quick Note, Drink Name, Score, Price</li>
-          <li>• <strong>Optional headers:</strong> Ambiance, Review, Source, Instagram, IG Post Link, TikTok Post Link, Grams</li>
-          <li>• Headers are case-insensitive (e.g., "Name" or "name" both work)</li>
-          <li>• Slug, latitude, longitude will be auto-generated from the Google Maps link</li>
-          <li>• Currency is auto-detected from city (Toronto/Montreal=CAD, NYC=USD)</li>
-          <li>• One drink per row - multiple rows for same cafe = multiple drinks</li>
-        </ul>
-      </div>
+      {importMode === 'csv' ? (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <h3 className="font-semibold text-blue-800 mb-2">CSV Format Instructions</h3>
+          <ul className="text-sm text-blue-700 space-y-1">
+            <li>• <strong>Required headers:</strong> Name, Link (Google Maps URL), City, Quick Note, Drink Name, Score, Price</li>
+            <li>• <strong>Optional headers:</strong> Ambiance, Review, Source, Instagram, IG Post Link, TikTok Post Link, Grams</li>
+            <li>• Headers are case-insensitive (e.g., "Name" or "name" both work)</li>
+            <li>• Slug, latitude, longitude will be auto-generated from the Google Maps link</li>
+            <li>• Currency is auto-detected from city (Toronto/Montreal=CAD, NYC=USD)</li>
+            <li>• One drink per row - multiple rows for same cafe = multiple drinks</li>
+          </ul>
+        </div>
+      ) : (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <h3 className="font-semibold text-blue-800 mb-2">JSON Format Instructions</h3>
+          <ul className="text-sm text-blue-700 space-y-1">
+            <li>• Paste JSON array of cafes (same format as exported from "Export All Cafes")</li>
+            <li>• Can be a plain array: <code className="bg-white px-1 rounded">{"[{...}, {...}]"}</code></li>
+            <li>• Or wrapped: <code className="bg-white px-1 rounded">{'{cafes: [{...}, {...}]}'}</code></li>
+            <li>• Each cafe must have: name, link, quickNote, and drinks array</li>
+            <li>• Missing latitude/longitude will be fetched from Google Maps link</li>
+            <li>• Great for bulk editing or re-importing exported data</li>
+          </ul>
+        </div>
+      )}
 
-      {/* CSV Input */}
+      {/* Input */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <label className="block text-sm font-semibold text-gray-700 mb-2">
-          Paste CSV Data
+          {importMode === 'csv' ? 'Paste CSV Data' : 'Paste JSON Data'}
         </label>
         <textarea
-          value={csvText}
-          onChange={(e) => setCsvText(e.target.value)}
-          placeholder="Paste your CSV data here..."
+          value={importMode === 'csv' ? csvText : jsonText}
+          onChange={(e) => importMode === 'csv' ? setCsvText(e.target.value) : setJsonText(e.target.value)}
+          placeholder={importMode === 'csv' ? 'Paste your CSV data here...' : 'Paste your JSON data here...'}
           className="w-full h-64 px-4 py-3 border border-gray-300 rounded-lg font-mono text-sm resize-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
         />
 
         <button
           onClick={handleParse}
-          disabled={!csvText.trim()}
+          disabled={importMode === 'csv' ? !csvText.trim() : !jsonText.trim()}
           className="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition flex items-center gap-2"
         >
           <FileText size={20} />
