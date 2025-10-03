@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { Coffee, Plus, Search, Edit, Trash2, Loader, AlertCircle, Database } from 'lucide-react'
+import { Coffee, Plus, Search, Edit, Trash2, Loader, AlertCircle } from 'lucide-react'
 import { useDataStore } from '../../stores/dataStore'
 import { api } from '../../utils/api'
 import { CafeForm } from './CafeForm'
 import { CafeFormWizard } from './CafeFormWizard'
 import { DrinksManagement } from './DrinksManagement'
-import { DataManagement } from './DataManagement'
 import type { Cafe } from '../../types'
 
 export const CafeManagementPage: React.FC = () => {
@@ -16,7 +15,6 @@ export const CafeManagementPage: React.FC = () => {
   const [filterCity, setFilterCity] = useState<string>('all')
   const [isDeleting, setIsDeleting] = useState<number | null>(null)
   const [managingDrinksCafe, setManagingDrinksCafe] = useState<Cafe | null>(null)
-  const [showDataManagement, setShowDataManagement] = useState(false)
 
   useEffect(() => {
     fetchCafes(undefined, true) // Bust cache on mount for admin
@@ -96,13 +94,6 @@ export const CafeManagementPage: React.FC = () => {
 
             <div className="flex gap-2">
               <button
-                onClick={() => setShowDataManagement(!showDataManagement)}
-                className="flex items-center justify-center gap-2 px-4 py-3 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition"
-              >
-                <Database size={20} />
-                {showDataManagement ? 'Hide' : 'Import/Export'}
-              </button>
-              <button
                 onClick={handleAddCafe}
                 className="flex items-center justify-center gap-2 px-4 py-3 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition"
               >
@@ -136,15 +127,6 @@ export const CafeManagementPage: React.FC = () => {
             </select>
           </div>
         </div>
-
-        {/* Data Management Section */}
-        {showDataManagement && (
-          <div className="mb-6">
-            <DataManagement
-              onImportComplete={() => fetchCafes(undefined, true)}
-            />
-          </div>
-        )}
 
         {/* Loading State */}
         {isLoading && (

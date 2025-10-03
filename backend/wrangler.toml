@@ -2,6 +2,9 @@ name = "matchamap-api"
 main = "src/index.ts"
 compatibility_date = "2025-09-30"
 
+[dev]
+port = 8787
+
 # D1 Database binding
 [[d1_databases]]
 binding = "DB"
