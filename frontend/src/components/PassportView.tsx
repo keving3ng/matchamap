@@ -47,7 +47,7 @@ export const PassportView: React.FC<PassportViewProps> = ({ cafes, visitedStamps
           <div className="mt-4 flex items-center gap-2">
             {percentage >= 50 ? <TrendingUp size={20} /> : <span className="text-lg">🍵</span>}
             <p className="text-sm font-semibold">
-              {percentage >= 50 ? 'Great progress! Keep going!' : 'Start your matcha journey!'}
+              {percentage >= 50 ? `${visitedStamps.length} of ${cafes.length} visited` : 'Start exploring'}
             </p>
           </div>
         </div>

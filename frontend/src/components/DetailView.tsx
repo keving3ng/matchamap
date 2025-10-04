@@ -203,7 +203,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
               <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 p-2 rounded-xl shadow-md">
                 <MessageSquare size={20} className="text-white" />
               </div>
-              <h3 className="text-xl font-bold text-charcoal-900">Expert Review</h3>
+              <h3 className="text-xl font-bold text-charcoal-900">Our Review</h3>
             </div>
             <div className="bg-gradient-to-br from-white to-cream-50 rounded-2xl shadow-lg p-6 border-2 border-matcha-100">
               <div className="flex items-start gap-3">
