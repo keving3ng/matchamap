@@ -4,7 +4,7 @@ import { useGeolocation } from '../hooks/useGeolocation'
 import { getLocationRequestAdvice, getOptimalGeolocationOptions } from '../utils/deviceDetection'
 import { getMapsUrl } from '../utils/mapsUrl'
 import { ContentContainer } from './ContentContainer'
-import { CITIES, type CityKey } from '../stores/cityStore'
+import { CITIES, type CityKey, useCityStore } from '../stores/cityStore'
 import type { ListViewProps } from '../types'
 
 type SortOption = 'rating' | 'distance'
@@ -25,6 +25,8 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
     maxDistance: null,
     selectedCities: []
   })
+
+  const { selectedCity } = useCityStore()
 
   const {
     coordinates,
@@ -489,16 +491,25 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
 
                   {/* Quick info section */}
                   <div className="space-y-1.5">
-                    <div className="flex items-center gap-2 text-sm">
+                    <div className="flex items-center gap-3 text-sm flex-wrap">
                       {cafe.distanceInfo ? (
                         <span className="flex items-center gap-1.5 text-matcha-700 font-medium">
                           <Navigation size={16} className="text-matcha-600" />
-                          {cafe.distanceInfo.formattedKm} • {cafe.distanceInfo.walkTime} walk
+                          {/* Only show walk time if distance is reasonable for walking (< 5km) */}
+                          {cafe.distanceInfo.kilometers > 5
+                            ? cafe.distanceInfo.formattedKm
+                            : `${cafe.distanceInfo.formattedKm} • ${cafe.distanceInfo.walkTime} walk`
+                          }
                         </span>
                       ) : (
                         <span className="flex items-center gap-1.5 text-gray-400">
                           <MapPin size={16} />
                           Tap location for distance
+                        </span>
+                      )}
+                      {cafe.city && (
+                        <span className="text-gray-600 text-xs px-2 py-0.5 bg-gray-100 rounded-full font-medium capitalize">
+                          {cafe.city}
                         </span>
                       )}
                     </div>
@@ -517,16 +528,16 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                 />
               </button>
 
-              {/* Get Directions button - compact version */}
+              {/* Get Directions button - below content, responsive sizing */}
               <a
                 href={getMapsUrl(cafe.address || '', cafe.link)}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
-                className="inline-flex items-center gap-1.5 bg-gradient-to-r from-matcha-600 to-matcha-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:from-matcha-700 hover:to-matcha-600 transition-all duration-200 shadow-sm hover:shadow-md"
+                className="inline-flex items-center justify-center gap-1.5 bg-gradient-to-r from-matcha-600 to-matcha-500 text-white px-3 py-1.5 sm:px-4 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold hover:from-matcha-700 hover:to-matcha-600 transition-all duration-200 shadow-sm hover:shadow-md whitespace-nowrap"
               >
-                <Navigation size={14} />
-                Directions
+                <Navigation size={14} className="sm:w-4 sm:h-4" />
+                <span>Directions</span>
               </a>
             </div>
 
