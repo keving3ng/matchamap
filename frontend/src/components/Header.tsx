@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router'
 import { ArrowLeft, Menu, Instagram, Settings, LogIn, LogOut, Mail, Info, ShoppingBag, Sliders } from 'lucide-react'
 import { useFeatureToggle } from '../hooks/useFeatureToggle'
+import { COPY } from '../constants/copy'
 
 export const Header: React.FC = () => {
   const navigate = useNavigate()
@@ -62,7 +63,7 @@ export const Header: React.FC = () => {
             <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
               <span className="text-green-600 text-xl">🍵</span>
             </div>
-            <h1 className="text-xl font-bold tracking-wide hidden sm:block">MatchaMap</h1>
+            <h1 className="text-xl font-bold tracking-wide hidden sm:block">{COPY.header.title}</h1>
           </button>
         </div>
         <div className="flex items-center gap-2">
@@ -72,7 +73,7 @@ export const Header: React.FC = () => {
             target="_blank"
             rel="noopener noreferrer"
             className="p-2 hover:bg-green-700 rounded-lg transition flex items-center justify-center"
-            aria-label="Instagram"
+            aria-label={COPY.header.instagramAriaLabel}
           >
             <Instagram size={20} />
           </a>
@@ -81,7 +82,7 @@ export const Header: React.FC = () => {
             target="_blank"
             rel="noopener noreferrer"
             className="p-2 hover:bg-green-700 rounded-lg transition flex items-center justify-center"
-            aria-label="TikTok"
+            aria-label={COPY.header.tiktokAriaLabel}
           >
             <svg
               width="20"
@@ -120,7 +121,7 @@ export const Header: React.FC = () => {
                         className="w-full px-4 py-2 text-left text-gray-700 hover:bg-green-50 flex items-center gap-2 transition"
                       >
                         <LogOut size={18} />
-                        <span>Sign Out</span>
+                        <span>{COPY.menu.signOut}</span>
                       </button>
                     ) : (
                       <button
@@ -131,7 +132,7 @@ export const Header: React.FC = () => {
                         className="w-full px-4 py-2 text-left text-gray-700 hover:bg-green-50 flex items-center gap-2 transition"
                       >
                         <LogIn size={18} />
-                        <span>Sign In</span>
+                        <span>{COPY.menu.signIn}</span>
                       </button>
                     )
                   )}
@@ -146,7 +147,7 @@ export const Header: React.FC = () => {
                       className="w-full px-4 py-2 text-left text-gray-700 hover:bg-green-50 flex items-center gap-2 transition"
                     >
                       <Info size={18} />
-                      <span>About</span>
+                      <span>{COPY.menu.about}</span>
                     </button>
                   )}
 
@@ -160,7 +161,7 @@ export const Header: React.FC = () => {
                       className="w-full px-4 py-2 text-left text-gray-700 hover:bg-green-50 flex items-center gap-2 transition"
                     >
                       <ShoppingBag size={18} />
-                      <span>Shop</span>
+                      <span>{COPY.menu.shop}</span>
                     </button>
                   )}
 
@@ -174,7 +175,7 @@ export const Header: React.FC = () => {
                       className="w-full px-4 py-2 text-left text-gray-700 hover:bg-green-50 flex items-center gap-2 transition"
                     >
                       <Mail size={18} />
-                      <span>Contact</span>
+                      <span>{COPY.menu.contact}</span>
                     </button>
                   )}
 
@@ -188,7 +189,7 @@ export const Header: React.FC = () => {
                       className="w-full px-4 py-2 text-left text-gray-700 hover:bg-green-50 flex items-center gap-2 transition"
                     >
                       <Sliders size={18} />
-                      <span>Settings</span>
+                      <span>{COPY.menu.settings}</span>
                     </button>
                   )}
 
@@ -207,7 +208,7 @@ export const Header: React.FC = () => {
                       className="w-full px-4 py-2 text-left text-gray-700 hover:bg-green-50 flex items-center gap-2 transition"
                     >
                       <Settings size={18} />
-                      <span>Admin</span>
+                      <span>{COPY.menu.admin}</span>
                     </button>
                   )}
                 </div>

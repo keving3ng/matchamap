@@ -9,6 +9,7 @@ import { getLocationRequestAdvice, getOptimalGeolocationOptions } from '../utils
 import { getMapsUrl } from '../utils/mapsUrl'
 import { formatHoursCompact } from '../utils/hoursFormatter'
 import { findClosestCity } from '../utils/cityDetection'
+import { COPY } from '../constants/copy'
 import type { MapViewProps } from '../types'
 
 export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCafe, onPinClick, onViewDetails, onClosePopover }) => {
@@ -161,25 +162,25 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
               <MapPin size={20} className="text-red-600" />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-gray-800 mb-1">Location Access Needed</h3>
+              <h3 className="font-semibold text-gray-800 mb-1">{COPY.location.permissionDenied.title}</h3>
               <p className="text-sm text-gray-600 mb-3">
                 {getLocationRequestAdvice()}
               </p>
               <p className="text-xs text-gray-500 mb-3">
-                We need location access to calculate distances to cafes. Your location is never stored or shared.
+                {COPY.location.permissionDenied.description}
               </p>
               <div className="flex flex-col sm:flex-row gap-2">
                 <button
                   onClick={requestLocation}
                   className="px-4 py-2 bg-matcha-500 text-white rounded-lg text-sm font-medium hover:bg-matcha-600 transition focus:outline-none focus:ring-2 focus:ring-matcha-500 focus:ring-offset-2"
                 >
-                  Try Again
+                  {COPY.location.permissionDenied.tryAgain}
                 </button>
                 <button
                   onClick={clearLocation}
                   className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                 >
-                  Skip for Now
+                  {COPY.location.permissionDenied.skip}
                 </button>
               </div>
             </div>
@@ -195,15 +196,15 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
               <Crosshair size={20} className="text-matcha-600" />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-gray-800 mb-1">Finding Your Location</h3>
+              <h3 className="font-semibold text-gray-800 mb-1">{COPY.location.loading.title}</h3>
               <p className="text-sm text-gray-600 mb-3">
-                Please allow location access when prompted. This may take a few seconds...
+                {COPY.location.loading.description}
               </p>
               <button
                 onClick={clearLocation}
                 className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
               >
-                Cancel
+                {COPY.location.loading.cancel}
               </button>
             </div>
           </div>
@@ -218,25 +219,25 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
               <Crosshair size={20} className="text-yellow-600" />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-gray-800 mb-1">Location Unavailable</h3>
+              <h3 className="font-semibold text-gray-800 mb-1">{COPY.location.unavailable.title}</h3>
               <p className="text-sm text-gray-600 mb-3">
-                {error.code === 2 ? 'Unable to determine your location. Try moving to an open area with better GPS signal, or make sure location services are enabled for your browser.' :
-                 error.code === 3 ? 'Location request timed out. This often happens indoors or in areas with poor GPS signal. Try again when you have better signal or are outdoors.' :
-                 error.code === 0 ? 'Geolocation is not supported by your browser. Try using a modern browser like Chrome, Safari, or Firefox.' :
-                 'Location services are not available. Make sure you\'re on a secure (HTTPS) connection and location services are enabled.'}
+                {error.code === 2 ? COPY.location.unavailable.errorMessages.positionUnavailable :
+                 error.code === 3 ? COPY.location.unavailable.errorMessages.timeout :
+                 error.code === 0 ? COPY.location.unavailable.errorMessages.notSupported :
+                 COPY.location.unavailable.errorMessages.generic}
               </p>
               <div className="flex flex-col sm:flex-row gap-2">
                 <button
                   onClick={requestLocation}
                   className="px-4 py-2 bg-matcha-500 text-white rounded-lg text-sm font-medium hover:bg-matcha-600 transition focus:outline-none focus:ring-2 focus:ring-matcha-500 focus:ring-offset-2"
                 >
-                  Try Again
+                  {COPY.location.unavailable.tryAgain}
                 </button>
                 <button
                   onClick={clearLocation}
                   className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                 >
-                  Close
+                  {COPY.location.unavailable.close}
                 </button>
               </div>
             </div>
@@ -283,7 +284,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                 className="flex items-center gap-2 text-sm text-gray-500 mb-3 hover:text-gray-700 transition"
               >
                 <MapPin size={16} className="text-gray-400" />
-                <span className="underline decoration-dotted">Enable location services</span>
+                <span className="underline decoration-dotted">{COPY.map.enableLocationServices}</span>
               </button>
             )}
 
@@ -297,7 +298,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
               <div className="mb-3">
                 <div className="flex items-center gap-1 text-xs font-semibold text-gray-700 mb-1">
                   <Coffee size={12} />
-                  Drinks
+                  {COPY.map.drinks}
                 </div>
                 <div className="space-y-1">
                   {selectedCafe.drinks
@@ -327,9 +328,9 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
               const hoursData = formatHoursCompact(selectedCafe.hours)
               return hoursData && hoursData.todayHours ? (
                 <div className="mb-3">
-                  <p className="text-xs font-semibold text-gray-700 mb-1">Hours</p>
+                  <p className="text-xs font-semibold text-gray-700 mb-1">{COPY.map.hours}</p>
                   <p className="text-xs text-gray-600">
-                    <span className="font-semibold text-green-600">Today: </span>
+                    <span className="font-semibold text-green-600">{COPY.map.today}: </span>
                     {hoursData.todayHours.split(': ')[1]}
                   </p>
                 </div>
@@ -345,13 +346,13 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                 className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 text-white py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-600 transition shadow-md flex items-center justify-center gap-2"
               >
                 <Navigation size={18} />
-                Directions
+                {COPY.map.directions}
               </a>
               <button
                 onClick={() => onViewDetails(selectedCafe)}
                 className="flex-1 bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-green-600 transition shadow-md"
               >
-                View Details
+                {COPY.map.viewDetails}
               </button>
             </div>
           </div>
@@ -388,7 +389,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                     className="flex items-center gap-2 text-gray-500 hover:text-gray-700 transition"
                   >
                     <MapPin size={18} className="text-gray-400" />
-                    <span className="underline decoration-dotted">Enable location services</span>
+                    <span className="underline decoration-dotted">{COPY.map.enableLocationServices}</span>
                   </button>
                 )}
               </div>
@@ -405,7 +406,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                 <div>
                   <div className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-2">
                     <Coffee size={16} />
-                    Drinks
+                    {COPY.map.drinks}
                   </div>
                   <div className="space-y-2">
                     {selectedCafe.drinks
@@ -435,9 +436,9 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                 const hoursData = formatHoursCompact(selectedCafe.hours)
                 return hoursData && hoursData.todayHours ? (
                   <div>
-                    <h4 className="font-semibold text-gray-800 mb-2">Hours</h4>
+                    <h4 className="font-semibold text-gray-800 mb-2">{COPY.map.hours}</h4>
                     <p className="text-sm text-gray-600">
-                      <span className="font-semibold text-green-600">Today: </span>
+                      <span className="font-semibold text-green-600">{COPY.map.today}: </span>
                       {hoursData.todayHours}
                     </p>
                   </div>
@@ -450,7 +451,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                   onClick={() => onViewDetails(selectedCafe)}
                   className="w-full bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-green-600 transition shadow-md"
                 >
-                  View Full Details
+                  {COPY.map.viewFullDetails}
                 </button>
 
                 <a
@@ -460,14 +461,14 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                   className="w-full bg-white border-2 border-green-300 text-green-600 py-3 rounded-xl font-semibold hover:bg-green-50 transition flex items-center justify-center gap-2"
                 >
                   <Navigation size={18} />
-                  Get Directions
+                  {COPY.map.getDirections}
                 </a>
               </div>
 
               {/* Social Links */}
               {(selectedCafe.instagram || selectedCafe.instagramPostLink || selectedCafe.tiktokPostLink) && (
                 <div>
-                  <h4 className="font-semibold text-gray-800 mb-3">Follow</h4>
+                  <h4 className="font-semibold text-gray-800 mb-3">{COPY.map.follow}</h4>
                   <div className="flex gap-2">
                     {(selectedCafe.instagram || selectedCafe.instagramPostLink) && (
                       <a
@@ -476,7 +477,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                         rel="noopener noreferrer"
                         className="flex-1 bg-gradient-to-br from-purple-500 to-pink-500 text-white py-2 px-3 rounded-lg font-medium text-center hover:from-purple-600 hover:to-pink-600 transition text-sm"
                       >
-                        Instagram
+                        {COPY.detail.instagram}
                       </a>
                     )}
                     {selectedCafe.tiktokPostLink && (
@@ -486,7 +487,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                         rel="noopener noreferrer"
                         className="flex-1 bg-gray-800 text-white py-2 px-3 rounded-lg font-medium text-center hover:bg-gray-900 transition text-sm"
                       >
-                        TikTok
+                        {COPY.detail.tiktok}
                       </a>
                     )}
                   </div>
@@ -557,7 +558,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                   : 'bg-white text-gray-700 hover:bg-gray-50'
               }`}
             >
-              {rating}+ ★
+              {COPY.map.ratingFilter(rating)}
             </button>
           ))}
 
@@ -572,7 +573,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                   : 'bg-white text-gray-700 hover:bg-gray-50'
               }`}
             >
-              Under ${price}
+              {COPY.map.underPrice(price)}
             </button>
           ))}
 
@@ -585,7 +586,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                 : 'bg-white text-gray-700 hover:bg-gray-50'
             }`}
           >
-            Open Now
+            {COPY.map.openNow}
           </button>
         </div>
       </div>

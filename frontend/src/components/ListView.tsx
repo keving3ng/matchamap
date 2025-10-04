@@ -5,6 +5,7 @@ import { getLocationRequestAdvice, getOptimalGeolocationOptions } from '../utils
 import { getMapsUrl } from '../utils/mapsUrl'
 import { ContentContainer } from './ContentContainer'
 import { CITIES, type CityKey } from '../stores/cityStore'
+import { COPY } from '../constants/copy'
 import type { ListViewProps } from '../types'
 
 type SortOption = 'rating' | 'distance'
@@ -179,8 +180,8 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                 onChange={(e) => setSortBy(e.target.value as SortOption)}
                 className="w-full px-4 py-2.5 rounded-full text-sm font-bold bg-gradient-to-r from-matcha-600 to-matcha-500 text-white appearance-none cursor-pointer pr-8 focus:outline-none focus:ring-2 focus:ring-matcha-500 focus:ring-offset-2 shadow-md hover:from-matcha-700 hover:to-matcha-600 transition-all"
               >
-                <option value="rating">Sort: Rating</option>
-                <option value="distance">Sort: Distance</option>
+                <option value="rating">{COPY.list.sortByRating}</option>
+                <option value="distance">{COPY.list.sortByDistance}</option>
               </select>
               <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-white pointer-events-none" />
             </div>
@@ -200,7 +201,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                 }`}
               >
                 <Search size={16} />
-                <span className="hidden sm:inline">Search</span>
+                <span className="hidden sm:inline">{COPY.list.search}</span>
                 {hasActiveSearch && !showSearch && (
                   <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 border-2 border-white rounded-full animate-pulse"></span>
                 )}
@@ -219,7 +220,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                 }`}
               >
                 <Filter size={16} />
-                <span className="hidden sm:inline">Filter</span>
+                <span className="hidden sm:inline">{COPY.list.filter}</span>
                 {hasActiveFilters && !showFilters && (
                   <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 border-2 border-white rounded-full animate-pulse"></span>
                 )}
@@ -258,7 +259,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search cafes, neighborhoods, or keywords..."
+                placeholder={COPY.list.searchPlaceholder}
                 className="w-full pl-10 pr-10 py-3 bg-white border-2 border-matcha-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-matcha-500 focus:border-matcha-500 transition-all shadow-md"
                 autoFocus
               />
@@ -266,7 +267,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                 <button
                   onClick={() => setSearchQuery('')}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-matcha-600 transition-colors"
-                  aria-label="Clear search"
+                  aria-label={COPY.list.clearSearch}
                 >
                   <X size={18} />
                 </button>
@@ -281,7 +282,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
             <div className="space-y-4">
               {/* Rating Filter */}
               <div>
-                <h4 className="text-sm font-bold text-charcoal-900 mb-3">Minimum Rating</h4>
+                <h4 className="text-sm font-bold text-charcoal-900 mb-3">{COPY.list.minimumRating}</h4>
                 <div className="flex flex-wrap gap-2">
                   {[7, 8, 9].map(rating => (
                     <button
@@ -302,7 +303,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
               {/* Distance Filter */}
               <div>
                 <h4 className="text-sm font-bold text-charcoal-900 mb-3">
-                  Max Distance {coordinates ? '' : '(Enable location first)'}
+                  {coordinates ? COPY.list.maxDistance : COPY.list.maxDistanceRequiresLocation}
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {[1, 3, 5, 10].map(distance => (
@@ -318,7 +319,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                           : 'bg-gray-100 text-gray-400 cursor-not-allowed opacity-50'
                       }`}
                     >
-                      {distance}km
+                      {COPY.list.kmDistance(distance)}
                     </button>
                   ))}
                 </div>
@@ -332,7 +333,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                     className="w-full px-4 py-2.5 bg-gray-100 text-gray-700 rounded-xl text-sm font-bold hover:bg-gray-200 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
                   >
                     <X size={16} />
-                    Clear All Filters
+                    {COPY.list.clearAllFilters}
                   </button>
                 </div>
               )}
@@ -349,25 +350,25 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
               <MapPin size={20} className="text-red-600" />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-gray-800 mb-1">Location Access Needed</h3>
+              <h3 className="font-semibold text-gray-800 mb-1">{COPY.location.permissionDenied.title}</h3>
               <p className="text-sm text-gray-600 mb-3">
                 {getLocationRequestAdvice()}
               </p>
               <p className="text-xs text-gray-500 mb-3">
-                We need location access to calculate distances to cafes. Your location is never stored or shared.
+                {COPY.location.permissionDenied.description}
               </p>
               <div className="flex flex-col sm:flex-row gap-2">
                 <button
                   onClick={requestLocation}
                   className="px-4 py-2 bg-matcha-500 text-white rounded-lg text-sm font-medium hover:bg-matcha-600 transition focus:outline-none focus:ring-2 focus:ring-matcha-500 focus:ring-offset-2"
                 >
-                  Try Again
+                  {COPY.location.permissionDenied.tryAgain}
                 </button>
                 <button
                   onClick={clearLocation}
                   className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                 >
-                  Skip for Now
+                  {COPY.location.permissionDenied.skip}
                 </button>
               </div>
             </div>
@@ -383,15 +384,15 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
               <Crosshair size={20} className="text-matcha-600" />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-gray-800 mb-1">Finding Your Location</h3>
+              <h3 className="font-semibold text-gray-800 mb-1">{COPY.location.loading.title}</h3>
               <p className="text-sm text-gray-600 mb-3">
-                Please allow location access when prompted. This may take a few seconds...
+                {COPY.location.loading.description}
               </p>
               <button
                 onClick={clearLocation}
                 className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
               >
-                Cancel
+                {COPY.location.loading.cancel}
               </button>
             </div>
           </div>
@@ -406,25 +407,25 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
               <Crosshair size={20} className="text-yellow-600" />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-gray-800 mb-1">Location Unavailable</h3>
+              <h3 className="font-semibold text-gray-800 mb-1">{COPY.location.unavailable.title}</h3>
               <p className="text-sm text-gray-600 mb-3">
-                {error.code === 2 ? 'Unable to determine your location. Try moving to an open area with better GPS signal, or make sure location services are enabled for your browser.' :
-                 error.code === 3 ? 'Location request timed out. This often happens indoors or in areas with poor GPS signal. Try again when you have better signal or are outdoors.' :
-                 error.code === 0 ? 'Geolocation is not supported by your browser. Try using a modern browser like Chrome, Safari, or Firefox.' :
-                 'Location services are not available. Make sure you\'re on a secure (HTTPS) connection and location services are enabled.'}
+                {error.code === 2 ? COPY.location.unavailable.errorMessages.positionUnavailable :
+                 error.code === 3 ? COPY.location.unavailable.errorMessages.timeout :
+                 error.code === 0 ? COPY.location.unavailable.errorMessages.notSupported :
+                 COPY.location.unavailable.errorMessages.generic}
               </p>
               <div className="flex flex-col sm:flex-row gap-2">
                 <button
                   onClick={requestLocation}
                   className="px-4 py-2 bg-matcha-500 text-white rounded-lg text-sm font-medium hover:bg-matcha-600 transition focus:outline-none focus:ring-2 focus:ring-matcha-500 focus:ring-offset-2"
                 >
-                  Try Again
+                  {COPY.location.unavailable.tryAgain}
                 </button>
                 <button
                   onClick={clearLocation}
                   className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                 >
-                  Close
+                  {COPY.location.unavailable.close}
                 </button>
               </div>
             </div>
@@ -437,12 +438,12 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
         <div className="px-4 py-4 space-y-3">
           {filteredAndSortedCafes.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 text-lg mb-2">No cafes match your filters</p>
+              <p className="text-gray-500 text-lg mb-2">{COPY.list.noResults}</p>
               <button
                 onClick={clearFilters}
                 className="text-green-600 font-semibold hover:underline"
               >
-                Clear filters
+                {COPY.list.clearFilters}
               </button>
             </div>
           ) : (
@@ -483,7 +484,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                       ) : (
                         <span className="flex items-center gap-1.5 text-gray-400">
                           <MapPin size={16} />
-                          Tap location for distance
+                          {COPY.list.tapLocationForDistance}
                         </span>
                       )}
                       {cafe.city && (
@@ -516,7 +517,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                 className="inline-flex items-center justify-center gap-1.5 bg-gradient-to-r from-matcha-600 to-matcha-500 text-white px-3 py-1.5 sm:px-4 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold hover:from-matcha-700 hover:to-matcha-600 transition-all duration-200 shadow-sm hover:shadow-md whitespace-nowrap"
               >
                 <Navigation size={14} className="sm:w-4 sm:h-4" />
-                <span>Directions</span>
+                <span>{COPY.map.directions}</span>
               </a>
             </div>
 
@@ -539,7 +540,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                         <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 p-1.5 rounded-lg">
                           <Coffee size={14} className="text-white" />
                         </div>
-                        <span className="text-sm font-bold text-charcoal-900">Top Drinks</span>
+                        <span className="text-sm font-bold text-charcoal-900">{COPY.map.drinks}</span>
                       </div>
                       <div className="space-y-2">
                         {cafe.drinks
@@ -582,7 +583,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                       onClick={() => onViewDetails(cafe)}
                       className="w-full bg-gradient-to-r from-matcha-600 via-matcha-500 to-matcha-600 text-white py-3 rounded-xl font-bold hover:from-matcha-700 hover:to-matcha-700 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
                     >
-                      View Full Details
+                      {COPY.map.viewFullDetails}
                       <ChevronDown size={18} className="-rotate-90" />
                     </button>
                   </div>
@@ -604,7 +605,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
               ? 'bg-gradient-to-r from-matcha-600 to-matcha-500 text-white hover:from-matcha-700 hover:to-matcha-600 scale-105'
               : 'bg-white text-gray-700 hover:bg-gray-50'
           }`}
-          title={filters.selectedCities.length === 0 ? 'Filter by city' : `${filters.selectedCities.length} cities selected`}
+          title={filters.selectedCities.length === 0 ? COPY.list.filterByCity : COPY.list.citiesSelected(filters.selectedCities.length)}
         >
           <Building2 size={24} />
           {filters.selectedCities.length > 0 && (
@@ -620,7 +621,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
             <div className="fixed inset-0 z-40" onClick={() => setShowCityDropdown(false)} />
             <div className="absolute bottom-full right-0 mb-2 bg-white rounded-lg shadow-2xl border border-gray-200 py-2 z-50 min-w-[160px]">
               <div className="px-3 py-2 border-b border-gray-200">
-                <h3 className="text-xs font-bold text-gray-500 uppercase">Filter by City</h3>
+                <h3 className="text-xs font-bold text-gray-500 uppercase">{COPY.list.filterByCity}</h3>
               </div>
               {(Object.keys(CITIES) as CityKey[]).map(cityKey => (
                 <button
@@ -647,7 +648,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                     }}
                     className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium"
                   >
-                    Clear All
+                    {COPY.list.clearAll}
                   </button>
                 </div>
               )}

@@ -108,6 +108,94 @@ frontend/src/hooks/
 -   Return objects, not arrays (better for destructuring)
 -   Avoid deeply nested hooks
 
+## Copy & Internationalization
+
+**CRITICAL:** ALWAYS use the centralized copy constants (`frontend/src/constants/copy.ts`) for ALL user-facing strings. NEVER use hardcoded strings in components.
+
+### Why Use Copy Constants?
+
+The `COPY` constant in `copy.ts` provides:
+1. ✅ **Single source of truth** - Update copy in one place, reflects everywhere
+2. ✅ **Type safety** - Full TypeScript autocomplete for all strings
+3. ✅ **Future i18n ready** - Easy migration to react-i18next later
+4. ✅ **Easy audits** - Grep for `COPY.` to find all user-facing text
+5. ✅ **Consistent messaging** - No duplicate/conflicting wording
+
+### Copy Constants Usage
+
+**✅ CORRECT - Use the COPY constant:**
+```tsx
+import { COPY } from '@/constants/copy'
+
+const Header = () => (
+  <button onClick={handleClick}>
+    {COPY.map.getDirections}
+  </button>
+)
+```
+
+**❌ INCORRECT - Hardcoded strings:**
+```tsx
+// DON'T DO THIS
+const Header = () => (
+  <button onClick={handleClick}>
+    Get Directions
+  </button>
+)
+```
+
+### Adding New Copy
+
+When adding new user-facing strings:
+
+1. **Add to `copy.ts` first:**
+```typescript
+// In frontend/src/constants/copy.ts
+export const COPY = {
+  // ... existing copy
+  myFeature: {
+    title: 'My Feature',
+    description: 'A great new feature',
+    submitButton: 'Submit',
+    errorMessage: (error: string) => `Error: ${error}`,
+  },
+} as const
+```
+
+2. **Use in components:**
+```typescript
+import { COPY } from '@/constants/copy'
+
+<h1>{COPY.myFeature.title}</h1>
+<p>{COPY.myFeature.description}</p>
+<button>{COPY.myFeature.submitButton}</button>
+{error && <p>{COPY.myFeature.errorMessage(error)}</p>}
+```
+
+### Copy Organization
+
+Copy is organized by feature/section:
+- **`header`** - Header navigation and menu
+- **`menu`** - Dropdown menu items
+- **`map`** - Map view strings (buttons, filters, popovers)
+- **`location`** - Location permission dialogs (permission denied, loading, errors)
+- **`list`** - List view strings (sort, filter, search)
+- **`detail`** - Detail page strings (sections, labels, buttons)
+- **`passport`** - Passport feature strings
+- **`feed`** - Feed view strings
+- **`events`** - Events view strings
+- **`common`** - Shared strings (Loading, Error, Save, Cancel, etc.)
+- **`admin`** - Admin panel strings
+
+### When NOT to Use Copy Constants
+
+The ONLY exceptions to using copy constants:
+- ❌ **Dynamic data from API** - Cafe names, addresses, reviews (comes from database)
+- ❌ **Technical console logs** - Debug messages not shown to users
+- ❌ **Test data** - Mock strings in test files
+
+**All other user-facing strings MUST use the COPY constant.**
+
 ## API Communication
 
 **CRITICAL:** ALWAYS use the centralized API client (`frontend/src/utils/api.ts`) for all backend communication. NEVER use direct `fetch()` calls in components or hooks (except in authStore.ts which has a special case to avoid circular dependencies).
@@ -753,6 +841,7 @@ grep "ComponentName" --type tsx
 
 **Common locations:**
 -   ⭐ Shared UI components → `frontend/src/components/ui/` (ALWAYS check here first!)
+-   ⭐ Copy constants → `frontend/src/constants/copy.ts` (ALWAYS use for user-facing strings!)
 -   UI components → `frontend/src/components/`
 -   Business logic → `frontend/src/hooks/`
 -   Global state → `frontend/src/stores/`
@@ -1062,6 +1151,7 @@ Before marking any task complete, verify:
 ### Anti-Patterns to Avoid
 
 ❌ **Don't do this:**
+-   **Hardcoded strings** in components (use COPY constant)
 -   Creating custom buttons with inline styles (use shared Button components)
 -   Duplicating alert/dialog UI (use AlertDialog component)
 -   Custom score badge styling (use ScoreBadge, DrinkScoreBadge)
@@ -1080,6 +1170,7 @@ Before marking any task complete, verify:
 -   Multiple components per file
 
 ✅ **Do this instead:**
+-   **Import COPY constant** for all user-facing strings (`COPY.map.getDirections`)
 -   Import shared components from `@/components/ui`
 -   Use PrimaryButton, SecondaryButton, IconButton for all buttons
 -   Use AlertDialog for all alerts/errors/success messages

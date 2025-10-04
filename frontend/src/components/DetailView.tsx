@@ -5,6 +5,7 @@ import { getMapsUrl } from '../utils/mapsUrl'
 import { ContentContainer } from './ContentContainer'
 import { formatHoursCompact } from '../utils/formatHours'
 import { sanitizeText } from '../utils/sanitize'
+import { COPY } from '../constants/copy'
 import type { DetailViewProps } from '../types'
 
 export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, onToggleVisited }) => {
@@ -75,7 +76,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
             className="w-full bg-gradient-to-r from-matcha-600 via-matcha-500 to-matcha-600 text-white py-3.5 rounded-xl font-semibold hover:from-matcha-700 hover:to-matcha-700 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
           >
             <Navigation size={20} />
-            Get Directions
+            {COPY.detail.getDirections}
           </a>
         </div>
 
@@ -100,7 +101,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
               <span className={`font-semibold transition-colors ${
                 isVisited ? 'text-matcha-800' : 'text-gray-700 group-hover:text-matcha-700'
               }`}>
-                {isVisited ? "Visited! ✓" : "Mark as visited (Matcha Passport)"}
+                {isVisited ? COPY.detail.visited : COPY.detail.markVisited}
               </span>
             </button>
           </div>
@@ -113,7 +114,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
               <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 p-2 rounded-xl shadow-md">
                 <Coffee size={20} className="text-white" />
               </div>
-              <h3 className="text-xl font-bold text-charcoal-900">Drinks Menu</h3>
+              <h3 className="text-xl font-bold text-charcoal-900">{COPY.detail.drinksMenu}</h3>
             </div>
             <div className="bg-white rounded-2xl shadow-lg border-2 border-matcha-100 overflow-hidden divide-y divide-gray-100">
               {cafe.drinks
@@ -133,7 +134,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
                         <h4 className="font-bold text-gray-800 text-base">{drink.name || 'Iced Matcha Latte'}</h4>
                         {drink.isDefault && (
                           <span className="px-2.5 py-1 bg-gradient-to-r from-matcha-500 to-matcha-600 text-white text-xs font-semibold rounded-full shadow-sm">
-                            ⭐ Featured
+                            {COPY.detail.featured}
                           </span>
                         )}
                       </div>
@@ -154,7 +155,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
                       )}
                       {drink.gramsUsed && (
                         <div className="text-xs text-matcha-600 mt-1.5 bg-matcha-50 px-2 py-1 rounded-md">
-                          {drink.gramsUsed}g matcha
+                          {COPY.detail.matchaAmount(drink.gramsUsed)}
                         </div>
                       )}
                     </div>
@@ -171,12 +172,12 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
             <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 p-2 rounded-xl shadow-md">
               <Star size={20} className="text-white fill-white" />
             </div>
-            <h3 className="text-xl font-bold text-charcoal-900">Cafe Details</h3>
+            <h3 className="text-xl font-bold text-charcoal-900">{COPY.detail.cafeDetails}</h3>
           </div>
           <div className="bg-white rounded-2xl shadow-lg p-5 border-2 border-matcha-100 space-y-4">
               {cafe.ambianceScore && (
                 <div className="flex items-center justify-between p-3 bg-gradient-to-r from-cream-50 to-matcha-50 rounded-xl">
-                  <span className="text-gray-700 font-medium">Ambiance</span>
+                  <span className="text-gray-700 font-medium">{COPY.detail.ambiance}</span>
                   <div className="flex items-center gap-2">
                     <Star size={18} className="text-yellow-500 fill-yellow-500" />
                     <span className="font-bold text-matcha-600 text-lg">{cafe.ambianceScore.toFixed(1)}/10</span>
@@ -184,13 +185,13 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
                 </div>
               )}
               <div className="flex items-center justify-between p-3 bg-gradient-to-r from-cream-50 to-matcha-50 rounded-xl">
-                <span className="text-gray-700 font-medium">Alternative Milk</span>
+                <span className="text-gray-700 font-medium">{COPY.detail.alternativeMilk}</span>
                 <span className="font-bold text-gray-800">
                   {cafe.chargeForAltMilk === null || cafe.chargeForAltMilk === undefined
-                    ? <span className="text-gray-400 font-normal">Unknown</span>
+                    ? <span className="text-gray-400 font-normal">{COPY.detail.alternativeMilkUnknown}</span>
                     : cafe.chargeForAltMilk === 0
-                    ? <span className="text-matcha-600">Free ✓</span>
-                    : `+$${cafe.chargeForAltMilk.toFixed(2)}`}
+                    ? <span className="text-matcha-600">{COPY.detail.alternativeMilkFree}</span>
+                    : COPY.detail.alternativeMilkCharge(cafe.chargeForAltMilk)}
                 </span>
               </div>
             </div>
@@ -203,7 +204,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
               <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 p-2 rounded-xl shadow-md">
                 <MessageSquare size={20} className="text-white" />
               </div>
-              <h3 className="text-xl font-bold text-charcoal-900">Our Review</h3>
+              <h3 className="text-xl font-bold text-charcoal-900">{COPY.detail.ourReview}</h3>
             </div>
             <div className="bg-gradient-to-br from-white to-cream-50 rounded-2xl shadow-lg p-6 border-2 border-matcha-100">
               <div className="flex items-start gap-3">
@@ -221,13 +222,13 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
               <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 p-2 rounded-xl shadow-md">
                 <Clock size={20} className="text-white" />
               </div>
-              <h3 className="text-xl font-bold text-charcoal-900">Hours</h3>
+              <h3 className="text-xl font-bold text-charcoal-900">{COPY.detail.hours}</h3>
             </div>
             <div className="bg-white rounded-2xl shadow-lg p-5 border-2 border-matcha-100">
               {/* Today's hours - always show */}
               {hoursData.todayHours && (
                 <div className="bg-gradient-to-r from-matcha-50 to-cream-100 p-3 rounded-xl mb-3">
-                  <span className="font-bold text-matcha-700">Today: </span>
+                  <span className="font-bold text-matcha-700">{COPY.detail.today}: </span>
                   <span className="text-gray-800 font-medium">{hoursData.todayHours.split(': ')[1]}</span>
                 </div>
               )}
@@ -242,12 +243,12 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
                     {showAllHours ? (
                       <>
                         <ChevronUp size={16} />
-                        Show less
+                        {COPY.detail.showLess}
                       </>
                     ) : (
                       <>
                         <ChevronDown size={16} />
-                        Show full week
+                        {COPY.detail.showFullWeek}
                       </>
                     )}
                   </button>
@@ -274,7 +275,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
               <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 p-2 rounded-xl shadow-md">
                 <Lightbulb size={20} className="text-white" />
               </div>
-              <h3 className="text-xl font-bold text-charcoal-900">Quick Note</h3>
+              <h3 className="text-xl font-bold text-charcoal-900">{COPY.detail.quickNote}</h3>
             </div>
             <div className="bg-gradient-to-br from-yellow-50 to-cream-100 rounded-2xl shadow-lg p-6 border-2 border-yellow-200">
               <div className="flex items-start gap-3">
@@ -292,7 +293,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
               <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 p-2 rounded-xl shadow-md">
                 <Instagram size={20} className="text-white" />
               </div>
-              <h3 className="text-xl font-bold text-charcoal-900">Social Media</h3>
+              <h3 className="text-xl font-bold text-charcoal-900">{COPY.detail.socialMedia}</h3>
             </div>
             <div className="flex gap-3">
               {cafe.instagram && (
@@ -303,7 +304,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
                   className="flex-1 bg-gradient-to-br from-purple-500 via-pink-500 to-pink-600 text-white py-4 rounded-2xl font-bold shadow-lg flex items-center justify-center gap-2.5 hover:from-purple-600 hover:to-pink-700 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <Instagram size={22} />
-                  Instagram
+                  {COPY.detail.instagram}
                 </a>
               )}
               {cafe.tiktokPostLink && (
@@ -314,7 +315,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
                   className="flex-1 bg-gray-900 text-white py-4 rounded-2xl font-bold shadow-lg flex items-center justify-center gap-2.5 hover:bg-black transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <span className="text-2xl">🎵</span>
-                  TikTok
+                  {COPY.detail.tiktok}
                 </a>
               )}
             </div>
