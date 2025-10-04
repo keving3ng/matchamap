@@ -17,7 +17,7 @@ export const CITIES: Record<CityKey, City> = {
     name: 'Toronto',
     shortCode: 'TO',
     center: [43.6532, -79.3832],
-    zoom: 13,
+    zoom: 14,
   },
   montreal: {
     key: 'montreal',
@@ -51,7 +51,7 @@ export const CITIES: Record<CityKey, City> = {
     key: 'new york',
     name: 'New York',
     shortCode: 'NYC',
-    center: [40.7128, -74.0060],
+    center: [40.7280, -73.9855],
     zoom: 13,
   },
   mississauga: {

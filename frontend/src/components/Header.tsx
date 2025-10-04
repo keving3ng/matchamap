@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { ArrowLeft, Menu, Instagram, Settings, LogIn, LogOut, Mail, Info, ShoppingBag, Sliders } from 'lucide-react'
-import { CitySelector } from './CitySelector'
 import { useFeatureToggle } from '../hooks/useFeatureToggle'
 
 export const Header: React.FC = () => {
@@ -11,7 +10,6 @@ export const Header: React.FC = () => {
   const menuRef = useRef<HTMLDivElement>(null)
 
   const isMenuEnabled = useFeatureToggle('ENABLE_MENU')
-  const isCitySelectorEnabled = useFeatureToggle('ENABLE_CITY_SELECTOR')
   const isUserAccountsEnabled = useFeatureToggle('ENABLE_USER_ACCOUNTS')
   const isAdminEnabled = useFeatureToggle('ENABLE_ADMIN_PANEL')
   const isContactEnabled = useFeatureToggle('ENABLE_CONTACT')
@@ -99,9 +97,6 @@ export const Header: React.FC = () => {
               />
             </svg>
           </a>
-          {isCitySelectorEnabled && currentView === 'map' && (
-            <CitySelector />
-          )}
           {isMenuEnabled && (
             <div ref={menuRef} className="relative">
               <button

@@ -107,8 +107,8 @@ export const useLeafletMap = ({
     mapRef.current?.zoomOut()
   }
 
-  const centerOnLocation = useCallback((lat: number, lng: number) => {
-    mapRef.current?.setView([lat, lng], 15)
+  const centerOnLocation = useCallback((lat: number, lng: number, zoom?: number) => {
+    mapRef.current?.setView([lat, lng], zoom ?? 15)
   }, [])
 
   const addUserLocationMarker = (lat: number, lng: number) => {

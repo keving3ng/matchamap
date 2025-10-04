@@ -1,9 +1,9 @@
 import React from 'react'
-import { MapPin, Navigation, Crosshair, Coffee, Star } from 'lucide-react'
+import { MapPin, Navigation, Crosshair, Coffee, Star, Building2, ChevronDown } from 'lucide-react'
 import { useLeafletMap } from '../hooks/useLeafletMap'
 import { useGeolocation } from '../hooks/useGeolocation'
 import { useVisitedCafes } from '../hooks/useVisitedCafes'
-import { useCityStore } from '../stores/cityStore'
+import { useCityStore, CITIES, type CityKey } from '../stores/cityStore'
 import { CircleButton } from './CircleButton'
 import { getLocationRequestAdvice, getOptimalGeolocationOptions } from '../utils/deviceDetection'
 import { getMapsUrl } from '../utils/mapsUrl'
@@ -13,8 +13,63 @@ import type { MapViewProps } from '../types'
 export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCafe, onPinClick, onViewDetails, onClosePopover }) => {
   const mapsUrl = selectedCafe ? getMapsUrl(selectedCafe.address || '', selectedCafe.link) : ''
   const { visitedCafeIds } = useVisitedCafes()
-  const { getCity } = useCityStore()
+  const { selectedCity, setCity, getCity } = useCityStore()
   const currentCity = getCity()
+
+  // Quick filter state
+  const [showCityDropdown, setShowCityDropdown] = React.useState(false)
+  const [minRating, setMinRating] = React.useState<number | null>(null)
+  const [maxPrice, setMaxPrice] = React.useState<number | null>(null)
+  const [openNow, setOpenNow] = React.useState(false)
+
+  // Helper to check if cafe is open now
+  const isOpenNow = (cafe: typeof cafes[0]) => {
+    if (!cafe.hours) return true // Assume open if no hours data
+    try {
+      const hours = typeof cafe.hours === 'string' ? JSON.parse(cafe.hours) : cafe.hours
+      const now = new Date()
+      const dayOfWeek = now.getDay() // 0 = Sunday
+      const currentTime = now.getHours() * 60 + now.getMinutes()
+
+      const todayHours = hours?.periods?.find((p: any) => p.open?.day === dayOfWeek)
+      if (!todayHours?.open || !todayHours?.close) return true
+
+      const openTime = todayHours.open.hours * 60 + todayHours.open.minutes
+      const closeTime = todayHours.close.hours * 60 + todayHours.close.minutes
+
+      return currentTime >= openTime && currentTime <= closeTime
+    } catch {
+      return true
+    }
+  }
+
+  // Filter cafes based on quick filters (no city filter - city is handled by map navigation)
+  const filteredCafes = React.useMemo(() => {
+    return cafes.filter(cafe => {
+      // Rating filter
+      if (minRating !== null) {
+        const cafeScore = cafe.displayScore ?? 0
+        if (cafeScore < minRating) {
+          return false
+        }
+      }
+
+      // Max price filter
+      if (maxPrice !== null && cafe.drinks && cafe.drinks.length > 0) {
+        const minDrinkPrice = Math.min(...cafe.drinks.map(d => d.priceAmount || Infinity))
+        if (minDrinkPrice > maxPrice) {
+          return false
+        }
+      }
+
+      // Open now filter
+      if (openNow && !isOpenNow(cafe)) {
+        return false
+      }
+
+      return true
+    })
+  }, [cafes, minRating, maxPrice, openNow])
 
   const {
     containerRef,
@@ -24,7 +79,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
     removeUserLocationMarker,
     centerOnLocation
   } = useLeafletMap({
-    cafes,
+    cafes: filteredCafes,
     onPinClick,
     selectedCafeId: selectedCafe?.id || null,
     visitedCafeIds,
@@ -317,7 +372,6 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                     <span className="underline decoration-dotted">Enable location services</span>
                   </button>
                 )}
-                <p className="text-sm text-gray-700">{selectedCafe.address}</p>
               </div>
 
               {/* Quick Note */}
@@ -423,6 +477,97 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
           </div>
         </>
       )}
+
+      {/* City Dropdown - Rendered outside scrollable container */}
+      {showCityDropdown && (
+        <>
+          <div className="fixed inset-0 z-[9997]" onClick={() => setShowCityDropdown(false)} />
+          <div className="fixed top-[4.5rem] left-4 bg-white rounded-lg shadow-2xl border border-gray-200 py-1 z-[9998] min-w-[140px]">
+            {(Object.keys(CITIES) as CityKey[]).map(cityKey => (
+              <button
+                key={cityKey}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setCity(cityKey)
+                  setShowCityDropdown(false)
+                  // Pan map to new city center
+                  if (centerOnLocation) {
+                    const newCity = CITIES[cityKey]
+                    centerOnLocation(newCity.center[0], newCity.center[1], newCity.zoom)
+                  }
+                }}
+                className={`w-full text-left px-3 py-2 text-sm hover:bg-matcha-50 transition-colors ${
+                  selectedCity === cityKey ? 'bg-matcha-50 text-matcha-700 font-bold' : 'text-gray-700'
+                }`}
+              >
+                {CITIES[cityKey].name}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Quick Filters - Horizontal Scrollable */}
+      <div className="absolute top-4 left-4 right-4 z-[1001]">
+        <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-1">
+          {/* City Selector - Navigation, not filter */}
+          <div className="relative flex-shrink-0">
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                setShowCityDropdown(!showCityDropdown)
+              }}
+              className="px-2 py-1 rounded-full text-[11px] font-bold shadow-lg transition-all flex items-center gap-0.5 bg-gradient-to-r from-matcha-600 to-matcha-500 text-white whitespace-nowrap"
+            >
+              <Building2 size={11} />
+              {CITIES[selectedCity].name}
+              <ChevronDown size={10} className={`transition-transform ${showCityDropdown ? 'rotate-180' : ''}`} />
+            </button>
+          </div>
+
+          {/* Rating Filters */}
+          {[7, 8, 9].map(rating => (
+            <button
+              key={rating}
+              onClick={() => setMinRating(minRating === rating ? null : rating)}
+              className={`px-2 py-1 rounded-full text-[11px] font-bold transition-all shadow-lg flex-shrink-0 whitespace-nowrap ${
+                minRating === rating
+                  ? 'bg-gradient-to-r from-matcha-600 to-matcha-500 text-white'
+                  : 'bg-white text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              {rating}+ ★
+            </button>
+          ))}
+
+          {/* Price Filters */}
+          {[6, 8].map(price => (
+            <button
+              key={price}
+              onClick={() => setMaxPrice(maxPrice === price ? null : price)}
+              className={`px-2 py-1 rounded-full text-[11px] font-bold transition-all shadow-lg flex-shrink-0 whitespace-nowrap ${
+                maxPrice === price
+                  ? 'bg-gradient-to-r from-matcha-600 to-matcha-500 text-white'
+                  : 'bg-white text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              Under ${price}
+            </button>
+          ))}
+
+          {/* Open Now */}
+          <button
+            onClick={() => setOpenNow(!openNow)}
+            className={`px-2 py-1 rounded-full text-[11px] font-bold transition-all shadow-lg flex-shrink-0 whitespace-nowrap ${
+              openNow
+                ? 'bg-gradient-to-r from-matcha-600 to-matcha-500 text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            Open Now
+          </button>
+        </div>
+      </div>
 
       {/* Zoom Controls and Location - Bottom right positioning */}
       <div className="absolute bottom-4 right-4 flex flex-col gap-3 z-[1001]">
