@@ -4,12 +4,15 @@ import { useGeolocation } from '../hooks/useGeolocation'
 import { getLocationRequestAdvice, getOptimalGeolocationOptions } from '../utils/deviceDetection'
 import { getMapsUrl } from '../utils/mapsUrl'
 import { ContentContainer } from './ContentContainer'
+import { CITIES, type CityKey } from '../stores/cityStore'
 import type { ListViewProps } from '../types'
 
 type SortOption = 'rating' | 'distance'
 
 interface FilterState {
   minRating: number | null
+  maxDistance: number | null // in kilometers
+  selectedCities: CityKey[] // multi-select cities
 }
 
 export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggleExpand, onViewDetails }) => {
@@ -18,7 +21,9 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
   const [showSearch, setShowSearch] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [filters, setFilters] = useState<FilterState>({
-    minRating: null
+    minRating: null,
+    maxDistance: null,
+    selectedCities: []
   })
 
   const {
@@ -37,13 +42,13 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
 
   // Auto-trigger location when distance filter is selected
   React.useEffect(() => {
-    if (sortBy === 'distance' && !coordinates && !loading && !error) {
+    if ((sortBy === 'distance' || filters.maxDistance !== null) && !coordinates && !loading && !error) {
       requestLocation()
     }
-  }, [sortBy, coordinates, loading, error, requestLocation])
+  }, [sortBy, filters.maxDistance, coordinates, loading, error, requestLocation])
 
   // Check if any filters or search are active
-  const hasActiveFilters = filters.minRating !== null
+  const hasActiveFilters = filters.minRating !== null || filters.maxDistance !== null || filters.selectedCities.length > 0
 
   const hasActiveSearch = searchQuery.trim().length > 0
 
@@ -52,9 +57,24 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
     setFilters(prev => ({ ...prev, minRating: rating }))
   }
 
+  const setMaxDistance = (distance: number | null) => {
+    setFilters(prev => ({ ...prev, maxDistance: distance }))
+  }
+
+  const toggleCity = (city: CityKey) => {
+    setFilters(prev => ({
+      ...prev,
+      selectedCities: prev.selectedCities.includes(city)
+        ? prev.selectedCities.filter(c => c !== city)
+        : [...prev.selectedCities, city]
+    }))
+  }
+
   const clearFilters = () => {
     setFilters({
-      minRating: null
+      minRating: null,
+      maxDistance: null,
+      selectedCities: []
     })
   }
 
@@ -100,6 +120,20 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
         }
       }
 
+      // Distance filter (only if we have location and distance info)
+      if (filters.maxDistance !== null && cafe.distanceInfo) {
+        if (cafe.distanceInfo.kilometers > filters.maxDistance) {
+          return false
+        }
+      }
+
+      // City filter (multi-select)
+      if (filters.selectedCities.length > 0) {
+        if (!cafe.city || !filters.selectedCities.includes(cafe.city.toLowerCase() as CityKey)) {
+          return false
+        }
+      }
+
       return true
     })
 
@@ -128,7 +162,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
       default:
         return cafesCopy
     }
-  }, [cafes, sortBy, filters, searchQuery, hasActiveSearch])
+  }, [cafes, sortBy, filters.minRating, filters.maxDistance, filters.selectedCities, searchQuery, hasActiveSearch])
 
   return (
     <div className="flex-1 overflow-y-auto pb-24 relative">
@@ -243,7 +277,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
         {/* Filter Panel */}
         {showFilters && (
           <div className="px-4 pb-4 pt-3 border-t-2 border-matcha-100 bg-gradient-to-b from-cream-50 to-white overflow-hidden transition-all duration-300 ease-in-out animate-slide-down">
-            <div className="space-y-3">
+            <div className="space-y-4">
               {/* Rating Filter */}
               <div>
                 <h4 className="text-sm font-bold text-charcoal-900 mb-3">Minimum Rating</h4>
@@ -259,6 +293,51 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                       }`}
                     >
                       {rating}+
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Distance Filter */}
+              <div>
+                <h4 className="text-sm font-bold text-charcoal-900 mb-3">
+                  Max Distance {coordinates ? '' : '(Enable location first)'}
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {[1, 3, 5, 10].map(distance => (
+                    <button
+                      key={distance}
+                      onClick={() => setMaxDistance(filters.maxDistance === distance ? null : distance)}
+                      disabled={!coordinates}
+                      className={`px-4 py-2 rounded-full text-sm font-bold transition-all shadow-md ${
+                        filters.maxDistance === distance
+                          ? 'bg-gradient-to-r from-matcha-600 to-matcha-500 text-white scale-105'
+                          : coordinates
+                          ? 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-105'
+                          : 'bg-gray-100 text-gray-400 cursor-not-allowed opacity-50'
+                      }`}
+                    >
+                      {distance}km
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* City Filter */}
+              <div>
+                <h4 className="text-sm font-bold text-charcoal-900 mb-3">Cities</h4>
+                <div className="flex flex-wrap gap-2">
+                  {(Object.keys(CITIES) as CityKey[]).map(cityKey => (
+                    <button
+                      key={cityKey}
+                      onClick={() => toggleCity(cityKey)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all shadow-md ${
+                        filters.selectedCities.includes(cityKey)
+                          ? 'bg-gradient-to-r from-matcha-600 to-matcha-500 text-white scale-105'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-105'
+                      }`}
+                    >
+                      {CITIES[cityKey].name}
                     </button>
                   ))}
                 </div>
