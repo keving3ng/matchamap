@@ -159,21 +159,17 @@ export const useLeafletMap = ({
   }
 
   const drawRoute = useCallback((coordinates: Array<{ lat: number; lng: number }>) => {
-    console.log('drawRoute called with', coordinates.length, 'coordinates')
     if (!mapRef.current) {
-      console.log('No map ref available')
       return
     }
 
     // Remove existing route
     if (routeLayerRef.current) {
-      console.log('Removing existing route')
       mapRef.current.removeLayer(routeLayerRef.current)
     }
 
     // Draw new route with enhanced styling for better visibility
     const latLngs: [number, number][] = coordinates.map(coord => [coord.lat, coord.lng])
-    console.log('Creating polyline with', latLngs.length, 'points')
 
     // Create a white outline for contrast
     const outline = L.polyline(latLngs, {
@@ -197,8 +193,6 @@ export const useLeafletMap = ({
     // Group both layers together
     const routeGroup = L.layerGroup([outline, mainLine])
     routeLayerRef.current = routeGroup as any
-
-    console.log('Route added to map, fitting bounds')
 
     // Fit map to show entire route
     mapRef.current.fitBounds(mainLine.getBounds(), {

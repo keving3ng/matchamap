@@ -9,6 +9,10 @@ interface UIState {
   // List view state
   expandedCard: number | null
   setExpandedCard: (id: number | null) => void
+
+  // Drink type filter state (shared across Map and List views)
+  selectedDrinkType: string | null
+  setSelectedDrinkType: (drinkType: string | null) => void
 }
 
 export const useUIStore = create<UIState>((set) => ({
@@ -20,4 +24,8 @@ export const useUIStore = create<UIState>((set) => ({
   // List view state
   expandedCard: null,
   setExpandedCard: (id) => set({ expandedCard: id }),
+
+  // Drink type filter state
+  selectedDrinkType: null,
+  setSelectedDrinkType: (drinkType) => set({ selectedDrinkType: drinkType }),
 }))

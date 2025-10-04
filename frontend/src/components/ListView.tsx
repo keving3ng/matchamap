@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react'
 import { Navigation, MapPin, ChevronDown, Crosshair, Filter, X, Search, Coffee, Star, Building2 } from 'lucide-react'
 import { useGeolocation } from '../hooks/useGeolocation'
+import { useUIStore } from '../stores/uiStore'
 import { getLocationRequestAdvice, getOptimalGeolocationOptions } from '../utils/deviceDetection'
 import { getMapsUrl } from '../utils/mapsUrl'
 import { ContentContainer } from './ContentContainer'
@@ -27,6 +28,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
     maxDistance: null,
     selectedCities: []
   })
+  const { selectedDrinkType, setSelectedDrinkType } = useUIStore()
 
   const {
     coordinates,
@@ -49,8 +51,20 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
     }
   }, [sortBy, filters.maxDistance, coordinates, loading, error, requestLocation])
 
+  // Get unique drink types from all cafes
+  const availableDrinkTypes = React.useMemo(() => {
+    const drinkTypes = new Set<string>()
+    cafes.forEach(cafe => {
+      cafe.drinks?.forEach(drink => {
+        const drinkName = drink.name || 'Iced Matcha Latte'
+        drinkTypes.add(drinkName)
+      })
+    })
+    return Array.from(drinkTypes).sort()
+  }, [cafes])
+
   // Check if any filters or search are active
-  const hasActiveFilters = filters.minRating !== null || filters.maxDistance !== null || filters.selectedCities.length > 0
+  const hasActiveFilters = filters.minRating !== null || filters.maxDistance !== null || filters.selectedCities.length > 0 || selectedDrinkType !== null
 
   const hasActiveSearch = searchQuery.trim().length > 0
 
@@ -78,6 +92,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
       maxDistance: null,
       selectedCities: []
     })
+    setSelectedDrinkType(null)
   }
 
   // Filter and sort cafes based on selected options
@@ -136,6 +151,17 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
         }
       }
 
+      // Drink type filter
+      if (selectedDrinkType !== null && cafe.drinks && cafe.drinks.length > 0) {
+        const hasDrink = cafe.drinks.some(drink => {
+          const drinkName = drink.name || 'Iced Matcha Latte'
+          return drinkName === selectedDrinkType
+        })
+        if (!hasDrink) {
+          return false
+        }
+      }
+
       return true
     })
 
@@ -164,7 +190,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
       default:
         return cafesCopy
     }
-  }, [cafes, sortBy, filters.minRating, filters.maxDistance, filters.selectedCities, searchQuery, hasActiveSearch])
+  }, [cafes, sortBy, filters.minRating, filters.maxDistance, filters.selectedCities, selectedDrinkType, searchQuery, hasActiveSearch])
 
   return (
     <div className="flex-1 overflow-y-auto pb-24 relative">
@@ -339,6 +365,26 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
         {showFilters && (
           <div className="px-4 pb-4 pt-3 border-t-2 border-matcha-100 bg-gradient-to-b from-cream-50 to-white overflow-hidden transition-all duration-300 ease-in-out animate-slide-down">
             <div className="space-y-4">
+              {/* Drink Type Filter */}
+              <div>
+                <h4 className="text-sm font-bold text-charcoal-900 mb-3">{COPY.list.drinkType}</h4>
+                <div className="relative">
+                  <select
+                    value={selectedDrinkType || ''}
+                    onChange={(e) => setSelectedDrinkType(e.target.value || null)}
+                    className="w-full px-4 py-2.5 rounded-xl text-sm font-medium bg-white border-2 border-matcha-200 focus:outline-none focus:ring-2 focus:ring-matcha-500 focus:border-matcha-500 transition-all shadow-md appearance-none pr-10"
+                  >
+                    <option value="">{COPY.list.allDrinks}</option>
+                    {availableDrinkTypes.map(drinkType => (
+                      <option key={drinkType} value={drinkType}>
+                        {drinkType}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-matcha-600 pointer-events-none" />
+                </div>
+              </div>
+
               {/* Rating Filter */}
               <div>
                 <h4 className="text-sm font-bold text-charcoal-900 mb-3">{COPY.list.minimumRating}</h4>

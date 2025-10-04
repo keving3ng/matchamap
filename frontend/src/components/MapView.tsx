@@ -5,6 +5,7 @@ import { useGeolocation } from '../hooks/useGeolocation'
 import { useVisitedCafes } from '../hooks/useVisitedCafes'
 import { useRouteVisualization } from '../hooks/useRouteVisualization'
 import { useCityStore, CITIES, type CityKey } from '../stores/cityStore'
+import { useUIStore } from '../stores/uiStore'
 import { CircleButton } from './CircleButton'
 import { getLocationRequestAdvice, getOptimalGeolocationOptions } from '../utils/deviceDetection'
 import { getMapsUrl } from '../utils/mapsUrl'
@@ -19,12 +20,26 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
   const { visitedCafeIds } = useVisitedCafes()
   const { selectedCity, setCity, getCity } = useCityStore()
   const currentCity = getCity()
+  const { selectedDrinkType, setSelectedDrinkType } = useUIStore()
 
   // Quick filter state
   const [showCityDropdown, setShowCityDropdown] = React.useState(false)
+  const [showDrinkDropdown, setShowDrinkDropdown] = React.useState(false)
   const [minRating, setMinRating] = React.useState<number | null>(null)
   const [maxPrice, setMaxPrice] = React.useState<number | null>(null)
   const [openNow, setOpenNow] = React.useState(false)
+
+  // Get unique drink types from all cafes
+  const availableDrinkTypes = React.useMemo(() => {
+    const drinkTypes = new Set<string>()
+    cafes.forEach(cafe => {
+      cafe.drinks?.forEach(drink => {
+        const drinkName = drink.name || 'Iced Matcha Latte'
+        drinkTypes.add(drinkName)
+      })
+    })
+    return Array.from(drinkTypes).sort()
+  }, [cafes])
 
   // Helper to check if cafe is open now
   const isOpenNow = (cafe: typeof cafes[0]) => {
@@ -66,6 +81,17 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
         }
       }
 
+      // Drink type filter
+      if (selectedDrinkType !== null && cafe.drinks && cafe.drinks.length > 0) {
+        const hasDrink = cafe.drinks.some(drink => {
+          const drinkName = drink.name || 'Iced Matcha Latte'
+          return drinkName === selectedDrinkType
+        })
+        if (!hasDrink) {
+          return false
+        }
+      }
+
       // Open now filter
       if (openNow && !isOpenNow(cafe)) {
         return false
@@ -73,7 +99,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
 
       return true
     })
-  }, [cafes, minRating, maxPrice, openNow])
+  }, [cafes, minRating, maxPrice, selectedDrinkType, openNow])
 
   // Handle map movement to update city selector
   const handleMapMove = React.useCallback((center: { lat: number; lng: number }) => {
@@ -640,6 +666,43 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
         </>
       )}
 
+      {/* Drink Type Dropdown - Rendered outside scrollable container */}
+      {showDrinkDropdown && (
+        <>
+          <div className="fixed inset-0 z-[9997]" onClick={() => setShowDrinkDropdown(false)} />
+          <div className="fixed top-[4.5rem] left-4 bg-white rounded-lg shadow-2xl border border-gray-200 py-1 z-[9998] w-[200px] max-w-[calc(100vw-2rem)] max-h-[300px] overflow-y-auto">
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                setSelectedDrinkType(null)
+                setShowDrinkDropdown(false)
+              }}
+              className={`w-full text-left px-3 py-2 text-sm hover:bg-matcha-50 transition-colors ${
+                selectedDrinkType === null ? 'bg-matcha-50 text-matcha-700 font-bold' : 'text-gray-700'
+              }`}
+            >
+              {COPY.map.allDrinks}
+            </button>
+            {availableDrinkTypes.map(drinkType => (
+              <button
+                key={drinkType}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setSelectedDrinkType(drinkType)
+                  setShowDrinkDropdown(false)
+                }}
+                className={`w-full text-left px-3 py-2 text-sm hover:bg-matcha-50 transition-colors truncate ${
+                  selectedDrinkType === drinkType ? 'bg-matcha-50 text-matcha-700 font-bold' : 'text-gray-700'
+                }`}
+                title={drinkType}
+              >
+                {drinkType}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+
       {/* Quick Filters - Horizontal Scrollable */}
       <div className="absolute top-4 left-4 right-4 z-[1001]">
         <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-1">
@@ -655,6 +718,27 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
               <Building2 size={11} />
               {CITIES[selectedCity].name}
               <ChevronDown size={10} className={`transition-transform ${showCityDropdown ? 'rotate-180' : ''}`} />
+            </button>
+          </div>
+
+          {/* Drink Type Filter */}
+          <div className="relative flex-shrink-0">
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                setShowDrinkDropdown(!showDrinkDropdown)
+              }}
+              className={`px-3 py-[2px] rounded-full text-[11px] font-bold shadow-lg transition-all flex items-center gap-0.5 whitespace-nowrap max-w-[140px] ${
+                selectedDrinkType !== null
+                  ? 'bg-gradient-to-r from-matcha-600 to-matcha-500 text-white'
+                  : 'bg-white text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              <Coffee size={11} className="flex-shrink-0" />
+              <span className="truncate">
+                {selectedDrinkType || COPY.map.allDrinks}
+              </span>
+              <ChevronDown size={10} className={`transition-transform flex-shrink-0 ${showDrinkDropdown ? 'rotate-180' : ''}`} />
             </button>
           </div>
 

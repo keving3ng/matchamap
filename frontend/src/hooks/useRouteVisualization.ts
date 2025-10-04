@@ -73,14 +73,13 @@ export function useRouteVisualization(): UseRouteVisualizationResult {
 
         if (distanceMoved < LOCATION_THRESHOLD_METERS) {
           // Use cached route
-          console.log(`Using cached route for cafe ${cafeId} (moved ${distanceMoved.toFixed(1)}m)`)
           setRoute(cached.route)
           setShowRoute(true)
           setRouteCafeId(cafeId)
           setIsLoadingRoute(false)
           return
         } else {
-          console.log(`Cache invalidated for cafe ${cafeId} (moved ${distanceMoved.toFixed(1)}m)`)
+          // Cache invalidated - user moved too far
           routeCacheRef.current.delete(cafeId)
         }
       }
