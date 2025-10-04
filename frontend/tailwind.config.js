@@ -45,6 +45,9 @@ export default {
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
+        pacifico: ['Pacifico', 'cursive'],
+        caveat: ['Caveat', 'cursive'],
+        satisfy: ['Satisfy', 'cursive'],
       },
       screens: {
         'xs': '375px',

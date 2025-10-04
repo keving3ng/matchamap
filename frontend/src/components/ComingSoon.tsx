@@ -54,7 +54,9 @@ export const ComingSoon: React.FC<ComingSoonProps> = ({ onPasswordCorrect }) => 
         >
           🍵
         </button>
-        <h1 className="text-5xl sm:text-6xl font-bold tracking-tight mb-8">MatchaMap</h1>
+        <h1 className="text-5xl sm:text-6xl font-bold tracking-tight mb-8 font-caveat">
+          MatchaMap
+        </h1>
 
         {!isSubmitted ? (
           <form onSubmit={handleWaitlistSubmit} className="flex flex-col gap-3">

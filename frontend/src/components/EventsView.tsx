@@ -8,7 +8,7 @@ export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
     <div className="flex-1 overflow-y-auto pb-24">
       {/* Header */}
       <div className="bg-white border-b-2 border-green-200 px-4 py-4 shadow-sm">
-        <h2 className="text-2xl font-bold text-gray-800">Upcoming Events</h2>
+        <h2 className="text-2xl font-bold text-gray-800 font-caveat">Upcoming Events</h2>
         <p className="text-sm text-gray-600 mt-1">Toronto matcha community gatherings & workshops</p>
       </div>
 

@@ -17,7 +17,7 @@ export const PassportView: React.FC<PassportViewProps> = ({ cafes, visitedStamps
             🎫
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-800">Matcha Passport</h2>
+            <h2 className="text-2xl font-bold text-gray-800 font-caveat">Matcha Passport</h2>
             <p className="text-sm text-gray-600">Collect stamps from every location</p>
           </div>
         </div>

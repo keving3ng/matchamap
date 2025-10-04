@@ -29,7 +29,7 @@ export const ContactPage: React.FC = () => {
     <div className="flex-1 overflow-y-auto pb-24">
       {/* Header */}
       <div className="bg-white border-b-2 border-green-200 px-4 py-4 shadow-sm">
-        <h2 className="text-2xl font-bold text-gray-800">Contact Us</h2>
+        <h2 className="text-2xl font-bold text-gray-800 font-caveat">Contact Us</h2>
         <p className="text-sm text-gray-600 mt-1">Have a question or want to suggest a cafe?</p>
       </div>
 
