@@ -1,12 +1,11 @@
 import { create } from 'zustand'
 import { useLocationStore } from './locationStore'
-import { useCityStore } from './cityStore'
 import { useDataStore } from './dataStore'
 import { calculateCafeDistances } from '../utils/distance'
 import type { CafeWithDistance } from '../types'
 
 interface CafeStore {
-  // Computed cafe list with distances calculated for selected city
+  // Computed cafe list with distances calculated (shows all cafes regardless of city)
   cafesWithDistance: CafeWithDistance[]
 
   // Selected cafe state
@@ -26,14 +25,10 @@ export const useCafeStore = create<CafeStore>((set) => ({
   _recalculateCafes: () => {
     // Get current state from other stores
     const { allCafes } = useDataStore.getState()
-    const { selectedCity } = useCityStore.getState()
     const { coordinates } = useLocationStore.getState()
 
-    // Filter cafes by selected city (case-insensitive)
-    const filteredCafes = allCafes.filter(cafe => {
-      if (!cafe.city) return false // Skip cafes without city
-      return cafe.city.toLowerCase() === selectedCity.toLowerCase()
-    })
+    // Show all cafes (no city filtering) - user can see all cafes when zoomed out
+    const cafesToShow = allCafes
 
     // Calculate distances if we have user location
     let cafesWithDistance: CafeWithDistance[]
@@ -43,10 +38,10 @@ export const useCafeStore = create<CafeStore>((set) => ({
         latitude: coordinates.latitude,
         longitude: coordinates.longitude,
       }
-      cafesWithDistance = calculateCafeDistances(userLocation, filteredCafes)
+      cafesWithDistance = calculateCafeDistances(userLocation, cafesToShow)
     } else {
       // No user location - return cafes with null distance info
-      cafesWithDistance = filteredCafes.map(cafe => ({
+      cafesWithDistance = cafesToShow.map(cafe => ({
         ...cafe,
         distanceInfo: null,
       }))
@@ -66,10 +61,8 @@ useLocationStore.subscribe(() => {
   useCafeStore.getState()._recalculateCafes()
 })
 
-// Subscribe to city store changes
-useCityStore.subscribe(() => {
-  useCafeStore.getState()._recalculateCafes()
-})
+// Note: No longer subscribing to city changes since we show all cafes regardless of city
+// City selection is only used for map centering, not cafe filtering
 
 // Initial calculation on store creation
 useCafeStore.getState()._recalculateCafes()
