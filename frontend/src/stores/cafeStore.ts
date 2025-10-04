@@ -17,7 +17,7 @@ interface CafeStore {
   _recalculateCafes: () => void
 }
 
-export const useCafeStore = create<CafeStore>((set, get) => ({
+export const useCafeStore = create<CafeStore>((set) => ({
   cafesWithDistance: [],
 
   selectedCafe: null,
@@ -57,17 +57,17 @@ export const useCafeStore = create<CafeStore>((set, get) => ({
 }))
 
 // Subscribe to data store changes (when cafes are fetched)
-useDataStore.subscribe((state) => {
+useDataStore.subscribe(() => {
   useCafeStore.getState()._recalculateCafes()
 })
 
 // Subscribe to location store changes
-useLocationStore.subscribe((state) => {
+useLocationStore.subscribe(() => {
   useCafeStore.getState()._recalculateCafes()
 })
 
 // Subscribe to city store changes
-useCityStore.subscribe((state) => {
+useCityStore.subscribe(() => {
   useCafeStore.getState()._recalculateCafes()
 })
 

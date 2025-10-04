@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { isValidEmail } from '../utils/validation'
+import { api } from '../utils/api'
 
 interface ComingSoonProps {
   onPasswordCorrect: () => void
@@ -34,20 +35,9 @@ export const ComingSoon: React.FC<ComingSoonProps> = ({ onPasswordCorrect }) => 
     setIsSubmitting(true)
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/waitlist`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      })
-
-      if (response.ok) {
-        setIsSubmitted(true)
-        setEmail('')
-      } else {
-        console.error('Failed to join waitlist')
-      }
+      await api.waitlist.join(email)
+      setIsSubmitted(true)
+      setEmail('')
     } catch (error) {
       console.error('Error joining waitlist:', error)
     } finally {

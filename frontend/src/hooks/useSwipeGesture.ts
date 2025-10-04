@@ -143,7 +143,7 @@ export const useLongPress = (
   options: { delay?: number } = {}
 ) => {
   const { delay = 500 } = options
-  const timeout = useRef<ReturnType<typeof setTimeout>>()
+  const timeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const target = useRef<EventTarget | null>(null)
 
   const start = (e: TouchEvent | MouseEvent) => {

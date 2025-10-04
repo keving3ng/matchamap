@@ -57,7 +57,7 @@ const CafeDetailWrapper: React.FC = () => {
 }
 
 export const AppRoutes: React.FC = () => {
-  const { isEventsEnabled, isPassportEnabled, isUserAccountsEnabled } = useFeatureStore()
+  const { isEventsEnabled, isPassportEnabled } = useFeatureStore()
   const isAdminEnabled = useFeatureToggle('ENABLE_ADMIN_PANEL')
   const isContactEnabled = useFeatureToggle('ENABLE_CONTACT')
   const isAboutEnabled = useFeatureToggle('ENABLE_ABOUT')

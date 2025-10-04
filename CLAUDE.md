@@ -108,6 +108,94 @@ frontend/src/hooks/
 -   Return objects, not arrays (better for destructuring)
 -   Avoid deeply nested hooks
 
+## API Communication
+
+**CRITICAL:** ALWAYS use the centralized API client (`frontend/src/utils/api.ts`) for all backend communication. NEVER use direct `fetch()` calls in components or hooks (except in authStore.ts which has a special case to avoid circular dependencies).
+
+### Why Use the Centralized API Client?
+
+The generic `fetchAPI()` function in `api.ts` provides:
+1. ✅ **Consistent base URL** - Uses `VITE_API_URL` automatically with `/api` prefix
+2. ✅ **Automatic auth token injection** - Adds `Authorization` header from authStore
+3. ✅ **Consistent error handling** - Standardized error responses
+4. ✅ **Type safety** - Full TypeScript support for requests/responses
+5. ✅ **Cache-busting** - Built-in cache control for GET requests
+6. ✅ **No environment variable confusion** - Single source of truth
+
+### API Client Usage
+
+**✅ CORRECT - Use the API client:**
+```tsx
+import { api } from '../utils/api'
+
+// In a component or hook
+const handleSubmit = async () => {
+  try {
+    await api.waitlist.join(email)
+    setSuccess(true)
+  } catch (error) {
+    console.error('Failed:', error)
+  }
+}
+```
+
+**❌ INCORRECT - Direct fetch() calls:**
+```tsx
+// DON'T DO THIS - bypasses all centralized handling
+const response = await fetch(`${import.meta.env.VITE_API_URL}/api/waitlist`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ email })
+})
+```
+
+### Adding New API Endpoints
+
+When adding a new backend endpoint, always add it to `api.ts`:
+
+1. **Create the endpoint function:**
+```typescript
+// In frontend/src/utils/api.ts
+export const myFeatureAPI = {
+  async doSomething(data: SomeType): Promise<ResponseType> {
+    return fetchAPI('/my-endpoint', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  },
+}
+```
+
+2. **Export it in the main API object:**
+```typescript
+export const api = {
+  cafes: cafeAPI,
+  feed: feedAPI,
+  events: eventsAPI,
+  health: healthAPI,
+  places: placesAPI,
+  drinks: drinksAPI,
+  admin: adminAPI,
+  waitlist: waitlistAPI,
+  myFeature: myFeatureAPI,  // Add here
+}
+```
+
+3. **Use it in components:**
+```typescript
+import { api } from '@/utils/api'
+const result = await api.myFeature.doSomething(data)
+```
+
+### Special Case: authStore.ts
+
+The ONLY exception to the "always use api.ts" rule is `authStore.ts`. It uses direct fetch calls because:
+- The generic `fetchAPI()` function depends on `authStore` to get the access token
+- This would create a circular dependency if `authStore` tried to use `fetchAPI()`
+- Authentication endpoints don't need auth tokens (they generate them)
+
+**All other code MUST use the centralized API client.**
+
 ## Shared UI Component Library
 
 **IMPORTANT:** Always use shared components from `frontend/src/components/ui/` instead of inline styles or duplicating component code.
@@ -978,6 +1066,8 @@ Before marking any task complete, verify:
 -   Duplicating alert/dialog UI (use AlertDialog component)
 -   Custom score badge styling (use ScoreBadge, DrinkScoreBadge)
 -   Arbitrary spacing values (use design tokens from spacing.ts)
+-   Direct fetch() calls in components/hooks (use api.ts client)
+-   Using wrong env variable names (only VITE_API_URL exists)
 -   Class components
 -   Inline styles (use Tailwind + shared components)
 -   Default exports (use named exports)
@@ -995,6 +1085,8 @@ Before marking any task complete, verify:
 -   Use AlertDialog for all alerts/errors/success messages
 -   Use ScoreBadge for all score displays
 -   Use design tokens from `@/styles/spacing`
+-   Use api.ts client for all API calls (api.cafes.getAll(), api.waitlist.join(), etc.)
+-   Use VITE_API_URL environment variable (consistent across all environments)
 -   Functional components
 -   Tailwind classes + shared component library
 -   Named exports

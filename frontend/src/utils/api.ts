@@ -380,6 +380,24 @@ export const adminAPI = {
 }
 
 /**
+ * Waitlist API endpoints
+ */
+export const waitlistAPI = {
+  /**
+   * Join the waitlist
+   */
+  async join(email: string, referralSource?: string): Promise<{
+    success: boolean
+    message: string
+  }> {
+    return fetchAPI('/waitlist', {
+      method: 'POST',
+      body: JSON.stringify({ email, referralSource }),
+    })
+  },
+}
+
+/**
  * Export all APIs
  */
 export const api = {
@@ -390,6 +408,7 @@ export const api = {
   places: placesAPI,
   drinks: drinksAPI,
   admin: adminAPI,
+  waitlist: waitlistAPI,
 }
 
 export default api

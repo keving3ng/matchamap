@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Newspaper, Plus, Search, Edit, Trash2, Eye, EyeOff } from 'lucide-react'
 import { api } from '../../utils/api'
-import type { FeedItem } from '../../types'
+import type { FeedItem } from '../../../../shared/types'
 
 export const NewsfeedManagementPage: React.FC = () => {
   const [feedItems, setFeedItems] = useState<FeedItem[]>([])

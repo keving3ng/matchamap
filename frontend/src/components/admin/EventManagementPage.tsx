@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react'
-import { Calendar, Plus, Search, Edit, Trash2, Star, Eye, EyeOff } from 'lucide-react'
+import { Calendar, Plus, Search, Edit, Trash2, Star } from 'lucide-react'
 import { api } from '../../utils/api'
-import type { EventItem } from '../../types'
+import type { Event } from '../../../../shared/types'
 
 export const EventManagementPage: React.FC = () => {
-  const [events, setEvents] = useState<EventItem[]>([])
+  const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [showEditor, setShowEditor] = useState(false)
-  const [editingEvent, setEditingEvent] = useState<EventItem | null>(null)
-  const [formData, setFormData] = useState<Partial<EventItem>>({
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null)
+  const [formData, setFormData] = useState<Partial<Event>>({
     title: '',
     date: new Date().toISOString().split('T')[0],
     time: '',
@@ -53,7 +53,7 @@ export const EventManagementPage: React.FC = () => {
     setShowEditor(true)
   }
 
-  const handleEdit = (event: EventItem) => {
+  const handleEdit = (event: Event) => {
     setEditingEvent(event)
     setFormData(event)
     setShowEditor(true)
@@ -90,7 +90,7 @@ export const EventManagementPage: React.FC = () => {
     }
   }
 
-  const handleToggleFeatured = async (event: EventItem) => {
+  const handleToggleFeatured = async (event: Event) => {
     try {
       await api.events.update(event.id, { featured: !event.featured })
       await loadEvents()

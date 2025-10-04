@@ -82,7 +82,7 @@ export const useAuthStore = create<AuthState>()(
             throw new Error(error.error || 'Registration failed')
           }
 
-          const result = await response.json()
+          await response.json()
           set({ isLoading: false, error: null })
 
           // After successful registration, automatically log in
@@ -198,7 +198,7 @@ export const useAuthStore = create<AuthState>()(
         accessToken: state.accessToken,
         refreshToken: state.refreshToken,
         isAuthenticated: state.isAuthenticated,
-      }) as Pick<AuthState, 'user' | 'accessToken' | 'refreshToken' | 'isAuthenticated'>,
+      }) as AuthState,
     }
   )
 )

@@ -1,36 +1,21 @@
 import React, { useState } from 'react'
-import { X, Save, MapPin, DollarSign, Star, Coffee, ArrowRight, ArrowLeft, Search } from 'lucide-react'
+import { X, Save, MapPin, Star, Coffee, ArrowRight, ArrowLeft, Search } from 'lucide-react'
 import { api } from '../../utils/api'
 import { formatHoursList } from '../../utils/formatHours'
 import type { Cafe } from '../../types'
 
 interface CafeFormWizardProps {
-  cafe?: Cafe | null
   onSave: (cafeData: Partial<Cafe>) => Promise<void>
   onCancel: () => void
 }
 
 type WizardStep = 'url' | 'details' | 'review'
 
-interface PlaceData {
-  name: string
-  address: string
-  latitude: number
-  longitude: number
-  hours: string
-  phone: string
-  website: string
-  googleMapsUrl: string
-  rating: number
-  reviewCount: number
-}
-
-export const CafeFormWizard: React.FC<CafeFormWizardProps> = ({ cafe, onSave, onCancel }) => {
+export const CafeFormWizard: React.FC<CafeFormWizardProps> = ({ onSave, onCancel }) => {
   const [currentStep, setCurrentStep] = useState<WizardStep>('url')
   const [googleMapsUrl, setGoogleMapsUrl] = useState('')
   const [isLookingUp, setIsLookingUp] = useState(false)
   const [lookupError, setLookupError] = useState<string | null>(null)
-  const [placeData, setPlaceData] = useState<PlaceData | null>(null)
 
   const [formData, setFormData] = useState({
     name: '',
@@ -64,15 +49,14 @@ export const CafeFormWizard: React.FC<CafeFormWizardProps> = ({ cafe, onSave, on
       const response = await api.places.lookup(googleMapsUrl)
       const place = response.place
 
-      setPlaceData(place)
       setFormData(prev => ({
         ...prev,
         name: place.name,
         lat: place.latitude,
         lng: place.longitude,
         address: place.address,
-        hours: place.hours,
-        googleMapsUrl: place.googleMapsUrl,
+        hours: place.hours || '',
+        googleMapsUrl: googleMapsUrl,
       }))
 
       // Move to next step
