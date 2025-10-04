@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router'
 import { Settings, ToggleLeft, Menu, X, Coffee, Newspaper, Calendar, Code, Users, Package, Wrench, Upload } from 'lucide-react'
 
 interface AdminLayoutProps {

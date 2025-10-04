@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router'
 import { useAuthStore } from '../../stores/authStore'
 import { LoginForm } from './LoginForm'
 

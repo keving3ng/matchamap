@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { useUIStore } from '../stores/uiStore'
 import { useCafeStore } from '../stores/cafeStore'
 import { getCafeUrlPath } from '../utils/cityMapping'

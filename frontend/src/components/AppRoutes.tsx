@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { Routes, Route, Navigate, useParams } from 'react-router-dom'
+import { Routes, Route, Navigate, useParams } from 'react-router'
 import MapView from './MapView'
 import ListView from './ListView'
 import DetailView from './DetailView'

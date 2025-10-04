@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import { useAdminStore } from '../stores/adminStore'
 import { useAuthStore } from '../stores/authStore'
 import { getCurrentEnvironment } from '../hooks/useFeatureToggle'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { Settings, AlertTriangle, LogOut, User } from 'lucide-react'
 
 interface AdminWrapperProps {
