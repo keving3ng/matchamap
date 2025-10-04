@@ -4,7 +4,7 @@
 # Matcha Passport - Visit tracking system
 # Allows users to track which cafes they've visited with a digital stamp collection
 ENABLE_PASSPORT:
-  dev: true
+  dev: false
   prod: false
 
 # News Feed - Updates and announcements
@@ -35,7 +35,7 @@ ENABLE_ADMIN_PANEL:
 # Coming Soon Page
 # Password-protected splash page shown before public launch
 SHOW_COMING_SOON:
-  dev: true
+  dev: false
   prod: true
 
 # Events Page - Community gatherings and workshops
