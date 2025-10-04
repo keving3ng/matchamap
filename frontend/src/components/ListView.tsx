@@ -132,7 +132,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
   return (
     <div className="flex-1 overflow-y-auto pb-24 relative">
       {/* Sort & Filter Header */}
-      <div className="bg-white border-b-2 border-green-200 shadow-sm">
+      <div className="bg-gradient-to-b from-white to-cream-50 border-b-2 border-matcha-200 shadow-md">
         {/* Sort & Action Buttons */}
         <div className="px-4 py-3">
           <div className="flex items-center justify-between gap-2">
@@ -141,7 +141,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortOption)}
-                className="w-full px-4 py-2 rounded-full text-sm font-semibold bg-green-600 text-white appearance-none cursor-pointer pr-8 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                className="w-full px-4 py-2.5 rounded-full text-sm font-bold bg-gradient-to-r from-matcha-600 to-matcha-500 text-white appearance-none cursor-pointer pr-8 focus:outline-none focus:ring-2 focus:ring-matcha-500 focus:ring-offset-2 shadow-md hover:from-matcha-700 hover:to-matcha-600 transition-all"
               >
                 <option value="rating">Sort: Rating</option>
                 <option value="distance">Sort: Distance</option>
@@ -157,16 +157,16 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                   setShowSearch(!showSearch)
                   if (!showSearch) setShowFilters(false) // Close filters when opening search
                 }}
-                className={`p-2 sm:px-3 sm:py-2 rounded-full text-sm font-semibold whitespace-nowrap transition flex items-center justify-center sm:justify-start gap-1.5 relative ${
+                className={`p-2 sm:px-3 sm:py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all flex items-center justify-center sm:justify-start gap-1.5 relative shadow-md ${
                   hasActiveSearch || showSearch
-                    ? 'bg-green-600 text-white'
-                    : 'bg-green-100 text-green-700 hover:bg-green-200'
+                    ? 'bg-gradient-to-r from-matcha-600 to-matcha-500 text-white scale-105'
+                    : 'bg-matcha-100 text-matcha-700 hover:bg-matcha-200'
                 }`}
               >
                 <Search size={16} />
                 <span className="hidden sm:inline">Search</span>
                 {hasActiveSearch && !showSearch && (
-                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 border-2 border-white rounded-full"></span>
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 border-2 border-white rounded-full animate-pulse"></span>
                 )}
               </button>
 
@@ -176,16 +176,16 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                   setShowFilters(!showFilters)
                   if (!showFilters) setShowSearch(false) // Close search when opening filters
                 }}
-                className={`p-2 sm:px-3 sm:py-2 rounded-full text-sm font-semibold whitespace-nowrap transition flex items-center justify-center sm:justify-start gap-1.5 relative ${
+                className={`p-2 sm:px-3 sm:py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all flex items-center justify-center sm:justify-start gap-1.5 relative shadow-md ${
                   hasActiveFilters || showFilters
-                    ? 'bg-green-600 text-white'
-                    : 'bg-green-100 text-green-700 hover:bg-green-200'
+                    ? 'bg-gradient-to-r from-matcha-600 to-matcha-500 text-white scale-105'
+                    : 'bg-matcha-100 text-matcha-700 hover:bg-matcha-200'
                 }`}
               >
                 <Filter size={16} />
                 <span className="hidden sm:inline">Filter</span>
                 {hasActiveFilters && !showFilters && (
-                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 border-2 border-white rounded-full"></span>
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 border-2 border-white rounded-full animate-pulse"></span>
                 )}
               </button>
 
@@ -193,10 +193,10 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
               <button
                 onClick={handleLocationClick}
                 disabled={!isSupported || (error !== null && error.code === 1)}
-                className={`p-2 rounded-full transition relative flex items-center justify-center ${
+                className={`p-2 rounded-full transition-all relative flex items-center justify-center shadow-md ${
                   coordinates
-                    ? 'bg-green-600 text-white hover:bg-green-700'
-                    : 'bg-green-100 text-green-700 hover:bg-green-200'
+                    ? 'bg-gradient-to-r from-matcha-600 to-matcha-500 text-white hover:from-matcha-700 hover:to-matcha-600 scale-105'
+                    : 'bg-matcha-100 text-matcha-700 hover:bg-matcha-200'
                 } ${!isSupported || (error && error.code === 1) ? 'opacity-50 cursor-not-allowed' : ''}`}
                 title={coordinates ? 'Location found' : 'Find my location'}
               >
@@ -206,7 +206,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                   <MapPin size={20} />
                 )}
                 {coordinates && (
-                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 border-2 border-white rounded-full animate-pulse"></span>
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-matcha-400 border-2 border-white rounded-full animate-pulse"></span>
                 )}
               </button>
             </div>
@@ -215,21 +215,21 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
 
         {/* Search Bar (Collapsible) */}
         {showSearch && (
-          <div className="px-4 py-3 border-t border-green-100 overflow-hidden transition-all duration-300 ease-in-out animate-slide-down">
+          <div className="px-4 py-3 border-t-2 border-matcha-100 bg-gradient-to-b from-cream-50 to-white overflow-hidden transition-all duration-300 ease-in-out animate-slide-down">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-matcha-500" size={18} />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search cafes, neighborhoods, or keywords..."
-                className="w-full pl-10 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+                className="w-full pl-10 pr-10 py-3 bg-white border-2 border-matcha-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-matcha-500 focus:border-matcha-500 transition-all shadow-md"
                 autoFocus
               />
               {hasActiveSearch && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-matcha-600 transition-colors"
                   aria-label="Clear search"
                 >
                   <X size={18} />
@@ -241,20 +241,20 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
 
         {/* Filter Panel */}
         {showFilters && (
-          <div className="px-4 pb-4 pt-3 border-t border-green-100 overflow-hidden transition-all duration-300 ease-in-out animate-slide-down">
+          <div className="px-4 pb-4 pt-3 border-t-2 border-matcha-100 bg-gradient-to-b from-cream-50 to-white overflow-hidden transition-all duration-300 ease-in-out animate-slide-down">
             <div className="space-y-3">
               {/* Rating Filter */}
               <div>
-                <h4 className="text-xs font-semibold text-gray-600 mb-2">Minimum Rating</h4>
+                <h4 className="text-sm font-bold text-charcoal-900 mb-3">Minimum Rating</h4>
                 <div className="flex flex-wrap gap-2">
                   {[7, 8, 9].map(rating => (
                     <button
                       key={rating}
                       onClick={() => setMinRating(filters.minRating === rating ? null : rating)}
-                      className={`px-3 py-1.5 rounded-full text-sm font-medium transition ${
+                      className={`px-4 py-2 rounded-full text-sm font-bold transition-all shadow-md ${
                         filters.minRating === rating
-                          ? 'bg-green-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? 'bg-gradient-to-r from-matcha-600 to-matcha-500 text-white scale-105'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-105'
                       }`}
                     >
                       {rating}+
@@ -268,7 +268,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                 <div className="pt-2">
                   <button
                     onClick={clearFilters}
-                    className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition flex items-center justify-center gap-2"
+                    className="w-full px-4 py-2.5 bg-gray-100 text-gray-700 rounded-xl text-sm font-bold hover:bg-gray-200 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
                   >
                     <X size={16} />
                     Clear All Filters
@@ -386,29 +386,34 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
             </div>
           ) : (
             filteredAndSortedCafes.map((cafe) => (
-            <div key={cafe.id} className="bg-white rounded-2xl shadow-md border-2 border-green-100 overflow-hidden">
+            <div
+              key={cafe.id}
+              className={`bg-white rounded-2xl shadow-lg border-2 overflow-hidden transition-all duration-200 hover:shadow-xl ${
+                expandedCard === cafe.id ? 'border-matcha-400' : 'border-matcha-100'
+              }`}
+            >
             <button
               onClick={() => onToggleExpand(expandedCard === cafe.id ? null : cafe.id)}
-              className="w-full p-4 flex items-center justify-between"
+              className="w-full p-5 flex items-center justify-between group hover:bg-cream-50 transition-colors"
             >
               <div className="flex-1 text-left">
-                <div className="flex items-center gap-3 mb-1">
-                  <h3 className="font-bold text-lg text-gray-800">{cafe.name}</h3>
+                <div className="flex items-center gap-3 mb-2 flex-wrap">
+                  <h3 className="font-bold text-xl text-charcoal-900">{cafe.name}</h3>
                   {cafe.displayScore && (
-                    <div className="bg-green-500 text-white px-2.5 py-0.5 rounded-full font-bold text-sm">
+                    <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 text-white px-3 py-1 rounded-full font-bold text-sm shadow-md">
                       {cafe.displayScore.toFixed(1)}
                     </div>
                   )}
                 </div>
-                <div className="flex items-center gap-3 text-sm text-gray-600">
+                <div className="flex items-center gap-3 text-sm">
                   {cafe.distanceInfo ? (
-                    <span className="flex items-center gap-1">
-                      <Navigation size={14} />
+                    <span className="flex items-center gap-1.5 text-matcha-700 font-medium">
+                      <Navigation size={16} className="text-matcha-600" />
                       {cafe.distanceInfo.formattedKm}
                     </span>
                   ) : (
-                    <span className="flex items-center gap-1 text-gray-400">
-                      <MapPin size={14} />
+                    <span className="flex items-center gap-1.5 text-gray-400">
+                      <MapPin size={16} />
                       Tap location for distance
                     </span>
                   )}
@@ -416,39 +421,48 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
               </div>
               <ChevronDown
                 size={24}
-                className={`text-green-600 transition-transform ${
-                  expandedCard === cafe.id ? 'rotate-180' : ''
+                className={`text-matcha-600 transition-all ${
+                  expandedCard === cafe.id ? 'rotate-180' : 'group-hover:translate-y-0.5'
                 }`}
               />
             </button>
 
             {expandedCard === cafe.id && (
-              <div className="px-4 pb-4 border-t-2 border-green-100 pt-4">
-                <div className="space-y-3">
-                  <div className="flex items-start gap-2">
-                    <MapPin size={18} className="text-green-600 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-sm font-medium text-gray-700">{cafe.address}</p>
-                      {cafe.distanceInfo ? (
-                        <p className="text-xs text-gray-500">{cafe.distanceInfo.walkTime} walk</p>
-                      ) : (
-                        <p className="text-xs text-gray-400">Tap location button for walk time</p>
-                      )}
+              <div className="px-5 pb-5 border-t-2 border-matcha-100 pt-4 bg-gradient-to-b from-cream-50 to-white animate-slide-down">
+                <div className="space-y-4">
+                  {/* Address Section */}
+                  <div className="bg-gradient-to-r from-matcha-50 to-cream-100 rounded-xl p-3">
+                    <div className="flex items-start gap-2.5">
+                      <MapPin size={18} className="text-matcha-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-800">{cafe.address}</p>
+                        {cafe.distanceInfo ? (
+                          <p className="text-xs text-matcha-700 font-semibold mt-1">{cafe.distanceInfo.walkTime} walk</p>
+                        ) : (
+                          <p className="text-xs text-gray-400 mt-1">Tap location button for walk time</p>
+                        )}
+                      </div>
                     </div>
                   </div>
 
+                  {/* Quick Note */}
                   {cafe.quickNote && (
-                    <div className="bg-green-50 rounded-lg p-3 border border-green-200">
-                      <p className="text-sm text-gray-700 italic">"{cafe.quickNote}"</p>
+                    <div className="bg-gradient-to-br from-yellow-50 to-cream-100 rounded-xl p-4 border-2 border-yellow-200">
+                      <div className="flex items-start gap-2">
+                        <span className="text-xl">💡</span>
+                        <p className="text-sm text-gray-700 italic flex-1">"{cafe.quickNote}"</p>
+                      </div>
                     </div>
                   )}
 
                   {/* Drinks List */}
                   {cafe.drinks && cafe.drinks.length > 0 && (
                     <div>
-                      <div className="flex items-center gap-1 text-xs font-semibold text-gray-700 mb-2">
-                        <Coffee size={14} />
-                        Drinks
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 p-1.5 rounded-lg">
+                          <Coffee size={14} className="text-white" />
+                        </div>
+                        <span className="text-sm font-bold text-charcoal-900">Top Drinks</span>
                       </div>
                       <div className="space-y-2">
                         {cafe.drinks
@@ -456,15 +470,27 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                           .concat(cafe.drinks.filter(d => !d.isDefault).sort((a, b) => b.score - a.score))
                           .slice(0, 3)
                           .map(drink => (
-                            <div key={drink.id} className="flex items-center justify-between text-sm bg-gray-50 rounded-lg p-2">
-                              <span className="text-gray-700 font-medium">{drink.name || 'Iced Matcha Latte'}</span>
+                            <div
+                              key={drink.id}
+                              className={`flex items-center justify-between text-sm rounded-xl p-3 border transition-colors hover:border-matcha-300 ${
+                                drink.isDefault
+                                  ? 'bg-gradient-to-r from-matcha-50 to-cream-100 border-matcha-200'
+                                  : 'bg-gray-50 border-gray-200'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2">
+                                <span className="text-gray-800 font-semibold">{drink.name || 'Iced Matcha Latte'}</span>
+                                {drink.isDefault && (
+                                  <span className="text-xs px-1.5 py-0.5 bg-matcha-500 text-white rounded-full">★</span>
+                                )}
+                              </div>
                               <div className="flex items-center gap-3">
                                 {drink.priceAmount !== null && drink.priceAmount !== undefined && (
-                                  <span className="text-gray-600">${drink.priceAmount.toFixed(2)}</span>
+                                  <span className="text-gray-600 font-medium">${drink.priceAmount.toFixed(2)}</span>
                                 )}
-                                <div className="flex items-center gap-1">
-                                  <Star size={12} className="text-green-600 fill-green-600" />
-                                  <span className="font-semibold text-green-600">{drink.score.toFixed(1)}</span>
+                                <div className="flex items-center gap-1 bg-white px-2 py-1 rounded-lg">
+                                  <Star size={14} className="text-matcha-600 fill-matcha-600" />
+                                  <span className="font-bold text-matcha-600">{drink.score.toFixed(1)}</span>
                                 </div>
                               </div>
                             </div>
@@ -473,12 +499,14 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                     </div>
                   )}
 
-                  <div className="flex gap-2 pt-2">
+                  {/* View Details Button */}
+                  <div className="pt-2">
                     <button
                       onClick={() => onViewDetails(cafe)}
-                      className="flex-1 bg-gradient-to-r from-green-600 to-green-500 text-white py-2.5 rounded-xl font-semibold hover:from-green-700 hover:to-green-600 transition shadow-md text-sm"
+                      className="w-full bg-gradient-to-r from-matcha-600 via-matcha-500 to-matcha-600 text-white py-3 rounded-xl font-bold hover:from-matcha-700 hover:to-matcha-700 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
                     >
                       View Full Details
+                      <ChevronDown size={18} className="-rotate-90" />
                     </button>
                   </div>
                 </div>
