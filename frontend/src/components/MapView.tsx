@@ -1,13 +1,15 @@
 import React from 'react'
-import { MapPin, Navigation, Crosshair, Coffee, Star, Building2, ChevronDown } from 'lucide-react'
+import { MapPin, Navigation, Crosshair, Coffee, Star, Building2, ChevronDown, Route } from 'lucide-react'
 import { useLeafletMap } from '../hooks/useLeafletMap'
 import { useGeolocation } from '../hooks/useGeolocation'
 import { useVisitedCafes } from '../hooks/useVisitedCafes'
+import { useRouteVisualization } from '../hooks/useRouteVisualization'
 import { useCityStore, CITIES, type CityKey } from '../stores/cityStore'
 import { CircleButton } from './CircleButton'
 import { getLocationRequestAdvice, getOptimalGeolocationOptions } from '../utils/deviceDetection'
 import { getMapsUrl } from '../utils/mapsUrl'
 import { formatHoursCompact } from '../utils/hoursFormatter'
+import { formatDuration } from '../utils/routing'
 import { findClosestCity } from '../utils/cityDetection'
 import { COPY } from '../constants/copy'
 import type { MapViewProps } from '../types'
@@ -88,12 +90,24 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
   }, [selectedCity, setCity])
 
   const {
+    route,
+    isLoadingRoute,
+    showRoute,
+    routeCafeId,
+    toggleRoute,
+    loadRoute,
+    clearRoute: clearRouteData
+  } = useRouteVisualization()
+
+  const {
     containerRef,
     zoomIn,
     zoomOut,
     addUserLocationMarker,
     removeUserLocationMarker,
-    centerOnLocation
+    centerOnLocation,
+    drawRoute,
+    clearRoute: clearRouteVisual
   } = useLeafletMap({
     cafes: filteredCafes,
     onPinClick,
@@ -143,6 +157,56 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
       centerOnLocation(coordinates.latitude, coordinates.longitude)
     }
   }
+
+  // Handle route toggle
+  const handleRouteToggle = async () => {
+    if (!selectedCafe) return
+
+    // If no location yet, request it first
+    if (!coordinates) {
+      requestLocation()
+      return
+    }
+
+    // Check if we're showing a route for a different cafe
+    const isCurrentCafeRoute = routeCafeId === selectedCafe.id
+
+    if (showRoute && route && isCurrentCafeRoute) {
+      // Hide route for current cafe
+      clearRouteVisual()
+      toggleRoute()
+    } else if (route && !showRoute && isCurrentCafeRoute) {
+      // We have route data for current cafe, just need to show it and hide popover
+      drawRoute(route.coordinates)
+      toggleRoute()
+      onClosePopover() // Hide the card when showing route
+    } else {
+      // Load new route for this cafe (or different cafe) and hide popover
+      await loadRoute(
+        { lat: coordinates.latitude, lng: coordinates.longitude },
+        { lat: selectedCafe.lat ?? selectedCafe.latitude, lng: selectedCafe.lng ?? selectedCafe.longitude },
+        selectedCafe.id
+      )
+      onClosePopover() // Hide the card when showing route
+    }
+  }
+
+  // Draw route when route data becomes available
+  React.useEffect(() => {
+    if (route && showRoute && route.coordinates.length > 0) {
+      drawRoute(route.coordinates)
+    } else if (!showRoute) {
+      clearRouteVisual()
+    }
+  }, [route, showRoute, drawRoute, clearRouteVisual])
+
+  // Clear route when cafe changes (but not when popover just closes)
+  React.useEffect(() => {
+    if (!selectedCafe) {
+      clearRouteVisual()
+      clearRouteData()
+    }
+  }, [selectedCafe?.id, clearRouteVisual, clearRouteData])
 
   return (
     <div className="flex-1 relative">
@@ -338,21 +402,45 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
             })()}
 
             {/* Action Buttons */}
-            <div className="flex gap-2 mb-2">
-              <a
-                href={mapsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 text-white py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-600 transition shadow-md flex items-center justify-center gap-2"
-              >
-                <Navigation size={18} />
-                {COPY.map.directions}
-              </a>
+            <div className="space-y-2 mb-2">
+              {/* Primary Actions: Open Maps & View Details */}
+              <div className="flex gap-2">
+                <a
+                  href={mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 text-white py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-600 transition shadow-md flex items-center justify-center gap-2"
+                >
+                  <Navigation size={18} />
+                  {COPY.map.directions}
+                </a>
+                <button
+                  onClick={() => onViewDetails(selectedCafe)}
+                  className="flex-1 bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-green-600 transition shadow-md"
+                >
+                  {COPY.map.viewDetails}
+                </button>
+              </div>
+
+              {/* Secondary Action: Show Route on Map - Always visible */}
               <button
-                onClick={() => onViewDetails(selectedCafe)}
-                className="flex-1 bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-green-600 transition shadow-md"
+                onClick={handleRouteToggle}
+                disabled={isLoadingRoute || loading}
+                className={`w-full py-2.5 rounded-lg font-medium transition flex items-center justify-center gap-2 ${
+                  showRoute && routeCafeId === selectedCafe.id
+                    ? 'bg-matcha-100 border-2 border-matcha-500 text-matcha-700 hover:bg-matcha-200'
+                    : 'bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50'
+                } ${isLoadingRoute || loading ? 'opacity-50 cursor-wait' : ''}`}
               >
-                {COPY.map.viewDetails}
+                <Route size={16} />
+                <span className="text-sm">
+                  {isLoadingRoute ? COPY.map.routeLoading : (showRoute && routeCafeId === selectedCafe.id) ? COPY.map.hideRoute : COPY.map.showRoute}
+                </span>
+                {route && !isLoadingRoute && coordinates && routeCafeId === selectedCafe.id && (
+                  <span className="text-xs text-gray-600">
+                    ({COPY.map.walkingTime(formatDuration(route.duration))})
+                  </span>
+                )}
               </button>
             </div>
           </div>
@@ -447,6 +535,18 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
 
               {/* Action Buttons */}
               <div className="space-y-3 pt-4">
+                {/* Primary Action: Open in Maps */}
+                <a
+                  href={mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full bg-gradient-to-r from-blue-600 to-blue-500 text-white py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-600 transition shadow-md flex items-center justify-center gap-2"
+                >
+                  <Navigation size={18} />
+                  {COPY.map.getDirections}
+                </a>
+
+                {/* Primary Action: View Full Details */}
                 <button
                   onClick={() => onViewDetails(selectedCafe)}
                   className="w-full bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-green-600 transition shadow-md"
@@ -454,15 +554,26 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                   {COPY.map.viewFullDetails}
                 </button>
 
-                <a
-                  href={mapsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full bg-white border-2 border-green-300 text-green-600 py-3 rounded-xl font-semibold hover:bg-green-50 transition flex items-center justify-center gap-2"
+                {/* Secondary Action: Show Route on Map - Always visible */}
+                <button
+                  onClick={handleRouteToggle}
+                  disabled={isLoadingRoute || loading}
+                  className={`w-full py-2.5 rounded-lg font-medium transition flex items-center justify-center gap-2 ${
+                    showRoute && routeCafeId === selectedCafe.id
+                      ? 'bg-matcha-100 border-2 border-matcha-500 text-matcha-700 hover:bg-matcha-200'
+                      : 'bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50'
+                  } ${isLoadingRoute || loading ? 'opacity-50 cursor-wait' : ''}`}
                 >
-                  <Navigation size={18} />
-                  {COPY.map.getDirections}
-                </a>
+                  <Route size={16} />
+                  <span className="text-sm">
+                    {isLoadingRoute ? COPY.map.routeLoading : (showRoute && routeCafeId === selectedCafe.id) ? COPY.map.hideRoute : COPY.map.showRoute}
+                  </span>
+                  {route && !isLoadingRoute && coordinates && routeCafeId === selectedCafe.id && (
+                    <span className="text-xs text-gray-600">
+                      ({COPY.map.walkingTime(formatDuration(route.duration))})
+                    </span>
+                  )}
+                </button>
               </div>
 
               {/* Social Links */}

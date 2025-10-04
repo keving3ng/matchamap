@@ -46,6 +46,12 @@ export const COPY = {
     openNow: 'Open Now',
     underPrice: (price: number) => `Under $${price}`,
     ratingFilter: (rating: number) => `${rating}+ ★`,
+    showRoute: 'Show Route',
+    hideRoute: 'Hide Route',
+    routeLoading: 'Loading route...',
+    routeError: 'Unable to load route',
+    walkingTime: (duration: string) => `${duration} walk`,
+    walkingDistance: (distance: string) => distance,
   },
 
   // Location Dialogs

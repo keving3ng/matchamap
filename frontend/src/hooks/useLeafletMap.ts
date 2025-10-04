@@ -33,6 +33,7 @@ export const useLeafletMap = ({
   const mapRef = useRef<L.Map | null>(null)
   const markersRef = useRef<Map<number, L.Marker>>(new Map())
   const userLocationMarkerRef = useRef<L.Marker | null>(null)
+  const routeLayerRef = useRef<L.Polyline | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -157,6 +158,62 @@ export const useLeafletMap = ({
     }
   }
 
+  const drawRoute = useCallback((coordinates: Array<{ lat: number; lng: number }>) => {
+    console.log('drawRoute called with', coordinates.length, 'coordinates')
+    if (!mapRef.current) {
+      console.log('No map ref available')
+      return
+    }
+
+    // Remove existing route
+    if (routeLayerRef.current) {
+      console.log('Removing existing route')
+      mapRef.current.removeLayer(routeLayerRef.current)
+    }
+
+    // Draw new route with enhanced styling for better visibility
+    const latLngs: [number, number][] = coordinates.map(coord => [coord.lat, coord.lng])
+    console.log('Creating polyline with', latLngs.length, 'points')
+
+    // Create a white outline for contrast
+    const outline = L.polyline(latLngs, {
+      color: '#ffffff',
+      weight: 9,
+      opacity: 0.9,
+      lineJoin: 'round',
+      lineCap: 'round',
+    }).addTo(mapRef.current)
+
+    // Create the main route line on top
+    const mainLine = L.polyline(latLngs, {
+      color: '#558b2f', // darker matcha-700 for better contrast
+      weight: 6,
+      opacity: 1,
+      lineJoin: 'round',
+      lineCap: 'round',
+      dashArray: '10, 8', // Dashed pattern for walking route
+    }).addTo(mapRef.current)
+
+    // Group both layers together
+    const routeGroup = L.layerGroup([outline, mainLine])
+    routeLayerRef.current = routeGroup as any
+
+    console.log('Route added to map, fitting bounds')
+
+    // Fit map to show entire route
+    mapRef.current.fitBounds(mainLine.getBounds(), {
+      padding: [50, 50],
+      maxZoom: 16,
+    })
+  }, [])
+
+  const clearRoute = useCallback(() => {
+    if (routeLayerRef.current && mapRef.current) {
+      mapRef.current.removeLayer(routeLayerRef.current)
+      routeLayerRef.current = null
+    }
+  }, [])
+
   return {
     containerRef,
     zoomIn,
@@ -164,6 +221,8 @@ export const useLeafletMap = ({
     centerOnLocation,
     addUserLocationMarker,
     removeUserLocationMarker,
+    drawRoute,
+    clearRoute,
     map: mapRef.current,
   }
 }
