@@ -80,6 +80,7 @@ export const COPY = {
     sortByDistance: 'Sort: Distance',
     search: 'Search',
     filter: 'Filter',
+    city: 'City',
     searchPlaceholder: 'Search cafes, neighborhoods, or keywords...',
     clearSearch: 'Clear search',
     minimumRating: 'Minimum Rating',

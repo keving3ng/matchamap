@@ -226,6 +226,65 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                 )}
               </button>
 
+              {/* City Filter Button (desktop only) */}
+              <div className="relative hidden md:block">
+                <button
+                  onClick={() => setShowCityDropdown(!showCityDropdown)}
+                  className={`px-3 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all flex items-center gap-1.5 relative shadow-md ${
+                    filters.selectedCities.length > 0
+                      ? 'bg-gradient-to-r from-matcha-600 to-matcha-500 text-white scale-105'
+                      : 'bg-matcha-100 text-matcha-700 hover:bg-matcha-200'
+                  }`}
+                >
+                  <Building2 size={16} />
+                  <span>{COPY.list.city}</span>
+                  {filters.selectedCities.length > 0 && (
+                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 border-2 border-white rounded-full animate-pulse"></span>
+                  )}
+                </button>
+
+                {/* Desktop City Dropdown */}
+                {showCityDropdown && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setShowCityDropdown(false)} />
+                    <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-2xl border border-gray-200 py-2 z-50 min-w-[160px]">
+                      <div className="px-3 py-2 border-b border-gray-200">
+                        <h3 className="text-xs font-bold text-gray-500 uppercase">{COPY.list.filterByCity}</h3>
+                      </div>
+                      {(Object.keys(CITIES) as CityKey[]).map(cityKey => (
+                        <button
+                          key={cityKey}
+                          onClick={() => {
+                            toggleCity(cityKey)
+                          }}
+                          className={`w-full text-left px-4 py-2.5 text-sm hover:bg-matcha-50 transition-colors flex items-center justify-between ${
+                            filters.selectedCities.includes(cityKey) ? 'bg-matcha-50 text-matcha-700 font-bold' : 'text-gray-700'
+                          }`}
+                        >
+                          <span>{CITIES[cityKey].name}</span>
+                          {filters.selectedCities.includes(cityKey) && (
+                            <span className="text-matcha-600">✓</span>
+                          )}
+                        </button>
+                      ))}
+                      {filters.selectedCities.length > 0 && (
+                        <div className="border-t border-gray-200 mt-1 pt-1">
+                          <button
+                            onClick={() => {
+                              setFilters(prev => ({ ...prev, selectedCities: [] }))
+                              setShowCityDropdown(false)
+                            }}
+                            className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium"
+                          >
+                            {COPY.list.clearAll}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+
               {/* Location Button */}
               <button
                 onClick={handleLocationClick}
@@ -596,8 +655,8 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
         </div>
       </ContentContainer>
 
-      {/* Floating City Filter Button */}
-      <div className="fixed bottom-24 right-4 z-50">
+      {/* Floating City Filter Button (mobile only) */}
+      <div className="fixed bottom-24 right-4 z-50 md:hidden">
         <button
           onClick={() => setShowCityDropdown(!showCityDropdown)}
           className={`w-14 h-14 rounded-full shadow-2xl transition-all flex items-center justify-center relative ${
@@ -615,7 +674,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
           )}
         </button>
 
-        {/* City Dropdown Menu */}
+        {/* Mobile City Dropdown Menu */}
         {showCityDropdown && (
           <>
             <div className="fixed inset-0 z-40" onClick={() => setShowCityDropdown(false)} />
