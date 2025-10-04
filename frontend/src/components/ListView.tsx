@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react'
-import { Navigation, MapPin, ChevronDown, Crosshair, Filter, X, Search, Coffee, Star } from 'lucide-react'
+import { Navigation, MapPin, ChevronDown, Crosshair, Filter, X, Search, Coffee, Star, Building2 } from 'lucide-react'
 import { useGeolocation } from '../hooks/useGeolocation'
 import { getLocationRequestAdvice, getOptimalGeolocationOptions } from '../utils/deviceDetection'
 import { getMapsUrl } from '../utils/mapsUrl'
@@ -20,6 +20,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
   const [showFilters, setShowFilters] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [showCityDropdown, setShowCityDropdown] = useState(false)
   const [filters, setFilters] = useState<FilterState>({
     minRating: null,
     maxDistance: null,
@@ -325,26 +326,6 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                 </div>
               </div>
 
-              {/* City Filter */}
-              <div>
-                <h4 className="text-sm font-bold text-charcoal-900 mb-3">Cities</h4>
-                <div className="flex flex-wrap gap-2">
-                  {(Object.keys(CITIES) as CityKey[]).map(cityKey => (
-                    <button
-                      key={cityKey}
-                      onClick={() => toggleCity(cityKey)}
-                      className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all shadow-md ${
-                        filters.selectedCities.includes(cityKey)
-                          ? 'bg-gradient-to-r from-matcha-600 to-matcha-500 text-white scale-105'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-105'
-                      }`}
-                    >
-                      {CITIES[cityKey].name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
               {/* Clear Filters Button */}
               {hasActiveFilters && (
                 <div className="pt-2">
@@ -615,6 +596,67 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
         )}
         </div>
       </ContentContainer>
+
+      {/* Floating City Filter Button */}
+      <div className="fixed bottom-24 right-4 z-50">
+        <button
+          onClick={() => setShowCityDropdown(!showCityDropdown)}
+          className={`w-14 h-14 rounded-full shadow-2xl transition-all flex items-center justify-center relative ${
+            filters.selectedCities.length > 0
+              ? 'bg-gradient-to-r from-matcha-600 to-matcha-500 text-white hover:from-matcha-700 hover:to-matcha-600 scale-105'
+              : 'bg-white text-gray-700 hover:bg-gray-50'
+          }`}
+          title={filters.selectedCities.length === 0 ? 'Filter by city' : `${filters.selectedCities.length} cities selected`}
+        >
+          <Building2 size={24} />
+          {filters.selectedCities.length > 0 && (
+            <span className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 text-white text-xs font-bold border-2 border-white rounded-full flex items-center justify-center">
+              {filters.selectedCities.length}
+            </span>
+          )}
+        </button>
+
+        {/* City Dropdown Menu */}
+        {showCityDropdown && (
+          <>
+            <div className="fixed inset-0 z-40" onClick={() => setShowCityDropdown(false)} />
+            <div className="absolute bottom-full right-0 mb-2 bg-white rounded-lg shadow-2xl border border-gray-200 py-2 z-50 min-w-[160px]">
+              <div className="px-3 py-2 border-b border-gray-200">
+                <h3 className="text-xs font-bold text-gray-500 uppercase">Filter by City</h3>
+              </div>
+              {(Object.keys(CITIES) as CityKey[]).map(cityKey => (
+                <button
+                  key={cityKey}
+                  onClick={() => {
+                    toggleCity(cityKey)
+                  }}
+                  className={`w-full text-left px-4 py-2.5 text-sm hover:bg-matcha-50 transition-colors flex items-center justify-between ${
+                    filters.selectedCities.includes(cityKey) ? 'bg-matcha-50 text-matcha-700 font-bold' : 'text-gray-700'
+                  }`}
+                >
+                  <span>{CITIES[cityKey].name}</span>
+                  {filters.selectedCities.includes(cityKey) && (
+                    <span className="text-matcha-600">✓</span>
+                  )}
+                </button>
+              ))}
+              {filters.selectedCities.length > 0 && (
+                <div className="border-t border-gray-200 mt-1 pt-1">
+                  <button
+                    onClick={() => {
+                      setFilters(prev => ({ ...prev, selectedCities: [] }))
+                      setShowCityDropdown(false)
+                    }}
+                    className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium"
+                  >
+                    Clear All
+                  </button>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   )
 }
