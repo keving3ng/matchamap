@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-export type CityKey = 'toronto' | 'montreal' | 'tokyo'
+export type CityKey = 'toronto' | 'montreal' | 'tokyo' | 'kyoto' | 'osaka' | 'new york' | 'mississauga' | 'scarborough'
 
 export interface City {
   key: CityKey
@@ -31,6 +31,41 @@ export const CITIES: Record<CityKey, City> = {
     name: 'Tokyo',
     shortCode: 'TYO',
     center: [35.6762, 139.6503],
+    zoom: 13,
+  },
+  kyoto: {
+    key: 'kyoto',
+    name: 'Kyoto',
+    shortCode: 'KYO',
+    center: [35.0116, 135.7681],
+    zoom: 13,
+  },
+  osaka: {
+    key: 'osaka',
+    name: 'Osaka',
+    shortCode: 'OSA',
+    center: [34.6937, 135.5023],
+    zoom: 13,
+  },
+  'new york': {
+    key: 'new york',
+    name: 'New York',
+    shortCode: 'NYC',
+    center: [40.7128, -74.0060],
+    zoom: 13,
+  },
+  mississauga: {
+    key: 'mississauga',
+    name: 'Mississauga',
+    shortCode: 'MIS',
+    center: [43.5890, -79.6441],
+    zoom: 13,
+  },
+  scarborough: {
+    key: 'scarborough',
+    name: 'Scarborough',
+    shortCode: 'SCA',
+    center: [43.7731, -79.2578],
     zoom: 13,
   },
 }

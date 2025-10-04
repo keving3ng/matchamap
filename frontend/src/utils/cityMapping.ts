@@ -7,12 +7,22 @@ export const CITY_SHORTCODES = {
   toronto: 'tor',
   montreal: 'mtl',
   tokyo: 'tyo',
+  kyoto: 'kyo',
+  osaka: 'osa',
+  'new york': 'nyc',
+  mississauga: 'mis',
+  scarborough: 'sca',
 } as const
 
 export const SHORTCODE_TO_CITY = {
   tor: 'toronto',
   mtl: 'montreal',
   tyo: 'tokyo',
+  kyo: 'kyoto',
+  osa: 'osaka',
+  nyc: 'new york',
+  mis: 'mississauga',
+  sca: 'scarborough',
 } as const
 
 export type CityShortcode = keyof typeof SHORTCODE_TO_CITY

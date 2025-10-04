@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react'
 import { Navigation, MapPin, ChevronDown, Crosshair, Filter, X, Search, Coffee, Star } from 'lucide-react'
 import { useGeolocation } from '../hooks/useGeolocation'
 import { getLocationRequestAdvice, getOptimalGeolocationOptions } from '../utils/deviceDetection'
+import { getMapsUrl } from '../utils/mapsUrl'
 import { ContentContainer } from './ContentContainer'
 import type { ListViewProps } from '../types'
 
@@ -392,65 +393,72 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                 expandedCard === cafe.id ? 'border-matcha-400' : 'border-matcha-100'
               }`}
             >
-            <button
-              onClick={() => onToggleExpand(expandedCard === cafe.id ? null : cafe.id)}
-              className="w-full p-5 flex items-center justify-between group hover:bg-cream-50 transition-colors"
-            >
-              <div className="flex-1 text-left">
-                <div className="flex items-center gap-3 mb-2 flex-wrap">
-                  <h3 className="font-bold text-xl text-charcoal-900">{cafe.name}</h3>
-                  {cafe.displayScore && (
-                    <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 text-white px-3 py-1 rounded-full font-bold text-sm shadow-md">
-                      {cafe.displayScore.toFixed(1)}
+            <div className="p-5">
+              <button
+                onClick={() => onToggleExpand(expandedCard === cafe.id ? null : cafe.id)}
+                className="w-full flex items-start justify-between group text-left mb-3"
+              >
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2 flex-wrap">
+                    <h3 className="font-bold text-xl text-charcoal-900">{cafe.name}</h3>
+                    {cafe.displayScore && (
+                      <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 text-white px-3 py-1 rounded-full font-bold text-sm shadow-md">
+                        {cafe.displayScore.toFixed(1)}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Quick info section */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-2 text-sm">
+                      {cafe.distanceInfo ? (
+                        <span className="flex items-center gap-1.5 text-matcha-700 font-medium">
+                          <Navigation size={16} className="text-matcha-600" />
+                          {cafe.distanceInfo.formattedKm} • {cafe.distanceInfo.walkTime} walk
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1.5 text-gray-400">
+                          <MapPin size={16} />
+                          Tap location for distance
+                        </span>
+                      )}
                     </div>
-                  )}
+
+                    {/* Quick note preview */}
+                    {cafe.quickNote && (
+                      <p className="text-sm text-gray-600 italic line-clamp-1">"{cafe.quickNote}"</p>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center gap-3 text-sm">
-                  {cafe.distanceInfo ? (
-                    <span className="flex items-center gap-1.5 text-matcha-700 font-medium">
-                      <Navigation size={16} className="text-matcha-600" />
-                      {cafe.distanceInfo.formattedKm}
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-1.5 text-gray-400">
-                      <MapPin size={16} />
-                      Tap location for distance
-                    </span>
-                  )}
-                </div>
-              </div>
-              <ChevronDown
-                size={24}
-                className={`text-matcha-600 transition-all ${
-                  expandedCard === cafe.id ? 'rotate-180' : 'group-hover:translate-y-0.5'
-                }`}
-              />
-            </button>
+                <ChevronDown
+                  size={24}
+                  className={`text-matcha-600 transition-all flex-shrink-0 ml-2 ${
+                    expandedCard === cafe.id ? 'rotate-180' : 'group-hover:translate-y-0.5'
+                  }`}
+                />
+              </button>
+
+              {/* Get Directions button - compact version */}
+              <a
+                href={getMapsUrl(cafe.address || '', cafe.link)}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex items-center gap-1.5 bg-gradient-to-r from-matcha-600 to-matcha-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:from-matcha-700 hover:to-matcha-600 transition-all duration-200 shadow-sm hover:shadow-md"
+              >
+                <Navigation size={14} />
+                Directions
+              </a>
+            </div>
 
             {expandedCard === cafe.id && (
               <div className="px-5 pb-5 border-t-2 border-matcha-100 pt-4 bg-gradient-to-b from-cream-50 to-white animate-slide-down">
-                <div className="space-y-4">
-                  {/* Address Section */}
-                  <div className="bg-gradient-to-r from-matcha-50 to-cream-100 rounded-xl p-3">
-                    <div className="flex items-start gap-2.5">
-                      <MapPin size={18} className="text-matcha-600 mt-0.5 flex-shrink-0" />
-                      <div>
+                <div className="space-y-4">{/* Address Section */}
+                  {cafe.address && (
+                    <div className="bg-gradient-to-r from-matcha-50 to-cream-100 rounded-xl p-3">
+                      <div className="flex items-start gap-2.5">
+                        <MapPin size={18} className="text-matcha-600 mt-0.5 flex-shrink-0" />
                         <p className="text-sm font-medium text-gray-800">{cafe.address}</p>
-                        {cafe.distanceInfo ? (
-                          <p className="text-xs text-matcha-700 font-semibold mt-1">{cafe.distanceInfo.walkTime} walk</p>
-                        ) : (
-                          <p className="text-xs text-gray-400 mt-1">Tap location button for walk time</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Quick Note */}
-                  {cafe.quickNote && (
-                    <div className="bg-gradient-to-br from-yellow-50 to-cream-100 rounded-xl p-4 border-2 border-yellow-200">
-                      <div className="flex items-start gap-2">
-                        <span className="text-xl">💡</span>
-                        <p className="text-sm text-gray-700 italic flex-1">"{cafe.quickNote}"</p>
                       </div>
                     </div>
                   )}

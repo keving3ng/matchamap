@@ -49,8 +49,8 @@ export const waitlistSchema = z.object({
 });
 
 // Cafe schemas
-export const citySchema = z.enum(['toronto', 'montreal', 'tokyo'], {
-  errorMap: () => ({ message: 'Invalid city. Must be toronto, montreal, or tokyo' }),
+export const citySchema = z.enum(['toronto', 'montreal', 'tokyo', 'kyoto', 'osaka', 'new york', 'mississauga', 'scarborough'], {
+  errorMap: () => ({ message: 'Invalid city. Must be one of: toronto, montreal, tokyo, kyoto, osaka, new york, mississauga, or scarborough' }),
 });
 
 export const createCafeSchema = z.object({
