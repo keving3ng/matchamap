@@ -18,6 +18,7 @@ interface UseLeafletMapOptions {
   visitedCafeIds?: number[]
   initialCenter?: [number, number]
   initialZoom?: number
+  onMapMove?: (center: { lat: number; lng: number }) => void
 }
 
 export const useLeafletMap = ({
@@ -26,7 +27,8 @@ export const useLeafletMap = ({
   selectedCafeId,
   visitedCafeIds = [],
   initialCenter = [43.6532, -79.3832],
-  initialZoom = 13
+  initialZoom = 13,
+  onMapMove
 }: UseLeafletMapOptions) => {
   const mapRef = useRef<L.Map | null>(null)
   const markersRef = useRef<Map<number, L.Marker>>(new Map())
@@ -60,12 +62,27 @@ export const useLeafletMap = ({
     }
   }, [])
 
-  // Update map center when initialCenter changes
+  // Add map move listener
   useEffect(() => {
-    if (mapRef.current) {
-      mapRef.current.setView(initialCenter, initialZoom)
+    if (!mapRef.current || !onMapMove) return
+
+    const handleMoveEnd = () => {
+      if (!mapRef.current) return
+      const center = mapRef.current.getCenter()
+      onMapMove({ lat: center.lat, lng: center.lng })
     }
-  }, [initialCenter, initialZoom])
+
+    mapRef.current.on('moveend', handleMoveEnd)
+
+    return () => {
+      mapRef.current?.off('moveend', handleMoveEnd)
+    }
+  }, [onMapMove])
+
+  // Note: We don't auto-update the map center when initialCenter changes
+  // This would cause the map to "yank" when the user pans near another city
+  // Instead, we only update the map when the user explicitly clicks a city in the dropdown
+  // (which is handled via the centerOnLocation callback)
 
   useEffect(() => {
     if (!mapRef.current) return

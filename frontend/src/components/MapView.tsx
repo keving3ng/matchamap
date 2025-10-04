@@ -8,6 +8,7 @@ import { CircleButton } from './CircleButton'
 import { getLocationRequestAdvice, getOptimalGeolocationOptions } from '../utils/deviceDetection'
 import { getMapsUrl } from '../utils/mapsUrl'
 import { formatHoursCompact } from '../utils/hoursFormatter'
+import { findClosestCity } from '../utils/cityDetection'
 import type { MapViewProps } from '../types'
 
 export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCafe, onPinClick, onViewDetails, onClosePopover }) => {
@@ -71,6 +72,20 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
     })
   }, [cafes, minRating, maxPrice, openNow])
 
+  // Handle map movement to update city selector
+  const handleMapMove = React.useCallback((center: { lat: number; lng: number }) => {
+    // Ignore if this is a programmatic change (user clicked city selector)
+    if (isProgrammaticChangeRef.current) {
+      isProgrammaticChangeRef.current = false
+      return
+    }
+
+    const closestCity = findClosestCity(center.lat, center.lng)
+    if (closestCity !== selectedCity) {
+      setCity(closestCity)
+    }
+  }, [selectedCity, setCity])
+
   const {
     containerRef,
     zoomIn,
@@ -85,6 +100,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
     visitedCafeIds,
     initialCenter: currentCity.center,
     initialZoom: currentCity.zoom,
+    onMapMove: handleMapMove,
   })
 
   const {
@@ -98,6 +114,9 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
 
   // Track if we've already auto-centered on initial location
   const hasAutoCenteredRef = React.useRef(false)
+
+  // Track programmatic city changes to avoid infinite loops
+  const isProgrammaticChangeRef = React.useRef(false)
 
   // Add user location marker when coordinates are available
   React.useEffect(() => {
@@ -488,6 +507,8 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                 key={cityKey}
                 onClick={(e) => {
                   e.stopPropagation()
+                  // Mark this as a programmatic change to avoid loop
+                  isProgrammaticChangeRef.current = true
                   setCity(cityKey)
                   setShowCityDropdown(false)
                   // Pan map to new city center
