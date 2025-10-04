@@ -3,12 +3,12 @@ import Header from './components/Header'
 import BottomNavigation from './components/BottomNavigation'
 import AppRoutes from './components/AppRoutes'
 import ComingSoon from './components/ComingSoon'
-import { useFeatureStore } from './stores/featureStore'
+import { useAppFeatures } from './hooks/useAppFeatures'
 
 const SESSION_KEY = 'matchamap_unlocked'
 
 export const App: React.FC = () => {
-  const { showComingSoon } = useFeatureStore()
+  const { showComingSoon } = useAppFeatures()
   const [hasEnteredPassword, setHasEnteredPassword] = useState(() => {
     // Check sessionStorage on mount
     return sessionStorage.getItem(SESSION_KEY) === 'true'

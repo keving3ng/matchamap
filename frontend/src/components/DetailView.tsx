@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { MapPin, Navigation, Heart, CheckCircle, Instagram, ChevronDown, ChevronUp, Star, Coffee, MessageSquare, Clock, Lightbulb } from 'lucide-react'
-import { useFeatureStore } from '../stores/featureStore'
+import { useAppFeatures } from '../hooks/useAppFeatures'
 import { getMapsUrl } from '../utils/mapsUrl'
 import { ContentContainer } from './ContentContainer'
 import { formatHoursCompact } from '../utils/formatHours'
@@ -8,7 +8,7 @@ import { sanitizeText } from '../utils/sanitize'
 import type { DetailViewProps } from '../types'
 
 export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, onToggleVisited }) => {
-  const { isPassportEnabled, isUserAccountsEnabled } = useFeatureStore()
+  const { isPassportEnabled, isUserAccountsEnabled } = useAppFeatures()
   const isVisited: boolean = visitedLocations.includes(cafe.id)
   const mapsUrl = getMapsUrl(cafe.address || '', cafe.link)
   const [showAllHours, setShowAllHours] = useState(false)

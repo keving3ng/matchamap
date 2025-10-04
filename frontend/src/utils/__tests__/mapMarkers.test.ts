@@ -5,15 +5,14 @@ import type { Cafe } from '../../types'
 const mockCafe: Cafe = {
   id: 1,
   name: 'Test Matcha Cafe',
-  score: 8.5,
-  lat: 43.6532,
-  lng: -79.3832,
-  neighborhood: 'Downtown',
+  slug: 'test-matcha-cafe',
+  displayScore: 8.5,
+  latitude: 43.6532,
+  longitude: -79.3832,
+  link: 'https://maps.google.com',
   address: '123 Test St',
   quickNote: 'Great matcha',
   city: 'toronto',
-  emoji: '🍃',
-  color: 'from-green-400 to-green-600',
 }
 
 describe('mapMarkers', () => {
@@ -56,22 +55,22 @@ describe('mapMarkers', () => {
 
     it('should apply correct score badge styling based on score', () => {
       // High score (9.0+)
-      const highScoreCafe = { ...mockCafe, score: 9.2 }
+      const highScoreCafe = { ...mockCafe, displayScore: 9.2 }
       const highScoreHtml = createMatchaMarker(highScoreCafe)
       expect(highScoreHtml).toContain('from-matcha-600 to-matcha-700')
 
       // Good score (8.0-8.9)
-      const goodScoreCafe = { ...mockCafe, score: 8.5 }
+      const goodScoreCafe = { ...mockCafe, displayScore: 8.5 }
       const goodScoreHtml = createMatchaMarker(goodScoreCafe)
       expect(goodScoreHtml).toContain('from-matcha-500 to-matcha-600')
 
       // Average score (7.0-7.9)
-      const avgScoreCafe = { ...mockCafe, score: 7.5 }
+      const avgScoreCafe = { ...mockCafe, displayScore: 7.5 }
       const avgScoreHtml = createMatchaMarker(avgScoreCafe)
       expect(avgScoreHtml).toContain('from-matcha-400 to-matcha-500')
 
       // Lower score (<7.0)
-      const lowScoreCafe = { ...mockCafe, score: 6.5 }
+      const lowScoreCafe = { ...mockCafe, displayScore: 6.5 }
       const lowScoreHtml = createMatchaMarker(lowScoreCafe)
       expect(lowScoreHtml).toContain('from-matcha-300 to-matcha-400')
     })

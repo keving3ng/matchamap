@@ -23,8 +23,8 @@ import ProductsManagementPage from './admin/ProductsManagementPage'
 import MiscAdminPage from './admin/MiscAdminPage'
 import BulkImporterPage from './admin/BulkImporterPage'
 import { useFeatureToggle } from '../hooks/useFeatureToggle'
+import { useAppFeatures } from '../hooks/useAppFeatures'
 import { useDataStore } from '../stores/dataStore'
-import { useFeatureStore } from '../stores/featureStore'
 import { useCafeStore } from '../stores/cafeStore'
 import { useUIStore } from '../stores/uiStore'
 import { useVisitedCafesStore } from '../stores/visitedCafesStore'
@@ -57,7 +57,7 @@ const CafeDetailWrapper: React.FC = () => {
 }
 
 export const AppRoutes: React.FC = () => {
-  const { isEventsEnabled, isPassportEnabled } = useFeatureStore()
+  const { isEventsEnabled, isPassportEnabled } = useAppFeatures()
   const isAdminEnabled = useFeatureToggle('ENABLE_ADMIN_PANEL')
   const isContactEnabled = useFeatureToggle('ENABLE_CONTACT')
   const isAboutEnabled = useFeatureToggle('ENABLE_ABOUT')

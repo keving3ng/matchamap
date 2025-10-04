@@ -91,9 +91,9 @@ describe('distance utilities', () => {
 
   describe('calculateCafeDistances', () => {
     const mockCafes = [
-      { id: 1, name: 'Cafe A', lat: 43.6532, lng: -79.3832 },
-      { id: 2, name: 'Cafe B', lat: 43.6708, lng: -79.3915 },
-      { id: 3, name: 'Cafe C', lat: 43.6426, lng: -79.4020 },
+      { id: 1, name: 'Cafe A', latitude: 43.6532, longitude: -79.3832 },
+      { id: 2, name: 'Cafe B', latitude: 43.6708, longitude: -79.3915 },
+      { id: 3, name: 'Cafe C', latitude: 43.6426, longitude: -79.4020 },
     ]
 
     it('should add distance info to all cafes', () => {

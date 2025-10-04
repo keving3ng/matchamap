@@ -4,7 +4,7 @@ import { useGeolocation } from '../hooks/useGeolocation'
 import { getLocationRequestAdvice, getOptimalGeolocationOptions } from '../utils/deviceDetection'
 import { getMapsUrl } from '../utils/mapsUrl'
 import { ContentContainer } from './ContentContainer'
-import { CITIES, type CityKey, useCityStore } from '../stores/cityStore'
+import { CITIES, type CityKey } from '../stores/cityStore'
 import type { ListViewProps } from '../types'
 
 type SortOption = 'rating' | 'distance'
@@ -26,8 +26,6 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
     maxDistance: null,
     selectedCities: []
   })
-
-  const { selectedCity } = useCityStore()
 
   const {
     coordinates,
