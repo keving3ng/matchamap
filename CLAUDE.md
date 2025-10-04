@@ -108,6 +108,291 @@ frontend/src/hooks/
 -   Return objects, not arrays (better for destructuring)
 -   Avoid deeply nested hooks
 
+## Shared UI Component Library
+
+**IMPORTANT:** Always use shared components from `frontend/src/components/ui/` instead of inline styles or duplicating component code.
+
+### Component Library Location
+
+All shared UI components live in `frontend/src/components/ui/`:
+
+```
+frontend/src/components/ui/
+├── Button.tsx      # All button variants
+├── Badge.tsx       # Score and status badges
+├── AlertDialog.tsx # Alerts and info cards
+├── Skeleton.tsx    # Loading states
+└── index.ts        # Centralized exports
+```
+
+### When to Use Shared Components
+
+**ALWAYS use shared components for:**
+- ✅ Buttons (Primary, Secondary, Tertiary, Icon, Filter)
+- ✅ Score displays and badges
+- ✅ Alert dialogs and notifications
+- ✅ Loading states (skeletons)
+- ✅ Status indicators
+
+**DON'T create custom components for:**
+- ❌ Generic buttons (use PrimaryButton, SecondaryButton, etc.)
+- ❌ Score badges (use ScoreBadge, DrinkScoreBadge)
+- ❌ Alert/error/success messages (use AlertDialog)
+- ❌ Loading placeholders (use Skeleton)
+
+### Button Components
+
+**Import from centralized index:**
+```tsx
+import { PrimaryButton, SecondaryButton, IconButton, FilterButton } from '@/components/ui'
+```
+
+**PrimaryButton** - Main action buttons with green gradient:
+```tsx
+<PrimaryButton
+  icon={Navigation}
+  iconPosition="left"
+  onClick={handleClick}
+  fullWidth
+>
+  Get Directions
+</PrimaryButton>
+```
+
+**SecondaryButton** - Secondary actions with border:
+```tsx
+<SecondaryButton icon={Info} onClick={handleInfo}>
+  Learn More
+</SecondaryButton>
+```
+
+**IconButton** - Circular icon-only buttons:
+```tsx
+<IconButton
+  icon={MapPin}
+  variant="primary" // primary | secondary | ghost
+  badge={true}      // Shows notification dot
+  loading={isLoading}
+  ariaLabel="Find my location"
+  onClick={handleLocation}
+/>
+```
+
+**FilterButton** - Pill-shaped filter/toggle buttons:
+```tsx
+<FilterButton
+  icon={Filter}
+  active={showFilters}
+  hasBadge={filtersActive}
+  onClick={toggleFilters}
+>
+  Filters
+</FilterButton>
+```
+
+**All buttons include:**
+- 44px minimum touch targets (WCAG compliant)
+- Active state animations (`active:scale-[0.98]`)
+- Proper focus rings for accessibility
+- Disabled states with visual feedback
+- TypeScript types with full autocomplete
+
+### Badge Components
+
+**Import:**
+```tsx
+import { ScoreBadge, DrinkScoreBadge, StatusBadge, FeatureBadge } from '@/components/ui'
+```
+
+**ScoreBadge** - Main cafe scores:
+```tsx
+<ScoreBadge
+  score={cafe.displayScore}
+  size="lg" // sm | md | lg | xl
+/>
+```
+
+**DrinkScoreBadge** - Inline drink scores with star:
+```tsx
+<DrinkScoreBadge score={drink.score} />
+```
+
+**StatusBadge** - Status indicators:
+```tsx
+<StatusBadge variant="success"> // success | warning | error | info | default
+  Open Now
+</StatusBadge>
+```
+
+**FeatureBadge** - Highlight featured items:
+```tsx
+<FeatureBadge>Featured</FeatureBadge>
+```
+
+### Dialog Components
+
+**Import:**
+```tsx
+import { AlertDialog, InfoCard } from '@/components/ui'
+```
+
+**AlertDialog** - Replaces all inline alert/error/success messages:
+```tsx
+<AlertDialog
+  variant="error"          // success | error | warning | info
+  title="Location Access Needed"
+  message="We need your location to show nearby cafes."
+  primaryAction={{
+    label: "Try Again",
+    onClick: handleRetry
+  }}
+  secondaryAction={{
+    label: "Skip",
+    onClick: handleSkip
+  }}
+/>
+```
+
+**InfoCard** - Static information cards:
+```tsx
+<InfoCard
+  variant="success"
+  icon={CheckCircle}
+  title="Quick Tip"
+>
+  Enable location for accurate distances!
+</InfoCard>
+```
+
+### Loading States
+
+**Import:**
+```tsx
+import { Skeleton, CafeCardSkeleton, ListSkeleton, DetailPageSkeleton } from '@/components/ui'
+```
+
+**Usage:**
+```tsx
+{loading ? (
+  <ListSkeleton count={5} />
+) : (
+  <CafeList cafes={cafes} />
+)}
+```
+
+**Custom skeletons:**
+```tsx
+<Skeleton
+  variant="rectangular" // text | circular | rectangular
+  width="60%"
+  height={24}
+  animation="shimmer" // pulse | shimmer | none
+/>
+```
+
+### Design Tokens & Spacing
+
+**ALWAYS use design tokens from `frontend/src/styles/spacing.ts`:**
+
+```typescript
+import { spacing, borderRadius, shadows, zIndex } from '@/styles/spacing'
+
+// Semantic spacing (preferred)
+spacing.cardPadding      // 16px - Standard card padding
+spacing.sectionGap       // 24px - Gap between sections
+spacing.listGap          // 12px - Gap between list items
+spacing.minTouchTarget   // 44px - WCAG minimum
+
+// Border radius
+borderRadius.lg          // 16px - Cards
+borderRadius.xl          // 24px - Large cards
+borderRadius.full        // 9999px - Pills/circular
+
+// Shadows
+shadows.md               // Standard card shadow
+shadows.xl               // Elevated elements
+
+// Z-index (prevent z-index chaos)
+zIndex.modal             // 9999
+zIndex.modalBackdrop     // 9998
+zIndex.fixed             // 1000
+```
+
+**In Tailwind classes, prefer design tokens:**
+```tsx
+// ✅ GOOD - Uses design tokens
+<div className="p-4 rounded-xl shadow-md">
+
+// ❌ AVOID - Arbitrary values
+<div className="p-[16px] rounded-[24px]" style={{boxShadow: '0 4px 6px rgba(0,0,0,0.1)'}}>
+```
+
+### Mobile Interaction Hooks
+
+**Location:** `frontend/src/hooks/useSwipeGesture.ts`
+
+**useSwipeGesture** - Detect swipe gestures:
+```tsx
+import { useSwipeGesture } from '@/hooks/useSwipeGesture'
+
+const swipeHandlers = useSwipeGesture({
+  onSwipeLeft: () => handleDismiss(),
+  onSwipeRight: () => handleExpand(),
+  threshold: 50,      // minimum pixels to trigger
+  velocity: 0.3,      // minimum speed
+  preventScroll: true // prevent native scroll
+})
+
+<div {...swipeHandlers}>
+  Swipeable content
+</div>
+```
+
+**useLongPress** - Detect long press:
+```tsx
+import { useLongPress } from '@/hooks/useSwipeGesture'
+
+const longPressHandlers = useLongPress(() => {
+  handleQuickAction()
+}, { delay: 500 })
+
+<button {...longPressHandlers}>
+  Long press me
+</button>
+```
+
+**Use cases:**
+- Swipe to dismiss cards
+- Swipe for quick actions
+- Long press for context menus
+- Long press to add to favorites
+
+### Animation Guidelines
+
+**Available animations in Tailwind config:**
+- `animate-slide-up` - Bottom sheet entry
+- `animate-slide-down` - Dropdown expansion
+- `animate-slide-in-left` - Left sidebar entry
+- `animate-slide-in-right` - Right sidebar entry
+- `animate-fade-in` - Gentle appearance
+- `animate-fade-out` - Gentle dismissal
+- `animate-scale-in` - Pop-in effect
+- `animate-bounce-subtle` - Gentle bounce (feedback)
+- `animate-shimmer` - Loading state (skeletons)
+
+**Animation rules:**
+- All animations < 300ms (mobile best practice)
+- Use CSS animations (hardware accelerated)
+- Prefer transforms over position/size changes
+- Easing: `cubic-bezier(0.16, 1, 0.3, 1)` for natural feel
+
+**Usage:**
+```tsx
+<div className="animate-slide-up">
+  Animated content
+</div>
+```
+
 ## Key Features (V1)
 
 1. **Interactive Map Interface**
@@ -190,6 +475,12 @@ matchamap/              # Monorepo root
 ├── frontend/           # React frontend application
 │   ├── src/
 │   │   ├── components/          # React components ONLY
+│   │   │   ├── ui/              # ⭐ SHARED UI COMPONENTS (use these!)
+│   │   │   │   ├── Button.tsx   # All button variants
+│   │   │   │   ├── Badge.tsx    # Score and status badges
+│   │   │   │   ├── AlertDialog.tsx # Alerts and info cards
+│   │   │   │   ├── Skeleton.tsx # Loading states
+│   │   │   │   └── index.ts     # Centralized exports
 │   │   │   ├── Header.tsx
 │   │   │   ├── BottomNavigation.tsx
 │   │   │   ├── AppRoutes.tsx
@@ -203,7 +494,8 @@ matchamap/              # Monorepo root
 │   │   ├── hooks/              # Custom React hooks ONLY
 │   │   │   ├── useGeolocation.ts
 │   │   │   ├── useCafeSelection.ts
-│   │   │   └── useDistanceCalculation.ts
+│   │   │   ├── useDistanceCalculation.ts
+│   │   │   └── useSwipeGesture.ts # ⭐ Mobile gesture detection
 │   │   ├── stores/             # Zustand stores ONLY
 │   │   │   ├── locationStore.ts
 │   │   │   ├── uiStore.ts
@@ -215,8 +507,9 @@ matchamap/              # Monorepo root
 │   │   │   └── analytics.ts    # Tracking utilities
 │   │   ├── types/              # Frontend-specific types
 │   │   │   └── index.ts
-│   │   ├── styles/             # Global CSS and Tailwind config
-│   │   │   └── index.css
+│   │   ├── styles/             # Global CSS, Tailwind, design tokens
+│   │   │   ├── index.css
+│   │   │   └── spacing.ts      # ⭐ Design tokens (spacing, shadows, z-index)
 │   │   ├── App.tsx             # Root component (composition only)
 │   │   └── main.tsx            # React entry point
 │   ├── public/                 # Static assets
@@ -371,10 +664,12 @@ grep "ComponentName" --type tsx
 ```
 
 **Common locations:**
+-   ⭐ Shared UI components → `frontend/src/components/ui/` (ALWAYS check here first!)
 -   UI components → `frontend/src/components/`
 -   Business logic → `frontend/src/hooks/`
 -   Global state → `frontend/src/stores/`
 -   Pure functions → `frontend/src/utils/`
+-   Design tokens → `frontend/src/styles/spacing.ts`
 -   Frontend types → `frontend/src/types/`
 -   API endpoints → `backend/src/routes/`
 -   Database schema → `backend/src/db/`
@@ -679,8 +974,12 @@ Before marking any task complete, verify:
 ### Anti-Patterns to Avoid
 
 ❌ **Don't do this:**
+-   Creating custom buttons with inline styles (use shared Button components)
+-   Duplicating alert/dialog UI (use AlertDialog component)
+-   Custom score badge styling (use ScoreBadge, DrinkScoreBadge)
+-   Arbitrary spacing values (use design tokens from spacing.ts)
 -   Class components
--   Inline styles (use Tailwind)
+-   Inline styles (use Tailwind + shared components)
 -   Default exports (use named exports)
 -   `any` types in TypeScript
 -   God components (>500 lines)
@@ -691,13 +990,18 @@ Before marking any task complete, verify:
 -   Multiple components per file
 
 ✅ **Do this instead:**
+-   Import shared components from `@/components/ui`
+-   Use PrimaryButton, SecondaryButton, IconButton for all buttons
+-   Use AlertDialog for all alerts/errors/success messages
+-   Use ScoreBadge for all score displays
+-   Use design tokens from `@/styles/spacing`
 -   Functional components
--   Tailwind classes
+-   Tailwind classes + shared component library
 -   Named exports
 -   Proper TypeScript types
 -   Small, focused components
 -   Zustand stores for shared state
--   Touch-first interactions
+-   Touch-first interactions (44px minimum)
 -   CSS animations 150-300ms
 -   Design token values
 -   One component per file
@@ -741,6 +1045,7 @@ Before marking any task complete, verify:
 
 ---
 
-_Last updated: 2025-09-30_
+_Last updated: 2025-10-03_
 _Project Phase: V1 Development_
 _React: 18.3+ | Zustand: Latest | TypeScript: Strict Mode_
+_UI Component Library: Available in `frontend/src/components/ui/`_

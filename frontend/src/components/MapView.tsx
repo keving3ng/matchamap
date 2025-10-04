@@ -284,7 +284,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
 
           {/* Tablet+ Sidebar */}
           <div
-            className="absolute top-4 left-4 bottom-4 w-80 bg-white rounded-2xl shadow-2xl p-6 z-[9999] border-2 border-green-200 map-popover hidden md:block overflow-y-auto transform transition-all duration-300 ease-out animate-slide-in-left"
+            className="absolute top-4 left-4 bottom-4 w-80 lg:w-96 xl:w-[28rem] bg-white rounded-2xl shadow-2xl p-6 z-[9999] border-2 border-green-200 map-popover hidden md:block overflow-y-auto transform transition-all duration-300 ease-out animate-slide-in-left"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="space-y-4">
