@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router'
-import { ArrowLeft, Menu, Instagram, Settings, LogIn, LogOut, Mail, Info, ShoppingBag, Sliders } from 'lucide-react'
+import { ArrowLeft, Menu, Instagram, Settings, LogIn, LogOut, Mail, Info, ShoppingBag, Sliders, User } from 'lucide-react'
 import { useFeatureToggle } from '../hooks/useFeatureToggle'
+import { useAuthStore } from '../stores/authStore'
 import { COPY } from '../constants/copy'
 
 export const Header: React.FC = () => {
@@ -18,8 +19,8 @@ export const Header: React.FC = () => {
   const isStoreEnabled = useFeatureToggle('ENABLE_STORE')
   const isSettingsEnabled = useFeatureToggle('ENABLE_SETTINGS')
 
-  // TODO: Replace with actual auth state
-  const isLoggedIn = false
+  // Get auth state
+  const { isAuthenticated, user, logout } = useAuthStore()
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -112,17 +113,31 @@ export const Header: React.FC = () => {
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-[9999]">
                   {/* Login/Logout */}
                   {isUserAccountsEnabled && (
-                    isLoggedIn ? (
-                      <button
-                        onClick={() => {
-                          // TODO: Implement logout
-                          setShowMenu(false)
-                        }}
-                        className="w-full px-4 py-2 text-left text-gray-700 hover:bg-green-50 flex items-center gap-2 transition"
-                      >
-                        <LogOut size={18} />
-                        <span>{COPY.menu.signOut}</span>
-                      </button>
+                    isAuthenticated ? (
+                      <>
+                        {/* Profile Link */}
+                        <button
+                          onClick={() => {
+                            navigate(`/profile/${user?.username}`)
+                            setShowMenu(false)
+                          }}
+                          className="w-full px-4 py-2 text-left text-gray-700 hover:bg-green-50 flex items-center gap-2 transition"
+                        >
+                          <User size={18} />
+                          <span>My Profile</span>
+                        </button>
+                        {/* Logout */}
+                        <button
+                          onClick={() => {
+                            logout()
+                            setShowMenu(false)
+                          }}
+                          className="w-full px-4 py-2 text-left text-gray-700 hover:bg-green-50 flex items-center gap-2 transition"
+                        >
+                          <LogOut size={18} />
+                          <span>{COPY.menu.signOut}</span>
+                        </button>
+                      </>
                     ) : (
                       <button
                         onClick={() => {
@@ -180,7 +195,7 @@ export const Header: React.FC = () => {
                   )}
 
                   {/* Settings */}
-                  {isSettingsEnabled && isLoggedIn && (
+                  {isSettingsEnabled && isAuthenticated && (
                     <button
                       onClick={() => {
                         navigate('/settings')

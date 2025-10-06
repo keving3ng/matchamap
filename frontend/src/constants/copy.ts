@@ -232,6 +232,50 @@ export const COPY = {
     unknown: 'Unknown',
   },
 
+  // Profile
+  profile: {
+    editProfile: 'Edit Profile',
+    loadingProfile: 'Loading profile...',
+    profileNotFound: 'Profile Not Found',
+    edit: 'Edit',
+    website: 'Website',
+    memberSince: 'Member since',
+
+    // Edit Profile Modal
+    displayName: 'Display Name',
+    displayNamePlaceholder: 'Your name',
+    bio: 'Bio',
+    bioPlaceholder: 'Tell us about yourself...',
+    bioCharCount: (current: number, max: number) => `${current}/${max}`,
+    location: 'Location',
+    locationPlaceholder: 'Toronto, ON',
+    instagram: 'Instagram',
+    tiktok: 'TikTok',
+    usernamePlaceholder: 'username',
+    websiteUrl: 'Website',
+    websitePlaceholder: 'https://example.com',
+    privacySettings: 'Privacy Settings',
+    publicProfile: 'Public Profile',
+    publicProfileDescription: 'Allow anyone to view your profile',
+    showActivity: 'Show Activity',
+    showActivityDescription: 'Display your recent reviews and check-ins',
+    saving: 'Saving...',
+    saveChanges: 'Save Changes',
+    failedToUpdate: 'Failed to update profile',
+
+    // Profile Stats
+    reviews: 'Reviews',
+    checkins: 'Check-ins',
+    photos: 'Photos',
+    passport: 'Passport',
+    reputation: (score: number) => `Reputation: ${score} points`,
+
+    // Profile Activity
+    badges: 'Badges',
+    ownActivityPlaceholder: 'Your recent activity will appear here once you start reviewing cafes!',
+    userActivityPlaceholder: (username: string) => `${username}'s recent activity will appear here.`,
+  },
+
   // Admin (basic strings, admin has more specific copy in components)
   admin: {
     title: 'Admin Dashboard',

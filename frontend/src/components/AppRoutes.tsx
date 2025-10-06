@@ -8,6 +8,7 @@ import PassportView from './PassportView'
 import EventsView from './EventsView'
 import LoginPage from './auth/LoginPage'
 import ProtectedRoute from './auth/ProtectedRoute'
+import { UserProfilePage } from './profile/UserProfilePage'
 import ContactPage from './ContactPage'
 import AboutPage from './AboutPage'
 import StorePage from './StorePage'
@@ -114,6 +115,8 @@ export const AppRoutes: React.FC = () => {
       )}
       {/* Login route - always available */}
       <Route path="/login" element={<LoginPage />} />
+      {/* Profile route - always available */}
+      <Route path="/profile/:username" element={<UserProfilePage />} />
       {isContactEnabled && (
         <Route path="/contact" element={<ContactPage />} />
       )}

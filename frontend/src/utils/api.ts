@@ -4,7 +4,7 @@
  */
 
 import { useAuthStore } from '../stores/authStore'
-import type { Cafe, Drink, FeedItem, Event } from '../../../shared/types'
+import type { Cafe, Drink, FeedItem, Event, PublicUserProfile, UpdateProfileRequest, UserProfile } from '../../../shared/types'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -398,6 +398,44 @@ export const waitlistAPI = {
 }
 
 /**
+ * User Profile API endpoints
+ */
+export const profileAPI = {
+  /**
+   * Get public user profile by username
+   */
+  async getUserProfile(username: string): Promise<PublicUserProfile> {
+    return fetchAPI(`/users/${username}/profile`)
+  },
+
+  /**
+   * Get own profile (authenticated)
+   */
+  async getMyProfile(): Promise<UserProfile> {
+    return fetchAPI('/users/me/profile')
+  },
+
+  /**
+   * Update own profile (authenticated)
+   */
+  async updateMyProfile(updates: UpdateProfileRequest): Promise<UserProfile> {
+    return fetchAPI('/users/me/profile', {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    })
+  },
+
+  /**
+   * Upload avatar (authenticated)
+   * TODO: Implement Cloudflare Images upload
+   */
+  async uploadAvatar(_file: File): Promise<{ avatarUrl: string }> {
+    // TODO: Implement multipart upload
+    throw new Error('Avatar upload not yet implemented')
+  },
+}
+
+/**
  * Export all APIs
  */
 export const api = {
@@ -409,6 +447,7 @@ export const api = {
   drinks: drinksAPI,
   admin: adminAPI,
   waitlist: waitlistAPI,
+  profile: profileAPI,
 }
 
 export default api
