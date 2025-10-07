@@ -85,3 +85,9 @@ ENABLE_STORE:
 ENABLE_SETTINGS:
   dev: true
   prod: false
+
+# Route Display
+# Shows walking/driving routes from user location to cafes on the map
+ENABLE_ROUTE_DISPLAY:
+  dev: false
+  prod: false
