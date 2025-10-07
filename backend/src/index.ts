@@ -13,6 +13,7 @@ import { bulkImportCafes, exportCafes } from './routes/import';
 import { register, login, logout, getCurrentUser, refreshToken } from './routes/auth';
 import { joinWaitlist } from './routes/waitlist';
 import { getUserProfile, getMyProfile, updateMyProfile, uploadAvatar } from './routes/profile';
+import { listUsers, getUserStats, getUser, updateUserRole, deleteUser } from './routes/admin-users';
 import { requireAuth, requireAdminAuth } from './middleware/auth';
 import { authRateLimit, publicRateLimit, writeRateLimit } from './middleware/rateLimit';
 import { requireHTTPS } from './middleware/httpsOnly';
@@ -75,6 +76,13 @@ router.get('/api/admin/events/:id', publicRateLimit(), requireAdminAuth(), getEv
 router.post('/api/admin/events', writeRateLimit(), requireAdminAuth(), createEvent);
 router.put('/api/admin/events/:id', writeRateLimit(), requireAdminAuth(), updateEvent);
 router.delete('/api/admin/events/:id', writeRateLimit(), requireAdminAuth(), deleteEvent);
+
+// User admin endpoints
+router.get('/api/admin/users/stats', publicRateLimit(), requireAdminAuth(), getUserStats);
+router.get('/api/admin/users/:id', publicRateLimit(), requireAdminAuth(), getUser);
+router.get('/api/admin/users', publicRateLimit(), requireAdminAuth(), listUsers);
+router.put('/api/admin/users/:id/role', writeRateLimit(), requireAdminAuth(), updateUserRole);
+router.delete('/api/admin/users/:id', writeRateLimit(), requireAdminAuth(), deleteUser);
 
 // Handle OPTIONS for CORS preflight
 router.options('*', (request, env: Env) => handleCorsPreflightRequest(request, env));

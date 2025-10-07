@@ -4,7 +4,7 @@
  */
 
 import { useAuthStore } from '../stores/authStore'
-import type { Cafe, Drink, FeedItem, Event, PublicUserProfile, UpdateProfileRequest, UserProfile } from '../../../shared/types'
+import type { Cafe, Drink, FeedItem, Event, PublicUserProfile, UpdateProfileRequest, UserProfile, User } from '../../../shared/types'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -436,6 +436,96 @@ export const profileAPI = {
 }
 
 /**
+ * User Admin API endpoints (admin only)
+ */
+export interface AdminUserListItem {
+  id: number
+  email: string
+  username: string
+  role: 'admin' | 'user'
+  isEmailVerified: boolean
+  lastActiveAt: string | null
+  createdAt: string
+  displayName: string | null
+  avatarUrl: string | null
+  totalCheckins: number
+  totalReviews: number
+  reputationScore: number
+}
+
+export interface AdminUserStats {
+  totalUsers: number
+  adminUsers: number
+  regularUsers: number
+  activeThisWeek: number
+  newThisMonth: number
+}
+
+export const userAdminAPI = {
+  /**
+   * List all users (admin only)
+   */
+  async listUsers(filters?: {
+    limit?: number
+    offset?: number
+    search?: string
+    role?: 'admin' | 'user'
+  }): Promise<{
+    users: AdminUserListItem[]
+    total: number
+    limit: number
+    offset: number
+    hasMore: boolean
+  }> {
+    const params = new URLSearchParams()
+    if (filters?.limit) params.append('limit', filters.limit.toString())
+    if (filters?.offset) params.append('offset', filters.offset.toString())
+    if (filters?.search) params.append('search', filters.search)
+    if (filters?.role) params.append('role', filters.role)
+
+    const query = params.toString() ? `?${params.toString()}` : ''
+    return fetchAPI(`/admin/users${query}`)
+  },
+
+  /**
+   * Get user statistics (admin only)
+   */
+  async getStats(): Promise<AdminUserStats> {
+    return fetchAPI('/admin/users/stats')
+  },
+
+  /**
+   * Get single user details (admin only)
+   */
+  async getUser(id: number): Promise<{
+    user: User
+    profile: UserProfile | null
+    stats: { totalCheckins: number }
+  }> {
+    return fetchAPI(`/admin/users/${id}`)
+  },
+
+  /**
+   * Update user role (admin only)
+   */
+  async updateUserRole(id: number, role: 'admin' | 'user'): Promise<{ user: User }> {
+    return fetchAPI(`/admin/users/${id}/role`, {
+      method: 'PUT',
+      body: JSON.stringify({ role }),
+    })
+  },
+
+  /**
+   * Delete user (admin only)
+   */
+  async deleteUser(id: number): Promise<{ success: boolean; message: string }> {
+    return fetchAPI(`/admin/users/${id}`, {
+      method: 'DELETE',
+    })
+  },
+}
+
+/**
  * Export all APIs
  */
 export const api = {
@@ -448,6 +538,7 @@ export const api = {
   admin: adminAPI,
   waitlist: waitlistAPI,
   profile: profileAPI,
+  userAdmin: userAdminAPI,
 }
 
 export default api

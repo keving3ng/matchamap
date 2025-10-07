@@ -1,41 +1,35 @@
-name = "matchamap-api"
+# PRODUCTION is the default deployment target
+name = "matchamap-api-production"
 main = "src/index.ts"
 compatibility_date = "2025-09-30"
 
 [dev]
 port = 8787
 
-# D1 Database binding
+# D1 Database binding (production database)
 [[d1_databases]]
 binding = "DB"
 database_name = "matchamap-db"
 database_id = "69667043-3d25-4fe2-9bac-1a8d42a7c25c"
 migrations_dir = "drizzle/migrations"
 
-# Environment variables
+# Production environment variables (default)
 [vars]
-ENVIRONMENT = "development"
-ALLOWED_ORIGINS = "http://localhost:3000,http://localhost:5173,http://localhost:5174"
-# SECURITY: API keys should be set as secrets, not committed to git
-# Set locally with: npx wrangler secret put GOOGLE_PLACES_API_KEY
-# For development, you can use .dev.vars file (which is gitignored)
-JWT_SECRET = "dev-secret-change-in-production-use-wrangler-secret"  # For local development only
-
-# Production environment
-[env.production]
-name = "matchamap-api-production"
-vars = { ENVIRONMENT = "production", ALLOWED_ORIGINS = "https://matchamap.pages.dev,https://*.matchamap.pages.dev,https://matchamap.club,https://*.matchamap.club" }
-
-# D1 Database binding for production (same database as dev)
-[[env.production.d1_databases]]
-binding = "DB"
-database_name = "matchamap-db"
-database_id = "69667043-3d25-4fe2-9bac-1a8d42a7c25c"
+ENVIRONMENT = "production"
+ALLOWED_ORIGINS = "https://matchamap.pages.dev,https://*.matchamap.pages.dev,http://localhost:3000,http://localhost:5173,http://localhost:5174"
 
 # SECURITY: JWT_SECRET MUST be set as a Wrangler secret in production
 # NEVER commit JWT_SECRET to git - it must be set via Wrangler CLI:
-# Run: npx wrangler secret put JWT_SECRET --env production
+# Run: npx wrangler secret put JWT_SECRET
 # Generate a secure secret with: openssl rand -base64 32
-#
-# IMPORTANT: The JWT_SECRET in the [vars] section above is for LOCAL DEV ONLY
-# Production MUST use the secret set via 'wrangler secret put'
+
+# Development environment (for testing deployments before production)
+[env.dev]
+name = "matchamap-api-dev"
+vars = { ENVIRONMENT = "development", ALLOWED_ORIGINS = "http://localhost:3000,http://localhost:5173,http://localhost:5174", JWT_SECRET = "dev-secret-change-in-production-use-wrangler-secret" }
+
+# D1 Database binding for dev environment (same database)
+[[env.dev.d1_databases]]
+binding = "DB"
+database_name = "matchamap-db"
+database_id = "69667043-3d25-4fe2-9bac-1a8d42a7c25c"

@@ -5,8 +5,10 @@
   "private": true,
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
-    "deploy:production": "wrangler deploy --env production",
+    "deploy": "wrangler deploy --env=\"\"",
+    "deploy:dev": "wrangler deploy --env dev",
+    "tail": "wrangler tail --env=\"\"",
+    "tail:dev": "wrangler tail --env dev",
     "db:create": "wrangler d1 create matchamap-db",
     "db:generate": "drizzle-kit generate",
     "db:migrate:local": "wrangler d1 migrations apply matchamap-db --local",
