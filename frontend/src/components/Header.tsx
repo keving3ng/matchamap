@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router'
-import { ArrowLeft, Menu, Instagram, Settings, LogIn, LogOut, Mail, Info, ShoppingBag, Sliders, User } from 'lucide-react'
+import { ArrowLeft, Menu, Instagram, LogIn, LogOut, Mail, Info, ShoppingBag, Sliders, User } from 'lucide-react'
 import { useFeatureToggle } from '../hooks/useFeatureToggle'
 import { useAuthStore } from '../stores/authStore'
 import { COPY } from '../constants/copy'
@@ -13,7 +13,6 @@ export const Header: React.FC = () => {
 
   const isMenuEnabled = useFeatureToggle('ENABLE_MENU')
   const isUserAccountsEnabled = useFeatureToggle('ENABLE_USER_ACCOUNTS')
-  const isAdminEnabled = useFeatureToggle('ENABLE_ADMIN_PANEL')
   const isContactEnabled = useFeatureToggle('ENABLE_CONTACT')
   const isAboutEnabled = useFeatureToggle('ENABLE_ABOUT')
   const isStoreEnabled = useFeatureToggle('ENABLE_STORE')
@@ -41,7 +40,6 @@ export const Header: React.FC = () => {
     : location.pathname === '/feed' ? 'feed'
     : location.pathname === '/passport' ? 'passport'
     : location.pathname === '/events' ? 'events'
-    : location.pathname === '/admin' ? 'admin'
     : location.pathname.startsWith('/cafe/') ? 'detail'
     : 'map'
 
@@ -124,13 +122,14 @@ export const Header: React.FC = () => {
                           className="w-full px-4 py-2 text-left text-gray-700 hover:bg-green-50 flex items-center gap-2 transition"
                         >
                           <User size={18} />
-                          <span>My Profile</span>
+                          <span>{COPY.menu.myProfile}</span>
                         </button>
                         {/* Logout */}
                         <button
                           onClick={() => {
                             logout()
                             setShowMenu(false)
+                            navigate('/')
                           }}
                           className="w-full px-4 py-2 text-left text-gray-700 hover:bg-green-50 flex items-center gap-2 transition"
                         >
@@ -205,25 +204,6 @@ export const Header: React.FC = () => {
                     >
                       <Sliders size={18} />
                       <span>{COPY.menu.settings}</span>
-                    </button>
-                  )}
-
-                  {/* Divider before admin */}
-                  {isAdminEnabled && (isAboutEnabled || isStoreEnabled || isContactEnabled || isSettingsEnabled || isUserAccountsEnabled) && (
-                    <div className="my-2 border-t border-gray-200"></div>
-                  )}
-
-                  {/* Admin */}
-                  {isAdminEnabled && (
-                    <button
-                      onClick={() => {
-                        navigate('/admin')
-                        setShowMenu(false)
-                      }}
-                      className="w-full px-4 py-2 text-left text-gray-700 hover:bg-green-50 flex items-center gap-2 transition"
-                    >
-                      <Settings size={18} />
-                      <span>{COPY.menu.admin}</span>
                     </button>
                   )}
                 </div>

@@ -40,11 +40,11 @@ router.post('/api/auth/logout', authRateLimit(), requireAuth(), logout);
 router.get('/api/auth/me', authRateLimit(), requireAuth(), getCurrentUser);
 router.post('/api/auth/refresh', authRateLimit(), refreshToken);
 
-// User profile endpoints
-router.get('/api/users/:username/profile', publicRateLimit(), getUserProfile);
+// User profile endpoints (more specific routes first)
 router.get('/api/users/me/profile', authRateLimit(), requireAuth(), getMyProfile);
 router.put('/api/users/me/profile', writeRateLimit(), requireAuth(), updateMyProfile);
 router.post('/api/users/me/avatar', writeRateLimit(), requireAuth(), uploadAvatar);
+router.get('/api/users/:username/profile', publicRateLimit(), getUserProfile);
 
 // Admin API endpoints (protected by JWT authentication + rate limiting)
 router.post('/api/admin/cafes', writeRateLimit(), requireAdminAuth(), createCafe);

@@ -1,12 +1,15 @@
 import React, { useState } from 'react'
 import { useAuthStore } from '../../stores/authStore'
 import { sanitizeText } from '../../utils/sanitize'
+import { COPY } from '../../constants/copy'
+import { PrimaryButton } from '../ui'
 
 interface LoginFormProps {
   onSuccess?: () => void
+  onSwitchToRegister?: () => void
 }
 
-export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
+export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToRegister }) => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const { login, isLoading, error, clearError } = useAuthStore()
@@ -34,7 +37,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
     <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-md">
       <div>
         <label htmlFor="email" className="block text-sm font-medium text-charcoal-700 mb-2">
-          Email
+          {COPY.auth.email}
         </label>
         <input
           type="email"
@@ -43,14 +46,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
           onChange={(e) => setEmail(e.target.value)}
           required
           className="w-full px-4 py-3 border border-matcha-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-matcha-500 focus:border-transparent"
-          placeholder="you@example.com"
+          placeholder={COPY.auth.emailPlaceholder}
           disabled={isLoading}
         />
       </div>
 
       <div>
         <label htmlFor="password" className="block text-sm font-medium text-charcoal-700 mb-2">
-          Password
+          {COPY.auth.password}
         </label>
         <input
           type="password"
@@ -59,7 +62,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
           onChange={(e) => setPassword(e.target.value)}
           required
           className="w-full px-4 py-3 border border-matcha-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-matcha-500 focus:border-transparent"
-          placeholder="••••••••"
+          placeholder={COPY.auth.passwordPlaceholder}
           disabled={isLoading}
         />
       </div>
@@ -70,13 +73,26 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
         </div>
       )}
 
-      <button
+      <PrimaryButton
         type="submit"
         disabled={isLoading}
-        className="w-full bg-matcha-500 hover:bg-matcha-600 text-white font-medium py-3 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+        fullWidth
       >
-        {isLoading ? 'Signing in...' : 'Sign In'}
-      </button>
+        {isLoading ? COPY.auth.signingIn : COPY.auth.signIn}
+      </PrimaryButton>
+
+      {/* Switch to Register */}
+      {onSwitchToRegister && (
+        <div className="text-center">
+          <button
+            type="button"
+            onClick={onSwitchToRegister}
+            className="text-sm text-matcha-600 hover:text-matcha-700 font-medium"
+          >
+            {COPY.auth.dontHaveAccount}
+          </button>
+        </div>
+      )}
     </form>
   )
 }

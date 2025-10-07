@@ -23,11 +23,11 @@ export const COPY = {
   menu: {
     signIn: 'Sign In',
     signOut: 'Sign Out',
+    myProfile: 'My Profile',
     about: 'About',
     shop: 'Shop',
     contact: 'Contact',
     settings: 'Settings',
-    admin: 'Admin',
   },
 
   // Map View
@@ -232,6 +232,43 @@ export const COPY = {
     unknown: 'Unknown',
   },
 
+  // Authentication
+  auth: {
+    // Login Page
+    welcomeBack: 'Welcome Back',
+    joinCommunity: 'Join the Community',
+    adminAccess: 'Admin Access',
+    signInToSave: 'Sign in to save your matcha journey',
+    createAccountToTrack: 'Create an account to track cafes and write reviews',
+    signInForAdmin: 'Sign in to access the admin panel',
+    adminAccessRestricted: 'Access restricted to authorized administrators',
+
+    // Login Form
+    email: 'Email',
+    emailPlaceholder: 'you@example.com',
+    password: 'Password',
+    passwordPlaceholder: '••••••••',
+    signIn: 'Sign In',
+    signingIn: 'Signing in...',
+    dontHaveAccount: "Don't have an account? Sign up",
+
+    // Register Form
+    username: 'Username',
+    usernamePlaceholder: 'matchalover',
+    usernameHint: 'Letters, numbers, and underscores only',
+    confirmPassword: 'Confirm Password',
+    createAccount: 'Create Account',
+    creatingAccount: 'Creating Account...',
+    alreadyHaveAccount: 'Already have an account? Sign in',
+    passwordMinLength: 'At least 8 characters',
+
+    // Validation Errors
+    passwordTooShort: 'Password must be at least 8 characters long',
+    passwordsDoNotMatch: 'Passwords do not match',
+    usernameTooShort: 'Username must be at least 3 characters long',
+    usernameInvalidChars: 'Username can only contain letters, numbers, and underscores',
+  },
+
   // Profile
   profile: {
     editProfile: 'Edit Profile',
@@ -240,6 +277,16 @@ export const COPY = {
     edit: 'Edit',
     website: 'Website',
     memberSince: 'Member since',
+
+    // Welcome Banner
+    welcomeTitle: 'Welcome to MatchaMap! 🍵',
+    welcomeSubtitle: "You're all set! Here's how to get started on your matcha journey:",
+    exploreCafes: 'Explore Cafes',
+    exploreCafesDescription: 'Browse our curated list of the best matcha cafes in Toronto',
+    buildPassport: 'Build Your Passport',
+    buildPassportDescription: 'Visit cafes and mark them on your passport to track your journey',
+    startExploringButton: 'Start Exploring',
+    dismissButton: 'Dismiss',
 
     // Edit Profile Modal
     displayName: 'Display Name',

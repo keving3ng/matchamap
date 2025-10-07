@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { sqliteTable, text, integer, real, index } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer, real, index, unique } from 'drizzle-orm/sqlite-core';
 
 // Cafes table
 export const cafes = sqliteTable('cafes', {
@@ -199,6 +199,20 @@ export const waitlist = sqliteTable('waitlist', {
   convertedIdx: index('waitlist_converted_idx').on(table.converted),
 }));
 
+// User check-ins / passport tracking
+export const userCheckins = sqliteTable('user_checkins', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  cafeId: integer('cafe_id').notNull().references(() => cafes.id, { onDelete: 'cascade' }),
+  visitedAt: text('visited_at').default(sql`CURRENT_TIMESTAMP`),
+  notes: text('notes'),
+}, (table) => ({
+  userIdIdx: index('user_checkins_user_id_idx').on(table.userId),
+  cafeIdIdx: index('user_checkins_cafe_id_idx').on(table.cafeId),
+  visitedAtIdx: index('user_checkins_visited_at_idx').on(table.visitedAt),
+  uniqueUserCafe: unique().on(table.userId, table.cafeId),
+}));
+
 // Type exports for use in the application
 export type Cafe = typeof cafes.$inferSelect;
 export type NewCafe = typeof cafes.$inferInsert;
@@ -216,3 +230,5 @@ export type Session = typeof sessions.$inferSelect;
 export type NewSession = typeof sessions.$inferInsert;
 export type Waitlist = typeof waitlist.$inferSelect;
 export type NewWaitlist = typeof waitlist.$inferInsert;
+export type UserCheckin = typeof userCheckins.$inferSelect;
+export type NewUserCheckin = typeof userCheckins.$inferInsert;

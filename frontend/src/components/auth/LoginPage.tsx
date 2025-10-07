@@ -1,48 +1,83 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router'
 import { useAuthStore } from '../../stores/authStore'
 import { LoginForm } from './LoginForm'
+import { RegisterForm } from './RegisterForm'
+import { COPY } from '../../constants/copy'
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const { isAuthenticated } = useAuthStore()
+  const { isAuthenticated, user } = useAuthStore()
+  const [mode, setMode] = useState<'login' | 'register'>('login')
 
-  // Get the redirect path from location state, default to admin
-  const from = (location.state as { from?: string })?.from || '/admin'
+  // Get the redirect path from location state
+  const from = (location.state as { from?: string })?.from
 
   useEffect(() => {
-    // If already authenticated, redirect to intended destination
-    if (isAuthenticated) {
-      navigate(from, { replace: true })
+    // If already authenticated, redirect appropriately
+    if (isAuthenticated && user) {
+      // Admins go to admin panel, regular users go to their profile
+      const destination = from || (user.role === 'admin' ? '/admin' : `/profile/${user.username}`)
+      navigate(destination, { replace: true })
     }
-  }, [isAuthenticated, navigate, from])
+  }, [isAuthenticated, user, navigate, from])
 
-  const handleLoginSuccess = () => {
-    navigate(from, { replace: true })
+  const handleSuccess = () => {
+    // After successful login/register, redirect based on role
+    if (user) {
+      const destination = from || (user.role === 'admin' ? '/admin' : `/profile/${user.username}`)
+      navigate(destination, { replace: true })
+    }
   }
+
+  const isAdminRoute = from?.startsWith('/admin')
 
   return (
     <div className="min-h-screen bg-cream-50 flex flex-col items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md space-y-8">
+      <div className="w-full max-w-md space-y-6">
         {/* Header */}
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-matcha-600 mb-2">MatchaMap</h1>
-          <h2 className="text-xl font-semibold text-charcoal-800 mb-2">Admin Login</h2>
-          <p className="text-sm text-charcoal-600">
-            Sign in to access the admin panel
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-matcha-500 to-matcha-600 rounded-full flex items-center justify-center text-2xl shadow-md">
+              🍵
+            </div>
+            <h1 className="text-3xl font-bold text-matcha-600 font-caveat">{COPY.header.title}</h1>
+          </div>
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">
+            {isAdminRoute ? COPY.auth.adminAccess : mode === 'login' ? COPY.auth.welcomeBack : COPY.auth.joinCommunity}
+          </h2>
+          <p className="text-sm text-gray-600">
+            {isAdminRoute
+              ? COPY.auth.signInForAdmin
+              : mode === 'login'
+                ? COPY.auth.signInToSave
+                : COPY.auth.createAccountToTrack
+            }
           </p>
         </div>
 
-        {/* Login Form */}
+        {/* Form Card */}
         <div className="bg-white rounded-2xl shadow-lg p-8">
-          <LoginForm onSuccess={handleLoginSuccess} />
+          {mode === 'login' ? (
+            <LoginForm
+              onSuccess={handleSuccess}
+              onSwitchToRegister={!isAdminRoute ? () => setMode('register') : undefined}
+            />
+          ) : (
+            <RegisterForm
+              onSuccess={handleSuccess}
+              onSwitchToLogin={() => setMode('login')}
+            />
+          )}
         </div>
 
         {/* Footer */}
-        <div className="text-center text-sm text-charcoal-600">
-          <p>Access restricted to authorized users only</p>
-        </div>
+        {isAdminRoute && (
+          <div className="text-center text-xs text-gray-500">
+            <p>{COPY.auth.adminAccessRestricted}</p>
+          </div>
+        )}
       </div>
     </div>
   )

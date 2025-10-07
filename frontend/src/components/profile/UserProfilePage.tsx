@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
-import { useParams, Navigate } from 'react-router'
-import { Loader2, AlertCircle } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { useParams, Navigate, useNavigate } from 'react-router'
+import { Loader2, AlertCircle, Sparkles, MapPin, Star } from 'lucide-react'
 import { useUserProfile, useMyProfile } from '../../hooks/useUserProfile'
 import { useAuthStore } from '../../stores/authStore'
 import { ProfileHeader } from './ProfileHeader'
@@ -12,7 +12,9 @@ import { COPY } from '../../constants/copy'
 export const UserProfilePage: React.FC = () => {
   const { username } = useParams<{ username: string }>()
   const { user: currentUser } = useAuthStore()
+  const navigate = useNavigate()
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [showWelcomeBanner, setShowWelcomeBanner] = useState(false)
 
   // Determine if this is the current user's own profile
   const isOwnProfile = currentUser?.username === username
@@ -20,6 +22,16 @@ export const UserProfilePage: React.FC = () => {
   // Use appropriate hook based on whether it's own profile
   const publicProfile = useUserProfile(username || '')
   const myProfile = useMyProfile()
+
+  // Check if this is a new user (no check-ins yet) and show welcome banner
+  useEffect(() => {
+    if (isOwnProfile && myProfile.profile && myProfile.profile.totalCheckins === 0) {
+      const hasSeenWelcome = localStorage.getItem(`welcome_shown_${currentUser?.id}`)
+      if (!hasSeenWelcome) {
+        setShowWelcomeBanner(true)
+      }
+    }
+  }, [isOwnProfile, myProfile.profile, currentUser?.id])
 
   // Select the appropriate profile data
   const profile = isOwnProfile ? myProfile.profile : publicProfile.profile
@@ -71,7 +83,7 @@ export const UserProfilePage: React.FC = () => {
           totalReviews: myProfile.profile.totalReviews,
           totalCheckins: myProfile.profile.totalCheckins,
           totalPhotos: myProfile.profile.totalPhotos,
-          passportCompletion: 0, // TODO: Calculate from actual data
+          passportCompletion: myProfile.profile.passportCompletion,
           reputationScore: myProfile.profile.reputationScore,
         },
         badges: [],
@@ -98,6 +110,77 @@ export const UserProfilePage: React.FC = () => {
 
       {/* Profile Stats */}
       <ProfileStats stats={profileData.stats} />
+
+      {/* Welcome Banner for New Users */}
+      {showWelcomeBanner && isOwnProfile && (
+        <ContentContainer maxWidth="lg">
+          <div className="p-4">
+            <div className="bg-gradient-to-br from-matcha-50 to-green-50 border-2 border-matcha-200 rounded-2xl p-6 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-matcha-100 rounded-full -mr-16 -mt-16 opacity-50" />
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-green-100 rounded-full -ml-12 -mb-12 opacity-50" />
+
+              <div className="relative">
+                <div className="flex items-center gap-2 mb-3">
+                  <Sparkles className="w-6 h-6 text-matcha-600" />
+                  <h2 className="text-2xl font-bold text-gray-900">{COPY.profile.welcomeTitle}</h2>
+                </div>
+
+                <p className="text-gray-700 mb-4">
+                  {COPY.profile.welcomeSubtitle}
+                </p>
+
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-matcha-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <MapPin className="w-4 h-4 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">{COPY.profile.exploreCafes}</h3>
+                      <p className="text-sm text-gray-600">
+                        {COPY.profile.exploreCafesDescription}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-matcha-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Star className="w-4 h-4 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">{COPY.profile.buildPassport}</h3>
+                      <p className="text-sm text-gray-600">
+                        {COPY.profile.buildPassportDescription}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 mt-6">
+                  <button
+                    onClick={() => {
+                      navigate('/')
+                      localStorage.setItem(`welcome_shown_${currentUser?.id}`, 'true')
+                      setShowWelcomeBanner(false)
+                    }}
+                    className="flex-1 bg-gradient-to-r from-matcha-500 to-matcha-600 hover:from-matcha-600 hover:to-matcha-700 text-white font-semibold py-3 px-6 rounded-lg transition active:scale-[0.98]"
+                  >
+                    {COPY.profile.startExploringButton}
+                  </button>
+                  <button
+                    onClick={() => {
+                      localStorage.setItem(`welcome_shown_${currentUser?.id}`, 'true')
+                      setShowWelcomeBanner(false)
+                    }}
+                    className="px-6 py-3 text-gray-600 hover:text-gray-900 font-medium transition"
+                  >
+                    {COPY.profile.dismissButton}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ContentContainer>
+      )}
 
       {/* Activity Section */}
       <ContentContainer maxWidth="lg">

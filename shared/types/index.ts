@@ -205,6 +205,7 @@ export interface UserProfile {
   totalReviews: number
   totalCheckins: number
   totalPhotos: number
+  passportCompletion: number
   reputationScore: number
   createdAt: string
   updatedAt: string

@@ -1,9 +1,16 @@
 import { IRequest } from 'itty-router';
-import { eq } from 'drizzle-orm';
+import { eq, count, sql } from 'drizzle-orm';
 import { Env } from '../types';
-import { getDb, users, userProfiles } from '../db';
+import { getDb, users, userProfiles, cafes, userCheckins } from '../db';
 import { jsonResponse, errorResponse, badRequestResponse } from '../utils/response';
 import { AuthenticatedRequest } from '../middleware/auth';
+import {
+  validateDisplayName,
+  validateBio,
+  validateLocation,
+  validateSocialUsername,
+  validateUrl,
+} from '../utils/validation';
 
 /**
  * GET /api/users/:username/profile
@@ -66,6 +73,21 @@ export async function getUserProfile(request: IRequest, env: Env): Promise<Respo
       }
     }
 
+    // Calculate passport completion percentage
+    const totalCafesResult = await db.select({ count: count() }).from(cafes).get();
+    const totalCafes = totalCafesResult?.count || 0;
+
+    const userCheckinsResult = await db
+      .select({ count: count() })
+      .from(userCheckins)
+      .where(eq(userCheckins.userId, user.id))
+      .get();
+    const userCheckinsCount = userCheckinsResult?.count || 0;
+
+    const passportCompletion = totalCafes > 0
+      ? Math.round((userCheckinsCount / totalCafes) * 100)
+      : 0;
+
     // Build public profile response
     const publicProfile = {
       user: {
@@ -78,9 +100,9 @@ export async function getUserProfile(request: IRequest, env: Env): Promise<Respo
         joinedAt: user.createdAt,
         stats: {
           totalReviews: profile.totalReviews,
-          totalCheckins: profile.totalCheckins,
+          totalCheckins: userCheckinsCount,
           totalPhotos: profile.totalPhotos,
-          passportCompletion: 0, // TODO: Calculate this
+          passportCompletion,
           reputationScore: profile.reputationScore,
         },
         badges: [], // TODO: Fetch badges from user_badges table
@@ -149,10 +171,27 @@ export async function getMyProfile(request: AuthenticatedRequest, env: Env): Pro
       }
     }
 
+    // Calculate passport completion percentage
+    const totalCafesResult = await db.select({ count: count() }).from(cafes).get();
+    const totalCafes = totalCafesResult?.count || 0;
+
+    const userCheckinsResult = await db
+      .select({ count: count() })
+      .from(userCheckins)
+      .where(eq(userCheckins.userId, user.id))
+      .get();
+    const userCheckinsCount = userCheckinsResult?.count || 0;
+
+    const passportCompletion = totalCafes > 0
+      ? Math.round((userCheckinsCount / totalCafes) * 100)
+      : 0;
+
     // Return full profile (including private fields)
     const fullProfile = {
       ...profile,
       preferences,
+      passportCompletion,
+      totalCheckins: userCheckinsCount,
       user: {
         id: user.id,
         username: user.username,
@@ -201,85 +240,63 @@ export async function updateMyProfile(
         .get();
     }
 
-    // Build update object
+    // Build update object with validation
     const updates: Partial<typeof userProfiles.$inferInsert> = {
       updatedAt: new Date().toISOString(),
     };
 
+    // Validate display name
     if (body.displayName !== undefined) {
-      // Validate display name length
-      if (typeof body.displayName === 'string' && body.displayName.length > 50) {
-        return badRequestResponse('Display name must be 50 characters or less', request as Request, env);
+      const validation = validateDisplayName(body.displayName);
+      if (!validation.valid) {
+        return badRequestResponse(validation.error!, request as Request, env);
       }
       updates.displayName = body.displayName;
     }
 
+    // Validate bio
     if (body.bio !== undefined) {
-      // Limit bio to 500 characters
-      if (typeof body.bio === 'string' && body.bio.length > 500) {
-        return badRequestResponse('Bio must be 500 characters or less', request as Request, env);
+      const validation = validateBio(body.bio);
+      if (!validation.valid) {
+        return badRequestResponse(validation.error!, request as Request, env);
       }
       updates.bio = body.bio;
     }
 
+    // Validate location
     if (body.location !== undefined) {
-      // Validate location length
-      if (typeof body.location === 'string' && body.location.length > 100) {
-        return badRequestResponse('Location must be 100 characters or less', request as Request, env);
+      const validation = validateLocation(body.location);
+      if (!validation.valid) {
+        return badRequestResponse(validation.error!, request as Request, env);
       }
       updates.location = body.location;
     }
 
+    // Validate Instagram username
     if (body.instagram !== undefined) {
-      // Validate Instagram handle (alphanumeric, underscores, periods, max 30 chars)
-      if (typeof body.instagram === 'string' && body.instagram.length > 0) {
-        const cleanHandle = body.instagram.replace(/^@/, '');
-        if (cleanHandle.length > 30) {
-          return badRequestResponse('Instagram handle must be 30 characters or less', request as Request, env);
-        }
-        if (!/^[a-zA-Z0-9_.]+$/.test(cleanHandle)) {
-          return badRequestResponse('Instagram handle can only contain letters, numbers, underscores, and periods', request as Request, env);
-        }
-        updates.instagram = cleanHandle;
-      } else {
-        updates.instagram = body.instagram;
+      const validation = validateSocialUsername(body.instagram, 'Instagram');
+      if (!validation.valid) {
+        return badRequestResponse(validation.error!, request as Request, env);
       }
+      updates.instagram = body.instagram;
     }
 
+    // Validate TikTok username
     if (body.tiktok !== undefined) {
-      // Validate TikTok handle (alphanumeric, underscores, periods, max 24 chars)
-      if (typeof body.tiktok === 'string' && body.tiktok.length > 0) {
-        const cleanHandle = body.tiktok.replace(/^@/, '');
-        if (cleanHandle.length > 24) {
-          return badRequestResponse('TikTok handle must be 24 characters or less', request as Request, env);
-        }
-        if (!/^[a-zA-Z0-9_.]+$/.test(cleanHandle)) {
-          return badRequestResponse('TikTok handle can only contain letters, numbers, underscores, and periods', request as Request, env);
-        }
-        updates.tiktok = cleanHandle;
-      } else {
-        updates.tiktok = body.tiktok;
+      const validation = validateSocialUsername(body.tiktok, 'TikTok');
+      if (!validation.valid) {
+        return badRequestResponse(validation.error!, request as Request, env);
       }
+      updates.tiktok = body.tiktok;
     }
 
+    // Validate website URL
     if (body.website !== undefined) {
-      // Validate website URL format
-      if (typeof body.website === 'string' && body.website.length > 0) {
-        if (body.website.length > 255) {
-          return badRequestResponse('Website URL must be 255 characters or less', request as Request, env);
-        }
-        try {
-          const url = new URL(body.website);
-          if (!['http:', 'https:'].includes(url.protocol)) {
-            return badRequestResponse('Website URL must use HTTP or HTTPS protocol', request as Request, env);
-          }
-        } catch {
-          return badRequestResponse('Invalid website URL format', request as Request, env);
-        }
-        updates.website = body.website;
-      } else {
-        updates.website = body.website;
+      const validation = validateUrl(body.website);
+      if (!validation.valid) {
+        return badRequestResponse(validation.error!, request as Request, env);
       }
+      updates.website = body.website;
     }
 
     if (body.preferences !== undefined) {
