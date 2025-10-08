@@ -10,7 +10,7 @@ import { useUIStore } from '../stores/uiStore'
 import { CircleButton } from './CircleButton'
 import { getLocationRequestAdvice, getOptimalGeolocationOptions } from '../utils/deviceDetection'
 import { getMapsUrl } from '../utils/mapsUrl'
-import { formatHoursCompact } from '../utils/hoursFormatter'
+import { formatHoursCompact, isCurrentlyOpen } from '../utils/hoursFormatter'
 import { formatDuration } from '../utils/routing'
 import { findClosestCity } from '../utils/cityDetection'
 import { COPY } from '../constants/copy'
@@ -43,27 +43,6 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
     return Array.from(drinkTypes).sort()
   }, [cafes])
 
-  // Helper to check if cafe is open now
-  const isOpenNow = (cafe: typeof cafes[0]) => {
-    if (!cafe.hours) return true // Assume open if no hours data
-    try {
-      const hours = typeof cafe.hours === 'string' ? JSON.parse(cafe.hours) : cafe.hours
-      const now = new Date()
-      const dayOfWeek = now.getDay() // 0 = Sunday
-      const currentTime = now.getHours() * 60 + now.getMinutes()
-
-      const todayHours = hours?.periods?.find((p: any) => p.open?.day === dayOfWeek)
-      if (!todayHours?.open || !todayHours?.close) return true
-
-      const openTime = todayHours.open.hours * 60 + todayHours.open.minutes
-      const closeTime = todayHours.close.hours * 60 + todayHours.close.minutes
-
-      return currentTime >= openTime && currentTime <= closeTime
-    } catch {
-      return true
-    }
-  }
-
   // Filter cafes based on quick filters (no city filter - city is handled by map navigation)
   const filteredCafes = React.useMemo(() => {
     return cafes.filter(cafe => {
@@ -95,8 +74,13 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
       }
 
       // Open now filter
-      if (openNow && !isOpenNow(cafe)) {
-        return false
+      if (openNow) {
+        const cafeIsOpen = isCurrentlyOpen(cafe.hours)
+        // Only filter out if we know it's closed (false)
+        // If null (can't determine), include it in results
+        if (cafeIsOpen === false) {
+          return false
+        }
       }
 
       return true

@@ -48,8 +48,28 @@ export function formatHoursCompact(hours: string | null | undefined): HoursData 
 }
 
 /**
+ * Parse a time string like "9:00 AM" into minutes since midnight
+ */
+function parseTime(timeStr: string): number | null {
+  const match = timeStr.trim().match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i)
+  if (!match) return null
+
+  let hours = parseInt(match[1], 10)
+  const minutes = parseInt(match[2], 10)
+  const period = match[3].toUpperCase()
+
+  // Convert to 24-hour format
+  if (period === 'PM' && hours !== 12) {
+    hours += 12
+  } else if (period === 'AM' && hours === 12) {
+    hours = 0
+  }
+
+  return hours * 60 + minutes
+}
+
+/**
  * Check if cafe is currently open based on hours
- * Note: This is a simplified check - for production you'd want more robust time parsing
  */
 export function isCurrentlyOpen(hours: string | null | undefined): boolean | null {
   if (!hours) return null
@@ -63,9 +83,45 @@ export function isCurrentlyOpen(hours: string | null | undefined): boolean | nul
       return false
     }
 
-    // For a basic check, if there are hours listed, assume open
-    // A more robust implementation would parse actual hours and check current time
-    return true
+    // Parse the time range from today's hours
+    // Format: "Monday: 9:00 AM – 5:00 PM" or "Monday: 9:00 AM – 5:00 PM, 6:00 PM – 10:00 PM"
+    const timeMatch = hoursData.todayHours.match(/:\s*(.+)/)
+    if (!timeMatch) return null
+
+    const timePart = timeMatch[1]
+
+    // Handle multiple time ranges (split by comma)
+    const ranges = timePart.split(',')
+
+    const now = new Date()
+    const currentMinutes = now.getHours() * 60 + now.getMinutes()
+
+    // Check if current time falls within any of the ranges
+    for (const range of ranges) {
+      const rangeParts = range.split('–').map(s => s.trim())
+      if (rangeParts.length !== 2) continue
+
+      const openTime = parseTime(rangeParts[0])
+      const closeTime = parseTime(rangeParts[1])
+
+      if (openTime === null || closeTime === null) continue
+
+      // Handle cases where closing time is past midnight (rare for cafes but possible)
+      if (closeTime < openTime) {
+        // Spans midnight
+        if (currentMinutes >= openTime || currentMinutes < closeTime) {
+          return true
+        }
+      } else {
+        // Normal case
+        if (currentMinutes >= openTime && currentMinutes < closeTime) {
+          return true
+        }
+      }
+    }
+
+    // Not within any time range
+    return false
   } catch {
     return null
   }

@@ -4,6 +4,7 @@ import { useGeolocation } from '../hooks/useGeolocation'
 import { useUIStore } from '../stores/uiStore'
 import { getLocationRequestAdvice, getOptimalGeolocationOptions } from '../utils/deviceDetection'
 import { getMapsUrl } from '../utils/mapsUrl'
+import { isCurrentlyOpen } from '../utils/hoursFormatter'
 import { ContentContainer } from './ContentContainer'
 import { CITIES, type CityKey } from '../stores/cityStore'
 import { COPY } from '../constants/copy'
@@ -15,6 +16,7 @@ interface FilterState {
   minRating: number | null
   maxDistance: number | null // in kilometers
   selectedCities: CityKey[] // multi-select cities
+  openNow: boolean
 }
 
 export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggleExpand, onViewDetails }) => {
@@ -26,7 +28,8 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
   const [filters, setFilters] = useState<FilterState>({
     minRating: null,
     maxDistance: null,
-    selectedCities: []
+    selectedCities: [],
+    openNow: false
   })
   const { selectedDrinkType, setSelectedDrinkType } = useUIStore()
 
@@ -64,7 +67,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
   }, [cafes])
 
   // Check if any filters or search are active
-  const hasActiveFilters = filters.minRating !== null || filters.maxDistance !== null || filters.selectedCities.length > 0 || selectedDrinkType !== null
+  const hasActiveFilters = filters.minRating !== null || filters.maxDistance !== null || filters.selectedCities.length > 0 || filters.openNow || selectedDrinkType !== null
 
   const hasActiveSearch = searchQuery.trim().length > 0
 
@@ -90,7 +93,8 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
     setFilters({
       minRating: null,
       maxDistance: null,
-      selectedCities: []
+      selectedCities: [],
+      openNow: false
     })
     setSelectedDrinkType(null)
   }
@@ -162,6 +166,16 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
         }
       }
 
+      // Open now filter
+      if (filters.openNow) {
+        const cafeIsOpen = isCurrentlyOpen(cafe.hours)
+        // Only filter out if we know it's closed (false)
+        // If null (can't determine), include it in results
+        if (cafeIsOpen === false) {
+          return false
+        }
+      }
+
       return true
     })
 
@@ -190,7 +204,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
       default:
         return cafesCopy
     }
-  }, [cafes, sortBy, filters.minRating, filters.maxDistance, filters.selectedCities, selectedDrinkType, searchQuery, hasActiveSearch])
+  }, [cafes, sortBy, filters.minRating, filters.maxDistance, filters.selectedCities, filters.openNow, selectedDrinkType, searchQuery, hasActiveSearch])
 
   return (
     <div className="flex-1 overflow-y-auto pb-24 relative">
@@ -428,6 +442,21 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* Open Now Filter */}
+              <div>
+                <h4 className="text-sm font-bold text-charcoal-900 mb-3">{COPY.list.availability}</h4>
+                <button
+                  onClick={() => setFilters(prev => ({ ...prev, openNow: !prev.openNow }))}
+                  className={`px-4 py-2 rounded-full text-sm font-bold transition-all shadow-md ${
+                    filters.openNow
+                      ? 'bg-gradient-to-r from-matcha-600 to-matcha-500 text-white scale-105'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-105'
+                  }`}
+                >
+                  {COPY.map.openNow}
+                </button>
               </div>
 
               {/* Clear Filters Button */}

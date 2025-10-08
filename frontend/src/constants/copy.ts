@@ -96,6 +96,7 @@ export const COPY = {
     maxDistanceRequiresLocation: 'Max Distance (Enable location first)',
     drinkType: 'Drink Type',
     allDrinks: 'All Drinks',
+    availability: 'Availability',
     clearAllFilters: 'Clear All Filters',
     clearFilters: 'Clear filters',
     noResults: 'No cafes match your filters',
