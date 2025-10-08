@@ -14,7 +14,7 @@ export const AboutPage: React.FC = () => {
       <ContentContainer maxWidth="md">
         <div className="px-4 py-8 space-y-6">
           {/* Hero Section */}
-          <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-lg p-8 text-white text-center">
+          <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 rounded-2xl shadow-lg p-8 text-white text-center">
             <div className="w-20 h-20 bg-white/20 backdrop-blur rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-5xl">🍵</span>
             </div>
@@ -117,7 +117,7 @@ export const AboutPage: React.FC = () => {
           <div className="bg-white rounded-2xl shadow-md border-2 border-green-100 p-6">
             <h3 className="text-xl font-bold text-gray-800 mb-3">About the Reviewer</h3>
             <div className="flex items-start gap-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center text-3xl flex-shrink-0 shadow-md">
+              <div className="w-16 h-16 bg-gradient-to-br from-matcha-500 to-matcha-600 rounded-full flex items-center justify-center text-3xl flex-shrink-0 shadow-md">
                 👤
               </div>
               <div>

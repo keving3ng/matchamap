@@ -8,16 +8,16 @@ export default {
     extend: {
       colors: {
         matcha: {
-          50: '#f4f8f0',
-          100: '#e6f2dc',
-          200: '#d1e7c4',
-          300: '#aed581', // Light Matcha
-          400: '#9ccc65',
-          500: '#7cb342', // Primary Matcha
-          600: '#689f38',
-          700: '#558b2f', // Dark Matcha
-          800: '#33691e',
-          900: '#1b5e20',
+          50: '#eff3ec',  // Very light, muted
+          100: '#dce6d3', // Light, muted
+          200: '#c2d4b3', // Light mid
+          300: '#9ab87e', // Mid light
+          400: '#759956', // Mid
+          500: '#5a7c3e', // Deep rich matcha (Primary)
+          600: '#4a6432', // Dark
+          700: '#3d5329', // Darker
+          800: '#2f4120', // Very dark
+          900: '#1f2e15', // Almost black green
         },
         cream: {
           50: '#fefdfb',

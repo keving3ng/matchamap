@@ -45,23 +45,23 @@ export const Header: React.FC = () => {
     : 'map'
 
   return (
-    <div className="bg-gradient-to-r from-green-600 to-green-500 text-white px-4 py-3 shadow-lg">
+    <div className="bg-gradient-to-r from-matcha-600 to-matcha-500 text-white px-4 py-3 shadow-lg">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           {currentView === 'detail' && (
             <button
               onClick={() => navigate(-1)}
-              className="p-2 hover:bg-green-700 rounded-lg transition"
+              className="p-2 hover:bg-matcha-700 rounded-lg transition"
             >
               <ArrowLeft size={24} />
             </button>
           )}
           <button
             onClick={() => navigate('/')}
-            className="flex items-center gap-2 hover:bg-green-700 rounded-lg px-2 py-1 transition"
+            className="flex items-center gap-2 hover:bg-matcha-700 rounded-lg px-2 py-1 transition"
           >
             <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-              <span className="text-green-600 text-xl">🍵</span>
+              <span className="text-matcha-600 text-xl">🍵</span>
             </div>
             <h1 className="text-xl font-bold tracking-wide hidden sm:block font-caveat">{COPY.header.title}</h1>
           </button>
@@ -102,7 +102,7 @@ export const Header: React.FC = () => {
             <div ref={menuRef} className="relative">
               <button
                 onClick={() => setShowMenu(!showMenu)}
-                className="p-2 hover:bg-green-700 rounded-lg transition"
+                className="p-2 hover:bg-matcha-700 rounded-lg transition"
               >
                 <Menu size={24} />
               </button>
