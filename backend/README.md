@@ -184,7 +184,7 @@ Set in `wrangler.toml`:
 ```toml
 [vars]
 ENVIRONMENT = "development"
-ALLOWED_ORIGINS = "http://localhost:5173,https://matchamap.com,https://*.matchamap.com"
+ALLOWED_ORIGINS = "http://localhost:5173,https://matchamap.club,https://*.matchamap.club"
 ```
 
 ## Database Schema
