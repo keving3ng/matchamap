@@ -24,7 +24,7 @@ JWT_SECRET = "dev-secret-change-in-production-use-wrangler-secret"  # For local 
 # Production environment
 [env.production]
 name = "matchamap-api-production"
-vars = { ENVIRONMENT = "production", ALLOWED_ORIGINS = "https://matchamap.pages.dev,https://*.matchamap.pages.dev" }
+vars = { ENVIRONMENT = "production", ALLOWED_ORIGINS = "https://matchamap.pages.dev,https://*.matchamap.pages.dev,https://matchamap.com,https://*.matchamap.com,https://matchamap.club,https://*.matchamap.club" }
 
 # D1 Database binding for production (same database as dev)
 [[env.production.d1_databases]]
