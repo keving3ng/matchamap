@@ -17,8 +17,8 @@ export const AdminWrapper: React.FC<AdminWrapperProps> = ({ children }) => {
   const currentEnv = getCurrentEnvironment()
   const navigate = useNavigate()
 
-  // Show banner if in dev mode with admin mode active, or if authenticated (in any environment)
-  const showBanner = (currentEnv === 'dev' && adminModeActive) || isAuthenticated
+  // Show banner if in dev mode with admin mode active, or if authenticated as admin
+  const showBanner = (currentEnv === 'dev' && adminModeActive) || (isAuthenticated && user?.role === 'admin')
 
   // Add CSS variable to document root for banner height
   useEffect(() => {
@@ -117,7 +117,7 @@ export const AdminWrapper: React.FC<AdminWrapperProps> = ({ children }) => {
             </>
           )}
 
-          {isAuthenticated && (
+          {isAuthenticated && user?.role === 'admin' && (
             <>
               <button
                 onClick={handleGoToAdmin}
