@@ -4,7 +4,7 @@
  */
 
 import { useAuthStore } from '../stores/authStore'
-import type { Cafe, Drink, FeedItem, Event, PublicUserProfile, UpdateProfileRequest, UserProfile, User } from '../../../shared/types'
+import type { Cafe, Drink, FeedItem, Event, PublicUserProfile, UpdateProfileRequest, UserProfile, CityWithCount } from '../../../shared/types'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -296,6 +296,19 @@ export const healthAPI = {
 }
 
 /**
+ * Cities API endpoints
+ */
+export const citiesAPI = {
+  /**
+   * Get all cities with their cafe counts
+   * Only returns cities that have at least one cafe
+   */
+  async getAll(bustCache = false): Promise<{ cities: CityWithCount[] }> {
+    return fetchAPI('/cities', { bustCache })
+  },
+}
+
+/**
  * Places API endpoints (Google Maps lookup)
  */
 interface PlaceData {
@@ -567,6 +580,7 @@ export const userAdminAPI = {
  */
 export const api = {
   cafes: cafeAPI,
+  cities: citiesAPI,
   feed: feedAPI,
   events: eventsAPI,
   health: healthAPI,
