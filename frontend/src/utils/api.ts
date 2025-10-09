@@ -395,6 +395,43 @@ export const waitlistAPI = {
       body: JSON.stringify({ email, referralSource }),
     })
   },
+
+  /**
+   * Get all waitlist entries (admin only)
+   */
+  async getAll(filters?: {
+    limit?: number
+    offset?: number
+    sortBy?: 'email' | 'created_at'
+    sortOrder?: 'asc' | 'desc'
+  }): Promise<{
+    waitlist: Array<{
+      id: number
+      email: string
+      referralSource?: string
+      converted: boolean
+      userId?: number
+      createdAt: string
+      convertedAt?: string
+    }>
+    total: number
+    hasMore: boolean
+    analytics: {
+      totalSignups: number
+      dailySignups: number
+      weeklySignups: number
+      conversionRate: number
+    }
+  }> {
+    const params = new URLSearchParams()
+    if (filters?.limit) params.append('limit', filters.limit.toString())
+    if (filters?.offset) params.append('offset', filters.offset.toString())
+    if (filters?.sortBy) params.append('sortBy', filters.sortBy)
+    if (filters?.sortOrder) params.append('sortOrder', filters.sortOrder)
+
+    const query = params.toString() ? `?${params.toString()}` : ''
+    return fetchAPI(`/admin/waitlist${query}`)
+  },
 }
 
 /**

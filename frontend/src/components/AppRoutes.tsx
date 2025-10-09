@@ -23,6 +23,7 @@ import UserManagementPage from './admin/UserManagementPage'
 import ProductsManagementPage from './admin/ProductsManagementPage'
 import MiscAdminPage from './admin/MiscAdminPage'
 import BulkImporterPage from './admin/BulkImporterPage'
+import WaitlistPage from './admin/WaitlistPage'
 import { useFeatureToggle } from '../hooks/useFeatureToggle'
 import { useAppFeatures } from '../hooks/useAppFeatures'
 import { useDataStore } from '../stores/dataStore'
@@ -163,6 +164,13 @@ export const AppRoutes: React.FC = () => {
             <ProtectedRoute requireAdmin={true}>
               <AdminLayout>
                 <UserManagementPage />
+              </AdminLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/waitlist" element={
+            <ProtectedRoute requireAdmin={true}>
+              <AdminLayout>
+                <WaitlistPage />
               </AdminLayout>
             </ProtectedRoute>
           } />
