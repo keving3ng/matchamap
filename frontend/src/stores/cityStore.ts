@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { api } from '../utils/api'
 
 export type CityKey = 'toronto' | 'montreal' | 'tokyo' | 'kyoto' | 'osaka' | 'new york' | 'mississauga' | 'scarborough'
 
@@ -72,16 +73,58 @@ export const CITIES: Record<CityKey, City> = {
 
 interface CityState {
   selectedCity: CityKey
+  availableCities: CityKey[]
+  availableCitiesLoaded: boolean
   setCity: (city: CityKey) => void
   getCity: () => City
+  getAvailableCities: () => City[]
+  loadAvailableCities: () => Promise<void>
 }
 
 export const useCityStore = create<CityState>()(
   persist(
     (set, get) => ({
       selectedCity: 'toronto',
-      setCity: (city) => set({ selectedCity: city }),
+      availableCities: [],
+      availableCitiesLoaded: false,
+      setCity: (city) => {
+        // Only allow selection of available cities
+        const availableCities = get().availableCities
+        if (availableCities.length === 0 || availableCities.includes(city)) {
+          set({ selectedCity: city })
+        }
+      },
       getCity: () => CITIES[get().selectedCity],
+      getAvailableCities: () => {
+        const availableCities = get().availableCities
+        return availableCities.map(cityKey => CITIES[cityKey]).filter(Boolean)
+      },
+      loadAvailableCities: async () => {
+        try {
+          const { cities } = await api.cities.getAll()
+          const availableCityKeys = cities
+            .map(cityData => cityData.city as CityKey)
+            .filter(cityKey => cityKey in CITIES)
+          
+          set({ 
+            availableCities: availableCityKeys,
+            availableCitiesLoaded: true
+          })
+
+          // If current selected city is not available, fallback to first available or default
+          const currentCity = get().selectedCity
+          if (availableCityKeys.length > 0 && !availableCityKeys.includes(currentCity)) {
+            set({ selectedCity: availableCityKeys[0] })
+          }
+        } catch (error) {
+          console.error('Failed to load available cities:', error)
+          // Fallback to all cities if API fails
+          set({ 
+            availableCities: Object.keys(CITIES) as CityKey[],
+            availableCitiesLoaded: true
+          })
+        }
+      },
     }),
     {
       name: 'matchamap_selected_city',

@@ -3,6 +3,7 @@ import { Env } from './types';
 import { handleCorsPreflightRequest } from './utils/cors';
 import { handleHealth } from './routes/health';
 import { listCafes, getCafe, createCafe, updateCafe, deleteCafe } from './routes/cafes';
+import { listCities } from './routes/cities';
 import { listDrinks, createDrink, updateDrink, deleteDrink } from './routes/drinks';
 import { listFeedItems } from './routes/feed';
 import { listAllFeedItems, getFeedItem, createFeedItem, updateFeedItem, deleteFeedItem } from './routes/admin-feed';
@@ -29,6 +30,7 @@ router.get('/api/health', handleHealth);
 // Public API endpoints (with rate limiting)
 router.get('/api/cafes', publicRateLimit(), listCafes);
 router.get('/api/cafes/:id', publicRateLimit(), getCafe);
+router.get('/api/cities', publicRateLimit(), listCities);
 router.get('/api/feed', publicRateLimit(), listFeedItems);
 router.get('/api/events', publicRateLimit(), listEvents);
 router.post('/api/waitlist', authRateLimit(), joinWaitlist);
