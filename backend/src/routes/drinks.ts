@@ -9,6 +9,8 @@ import {
   badRequestResponse,
 } from '../utils/response';
 import { HTTP_STATUS, CACHE_CONSTANTS } from '../constants';
+import { logAdminAction, generateChangesSummary } from '../utils/auditLog';
+import { AuthenticatedRequest } from '../middleware/auth';
 
 // GET /api/admin/cafes/:cafeId/drinks - List drinks for a cafe
 export async function listDrinks(request: IRequest, env: Env): Promise<Response> {
@@ -106,6 +108,15 @@ export async function createDrink(request: IRequest, env: Env): Promise<Response
       .values(drinkData)
       .returning();
 
+    // Log the audit action
+    await logAdminAction(request as AuthenticatedRequest, env, {
+      action: 'CREATE',
+      resourceType: 'drink',
+      resourceId: newDrink[0].id,
+      changesSummary: generateChangesSummary('CREATE', 'drink', newDrink[0].name),
+      afterState: newDrink[0],
+    });
+
     return jsonResponse(
       { drink: newDrink[0] },
       HTTP_STATUS.CREATED,
@@ -142,6 +153,7 @@ export async function updateDrink(request: IRequest, env: Env): Promise<Response
     }
 
     const drink = existing[0];
+    const beforeState = drink;
 
     // If setting as default, unset other defaults for this cafe
     if (body.isDefault && !drink.isDefault) {
@@ -163,6 +175,16 @@ export async function updateDrink(request: IRequest, env: Env): Promise<Response
       .set(updateData)
       .where(eq(drinks.id, drinkId))
       .returning();
+
+    // Log the audit action
+    await logAdminAction(request as AuthenticatedRequest, env, {
+      action: 'UPDATE',
+      resourceType: 'drink',
+      resourceId: drinkId,
+      changesSummary: generateChangesSummary('UPDATE', 'drink', updated[0].name, beforeState, updated[0]),
+      beforeState,
+      afterState: updated[0],
+    });
 
     return jsonResponse(
       { drink: updated[0] },
@@ -187,6 +209,17 @@ export async function deleteDrink(request: IRequest, env: Env): Promise<Response
 
     const db = getDb(env.DB);
 
+    // Get the drink before deletion for audit log
+    const beforeDelete = await db
+      .select()
+      .from(drinks)
+      .where(eq(drinks.id, drinkId))
+      .limit(1);
+
+    if (beforeDelete.length === 0) {
+      return notFoundResponse(request as Request, env);
+    }
+
     const deleted = await db
       .delete(drinks)
       .where(eq(drinks.id, drinkId))
@@ -195,6 +228,15 @@ export async function deleteDrink(request: IRequest, env: Env): Promise<Response
     if (deleted.length === 0) {
       return notFoundResponse(request as Request, env);
     }
+
+    // Log the audit action
+    await logAdminAction(request as AuthenticatedRequest, env, {
+      action: 'DELETE',
+      resourceType: 'drink',
+      resourceId: drinkId,
+      changesSummary: generateChangesSummary('DELETE', 'drink', beforeDelete[0].name),
+      beforeState: beforeDelete[0],
+    });
 
     return jsonResponse(
       { message: 'Drink deleted successfully' },

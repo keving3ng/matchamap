@@ -4,6 +4,7 @@ import { Env } from '../types';
 import { getDb, users, userProfiles, userCheckins } from '../db';
 import { jsonResponse, errorResponse, badRequestResponse } from '../utils/response';
 import { AuthenticatedRequest } from '../middleware/auth';
+import { logAdminAction, generateChangesSummary } from '../utils/auditLog';
 
 /**
  * GET /api/admin/users
@@ -261,6 +262,8 @@ export async function updateUserRole(request: AuthenticatedRequest, env: Env): P
       return errorResponse('User not found', 404, request as Request, env);
     }
 
+    const beforeState = user;
+
     // Update role
     const updatedUser = await db
       .update(users)
@@ -271,6 +274,16 @@ export async function updateUserRole(request: AuthenticatedRequest, env: Env): P
       .where(eq(users.id, userId))
       .returning()
       .get();
+
+    // Log the audit action (special case: user_role resource type)
+    await logAdminAction(request as AuthenticatedRequest, env, {
+      action: 'UPDATE',
+      resourceType: 'user_role',
+      resourceId: userId,
+      changesSummary: `Changed role for user "${user.username}" from "${user.role}" to "${body.role}"`,
+      beforeState,
+      afterState: updatedUser,
+    });
 
     return jsonResponse(
       {
@@ -319,6 +332,15 @@ export async function deleteUser(request: AuthenticatedRequest, env: Env): Promi
 
     // Delete user (cascade will handle related records)
     await db.delete(users).where(eq(users.id, userId)).run();
+
+    // Log the audit action
+    await logAdminAction(request as AuthenticatedRequest, env, {
+      action: 'DELETE',
+      resourceType: 'user',
+      resourceId: userId,
+      changesSummary: generateChangesSummary('DELETE', 'user', user.username),
+      beforeState: { ...user, passwordHash: undefined }, // Don't log password hash
+    });
 
     return jsonResponse(
       {
