@@ -113,7 +113,7 @@ export async function createDrink(request: IRequest, env: Env): Promise<Response
       action: 'CREATE',
       resourceType: 'drink',
       resourceId: newDrink[0].id,
-      changesSummary: generateChangesSummary('CREATE', 'drink', newDrink[0].name),
+      changesSummary: generateChangesSummary('CREATE', 'drink', newDrink[0].name ?? undefined),
       afterState: newDrink[0],
     });
 
@@ -181,7 +181,7 @@ export async function updateDrink(request: IRequest, env: Env): Promise<Response
       action: 'UPDATE',
       resourceType: 'drink',
       resourceId: drinkId,
-      changesSummary: generateChangesSummary('UPDATE', 'drink', updated[0].name, beforeState, updated[0]),
+      changesSummary: generateChangesSummary('UPDATE', 'drink', updated[0].name ?? undefined, beforeState, updated[0]),
       beforeState,
       afterState: updated[0],
     });
@@ -234,7 +234,7 @@ export async function deleteDrink(request: IRequest, env: Env): Promise<Response
       action: 'DELETE',
       resourceType: 'drink',
       resourceId: drinkId,
-      changesSummary: generateChangesSummary('DELETE', 'drink', beforeDelete[0].name),
+      changesSummary: generateChangesSummary('DELETE', 'drink', beforeDelete[0].name ?? undefined),
       beforeState: beforeDelete[0],
     });
 
