@@ -3,6 +3,7 @@ import { X, Save } from 'lucide-react'
 import { PrimaryButton, SecondaryButton } from '../ui'
 import { COPY } from '../../constants/copy'
 import type { UserProfile, UpdateProfileRequest } from '../../../../shared/types'
+import { sanitizeText, sanitizeUrl } from '../../utils/sanitize'
 
 interface EditProfileModalProps {
   profile: UserProfile
@@ -37,13 +38,14 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
     setIsSaving(true)
     setError(null)
 
+    // Sanitize all text inputs before sending
     const updates: UpdateProfileRequest = {
-      displayName: formData.displayName || null,
-      bio: formData.bio || null,
-      location: formData.location || null,
-      instagram: formData.instagram || null,
-      tiktok: formData.tiktok || null,
-      website: formData.website || null,
+      displayName: formData.displayName ? sanitizeText(formData.displayName.trim()) || null : null,
+      bio: formData.bio ? sanitizeText(formData.bio.trim()) || null : null,
+      location: formData.location ? sanitizeText(formData.location.trim()) || null : null,
+      instagram: formData.instagram ? sanitizeText(formData.instagram.trim()) || null : null,
+      tiktok: formData.tiktok ? sanitizeText(formData.tiktok.trim()) || null : null,
+      website: formData.website ? sanitizeUrl(formData.website.trim()) || null : null,
       privacy: {
         isPublic: formData.isPublic,
         showActivity: formData.showActivity,

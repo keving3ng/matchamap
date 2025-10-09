@@ -1,7 +1,7 @@
 import { IRequest } from 'itty-router';
 import { eq } from 'drizzle-orm';
 import { Env } from '../types';
-import { getDb, users, sessions, User } from '../db';
+import { getDb, users, sessions, userProfiles, User } from '../db';
 import { jsonResponse, errorResponse, badRequestResponse } from '../utils/response';
 import {
   hashPassword,
@@ -67,6 +67,20 @@ export async function register(request: IRequest, env: Env): Promise<Response> {
       })
       .returning()
       .get();
+
+    // Create default profile for the new user
+    try {
+      await db
+        .insert(userProfiles)
+        .values({
+          userId: result.id,
+          // All other fields will use their default values
+        })
+        .run();
+    } catch (profileError) {
+      // Log error but don't fail registration if profile creation fails
+      console.error('Failed to create default profile:', profileError);
+    }
 
     // Return user without password hash
     const { passwordHash: _, ...userWithoutPassword } = result;

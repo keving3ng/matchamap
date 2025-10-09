@@ -110,13 +110,18 @@ export const useAuthStore = create<AuthState>()(
           })
         }
 
+        // Clear auth state
         set({
           user: null,
           accessToken: null,
           refreshToken: null,
           isAuthenticated: false,
           error: null,
+          isLoading: false,
         })
+
+        // Explicitly clear sessionStorage to ensure tokens are removed
+        sessionStorage.removeItem('matchamap-auth')
       },
 
       refreshAccessToken: async () => {

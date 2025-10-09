@@ -56,7 +56,7 @@ export const AdminWrapper: React.FC<AdminWrapperProps> = ({ children }) => {
 
   const handleLogout = () => {
     logout()
-    navigate('/login')
+    navigate('/')
   }
 
   return (
