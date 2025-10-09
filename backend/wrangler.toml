@@ -1,4 +1,5 @@
 # PRODUCTION is the default deployment target
+# To deploy: npx wrangler deploy (no --env flag needed)
 name = "matchamap-api-production"
 main = "src/index.ts"
 compatibility_date = "2025-09-30"
