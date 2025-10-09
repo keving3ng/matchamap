@@ -98,7 +98,8 @@ frontend/src/hooks/
 ├── useDistanceCalculation.ts # Cafe distance math
 ├── useCafeSelection.ts       # Cafe selection logic
 ├── useVisitedCafes.ts        # Wrapper around store
-└── useFeatureToggle.ts       # Feature flags
+├── useFeatureToggle.ts       # Feature flags
+└── useLazyData.ts            # ⭐ Lazy loading with cache checking
 ```
 
 **Hook rules:**
@@ -107,6 +108,43 @@ frontend/src/hooks/
 -   Document complex hooks with JSDoc
 -   Return objects, not arrays (better for destructuring)
 -   Avoid deeply nested hooks
+
+### Lazy Loading Pattern (useLazyData)
+
+**IMPORTANT:** Always use the `useLazyData` hook for lazy loading data in view components.
+
+**Why use useLazyData:**
+- ✅ **Automatic cache checking** - Won't refetch data that's already loaded
+- ✅ **Consistent pattern** - Same behavior across all views
+- ✅ **Performance optimization** - Reduces unnecessary API calls
+- ✅ **Semantic clarity** - Makes lazy loading intent explicit
+
+**Usage:**
+```tsx
+import { useLazyData } from '../hooks/useLazyData'
+import { useDataStore } from '../stores/dataStore'
+
+export const FeedView: React.FC<FeedViewProps> = ({ feedItems }) => {
+  const { fetchFeed, feedFetched } = useDataStore()
+
+  // Lazy load feed items when component mounts (only if not already fetched)
+  useLazyData(fetchFeed, feedFetched)
+
+  return (
+    // ... component JSX
+  )
+}
+```
+
+**When to use:**
+- View components that fetch their own data (Feed, Events, Store, etc.)
+- Data should only load when user navigates to the view
+- Data should be cached in Zustand after first fetch
+
+**When NOT to use:**
+- Components that receive data via props (MapView, ListView, PassportView)
+- Components that need to refetch on every mount
+- Initial page load data (use AppRoutes.tsx instead)
 
 ## Copy & Internationalization
 

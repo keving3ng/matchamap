@@ -9,6 +9,11 @@ interface DataStore {
   isLoading: boolean
   error: string | null
 
+  // Cache flags to prevent unnecessary refetches
+  cafesFetched: boolean
+  feedFetched: boolean
+  eventsFetched: boolean
+
   // Actions
   fetchCafes: (city?: string, bustCache?: boolean) => Promise<void>
   fetchFeed: (bustCache?: boolean) => Promise<void>
@@ -26,8 +31,14 @@ export const useDataStore = create<DataStore>((set, get) => ({
   eventItems: [],
   isLoading: false,
   error: null,
+  cafesFetched: false,
+  feedFetched: false,
+  eventsFetched: false,
 
   fetchCafes: async (city?: string, bustCache = false) => {
+    // Skip if already fetched (unless cache busting)
+    if (!bustCache && get().cafesFetched) return
+
     try {
       set({ isLoading: true, error: null })
       const response = await api.cafes.getAll({ city, limit: 500 }, bustCache)
@@ -61,13 +72,16 @@ export const useDataStore = create<DataStore>((set, get) => ({
         deletedAt: cafe.deletedAt,
       }))
 
-      set({ allCafes: cafes, isLoading: false })
+      set({ allCafes: cafes, isLoading: false, cafesFetched: true })
     } catch (error) {
       set({ error: (error as Error).message, isLoading: false })
     }
   },
 
   fetchFeed: async (bustCache = false) => {
+    // Skip if already fetched (unless cache busting)
+    if (!bustCache && get().feedFetched) return
+
     try {
       set({ isLoading: true, error: null })
       const response = await api.feed.getAll({ limit: 100 }, bustCache)
@@ -91,13 +105,16 @@ export const useDataStore = create<DataStore>((set, get) => ({
         published: item.published,
       }))
 
-      set({ feedItems, isLoading: false })
+      set({ feedItems, isLoading: false, feedFetched: true })
     } catch (error) {
       set({ error: (error as Error).message, isLoading: false })
     }
   },
 
   fetchEvents: async (bustCache = false) => {
+    // Skip if already fetched (unless cache busting)
+    if (!bustCache && get().eventsFetched) return
+
     try {
       set({ isLoading: true, error: null })
       const response = await api.events.getAll({ upcoming: true, limit: 50 }, bustCache)
@@ -117,7 +134,7 @@ export const useDataStore = create<DataStore>((set, get) => ({
         published: event.published !== false, // Default to true if not specified
       }))
 
-      set({ eventItems, isLoading: false })
+      set({ eventItems, isLoading: false, eventsFetched: true })
     } catch (error) {
       set({ error: (error as Error).message, isLoading: false })
     }

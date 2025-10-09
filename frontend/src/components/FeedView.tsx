@@ -1,18 +1,15 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { MapPinned, Star, Calendar } from 'lucide-react'
 import { ContentContainer } from './ContentContainer'
 import { useDataStore } from '../stores/dataStore'
+import { useLazyData } from '../hooks/useLazyData'
 import type { FeedViewProps } from '../types'
 
 export const FeedView: React.FC<FeedViewProps> = ({ feedItems }) => {
-  const { fetchFeed } = useDataStore()
+  const { fetchFeed, feedFetched } = useDataStore()
 
-  // Lazy load feed items when component mounts
-  useEffect(() => {
-    if (feedItems.length === 0) {
-      fetchFeed()
-    }
-  }, [feedItems.length, fetchFeed])
+  // Lazy load feed items when component mounts (only if not already fetched)
+  useLazyData(fetchFeed, feedFetched)
   return (
     <div className="flex-1 overflow-y-auto pb-24">
       {/* Header */}
