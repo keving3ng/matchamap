@@ -46,9 +46,21 @@ export const useLeafletMap = ({
       zoom: initialZoom,
       zoomControl: false, // We'll add custom controls
       scrollWheelZoom: true,
-      touchZoom: true,
+      touchZoom: 'center', // Zoom to center for predictable mobile UX
       doubleClickZoom: true,
       boxZoom: false,
+
+      // Smooth panning with momentum (optimized for mobile)
+      inertia: true,
+      inertiaDeceleration: 3000,
+      inertiaMaxSpeed: 1500, // Prevent overly fast flinging on mobile
+
+      // Smoother zoom transitions (allow half-zoom levels)
+      zoomSnap: 0.5,
+      zoomDelta: 0.5,
+
+      // Allow panning around the world (default: true, keeps world tracking correct)
+      worldCopyJump: true,
     })
 
     // Add tile layer with improved preloading for city switching
@@ -60,6 +72,7 @@ export const useLeafletMap = ({
       updateWhenIdle: false, // Load tiles during pan for smoother experience
       updateWhenZooming: false, // Don't update during zoom animations
       updateInterval: 100, // Faster updates (reduced from 150ms)
+      detectRetina: true, // Load high-resolution tiles on Retina/high-DPI displays
       // Remove bounds restriction to allow global tile loading for all cities
     }).addTo(map)
     
