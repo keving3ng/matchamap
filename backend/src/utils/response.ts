@@ -5,7 +5,7 @@ import { HTTP_STATUS, CACHE_CONSTANTS } from '../constants';
 
 export function jsonResponse(
   data: unknown,
-  status = HTTP_STATUS.OK,
+  status: number = HTTP_STATUS.OK,
   request: Request,
   env: Env,
   cacheControl?: string
@@ -28,7 +28,7 @@ export function jsonResponse(
 
 export function errorResponse(
   error: string,
-  status = HTTP_STATUS.BAD_REQUEST,
+  status: number = HTTP_STATUS.BAD_REQUEST,
   request: Request,
   env: Env
 ): Response {

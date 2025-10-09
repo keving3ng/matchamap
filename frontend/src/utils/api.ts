@@ -4,7 +4,7 @@
  */
 
 import { useAuthStore } from '../stores/authStore'
-import type { Cafe, Drink, FeedItem, Event, PublicUserProfile, UpdateProfileRequest, UserProfile, CityWithCount } from '../../../shared/types'
+import type { Cafe, Drink, FeedItem, Event, PublicUserProfile, UpdateProfileRequest, UserProfile, CityWithCount, User } from '../../../shared/types'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
