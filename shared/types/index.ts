@@ -183,6 +183,83 @@ export interface AuthError {
   error: string
 }
 
+// User Profile Types
+export interface UserProfilePreferences {
+  favoriteStyle?: 'hot' | 'iced' | 'blended'
+  dietaryRestrictions?: string[]
+}
+
+export interface UserProfile {
+  id: number
+  userId: number
+  displayName?: string | null
+  bio?: string | null
+  avatarUrl?: string | null
+  location?: string | null
+  instagram?: string | null
+  tiktok?: string | null
+  website?: string | null
+  preferences?: UserProfilePreferences | null
+  isPublic: boolean
+  showActivity: boolean
+  totalReviews: number
+  totalCheckins: number
+  totalPhotos: number
+  reputationScore: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface UserProfileStats {
+  totalReviews: number
+  totalCheckins: number
+  totalPhotos: number
+  passportCompletion: number
+  reputationScore: number
+}
+
+export interface PublicUserProfile {
+  user: {
+    id: number
+    username: string
+    displayName?: string | null
+    bio?: string | null
+    avatarUrl?: string | null
+    location?: string | null
+    joinedAt: string
+    stats: UserProfileStats
+    badges?: UserBadge[]
+    social?: {
+      instagram?: string | null
+      tiktok?: string | null
+      website?: string | null
+    }
+  }
+}
+
+export interface UpdateProfileRequest {
+  displayName?: string | null
+  bio?: string | null
+  location?: string | null
+  instagram?: string | null
+  tiktok?: string | null
+  website?: string | null
+  preferences?: UserProfilePreferences
+  privacy?: {
+    isPublic?: boolean
+    showActivity?: boolean
+  }
+}
+
+export interface UserBadge {
+  type: string
+  name: string
+  description: string
+  iconUrl?: string
+  earnedAt: string
+  metadata?: Record<string, unknown>
+}
+
 // ============================================================================
 // ANALYTICS TYPES
 // ============================================================================

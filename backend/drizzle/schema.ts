@@ -126,11 +126,50 @@ export const users = sqliteTable('users', {
   username: text('username').notNull().unique(),
   passwordHash: text('password_hash').notNull(),
   role: text('role', { enum: ['admin', 'user'] }).notNull().default('user'),
+  lastActiveAt: text('last_active_at'),
+  isEmailVerified: integer('is_email_verified', { mode: 'boolean' }).default(false),
   createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
 }, (table) => ({
   emailIdx: index('users_email_idx').on(table.email),
   usernameIdx: index('users_username_idx').on(table.username),
+}));
+
+// User profiles table
+export const userProfiles = sqliteTable('user_profiles', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: integer('user_id').notNull().unique().references(() => users.id, { onDelete: 'cascade' }),
+
+  // Profile Info
+  displayName: text('display_name'),
+  bio: text('bio'),
+  avatarUrl: text('avatar_url'),
+  location: text('location'),
+
+  // Social Links
+  instagram: text('instagram'),
+  tiktok: text('tiktok'),
+  website: text('website'),
+
+  // Preferences (JSON)
+  preferences: text('preferences'), // {"favoriteStyle": "iced", "dietaryRestrictions": ["vegan"]}
+
+  // Privacy
+  isPublic: integer('is_public', { mode: 'boolean' }).default(true),
+  showActivity: integer('show_activity', { mode: 'boolean' }).default(true),
+
+  // Stats (denormalized for performance)
+  totalReviews: integer('total_reviews').default(0),
+  totalCheckins: integer('total_checkins').default(0),
+  totalPhotos: integer('total_photos').default(0),
+  reputationScore: integer('reputation_score').default(0),
+
+  // Timestamps
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+  userIdx: index('user_profiles_user_id_idx').on(table.userId),
+  displayNameIdx: index('user_profiles_display_name_idx').on(table.displayName),
 }));
 
 // Sessions table
@@ -171,6 +210,8 @@ export type Event = typeof events.$inferSelect;
 export type NewEvent = typeof events.$inferInsert;
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
+export type UserProfile = typeof userProfiles.$inferSelect;
+export type NewUserProfile = typeof userProfiles.$inferInsert;
 export type Session = typeof sessions.$inferSelect;
 export type NewSession = typeof sessions.$inferInsert;
 export type Waitlist = typeof waitlist.$inferSelect;

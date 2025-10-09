@@ -12,6 +12,7 @@ import { lookupPlace } from './routes/places';
 import { bulkImportCafes, exportCafes } from './routes/import';
 import { register, login, logout, getCurrentUser, refreshToken } from './routes/auth';
 import { joinWaitlist } from './routes/waitlist';
+import { getUserProfile, getMyProfile, updateMyProfile, uploadAvatar } from './routes/profile';
 import { requireAuth, requireAdminAuth } from './middleware/auth';
 import { authRateLimit, publicRateLimit, writeRateLimit } from './middleware/rateLimit';
 import { requireHTTPS } from './middleware/httpsOnly';
@@ -38,6 +39,12 @@ router.post('/api/auth/login', authRateLimit(), login);
 router.post('/api/auth/logout', authRateLimit(), requireAuth(), logout);
 router.get('/api/auth/me', authRateLimit(), requireAuth(), getCurrentUser);
 router.post('/api/auth/refresh', authRateLimit(), refreshToken);
+
+// User profile endpoints
+router.get('/api/users/:username/profile', publicRateLimit(), getUserProfile);
+router.get('/api/users/me/profile', authRateLimit(), requireAuth(), getMyProfile);
+router.put('/api/users/me/profile', writeRateLimit(), requireAuth(), updateMyProfile);
+router.post('/api/users/me/avatar', writeRateLimit(), requireAuth(), uploadAvatar);
 
 // Admin API endpoints (protected by JWT authentication + rate limiting)
 router.post('/api/admin/cafes', writeRateLimit(), requireAdminAuth(), createCafe);
