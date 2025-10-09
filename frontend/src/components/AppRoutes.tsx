@@ -23,6 +23,7 @@ import UserManagementPage from './admin/UserManagementPage'
 import ProductsManagementPage from './admin/ProductsManagementPage'
 import MiscAdminPage from './admin/MiscAdminPage'
 import BulkImporterPage from './admin/BulkImporterPage'
+import WaitlistPage from './admin/WaitlistPage'
 import { useFeatureToggle } from '../hooks/useFeatureToggle'
 import { useAppFeatures } from '../hooks/useAppFeatures'
 import { useDataStore } from '../stores/dataStore'
@@ -113,10 +114,14 @@ export const AppRoutes: React.FC = () => {
           />
         } />
       )}
-      {/* Login route - always available */}
-      <Route path="/login" element={<LoginPage />} />
-      {/* Profile route - always available */}
-      <Route path="/profile/:username" element={<UserProfilePage />} />
+      {/* Login route - only if user accounts enabled */}
+      {useFeatureToggle('ENABLE_USER_ACCOUNTS') && (
+        <Route path="/login" element={<LoginPage />} />
+      )}
+      {/* Profile route - only if user accounts AND profiles enabled */}
+      {useFeatureToggle('ENABLE_USER_ACCOUNTS') && useFeatureToggle('ENABLE_USER_PROFILES') && (
+        <Route path="/profile/:username" element={<UserProfilePage />} />
+      )}
       {isContactEnabled && (
         <Route path="/contact" element={<ContactPage />} />
       )}
@@ -163,6 +168,13 @@ export const AppRoutes: React.FC = () => {
             <ProtectedRoute requireAdmin={true}>
               <AdminLayout>
                 <UserManagementPage />
+              </AdminLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/waitlist" element={
+            <ProtectedRoute requireAdmin={true}>
+              <AdminLayout>
+                <WaitlistPage />
               </AdminLayout>
             </ProtectedRoute>
           } />

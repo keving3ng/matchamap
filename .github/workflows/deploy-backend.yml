@@ -21,7 +21,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
           cache: 'npm'
           cache-dependency-path: backend/package-lock.json
           
@@ -32,7 +32,7 @@ jobs:
         run: cd backend && npm run typecheck
         
       - name: Deploy to Cloudflare Workers
-        run: cd backend && npx wrangler deploy --env production
+        run: cd backend && npx wrangler deploy --env=""
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           

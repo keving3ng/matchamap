@@ -56,10 +56,28 @@ ENABLE_CITY_SELECTOR:
   dev: true
   prod: false
 
-# User Accounts
+# ============================================================================
+# USER ACCOUNT FEATURES (Phase 2)
+# All user features require ENABLE_USER_ACCOUNTS to be enabled
+# ============================================================================
+
+# User Accounts - Base System
 # User authentication and account features like favoriting cafes
 ENABLE_USER_ACCOUNTS:
   dev: true
+  prod: true
+
+# User Profiles
+# Public user profile pages showing activity and stats
+ENABLE_USER_PROFILES:
+  dev: true
+  prod: false
+
+# User Social Features (Phase 2 - All-in-One)
+# Includes: check-ins, reviews, ratings, photos, following, activity feed, badges, leaderboards, favorites, lists
+# This is a master toggle for all user-generated content and social features
+ENABLE_USER_SOCIAL:
+  dev: false
   prod: false
 
 # Contact Us Page

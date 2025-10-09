@@ -13,6 +13,7 @@ export const Header: React.FC = () => {
 
   const isMenuEnabled = useFeatureToggle('ENABLE_MENU')
   const isUserAccountsEnabled = useFeatureToggle('ENABLE_USER_ACCOUNTS')
+  const isUserProfilesEnabled = useFeatureToggle('ENABLE_USER_PROFILES')
   const isContactEnabled = useFeatureToggle('ENABLE_CONTACT')
   const isAboutEnabled = useFeatureToggle('ENABLE_ABOUT')
   const isStoreEnabled = useFeatureToggle('ENABLE_STORE')
@@ -113,17 +114,19 @@ export const Header: React.FC = () => {
                   {isUserAccountsEnabled && (
                     isAuthenticated ? (
                       <>
-                        {/* Profile Link */}
-                        <button
-                          onClick={() => {
-                            navigate(`/profile/${user?.username}`)
-                            setShowMenu(false)
-                          }}
-                          className="w-full px-4 py-2 text-left text-gray-700 hover:bg-green-50 flex items-center gap-2 transition"
-                        >
-                          <User size={18} />
-                          <span>{COPY.menu.myProfile}</span>
-                        </button>
+                        {/* Profile Link - only show if profiles are enabled */}
+                        {isUserProfilesEnabled && (
+                          <button
+                            onClick={() => {
+                              navigate(`/profile/${user?.username}`)
+                              setShowMenu(false)
+                            }}
+                            className="w-full px-4 py-2 text-left text-gray-700 hover:bg-green-50 flex items-center gap-2 transition"
+                          >
+                            <User size={18} />
+                            <span>{COPY.menu.myProfile}</span>
+                          </button>
+                        )}
                         {/* Logout */}
                         <button
                           onClick={() => {

@@ -104,8 +104,8 @@ export async function bulkImportCafes(request: IRequest, env: Env) {
               slug: enrichedCafe.slug,
               link: enrichedCafe.link,
               address: enrichedCafe.address || null,
-              latitude: enrichedCafe.latitude,
-              longitude: enrichedCafe.longitude,
+              latitude: enrichedCafe.latitude ?? 0,
+              longitude: enrichedCafe.longitude ?? 0,
               city: enrichedCafe.city,
               ambianceScore: enrichedCafe.ambianceScore ?? null,
               chargeForAltMilk: enrichedCafe.chargeForAltMilk ?? null,
@@ -117,7 +117,7 @@ export async function bulkImportCafes(request: IRequest, env: Env) {
               instagramPostLink: enrichedCafe.instagramPostLink || null,
               tiktokPostLink: enrichedCafe.tiktokPostLink || null,
               images: enrichedCafe.images || null,
-            })
+            } as typeof cafes.$inferInsert)
             .returning({ id: cafes.id })
 
           cafeId = result[0].id

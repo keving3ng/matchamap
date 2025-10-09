@@ -99,6 +99,7 @@ frontend/src/hooks/
 ├── useCafeSelection.ts       # Cafe selection logic
 ├── useVisitedCafes.ts        # Wrapper around store
 ├── useFeatureToggle.ts       # Feature flags
+├── useUserFeatures.ts        # ⭐ User feature toggles (social, accounts)
 └── useLazyData.ts            # ⭐ Lazy loading with cache checking
 ```
 
@@ -644,6 +645,80 @@ const longPressHandlers = useLongPress(() => {
     - About the reviewer
     - How to suggest locations
 
+## User Management & Social Features
+
+### 7. **User Accounts & Authentication**
+
+**Feature Flag:** `ENABLE_USER_ACCOUNTS`
+
+- User registration and login with email/password
+- Email verification system
+- Password reset functionality  
+- JWT-based authentication with secure httpOnly cookies
+- Profile management (display name, avatar, bio)
+- Account roles: `user` (default) and `admin`
+
+### 8. **Social Features**
+
+**Feature Flag:** `ENABLE_USER_SOCIAL` (depends on `ENABLE_USER_ACCOUNTS`)
+
+- User profiles with public activity feeds
+- Cafe check-ins and visit tracking
+- User-generated reviews and ratings
+- Follow/unfollow system (coming soon)
+- Reputation scoring based on review quality
+
+**Use the `useUserFeatures` hook for feature-dependent UI:**
+```tsx
+import { useUserFeatures } from '@/hooks/useUserFeatures'
+
+const MyComponent = () => {
+  const { hasUserAccounts, hasUserSocial } = useUserFeatures()
+  
+  return (
+    <div>
+      {hasUserAccounts && <LoginButton />}
+      {hasUserSocial && <CheckInButton />}
+    </div>
+  )
+}
+```
+
+### 9. **Admin Panel**
+
+**Access:** Protected by Cloudflare Access + admin role verification
+
+**Features:**
+- **User Management**
+  - List all users with search and filtering
+  - View user details, activity, and stats
+  - Role management (promote/demote admin status)
+  - User deletion with cascade data removal
+  - Activity analytics (active users, new registrations)
+
+- **Content Management**
+  - Cafe management (CRUD operations)
+  - Event management
+  - Feed/blog post management
+  - Drink management
+
+- **Analytics Dashboard**
+  - User engagement metrics
+  - Popular cafes and content
+  - System health monitoring
+
+**Admin UI Components:**
+- Built with shared UI component library (`@/components/ui`)
+- Uses centralized copy constants (`COPY.admin.*`)
+- Mobile-responsive design with card-based layouts
+- Real-time loading states and error handling
+
+**Security:**
+- All admin routes require `requireAdminAuth()` middleware
+- Self-protection (admins can't delete/demote themselves)
+- Input validation and SQL injection protection
+- Rate limiting on all endpoints
+
 ## Data Management
 
 ### Backend Architecture (Phase 1+)
@@ -661,11 +736,31 @@ const longPressHandlers = useLongPress(() => {
 - `GET /api/feed` - News feed items
 - `GET /api/events` - Upcoming events
 
-**Admin API (Cloudflare Access protected):**
+**Authentication API:**
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/login` - User login
+- `POST /api/auth/logout` - User logout
+- `POST /api/auth/verify-email` - Email verification
+- `POST /api/auth/forgot-password` - Password reset request
+- `POST /api/auth/reset-password` - Password reset completion
+
+**User API (requires authentication):**
+- `GET /api/profile` - Get user profile
+- `PUT /api/profile` - Update user profile
+- `POST /api/profile/avatar` - Upload avatar
+- `POST /api/checkins` - Record cafe check-in
+- `GET /api/checkins` - User's check-in history
+
+**Admin API (Cloudflare Access + admin role protected):**
 - `POST /api/admin/cafes` - Create cafe
 - `PUT /api/admin/cafes/:id` - Update cafe
 - `DELETE /api/admin/cafes/:id` - Soft delete cafe
 - `GET /api/admin/cafe-stats` - Analytics dashboard
+- `GET /api/admin/users` - List all users (with search/filter)
+- `GET /api/admin/users/:id` - Get user details
+- `PUT /api/admin/users/:id/role` - Update user role
+- `DELETE /api/admin/users/:id` - Delete user account
+- `GET /api/admin/users/stats` - User analytics (active, new, admin counts)
 
 **Analytics API (fire-and-forget):**
 - `POST /api/stats/cafe/:id/:stat` - Track cafe metrics
