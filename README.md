@@ -1,6 +1,30 @@
-# 🍵 MatchaMap 🍵
+# 🍵 MatchaMap
 
-A curated, map-based guide to matcha cafes in Toronto with expert reviews and ratings.
+A mobile-first, map-based guide to matcha cafes in Toronto featuring expert reviews, ratings, and location-based discovery tools.
+
+## ✨ Features
+
+- **Interactive Map** - Explore cafes with location-based discovery and user geolocation
+- **List & Detail Views** - Browse cafes with sorting, filtering, and detailed information
+- **Matcha Passport** - Track your visits and build your matcha journey
+- **News Feed** - Stay updated on new cafes and community news
+- **Events** - Discover matcha-related events and tastings
+- **User Accounts** - Registration, authentication, and profile management
+- **Social Features** - Check-ins, reviews, and community engagement
+- **Admin Panel** - Content management and analytics dashboard
+
+## 🛠️ Tech Stack
+
+- **Frontend**: React 18, Vite, Tailwind CSS, Zustand, Leaflet
+- **Backend**: Cloudflare Workers, D1 (SQLite), Drizzle ORM
+- **Hosting**: Cloudflare Pages + Workers (edge deployment)
+- **TypeScript**: Strict mode throughout
+
+## 🎯 Core Principles
+
+1. **Performance-First** - LCP < 2.5s, bundle < 100KB, optimized for 3G networks
+2. **Mobile-First** - Touch-optimized UI with 44px minimum targets, works one-handed
+3. **Lean & Efficient** - Simple architecture, browser APIs over libraries, aggressive code removal
 
 ## 📁 Monorepo Structure
 
@@ -9,10 +33,17 @@ matchamap/
 ├── frontend/          # React + Vite frontend
 ├── backend/           # Cloudflare Workers API
 ├── shared/            # Shared TypeScript types
-└── docs/             # Project documentation
+└── docs/              # Project documentation
 ```
 
 ## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 22+ (specified in package.json engines)
+- npm workspaces
+- Cloudflare Wrangler CLI (for backend development)
+
+### Installation
 
 ```bash
 # Install all dependencies
@@ -66,11 +97,40 @@ npm run db:push        # Push schema to D1
 npm run db:migrate     # Apply migrations
 ```
 
+### Environment Configuration
+
+**Frontend**: Uses `frontend/src/config/features.yaml` for feature toggles:
+```yaml
+ENABLE_PASSPORT: true
+ENABLE_EVENTS: true
+ENABLE_USER_ACCOUNTS: true
+ENABLE_USER_SOCIAL: true
+```
+
+**Backend**: Configuration in `backend/wrangler.toml`:
+- API base URL via `VITE_API_URL` environment variable
+- Database binding (D1)
+- CORS settings
+
+See [Feature Flags Guide](./docs/feature-flags-guide.md) for details.
+
 ## 📚 Documentation
 
-- [CLAUDE.md](./CLAUDE.md) - Comprehensive development guide
-- [Backend PRD](./docs/backend-prd.md) - Backend architecture and implementation
-- [Metrics Tracking PRD](./docs/metrics-tracking-prd.md) - Analytics implementation
+**Getting Started**
+- [CLAUDE.md](./CLAUDE.md) - Comprehensive development guide for contributors
+- [Quick Start Guide](./docs/QUICKSTART_BACKEND.md) - Backend setup and development
+
+**Architecture & Design**
+- [Tech Spec](./docs/TECH_SPEC.md) - Technical architecture overview
+- [Backend PRD](./docs/backend-prd.md) - Backend implementation details
+- [Social Features](./docs/social-features-prd.md) - Social networking functionality
+- [Metrics Tracking](./docs/metrics-tracking-prd.md) - Analytics implementation
+
+**Operations**
+- [Deployment Guide](./docs/DEPLOYMENT.md) - Production deployment instructions
+- [Deployment Commands](./docs/DEPLOYMENT_COMMANDS.md) - Common deployment commands
+- [Feature Flags](./docs/feature-flags-guide.md) - Managing feature toggles
+- [Google Places Setup](./docs/GOOGLE_PLACES_SETUP.md) - API integration guide
 
 ## 🌐 Deployment
 
@@ -86,13 +146,19 @@ npm run deploy:backend
 cd backend && npm run deploy
 ```
 
-## 🧪 Testing
+## ✅ Quality Checks
 
 ```bash
-npm run test           # Run tests
-npm run typecheck      # Type check all workspaces
+npm run typecheck      # Type check all workspaces (required before commit)
 npm run lint           # Lint frontend code
+npm run build          # Verify builds succeed
 ```
+
+**Pre-commit checklist:**
+1. Run `npm run typecheck` - must pass
+2. Run `npm run build` - must succeed
+3. Test on mobile viewport (320px+)
+4. Verify no console errors
 
 ## 📄 License
 
