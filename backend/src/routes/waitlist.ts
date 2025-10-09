@@ -108,12 +108,17 @@ export async function getWaitlistAdmin(request: IRequest, env: Env): Promise<Res
     // Calculate analytics
     const now = new Date();
     
+    // Helper function to format dates for SQLite (YYYY-MM-DD HH:MM:SS)
+    const toSQLiteDateTime = (date: Date): string => {
+      return date.toISOString().replace('T', ' ').replace(/\.\d{3}Z$/, '');
+    };
+    
     // Daily signups: last 24 hours
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     const dailySignupsResult = await db
       .select({ count: count() })
       .from(waitlist)
-      .where(gte(waitlist.createdAt, oneDayAgo.toISOString()))
+      .where(gte(waitlist.createdAt, toSQLiteDateTime(oneDayAgo)))
       .get();
 
     // Weekly signups: last 7 days
@@ -121,7 +126,7 @@ export async function getWaitlistAdmin(request: IRequest, env: Env): Promise<Res
     const weeklySignupsResult = await db
       .select({ count: count() })
       .from(waitlist)
-      .where(gte(waitlist.createdAt, sevenDaysAgo.toISOString()))
+      .where(gte(waitlist.createdAt, toSQLiteDateTime(sevenDaysAgo)))
       .get();
 
     const analytics = {
