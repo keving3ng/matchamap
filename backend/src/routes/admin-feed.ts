@@ -3,13 +3,14 @@ import { eq, desc, and } from 'drizzle-orm';
 import { Env } from '../types';
 import { getDb, feedItems, NewFeedItem } from '../db';
 import { jsonResponse, errorResponse } from '../utils/response';
+import { HTTP_STATUS, PAGINATION_CONSTANTS, CACHE_CONSTANTS } from '../constants';
 
 // GET /api/admin/feed - Get all feed items (including unpublished)
 export async function listAllFeedItems(request: IRequest, env: Env): Promise<Response> {
   try {
     const url = new URL(request.url);
-    const limit = Math.min(parseInt(url.searchParams.get('limit') || '50'), 200);
-    const offset = parseInt(url.searchParams.get('offset') || '0');
+    const limit = Math.min(parseInt(url.searchParams.get('limit') || PAGINATION_CONSTANTS.ADMIN_FEED_DEFAULT_LIMIT.toString()), PAGINATION_CONSTANTS.ADMIN_FEED_MAX_LIMIT);
+    const offset = parseInt(url.searchParams.get('offset') || PAGINATION_CONSTANTS.DEFAULT_OFFSET.toString());
     const published = url.searchParams.get('published');
 
     const db = getDb(env.DB);
@@ -34,14 +35,14 @@ export async function listAllFeedItems(request: IRequest, env: Env): Promise<Res
 
     return jsonResponse(
       { items, hasMore },
-      200,
+      HTTP_STATUS.OK,
       request as Request,
       env,
-      'no-store' // Don't cache admin data
+      CACHE_CONSTANTS.NO_STORE // Don't cache admin data
     );
   } catch (error) {
     console.error('Error fetching feed items:', error);
-    return errorResponse('Failed to fetch feed items', 500, request as Request, env);
+    return errorResponse('Failed to fetch feed items', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
   }
 }
 
@@ -50,20 +51,20 @@ export async function getFeedItem(request: IRequest, env: Env): Promise<Response
   try {
     const id = parseInt(request.params.id);
     if (isNaN(id)) {
-      return jsonResponse({ error: 'Invalid feed item ID' }, 400, request as Request, env);
+      return jsonResponse({ error: 'Invalid feed item ID' }, HTTP_STATUS.BAD_REQUEST, request as Request, env);
     }
 
     const db = getDb(env.DB);
     const item = await db.select().from(feedItems).where(eq(feedItems.id, id)).get();
 
     if (!item) {
-      return jsonResponse({ error: 'Feed item not found' }, 404, request as Request, env);
+      return jsonResponse({ error: 'Feed item not found' }, HTTP_STATUS.NOT_FOUND, request as Request, env);
     }
 
-    return jsonResponse(item, 200, request as Request, env, 'no-store');
+    return jsonResponse(item, HTTP_STATUS.OK, request as Request, env, CACHE_CONSTANTS.NO_STORE);
   } catch (error) {
     console.error('Error fetching feed item:', error);
-    return errorResponse('Failed to fetch feed item', 500, request as Request, env);
+    return errorResponse('Failed to fetch feed item', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
   }
 }
 
@@ -76,7 +77,7 @@ export async function createFeedItem(request: IRequest, env: Env): Promise<Respo
     if (!body.type || !body.title || !body.preview || !body.date) {
       return jsonResponse(
         { error: 'Missing required fields: type, title, preview, date' },
-        400,
+        HTTP_STATUS.BAD_REQUEST,
         request as Request,
         env
       );
@@ -87,7 +88,7 @@ export async function createFeedItem(request: IRequest, env: Env): Promise<Respo
     if (!validTypes.includes(body.type)) {
       return jsonResponse(
         { error: `Invalid type. Must be one of: ${validTypes.join(', ')}` },
-        400,
+        HTTP_STATUS.BAD_REQUEST,
         request as Request,
         env
       );
@@ -112,10 +113,10 @@ export async function createFeedItem(request: IRequest, env: Env): Promise<Respo
       date: body.date,
     }).returning();
 
-    return jsonResponse(result[0], 201, request as Request, env, 'no-store');
+    return jsonResponse(result[0], HTTP_STATUS.CREATED, request as Request, env, CACHE_CONSTANTS.NO_STORE);
   } catch (error) {
     console.error('Error creating feed item:', error);
-    return errorResponse('Failed to create feed item', 500, request as Request, env);
+    return errorResponse('Failed to create feed item', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
   }
 }
 
@@ -124,7 +125,7 @@ export async function updateFeedItem(request: IRequest, env: Env): Promise<Respo
   try {
     const id = parseInt(request.params.id);
     if (isNaN(id)) {
-      return jsonResponse({ error: 'Invalid feed item ID' }, 400, request as Request, env);
+      return jsonResponse({ error: 'Invalid feed item ID' }, HTTP_STATUS.BAD_REQUEST, request as Request, env);
     }
 
     const body = await request.json() as Partial<NewFeedItem>;
@@ -133,7 +134,7 @@ export async function updateFeedItem(request: IRequest, env: Env): Promise<Respo
     // Check if feed item exists
     const existing = await db.select().from(feedItems).where(eq(feedItems.id, id)).get();
     if (!existing) {
-      return jsonResponse({ error: 'Feed item not found' }, 404, request as Request, env);
+      return jsonResponse({ error: 'Feed item not found' }, HTTP_STATUS.NOT_FOUND, request as Request, env);
     }
 
     // Validate type if provided
@@ -142,7 +143,7 @@ export async function updateFeedItem(request: IRequest, env: Env): Promise<Respo
       if (!validTypes.includes(body.type)) {
         return jsonResponse(
           { error: `Invalid type. Must be one of: ${validTypes.join(', ')}` },
-          400,
+          HTTP_STATUS.BAD_REQUEST,
           request as Request,
           env
         );
@@ -158,10 +159,10 @@ export async function updateFeedItem(request: IRequest, env: Env): Promise<Respo
       .where(eq(feedItems.id, id))
       .returning();
 
-    return jsonResponse(result[0], 200, request as Request, env, 'no-store');
+    return jsonResponse(result[0], HTTP_STATUS.OK, request as Request, env, CACHE_CONSTANTS.NO_STORE);
   } catch (error) {
     console.error('Error updating feed item:', error);
-    return errorResponse('Failed to update feed item', 500, request as Request, env);
+    return errorResponse('Failed to update feed item', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
   }
 }
 
@@ -170,7 +171,7 @@ export async function deleteFeedItem(request: IRequest, env: Env): Promise<Respo
   try {
     const id = parseInt(request.params.id);
     if (isNaN(id)) {
-      return jsonResponse({ error: 'Invalid feed item ID' }, 400, request as Request, env);
+      return jsonResponse({ error: 'Invalid feed item ID' }, HTTP_STATUS.BAD_REQUEST, request as Request, env);
     }
 
     const db = getDb(env.DB);
@@ -178,14 +179,14 @@ export async function deleteFeedItem(request: IRequest, env: Env): Promise<Respo
     // Check if feed item exists
     const existing = await db.select().from(feedItems).where(eq(feedItems.id, id)).get();
     if (!existing) {
-      return jsonResponse({ error: 'Feed item not found' }, 404, request as Request, env);
+      return jsonResponse({ error: 'Feed item not found' }, HTTP_STATUS.NOT_FOUND, request as Request, env);
     }
 
     await db.delete(feedItems).where(eq(feedItems.id, id));
 
-    return jsonResponse({ success: true, message: 'Feed item deleted' }, 200, request as Request, env, 'no-store');
+    return jsonResponse({ success: true, message: 'Feed item deleted' }, HTTP_STATUS.OK, request as Request, env, CACHE_CONSTANTS.NO_STORE);
   } catch (error) {
     console.error('Error deleting feed item:', error);
-    return errorResponse('Failed to delete feed item', 500, request as Request, env);
+    return errorResponse('Failed to delete feed item', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
   }
 }

@@ -1,6 +1,7 @@
 import { IRequest } from 'itty-router';
 import { Env } from '../types';
 import { jsonResponse, errorResponse, badRequestResponse } from '../utils/response';
+import { HTTP_STATUS, CACHE_CONSTANTS } from '../constants';
 
 /**
  * Extract place ID from various Google Maps URL formats
@@ -167,16 +168,16 @@ export async function lookupPlace(request: IRequest, env: Env): Promise<Response
 
     return jsonResponse(
       { place: placeData },
-      200,
+      HTTP_STATUS.OK,
       request as Request,
       env,
-      'no-store'
+      CACHE_CONSTANTS.NO_STORE
     );
   } catch (error) {
     console.error('Error looking up place:', error);
     return errorResponse(
       'Failed to lookup place from Google Maps',
-      500,
+      HTTP_STATUS.INTERNAL_SERVER_ERROR,
       request as Request,
       env
     );

@@ -1,4 +1,5 @@
 import { Env } from '../types';
+import { SECURITY_CONSTANTS } from '../constants';
 
 /**
  * Security headers middleware
@@ -30,7 +31,7 @@ export interface SecurityHeadersOptions {
 const DEFAULT_OPTIONS: SecurityHeadersOptions = {
   contentSecurityPolicy: "default-src 'none'", // API only, no content
   enableHSTS: true,
-  hstsMaxAge: 31536000, // 1 year
+  hstsMaxAge: SECURITY_CONSTANTS.HSTS_MAX_AGE, // 1 year
 };
 
 /**

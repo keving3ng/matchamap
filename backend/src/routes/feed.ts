@@ -3,14 +3,15 @@ import { eq, and, desc } from 'drizzle-orm';
 import { Env } from '../types';
 import { getDb, feedItems } from '../db';
 import { jsonResponse, errorResponse } from '../utils/response';
+import { HTTP_STATUS, PAGINATION_CONSTANTS, CACHE_CONSTANTS } from '../constants';
 
 // GET /api/feed - Get feed items
 export async function listFeedItems(request: IRequest, env: Env): Promise<Response> {
   try {
     const url = new URL(request.url);
     const type = url.searchParams.get('type');
-    const limit = Math.min(parseInt(url.searchParams.get('limit') || '20'), 100);
-    const offset = parseInt(url.searchParams.get('offset') || '0');
+    const limit = Math.min(parseInt(url.searchParams.get('limit') || PAGINATION_CONSTANTS.FEED_DEFAULT_LIMIT.toString()), PAGINATION_CONSTANTS.FEED_MAX_LIMIT);
+    const offset = parseInt(url.searchParams.get('offset') || PAGINATION_CONSTANTS.DEFAULT_OFFSET.toString());
 
     const db = getDb(env.DB);
 
@@ -22,7 +23,7 @@ export async function listFeedItems(request: IRequest, env: Env): Promise<Respon
       if (!validTypes.includes(type)) {
         return jsonResponse(
           { error: 'Invalid type parameter' },
-          400,
+          HTTP_STATUS.BAD_REQUEST,
           request as Request,
           env
         );
@@ -44,13 +45,13 @@ export async function listFeedItems(request: IRequest, env: Env): Promise<Respon
 
     return jsonResponse(
       { items, hasMore },
-      200,
+      HTTP_STATUS.OK,
       request as Request,
       env,
-      'public, max-age=300' // 5 min cache
+      `${CACHE_CONSTANTS.PUBLIC_CACHE}, max-age=${CACHE_CONSTANTS.PUBLIC_CACHE_MAX_AGE}` // 5 min cache
     );
   } catch (error) {
     console.error('Error fetching feed:', error);
-    return errorResponse('Failed to fetch feed', 500, request as Request, env);
+    return errorResponse('Failed to fetch feed', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
   }
 }

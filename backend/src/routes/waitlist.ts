@@ -5,6 +5,7 @@ import { jsonResponse, errorResponse, badRequestResponse } from '../utils/respon
 import { drizzle } from 'drizzle-orm/d1';
 import { waitlist } from '../../drizzle/schema';
 import { safeValidate, waitlistSchema } from '../validators';
+import { HTTP_STATUS } from '../constants';
 
 export async function joinWaitlist(request: IRequest, env: Env): Promise<Response> {
   try {
@@ -35,7 +36,7 @@ export async function joinWaitlist(request: IRequest, env: Env): Promise<Respons
           success: true,
           message: 'You\'re on the waitlist!'
         },
-        200,
+        HTTP_STATUS.OK,
         request as Request,
         env
       );
@@ -52,13 +53,13 @@ export async function joinWaitlist(request: IRequest, env: Env): Promise<Respons
         success: true,
         message: 'You\'re on the waitlist!'
       },
-      201,
+      HTTP_STATUS.CREATED,
       request as Request,
       env
     );
   } catch (error) {
     console.error('Error adding to waitlist:', error);
-    return errorResponse('Failed to join waitlist', 500, request as Request, env);
+    return errorResponse('Failed to join waitlist', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
   }
 }
 

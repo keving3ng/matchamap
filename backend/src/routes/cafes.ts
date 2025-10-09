@@ -8,6 +8,7 @@ import {
   notFoundResponse,
   badRequestResponse,
 } from '../utils/response';
+import { HTTP_STATUS, PAGINATION_CONSTANTS, CACHE_CONSTANTS } from '../constants';
 
 // GET /api/cafes - List cafes with optional filtering
 export async function listCafes(request: IRequest, env: Env): Promise<Response> {
@@ -16,8 +17,8 @@ export async function listCafes(request: IRequest, env: Env): Promise<Response> 
     const city = url.searchParams.get('city'); // Optional - no default
     const minScore = url.searchParams.get('minScore');
     const maxPrice = url.searchParams.get('maxPrice');
-    const limit = Math.min(parseInt(url.searchParams.get('limit') || '500'), 500);
-    const offset = parseInt(url.searchParams.get('offset') || '0');
+    const limit = Math.min(parseInt(url.searchParams.get('limit') || PAGINATION_CONSTANTS.CAFES_DEFAULT_LIMIT.toString()), PAGINATION_CONSTANTS.CAFES_MAX_LIMIT);
+    const offset = parseInt(url.searchParams.get('offset') || PAGINATION_CONSTANTS.DEFAULT_OFFSET.toString());
 
     const db = getDb(env.DB);
 
@@ -89,14 +90,14 @@ export async function listCafes(request: IRequest, env: Env): Promise<Response> 
 
     return jsonResponse(
       response,
-      200,
+      HTTP_STATUS.OK,
       request as Request,
       env,
-      'public, max-age=300' // 5 min cache
+`${CACHE_CONSTANTS.PUBLIC_CACHE}, max-age=${CACHE_CONSTANTS.PUBLIC_CACHE_MAX_AGE}` // 5 min cache
     );
   } catch (error) {
     console.error('Error listing cafes:', error);
-    return errorResponse('Failed to fetch cafes', 500, request as Request, env);
+    return errorResponse('Failed to fetch cafes', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
   }
 }
 
@@ -136,14 +137,14 @@ export async function getCafe(request: IRequest, env: Env): Promise<Response> {
 
     return jsonResponse(
       response,
-      200,
+      HTTP_STATUS.OK,
       request as Request,
       env,
-      'public, max-age=300' // 5 min cache
+`${CACHE_CONSTANTS.PUBLIC_CACHE}, max-age=${CACHE_CONSTANTS.PUBLIC_CACHE_MAX_AGE}` // 5 min cache
     );
   } catch (error) {
     console.error('Error fetching cafe:', error);
-    return errorResponse('Failed to fetch cafe', 500, request as Request, env);
+    return errorResponse('Failed to fetch cafe', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
   }
 }
 
@@ -201,16 +202,16 @@ export async function createCafe(request: IRequest, env: Env): Promise<Response>
 
       return jsonResponse(
         { cafe: updated[0] },
-        201,
+        HTTP_STATUS.CREATED,
         request as Request,
         env,
-        'no-store'
+        CACHE_CONSTANTS.NO_STORE
       );
     }
 
     // If cafe exists and is NOT deleted, return error
     if (existing.length > 0) {
-      return errorResponse('Cafe with this slug already exists', 409, request as Request, env);
+      return errorResponse('Cafe with this slug already exists', HTTP_STATUS.CONFLICT, request as Request, env);
     }
 
     // Otherwise, insert new cafe
@@ -221,14 +222,14 @@ export async function createCafe(request: IRequest, env: Env): Promise<Response>
 
     return jsonResponse(
       { cafe: newCafe[0] },
-      201,
+      HTTP_STATUS.CREATED,
       request as Request,
       env,
-      'no-store'
+      CACHE_CONSTANTS.NO_STORE
     );
   } catch (error) {
     console.error('Error creating cafe:', error);
-    return errorResponse('Failed to create cafe', 500, request as Request, env);
+    return errorResponse('Failed to create cafe', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
   }
 }
 
@@ -299,14 +300,14 @@ export async function updateCafe(request: IRequest, env: Env): Promise<Response>
 
     return jsonResponse(
       { cafe: updated[0] },
-      200,
+      HTTP_STATUS.OK,
       request as Request,
       env,
-      'no-store'
+      CACHE_CONSTANTS.NO_STORE
     );
   } catch (error) {
     console.error('Error updating cafe:', error);
-    return errorResponse('Failed to update cafe', 500, request as Request, env);
+    return errorResponse('Failed to update cafe', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
   }
 }
 
@@ -336,13 +337,13 @@ export async function deleteCafe(request: IRequest, env: Env): Promise<Response>
 
     return jsonResponse(
       { message: 'Cafe deleted successfully' },
-      200,
+      HTTP_STATUS.OK,
       request as Request,
       env,
-      'no-store'
+      CACHE_CONSTANTS.NO_STORE
     );
   } catch (error) {
     console.error('Error deleting cafe:', error);
-    return errorResponse('Failed to delete cafe', 500, request as Request, env);
+    return errorResponse('Failed to delete cafe', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
   }
 }

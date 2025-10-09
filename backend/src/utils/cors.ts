@@ -1,4 +1,5 @@
 import { Env } from '../types';
+import { HTTP_STATUS } from '../constants';
 
 export function getCorsHeaders(request: Request, env: Env): Record<string, string> {
   const origin = request.headers.get('Origin');
@@ -34,7 +35,7 @@ export function getCorsHeaders(request: Request, env: Env): Record<string, strin
 
 export function handleCorsPreflightRequest(request: Request, env: Env): Response {
   return new Response(null, {
-    status: 204,
+    status: HTTP_STATUS.NO_CONTENT,
     headers: getCorsHeaders(request, env),
   });
 }

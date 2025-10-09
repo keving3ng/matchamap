@@ -1,4 +1,5 @@
 import { SignJWT, jwtVerify } from 'jose';
+import { AUTH_CONSTANTS } from '../constants';
 
 /**
  * Authentication utilities for password hashing and JWT management
@@ -11,13 +12,18 @@ import { SignJWT, jwtVerify } from 'jose';
 const ITERATIONS = 100000;
 const KEY_LENGTH = 32;
 const HASH_ALGORITHM = 'SHA-256';
+const SALT_LENGTH = 16;
+const PASSWORD_MAX_LENGTH = 128;
+const EMAIL_MAX_LENGTH = 255;
+const USERNAME_MAX_LENGTH = 30;
+const SESSION_TOKEN_LENGTH = 32;
 
 /**
  * Hash a password using PBKDF2
  */
 export async function hashPassword(password: string): Promise<string> {
   // Generate a random salt
-  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const salt = crypto.getRandomValues(new Uint8Array(SALT_LENGTH));
 
   // Encode the password
   const passwordBuffer = new TextEncoder().encode(password);
@@ -62,8 +68,8 @@ export async function verifyPassword(password: string, hashedPassword: string): 
     const combined = Uint8Array.from(atob(hashedPassword), c => c.charCodeAt(0));
 
     // Extract salt (first 16 bytes) and hash
-    const salt = combined.slice(0, 16);
-    const originalHash = combined.slice(16);
+    const salt = combined.slice(0, SALT_LENGTH);
+    const originalHash = combined.slice(SALT_LENGTH);
 
     // Hash the input password with the same salt
     const passwordBuffer = new TextEncoder().encode(password);
@@ -109,12 +115,12 @@ export async function verifyPassword(password: string, hashedPassword: string): 
  * Password validation rules
  */
 export function validatePassword(password: string): { valid: boolean; error?: string } {
-  if (password.length < 8) {
-    return { valid: false, error: 'Password must be at least 8 characters long' };
+  if (password.length < AUTH_CONSTANTS.PASSWORD_MIN_LENGTH) {
+    return { valid: false, error: `Password must be at least ${AUTH_CONSTANTS.PASSWORD_MIN_LENGTH} characters long` };
   }
 
-  if (password.length > 128) {
-    return { valid: false, error: 'Password must be less than 128 characters' };
+  if (password.length > PASSWORD_MAX_LENGTH) {
+    return { valid: false, error: `Password must be less than ${PASSWORD_MAX_LENGTH} characters` };
   }
 
   // Check for at least one number
@@ -135,19 +141,19 @@ export function validatePassword(password: string): { valid: boolean; error?: st
  */
 export function validateEmail(email: string): boolean {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email) && email.length <= 255;
+  return emailRegex.test(email) && email.length <= EMAIL_MAX_LENGTH;
 }
 
 /**
  * Username validation
  */
 export function validateUsername(username: string): { valid: boolean; error?: string } {
-  if (username.length < 3) {
-    return { valid: false, error: 'Username must be at least 3 characters long' };
+  if (username.length < AUTH_CONSTANTS.USERNAME_MIN_LENGTH) {
+    return { valid: false, error: `Username must be at least ${AUTH_CONSTANTS.USERNAME_MIN_LENGTH} characters long` };
   }
 
-  if (username.length > 30) {
-    return { valid: false, error: 'Username must be less than 30 characters' };
+  if (username.length > USERNAME_MAX_LENGTH) {
+    return { valid: false, error: `Username must be less than ${USERNAME_MAX_LENGTH} characters` };
   }
 
   // Allow alphanumeric, underscores, and hyphens
@@ -208,7 +214,7 @@ export async function verifyToken(token: string, secret: string): Promise<JWTPay
  * Generate a secure random token for sessions
  */
 export function generateSessionToken(): string {
-  const array = new Uint8Array(32);
+  const array = new Uint8Array(SESSION_TOKEN_LENGTH);
   crypto.getRandomValues(array);
   return btoa(String.fromCharCode(...array))
     .replace(/\+/g, '-')

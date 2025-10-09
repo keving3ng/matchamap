@@ -1,6 +1,7 @@
 import { IRequest } from 'itty-router';
 import { Env } from '../types';
 import { errorResponse } from '../utils/response';
+import { RATE_LIMIT_CONSTANTS, HTTP_STATUS } from '../constants';
 
 /**
  * Simple in-memory rate limiter for Cloudflare Workers
@@ -19,12 +20,11 @@ interface RateLimitEntry {
 const rateLimitStore = new Map<string, RateLimitEntry>();
 
 // Clean up old entries every 60 seconds
-const CLEANUP_INTERVAL = 60000;
 let lastCleanup = Date.now();
 
 function cleanup() {
   const now = Date.now();
-  if (now - lastCleanup > CLEANUP_INTERVAL) {
+  if (now - lastCleanup > RATE_LIMIT_CONSTANTS.CLEANUP_INTERVAL_MS) {
     const keysToDelete: string[] = [];
     rateLimitStore.forEach((entry, key) => {
       if (entry.resetAt < now) {
@@ -51,7 +51,7 @@ function getClientId(request: Request): string {
   }
 
   // Last resort: use a hash of user agent (less reliable)
-  return `ua-${request.headers.get('User-Agent')?.slice(0, 50) || 'unknown'}`;
+  return `ua-${request.headers.get('User-Agent')?.slice(0, RATE_LIMIT_CONSTANTS.USER_AGENT_SLICE_LENGTH) || 'unknown'}`;
 }
 
 /**
@@ -60,7 +60,7 @@ function getClientId(request: Request): string {
  * @param maxRequests - Maximum requests allowed in the window
  * @param windowMs - Time window in milliseconds
  */
-export function rateLimit(maxRequests: number, windowMs: number = 60000) {
+export function rateLimit(maxRequests: number, windowMs: number = RATE_LIMIT_CONSTANTS.WINDOW_MS) {
   return async (request: IRequest, env: Env): Promise<Response | void> => {
     cleanup();
 
@@ -88,7 +88,7 @@ export function rateLimit(maxRequests: number, windowMs: number = 60000) {
       const resetIn = Math.ceil((entry.resetAt - now) / 1000);
       return errorResponse(
         `Too many requests. Please try again in ${resetIn} seconds.`,
-        429,
+        HTTP_STATUS.TOO_MANY_REQUESTS,
         request as Request,
         env
       );
@@ -102,14 +102,14 @@ export function rateLimit(maxRequests: number, windowMs: number = 60000) {
  * Preset rate limiters for common use cases
  */
 
-// Strict rate limit for authentication endpoints (200 req/min)
-export const authRateLimit = () => rateLimit(200, 60000);
+// Strict rate limit for authentication endpoints
+export const authRateLimit = () => rateLimit(RATE_LIMIT_CONSTANTS.AUTH_MAX_REQUESTS, RATE_LIMIT_CONSTANTS.WINDOW_MS);
 
-// Medium rate limit for write operations (100 req/min)
-export const writeRateLimit = () => rateLimit(100, 60000);
+// Medium rate limit for write operations
+export const writeRateLimit = () => rateLimit(RATE_LIMIT_CONSTANTS.WRITE_MAX_REQUESTS, RATE_LIMIT_CONSTANTS.WINDOW_MS);
 
-// Generous rate limit for public read endpoints (500 req/min)
-export const publicRateLimit = () => rateLimit(500, 60000);
+// Generous rate limit for public read endpoints
+export const publicRateLimit = () => rateLimit(RATE_LIMIT_CONSTANTS.PUBLIC_MAX_REQUESTS, RATE_LIMIT_CONSTANTS.WINDOW_MS);
 
-// Very strict for sensitive operations (10 req/min)
-export const strictRateLimit = () => rateLimit(10, 60000);
+// Very strict for sensitive operations
+export const strictRateLimit = () => rateLimit(RATE_LIMIT_CONSTANTS.STRICT_MAX_REQUESTS, RATE_LIMIT_CONSTANTS.WINDOW_MS);
