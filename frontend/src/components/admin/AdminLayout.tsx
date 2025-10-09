@@ -13,13 +13,8 @@ interface NavItem {
   path: string
 }
 
-const navItems: NavItem[] = [
-  {
-    id: 'overrides',
-    label: 'Feature Toggles',
-    icon: <ToggleLeft size={20} />,
-    path: '/admin',
-  },
+// Core admin functions - frequently used
+const coreNavItems: NavItem[] = [
   {
     id: 'cafes',
     label: 'Cafes',
@@ -27,10 +22,10 @@ const navItems: NavItem[] = [
     path: '/admin/cafes',
   },
   {
-    id: 'import',
-    label: 'Bulk Import',
-    icon: <Upload size={20} />,
-    path: '/admin/import',
+    id: 'users',
+    label: 'Users',
+    icon: <Users size={20} />,
+    path: '/admin/users',
   },
   {
     id: 'newsfeed',
@@ -45,16 +40,20 @@ const navItems: NavItem[] = [
     path: '/admin/events',
   },
   {
-    id: 'users',
-    label: 'Users',
-    icon: <Users size={20} />,
-    path: '/admin/users',
-  },
-  {
     id: 'waitlist',
     label: 'Waitlist',
     icon: <Mail size={20} />,
     path: '/admin/waitlist',
+  },
+]
+
+// Secondary tools and utilities
+const toolsNavItems: NavItem[] = [
+  {
+    id: 'import',
+    label: 'Bulk Import',
+    icon: <Upload size={20} />,
+    path: '/admin/import',
   },
   {
     id: 'products',
@@ -76,14 +75,25 @@ const navItems: NavItem[] = [
   },
 ]
 
+// Settings and configuration - rarely used
+const settingsNavItems: NavItem[] = [
+  {
+    id: 'settings',
+    label: 'Settings',
+    icon: <Settings size={20} />,
+    path: '/admin/settings',
+  },
+]
+
 export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const navigate = useNavigate()
   const location = useLocation()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const isActive = (path: string) => {
-    if (path === '/admin') {
-      return location.pathname === '/admin'
+    if (path === '/admin/cafes') {
+      // Make cafes active for root /admin path too
+      return location.pathname === '/admin' || location.pathname.startsWith(path)
     }
     return location.pathname.startsWith(path)
   }
@@ -120,27 +130,87 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         </div>
 
         {/* Navigation Items */}
-        <nav className="flex-1 p-4">
-          <ul className="space-y-2">
-            {navItems.map((item) => (
-              <li key={item.id}>
-                <button
-                  onClick={() => {
-                    navigate(item.path)
-                    setMobileMenuOpen(false)
-                  }}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                    isActive(item.path)
-                      ? 'bg-green-100 text-green-700 font-semibold shadow-sm'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  {item.icon}
-                  <span>{item.label}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
+        <nav className="flex-1 p-4 space-y-6">
+          {/* Core Functions Section */}
+          <div>
+            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-2">
+              Core Functions
+            </h3>
+            <ul className="space-y-2">
+              {coreNavItems.map((item) => (
+                <li key={item.id}>
+                  <button
+                    onClick={() => {
+                      navigate(item.path)
+                      setMobileMenuOpen(false)
+                    }}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                      isActive(item.path)
+                        ? 'bg-green-100 text-green-700 font-semibold shadow-sm'
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    {item.icon}
+                    <span>{item.label}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Tools Section */}
+          <div>
+            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-2">
+              Tools & Utilities
+            </h3>
+            <ul className="space-y-2">
+              {toolsNavItems.map((item) => (
+                <li key={item.id}>
+                  <button
+                    onClick={() => {
+                      navigate(item.path)
+                      setMobileMenuOpen(false)
+                    }}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                      isActive(item.path)
+                        ? 'bg-green-100 text-green-700 font-semibold shadow-sm'
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    {item.icon}
+                    <span>{item.label}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Settings Section */}
+          <div>
+            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-2">
+              Configuration
+            </h3>
+            <ul className="space-y-2">
+              {settingsNavItems.map((item) => (
+                <li key={item.id}>
+                  <button
+                    onClick={() => {
+                      navigate(item.path)
+                      setMobileMenuOpen(false)
+                    }}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                      isActive(item.path)
+                        ? 'bg-green-100 text-green-700 font-semibold shadow-sm'
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    {item.icon}
+                    <span>{item.label}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
         </nav>
 
         {/* Sidebar Footer */}
