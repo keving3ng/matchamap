@@ -30,7 +30,12 @@ jobs:
         
       - name: Type check
         run: cd backend && npm run typecheck
-        
+
+      - name: Apply database migrations
+        run: cd backend && npm run db:migrate:prod
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
       - name: Deploy to Cloudflare Workers
         run: cd backend && npx wrangler deploy --env=""
         env:
@@ -38,5 +43,6 @@ jobs:
           
       - name: Deployment status
         run: |
+          echo "✅ Database migrations applied successfully"
           echo "✅ Backend successfully deployed to production"
           echo "🔗 API URL: https://matchamap-api-production.keving3ng.workers.dev"

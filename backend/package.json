@@ -8,8 +8,10 @@
   },
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy --env=\"\"",
-    "deploy:dev": "wrangler deploy --env dev",
+    "deploy": "npm run db:migrate:prod && wrangler deploy --env=\"\"",
+    "deploy:dev": "npm run db:migrate:prod && wrangler deploy --env dev",
+    "deploy:skip-migrations": "wrangler deploy --env=\"\"",
+    "deploy:dev:skip-migrations": "wrangler deploy --env dev",
     "tail": "wrangler tail --env=\"\"",
     "tail:dev": "wrangler tail --env dev",
     "db:create": "wrangler d1 create matchamap-db",
