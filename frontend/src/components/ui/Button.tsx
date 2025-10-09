@@ -10,6 +10,7 @@ interface BaseButtonProps {
   iconPosition?: 'left' | 'right'
   fullWidth?: boolean
   type?: 'button' | 'submit' | 'reset'
+  loading?: boolean
 }
 
 /**
@@ -24,13 +25,14 @@ export const PrimaryButton: React.FC<BaseButtonProps> = ({
   icon: Icon,
   iconPosition = 'left',
   fullWidth = false,
-  type = 'button'
+  type = 'button',
+  loading = false
 }) => {
   return (
     <button
       type={type}
       onClick={onClick}
-      disabled={disabled}
+      disabled={disabled || loading}
       className={`
         bg-gradient-to-r from-green-600 to-green-500
         text-white
@@ -46,12 +48,19 @@ export const PrimaryButton: React.FC<BaseButtonProps> = ({
         focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2
         min-h-[44px]
         ${fullWidth ? 'w-full' : ''}
+        ${loading ? 'cursor-wait' : ''}
         ${className}
       `}
     >
-      {Icon && iconPosition === 'left' && <Icon size={20} />}
-      <span>{children}</span>
-      {Icon && iconPosition === 'right' && <Icon size={20} />}
+      {loading ? (
+        <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
+      ) : (
+        <>
+          {Icon && iconPosition === 'left' && <Icon size={20} />}
+          <span>{children}</span>
+          {Icon && iconPosition === 'right' && <Icon size={20} />}
+        </>
+      )}
     </button>
   )
 }
@@ -68,13 +77,14 @@ export const SecondaryButton: React.FC<BaseButtonProps> = ({
   icon: Icon,
   iconPosition = 'left',
   fullWidth = false,
-  type = 'button'
+  type = 'button',
+  loading = false
 }) => {
   return (
     <button
       type={type}
       onClick={onClick}
-      disabled={disabled}
+      disabled={disabled || loading}
       className={`
         bg-white
         border-2 border-green-300
@@ -90,12 +100,19 @@ export const SecondaryButton: React.FC<BaseButtonProps> = ({
         focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2
         min-h-[44px]
         ${fullWidth ? 'w-full' : ''}
+        ${loading ? 'cursor-wait' : ''}
         ${className}
       `}
     >
-      {Icon && iconPosition === 'left' && <Icon size={20} />}
-      <span>{children}</span>
-      {Icon && iconPosition === 'right' && <Icon size={20} />}
+      {loading ? (
+        <div className="animate-spin rounded-full h-5 w-5 border-2 border-green-600 border-t-transparent" />
+      ) : (
+        <>
+          {Icon && iconPosition === 'left' && <Icon size={20} />}
+          <span>{children}</span>
+          {Icon && iconPosition === 'right' && <Icon size={20} />}
+        </>
+      )}
     </button>
   )
 }
@@ -112,13 +129,14 @@ export const TertiaryButton: React.FC<BaseButtonProps> = ({
   icon: Icon,
   iconPosition = 'left',
   fullWidth = false,
-  type = 'button'
+  type = 'button',
+  loading = false
 }) => {
   return (
     <button
       type={type}
       onClick={onClick}
-      disabled={disabled}
+      disabled={disabled || loading}
       className={`
         bg-gray-100
         text-gray-700
@@ -133,12 +151,19 @@ export const TertiaryButton: React.FC<BaseButtonProps> = ({
         focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2
         min-h-[44px]
         ${fullWidth ? 'w-full' : ''}
+        ${loading ? 'cursor-wait' : ''}
         ${className}
       `}
     >
-      {Icon && iconPosition === 'left' && <Icon size={20} />}
-      <span>{children}</span>
-      {Icon && iconPosition === 'right' && <Icon size={20} />}
+      {loading ? (
+        <div className="animate-spin rounded-full h-5 w-5 border-2 border-gray-700 border-t-transparent" />
+      ) : (
+        <>
+          {Icon && iconPosition === 'left' && <Icon size={20} />}
+          <span>{children}</span>
+          {Icon && iconPosition === 'right' && <Icon size={20} />}
+        </>
+      )}
     </button>
   )
 }
@@ -177,7 +202,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
   return (
     <button
       onClick={onClick}
-      disabled={disabled}
+      disabled={disabled || loading}
       aria-label={ariaLabel}
       className={`
         relative
@@ -189,11 +214,16 @@ export const IconButton: React.FC<IconButtonProps> = ({
         disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100
         focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2
         ${variantStyles[variant]}
+        ${loading ? 'cursor-wait' : ''}
         ${className}
       `}
     >
-      <Icon size={20} className={loading ? 'animate-pulse' : ''} />
-      {badge && (
+      {loading ? (
+        <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent" />
+      ) : (
+        <Icon size={20} />
+      )}
+      {badge && !loading && (
         <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 border-2 border-white rounded-full animate-pulse"></span>
       )}
     </button>
@@ -207,6 +237,7 @@ interface FilterButtonProps {
   icon?: LucideIcon
   hasBadge?: boolean
   className?: string
+  loading?: boolean
 }
 
 /**
@@ -219,11 +250,13 @@ export const FilterButton: React.FC<FilterButtonProps> = ({
   children,
   icon: Icon,
   hasBadge = false,
-  className = ''
+  className = '',
+  loading = false
 }) => {
   return (
     <button
       onClick={onClick}
+      disabled={loading}
       className={`
         relative
         p-2 sm:px-3 sm:py-2
@@ -237,12 +270,19 @@ export const FilterButton: React.FC<FilterButtonProps> = ({
           ? 'bg-green-600 text-white shadow-md'
           : 'bg-green-100 text-green-700 hover:bg-green-200'
         }
+        ${loading ? 'cursor-wait opacity-75' : ''}
         ${className}
       `}
     >
-      {Icon && <Icon size={16} />}
-      <span className="hidden sm:inline">{children}</span>
-      {hasBadge && !active && (
+      {loading ? (
+        <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent" />
+      ) : (
+        <>
+          {Icon && <Icon size={16} />}
+          <span className="hidden sm:inline">{children}</span>
+        </>
+      )}
+      {hasBadge && !active && !loading && (
         <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 border-2 border-white rounded-full"></span>
       )}
     </button>
