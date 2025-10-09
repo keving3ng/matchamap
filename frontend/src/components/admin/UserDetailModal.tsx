@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { X, Mail, Calendar, Shield, CheckCircle, XCircle, MapPin, Instagram, Globe, Clock, Star } from 'lucide-react'
 import { api } from '../../utils/api'
 import type { User, UserProfile } from '../../../../shared/types'
+import { formatDate, formatRelativeTime } from '../../utils/dateFormatter'
 
 interface UserDetailModalProps {
   userId: number
@@ -38,29 +39,6 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, onClos
     }
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  }
-
-  const formatLastActive = (dateString: string | null | undefined) => {
-    if (!dateString) return 'Never'
-    const date = new Date(dateString)
-    const now = new Date()
-    const diffMs = now.getTime() - date.getTime()
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-
-    if (diffDays === 0) return 'Today'
-    if (diffDays === 1) return 'Yesterday'
-    if (diffDays < 7) return `${diffDays} days ago`
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`
-    return formatDate(dateString)
-  }
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[10000] p-4">
@@ -145,7 +123,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, onClos
                     <div>
                       <p className="text-xs text-gray-500">Joined</p>
                       <p className="text-sm font-medium text-gray-900">
-                        {formatDate(userDetails.user.createdAt)}
+                        {formatDate(userDetails.user.createdAt, { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
                   </div>
@@ -154,7 +132,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, onClos
                     <div>
                       <p className="text-xs text-gray-500">Last Active</p>
                       <p className="text-sm font-medium text-gray-900">
-                        {formatLastActive(userDetails.user.lastActiveAt)}
+                        {formatRelativeTime(userDetails.user.lastActiveAt)}
                       </p>
                     </div>
                   </div>
