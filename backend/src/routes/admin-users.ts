@@ -21,25 +21,6 @@ export async function listUsers(request: AuthenticatedRequest, env: Env): Promis
 
     const db = getDb(env.DB);
 
-    // Build base query
-    let query = db
-      .select({
-        id: users.id,
-        email: users.email,
-        username: users.username,
-        role: users.role,
-        isEmailVerified: users.isEmailVerified,
-        lastActiveAt: users.lastActiveAt,
-        createdAt: users.createdAt,
-        displayName: userProfiles.displayName,
-        avatarUrl: userProfiles.avatarUrl,
-        totalCheckins: userProfiles.totalCheckins,
-        totalReviews: userProfiles.totalReviews,
-        reputationScore: userProfiles.reputationScore,
-      })
-      .from(users)
-      .leftJoin(userProfiles, eq(users.id, userProfiles.userId));
-
     // Build WHERE conditions array
     const conditions = [];
 
@@ -60,35 +41,48 @@ export async function listUsers(request: AuthenticatedRequest, env: Env): Promis
       conditions.push(eq(users.role, role));
     }
 
-    // Apply WHERE conditions if any exist
-    if (conditions.length > 0) {
-      query = query.where(conditions.length === 1 ? conditions[0] : and(...conditions));
-    }
+    // Build and execute query with all conditions in one go (fixes TypeScript type narrowing issues)
+    const baseQuery = db
+      .select({
+        id: users.id,
+        email: users.email,
+        username: users.username,
+        role: users.role,
+        isEmailVerified: users.isEmailVerified,
+        lastActiveAt: users.lastActiveAt,
+        createdAt: users.createdAt,
+        displayName: userProfiles.displayName,
+        avatarUrl: userProfiles.avatarUrl,
+        totalCheckins: userProfiles.totalCheckins,
+        totalReviews: userProfiles.totalReviews,
+        reputationScore: userProfiles.reputationScore,
+      })
+      .from(users)
+      .leftJoin(userProfiles, eq(users.id, userProfiles.userId));
 
     // Execute query with pagination and ordering
-    const allUsers = await query
+    const allUsers = await (conditions.length > 0
+      ? baseQuery.where(conditions.length === 1 ? conditions[0] : and(...conditions))
+      : baseQuery
+    )
       .orderBy(desc(users.createdAt))
       .limit(limit)
       .offset(offset)
       .all();
 
-    // Get total count with same filters
-    let countQuery = db.select({ count: count() }).from(users);
-    if (search) {
-      const searchPattern = `%${search}%`;
-      countQuery = countQuery
-        .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
-        .where(
-          or(
-            like(users.email, searchPattern),
-            like(users.username, searchPattern),
-            like(userProfiles.displayName, searchPattern)
+    // Get total count with same filters (build in one go to avoid type issues)
+    const baseCountQuery = db.select({ count: count() }).from(users);
+
+    const countQuery = search
+      ? baseCountQuery
+          .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
+          .where(
+            conditions.length === 1 ? conditions[0] : and(...conditions)
           )
-        );
-    }
-    if (role && (role === 'admin' || role === 'user')) {
-      countQuery = countQuery.where(eq(users.role, role));
-    }
+      : conditions.length > 0
+      ? baseCountQuery.where(conditions.length === 1 ? conditions[0] : and(...conditions))
+      : baseCountQuery;
+
     const totalResult = await countQuery.get();
     const total = totalResult?.count || 0;
 
