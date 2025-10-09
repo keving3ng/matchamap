@@ -4,6 +4,7 @@ import { api } from '../../utils/api'
 import { COPY } from '../../constants/copy'
 import { PrimaryButton, SecondaryButton, StatusBadge } from '../ui'
 import { Skeleton } from '../ui'
+import { formatDate, formatDateForCSV } from '../../utils/dateFormatter'
 
 interface WaitlistEntry {
   id: number
@@ -101,10 +102,10 @@ export const WaitlistPage: React.FC = () => {
       headers.join(','),
       ...data.waitlist.map(entry => [
         entry.email,
-        new Date(entry.createdAt).toLocaleDateString(),
+        formatDateForCSV(entry.createdAt),
         entry.referralSource || '',
         entry.converted ? 'Converted' : 'Pending',
-        entry.convertedAt ? new Date(entry.convertedAt).toLocaleDateString() : ''
+        entry.convertedAt ? formatDateForCSV(entry.convertedAt) : ''
       ].map(field => `"${field}"`).join(','))
     ].join('\n')
 
@@ -119,16 +120,6 @@ export const WaitlistPage: React.FC = () => {
     window.URL.revokeObjectURL(url)
   }
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-  }
 
   if (loading) {
     return (

@@ -403,6 +403,13 @@ export const COPY = {
       daysAgo: (days: number) => `${days} days ago`,
       weeksAgo: (weeks: number) => `${weeks} weeks ago`,
     },
+
+    // Date formatting
+    dateTime: {
+      justNow: 'Just now',
+      minutesAgo: (minutes: number) => `${minutes} minute${minutes === 1 ? '' : 's'} ago`,
+      hoursAgo: (hours: number) => `${hours} hour${hours === 1 ? '' : 's'} ago`,
+    },
   },
 } as const
 

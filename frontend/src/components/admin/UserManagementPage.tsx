@@ -5,6 +5,7 @@ import { useAuthStore } from '../../stores/authStore'
 import { UserDetailModal } from './UserDetailModal'
 import { AlertDialog } from '../../components/ui'
 import { COPY } from '../../constants/copy'
+import { formatDate, formatRelativeTime } from '../../utils/dateFormatter'
 
 export const UserManagementPage: React.FC = () => {
   const { user: currentUser } = useAuthStore()
@@ -103,27 +104,6 @@ export const UserManagementPage: React.FC = () => {
     setViewingUserId(userId)
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    })
-  }
-
-  const formatLastActive = (dateString: string | null) => {
-    if (!dateString) return COPY.admin.userManagement.never
-    const date = new Date(dateString)
-    const now = new Date()
-    const diffMs = now.getTime() - date.getTime()
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-
-    if (diffDays === 0) return COPY.admin.userManagement.today
-    if (diffDays === 1) return COPY.admin.userManagement.yesterday
-    if (diffDays < 7) return COPY.admin.userManagement.daysAgo(diffDays)
-    if (diffDays < 30) return COPY.admin.userManagement.weeksAgo(Math.floor(diffDays / 7))
-    return formatDate(dateString)
-  }
 
   return (
     <div className="p-4 md:p-6">
@@ -314,10 +294,10 @@ export const UserManagementPage: React.FC = () => {
                           {user.totalCheckins} check-ins • {user.totalReviews} reviews
                         </span>
                         <span className="text-xs">
-                          Joined: {formatDate(user.createdAt)}
+                          Joined: {formatDate(user.createdAt, { year: 'numeric', month: 'short', day: 'numeric' })}
                         </span>
                         <span className="text-xs">
-                          Last active: {formatLastActive(user.lastActiveAt)}
+                          Last active: {formatRelativeTime(user.lastActiveAt)}
                         </span>
                       </div>
                     </div>
