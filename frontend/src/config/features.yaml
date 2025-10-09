@@ -65,7 +65,7 @@ ENABLE_CITY_SELECTOR:
 # User authentication and account features like favoriting cafes
 ENABLE_USER_ACCOUNTS:
   dev: true
-  prod: false
+  prod: true
 
 # User Profiles
 # Public user profile pages showing activity and stats
