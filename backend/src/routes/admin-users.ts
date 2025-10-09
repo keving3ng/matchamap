@@ -1,5 +1,5 @@
 import { IRequest } from 'itty-router';
-import { eq, count, desc, sql } from 'drizzle-orm';
+import { eq, count, desc, sql, gte, like, or, and } from 'drizzle-orm';
 import { Env } from '../types';
 import { getDb, users, userProfiles, userCheckins } from '../db';
 import { jsonResponse, errorResponse, badRequestResponse } from '../utils/response';
@@ -12,14 +12,16 @@ import { AuthenticatedRequest } from '../middleware/auth';
 export async function listUsers(request: AuthenticatedRequest, env: Env): Promise<Response> {
   try {
     const url = new URL(request.url);
-    const limit = parseInt(url.searchParams.get('limit') || '50', 10);
-    const offset = parseInt(url.searchParams.get('offset') || '0', 10);
-    const search = url.searchParams.get('search');
+    // Validate and sanitize pagination parameters
+    const limit = Math.min(Math.max(parseInt(url.searchParams.get('limit') || '50', 10), 1), 100);
+    const offset = Math.max(parseInt(url.searchParams.get('offset') || '0', 10), 0);
+    // Validate and sanitize search (limit length for security)
+    const search = url.searchParams.get('search')?.trim().slice(0, 100);
     const role = url.searchParams.get('role'); // 'admin' or 'user'
 
     const db = getDb(env.DB);
 
-    // Build query conditions
+    // Build base query
     let query = db
       .select({
         id: users.id,
@@ -36,34 +38,58 @@ export async function listUsers(request: AuthenticatedRequest, env: Env): Promis
         reputationScore: userProfiles.reputationScore,
       })
       .from(users)
-      .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
-      .orderBy(desc(users.createdAt))
-      .limit(limit)
-      .offset(offset);
+      .leftJoin(userProfiles, eq(users.id, userProfiles.userId));
 
-    // Apply filters
-    // Note: drizzle-orm filtering needs to be done differently
-    // For now, we'll fetch and filter in memory for simplicity
-    let allUsers = await query.all();
+    // Build WHERE conditions array
+    const conditions = [];
 
-    // Apply search filter
+    // Apply search filter at database level
     if (search) {
-      const searchLower = search.toLowerCase();
-      allUsers = allUsers.filter(
-        (u) =>
-          u.email.toLowerCase().includes(searchLower) ||
-          u.username.toLowerCase().includes(searchLower) ||
-          u.displayName?.toLowerCase().includes(searchLower)
+      const searchPattern = `%${search}%`;
+      conditions.push(
+        or(
+          like(users.email, searchPattern),
+          like(users.username, searchPattern),
+          like(userProfiles.displayName, searchPattern)
+        )
       );
     }
 
-    // Apply role filter
+    // Apply role filter at database level
     if (role && (role === 'admin' || role === 'user')) {
-      allUsers = allUsers.filter((u) => u.role === role);
+      conditions.push(eq(users.role, role));
     }
 
-    // Get total count
-    const totalResult = await db.select({ count: count() }).from(users).get();
+    // Apply WHERE conditions if any exist
+    if (conditions.length > 0) {
+      query = query.where(conditions.length === 1 ? conditions[0] : and(...conditions));
+    }
+
+    // Execute query with pagination and ordering
+    const allUsers = await query
+      .orderBy(desc(users.createdAt))
+      .limit(limit)
+      .offset(offset)
+      .all();
+
+    // Get total count with same filters
+    let countQuery = db.select({ count: count() }).from(users);
+    if (search) {
+      const searchPattern = `%${search}%`;
+      countQuery = countQuery
+        .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
+        .where(
+          or(
+            like(users.email, searchPattern),
+            like(users.username, searchPattern),
+            like(userProfiles.displayName, searchPattern)
+          )
+        );
+    }
+    if (role && (role === 'admin' || role === 'user')) {
+      countQuery = countQuery.where(eq(users.role, role));
+    }
+    const totalResult = await countQuery.get();
     const total = totalResult?.count || 0;
 
     return jsonResponse(
@@ -112,7 +138,7 @@ export async function getUserStats(request: AuthenticatedRequest, env: Env): Pro
     const activeResult = await db
       .select({ count: count() })
       .from(users)
-      .where(sql`${users.lastActiveAt} >= ${oneWeekAgoStr}`)
+      .where(gte(users.lastActiveAt, oneWeekAgoStr))
       .get();
     const activeThisWeek = activeResult?.count || 0;
 
@@ -124,7 +150,7 @@ export async function getUserStats(request: AuthenticatedRequest, env: Env): Pro
     const newResult = await db
       .select({ count: count() })
       .from(users)
-      .where(sql`${users.createdAt} >= ${oneMonthAgoStr}`)
+      .where(gte(users.createdAt, oneMonthAgoStr))
       .get();
     const newThisMonth = newResult?.count || 0;
 
