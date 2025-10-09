@@ -1,7 +1,7 @@
 import { IRequest } from 'itty-router'
 import { drizzle } from 'drizzle-orm/d1'
 import { eq, isNull, inArray } from 'drizzle-orm'
-import { cafes, drinks } from '../../drizzle/schema'
+import { cafes, drinks, type NewCafe } from '../../drizzle/schema'
 import { Env } from '../types'
 import { jsonResponse, badRequestResponse, errorResponse } from '../utils/response'
 import { enrichCafeFromGoogleMaps } from '../utils/placesEnrichment'
@@ -97,27 +97,29 @@ export async function bulkImportCafes(request: IRequest, env: Env) {
             .where(eq(cafes.id, cafeId))
         } else {
           // Create new cafe
+          const newCafeData: NewCafe = {
+            name: enrichedCafe.name,
+            slug: enrichedCafe.slug,
+            link: enrichedCafe.link,
+            address: enrichedCafe.address || null,
+            latitude: enrichedCafe.latitude,
+            longitude: enrichedCafe.longitude,
+            city: enrichedCafe.city,
+            ambianceScore: enrichedCafe.ambianceScore ?? null,
+            chargeForAltMilk: enrichedCafe.chargeForAltMilk ?? null,
+            quickNote: enrichedCafe.quickNote,
+            review: enrichedCafe.review || null,
+            source: enrichedCafe.source || null,
+            hours: enrichedCafe.hours || null,
+            instagram: enrichedCafe.instagram || null,
+            instagramPostLink: enrichedCafe.instagramPostLink || null,
+            tiktokPostLink: enrichedCafe.tiktokPostLink || null,
+            images: enrichedCafe.images || null,
+          }
+
           const result = await db
             .insert(cafes)
-            .values({
-              name: enrichedCafe.name,
-              slug: enrichedCafe.slug,
-              link: enrichedCafe.link,
-              address: enrichedCafe.address || null,
-              latitude: enrichedCafe.latitude,
-              longitude: enrichedCafe.longitude,
-              city: enrichedCafe.city,
-              ambianceScore: enrichedCafe.ambianceScore ?? null,
-              chargeForAltMilk: enrichedCafe.chargeForAltMilk ?? null,
-              quickNote: enrichedCafe.quickNote,
-              review: enrichedCafe.review || null,
-              source: enrichedCafe.source || null,
-              hours: enrichedCafe.hours || null,
-              instagram: enrichedCafe.instagram || null,
-              instagramPostLink: enrichedCafe.instagramPostLink || null,
-              tiktokPostLink: enrichedCafe.tiktokPostLink || null,
-              images: enrichedCafe.images || null,
-            })
+            .values(newCafeData)
             .returning({ id: cafes.id })
 
           cafeId = result[0].id
