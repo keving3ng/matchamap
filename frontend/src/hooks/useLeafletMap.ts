@@ -50,10 +50,20 @@ export const useLeafletMap = ({
       boxZoom: false,
     })
 
-    // Add tile layer
+    // Add tile layer with optimized preloading
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors, © CARTO',
       maxZoom: 19,
+      minZoom: 10, // Prevent excessive zoom out for Toronto area
+      keepBuffer: 4, // Keep 4 tiles outside viewport (default: 2) - balances UX and performance
+      updateWhenIdle: false, // Update tiles while dragging for smoother experience
+      updateWhenZooming: false, // Don't update during zoom transitions
+      updateInterval: 150, // Throttle tile updates during movement (default: 200ms)
+      // Bounds restriction to Toronto area to prevent unnecessary tile loading
+      bounds: [
+        [43.5, -79.7], // Southwest corner (slightly south and west of Toronto)
+        [43.9, -79.0]  // Northeast corner (slightly north and east of Toronto)
+      ]
     }).addTo(map)
 
     mapRef.current = map
