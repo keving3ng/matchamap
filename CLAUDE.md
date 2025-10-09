@@ -886,11 +886,11 @@ export const CafeList = () => {}
 // tailwind.config.js
 colors: {
   matcha: {
-    50: '#f0f7e9',
-    100: '#e1efd3',
+    50: '#e8f5eb',
+    100: '#d1ebd7',
     // ... full scale
-    500: '#7cb342',  // Primary
-    600: '#689f38',
+    500: '#51aa63',  // Primary
+    600: '#418853',
     // ... to 900
   },
   cream: { /* ... */ },
@@ -904,7 +904,7 @@ colors: {
 <div className="bg-matcha-500 text-cream-50">
 
 // ❌ BAD - Arbitrary values
-<div className="bg-[#7cb342] text-[#faf7f2]">
+<div className="bg-[#51aa63] text-[#faf7f2]">
 ```
 
 **Animation Philosophy:**
@@ -1201,9 +1201,9 @@ await env.DB.prepare(`
 
 ### Color Palette
 
--   Primary Matcha: `#7cb342`
--   Light Matcha: `#aed581`
--   Dark Matcha: `#558b2f`
+-   Primary Matcha: `#51aa63`
+-   Light Matcha: `#82ca94`
+-   Dark Matcha: `#356e44`
 -   Cream Background: `#faf7f2`
 -   Charcoal Text: `#2e2e2e`
 -   Accent Pink: `#f8bbd9`
