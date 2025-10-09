@@ -11,7 +11,7 @@ import { listAllEvents, getEvent, createEvent, updateEvent, deleteEvent } from '
 import { lookupPlace } from './routes/places';
 import { bulkImportCafes, exportCafes } from './routes/import';
 import { register, login, logout, getCurrentUser, refreshToken } from './routes/auth';
-import { joinWaitlist } from './routes/waitlist';
+import { joinWaitlist, getWaitlistAdmin } from './routes/waitlist';
 import { getUserProfile, getMyProfile, updateMyProfile, uploadAvatar } from './routes/profile';
 import { listUsers, getUserStats, getUser, updateUserRole, deleteUser } from './routes/admin-users';
 import { requireAuth, requireAdminAuth } from './middleware/auth';
@@ -76,6 +76,9 @@ router.get('/api/admin/events/:id', publicRateLimit(), requireAdminAuth(), getEv
 router.post('/api/admin/events', writeRateLimit(), requireAdminAuth(), createEvent);
 router.put('/api/admin/events/:id', writeRateLimit(), requireAdminAuth(), updateEvent);
 router.delete('/api/admin/events/:id', writeRateLimit(), requireAdminAuth(), deleteEvent);
+
+// Waitlist admin endpoints
+router.get('/api/admin/waitlist', publicRateLimit(), requireAdminAuth(), getWaitlistAdmin);
 
 // User admin endpoints
 router.get('/api/admin/users/stats', publicRateLimit(), requireAdminAuth(), getUserStats);

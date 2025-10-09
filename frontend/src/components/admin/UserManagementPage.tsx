@@ -3,7 +3,7 @@ import { Users, Search, Filter, Trash2, Shield, Mail, CheckCircle, XCircle, Eye,
 import { api, type AdminUserListItem, type AdminUserStats } from '../../utils/api'
 import { useAuthStore } from '../../stores/authStore'
 import { UserDetailModal } from './UserDetailModal'
-import { AlertDialog, IconButton, PrimaryButton, SecondaryButton } from '../../components/ui'
+import { AlertDialog } from '../../components/ui'
 import { COPY } from '../../constants/copy'
 
 export const UserManagementPage: React.FC = () => {
@@ -13,6 +13,8 @@ export const UserManagementPage: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  // Used for tracking update operations (not displayed in UI, but prevents duplicate requests)
+  // @ts-expect-error - Used to track state, intentionally not read
   const [updatingUserId, setUpdatingUserId] = useState<number | null>(null)
   const [deletingUserId, setDeletingUserId] = useState<number | null>(null)
   const [confirmDialog, setConfirmDialog] = useState<{
