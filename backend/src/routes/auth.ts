@@ -12,6 +12,7 @@ import {
 } from '../utils/auth';
 import { AuthenticatedRequest } from '../middleware/auth';
 import { safeValidate, registerSchema, loginSchema, refreshTokenSchema } from '../validators';
+import { AUTH_CONSTANTS, HTTP_STATUS, JWT_EXPIRY } from '../constants';
 
 /**
  * POST /api/auth/register
@@ -90,13 +91,13 @@ export async function register(request: IRequest, env: Env): Promise<Response> {
         message: 'User registered successfully',
         user: userWithoutPassword,
       },
-      201,
+      HTTP_STATUS.CREATED,
       request as Request,
       env
     );
   } catch (error) {
     console.error('Registration error:', error);
-    return errorResponse('Registration failed', 500, request as Request, env);
+    return errorResponse('Registration failed', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
   }
 }
 
@@ -126,14 +127,14 @@ export async function login(request: IRequest, env: Env): Promise<Response> {
       .get();
 
     if (!user) {
-      return errorResponse('Invalid email or password', 401, request as Request, env);
+      return errorResponse('Invalid email or password', HTTP_STATUS.UNAUTHORIZED, request as Request, env);
     }
 
     // Verify password
     const isValid = await verifyPassword(password, user.passwordHash);
 
     if (!isValid) {
-      return errorResponse('Invalid email or password', 401, request as Request, env);
+      return errorResponse('Invalid email or password', HTTP_STATUS.UNAUTHORIZED, request as Request, env);
     }
 
     // Generate JWT token
@@ -144,12 +145,12 @@ export async function login(request: IRequest, env: Env): Promise<Response> {
       role: user.role,
     };
 
-    const accessToken = await signToken(tokenPayload, env.JWT_SECRET, '1h');
-    const refreshToken = await signToken(tokenPayload, env.JWT_SECRET, '7d');
+    const accessToken = await signToken(tokenPayload, env.JWT_SECRET, JWT_EXPIRY.ACCESS_TOKEN);
+    const refreshToken = await signToken(tokenPayload, env.JWT_SECRET, JWT_EXPIRY.REFRESH_TOKEN);
 
     // Store session
     const sessionToken = generateSessionToken();
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(); // 7 days
+    const expiresAt = new Date(Date.now() + AUTH_CONSTANTS.SESSION_EXPIRY_MS).toISOString();
 
     await db.insert(sessions).values({
       userId: user.id,
@@ -166,13 +167,13 @@ export async function login(request: IRequest, env: Env): Promise<Response> {
         refreshToken,
         user: userWithoutPassword,
       },
-      200,
+      HTTP_STATUS.OK,
       request as Request,
       env
     );
   } catch (error) {
     console.error('Login error:', error);
-    return errorResponse('Login failed', 500, request as Request, env);
+    return errorResponse('Login failed', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
   }
 }
 
@@ -192,13 +193,13 @@ export async function logout(request: AuthenticatedRequest, env: Env): Promise<R
 
     return jsonResponse(
       { message: 'Logged out successfully' },
-      200,
+      HTTP_STATUS.OK,
       request as Request,
       env
     );
   } catch (error) {
     console.error('Logout error:', error);
-    return errorResponse('Logout failed', 500, request as Request, env);
+    return errorResponse('Logout failed', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
   }
 }
 
@@ -209,7 +210,7 @@ export async function logout(request: AuthenticatedRequest, env: Env): Promise<R
 export async function getCurrentUser(request: AuthenticatedRequest, env: Env): Promise<Response> {
   try {
     if (!request.user) {
-      return errorResponse('Not authenticated', 401, request as Request, env);
+      return errorResponse('Not authenticated', HTTP_STATUS.UNAUTHORIZED, request as Request, env);
     }
 
     const db = getDb(env.DB);
@@ -222,16 +223,16 @@ export async function getCurrentUser(request: AuthenticatedRequest, env: Env): P
       .get();
 
     if (!user) {
-      return errorResponse('User not found', 404, request as Request, env);
+      return errorResponse('User not found', HTTP_STATUS.NOT_FOUND, request as Request, env);
     }
 
     // Return user without password hash
     const { passwordHash: _, ...userWithoutPassword } = user;
 
-    return jsonResponse({ user: userWithoutPassword }, 200, request as Request, env);
+    return jsonResponse({ user: userWithoutPassword }, HTTP_STATUS.OK, request as Request, env);
   } catch (error) {
     console.error('Get current user error:', error);
-    return errorResponse('Failed to get user info', 500, request as Request, env);
+    return errorResponse('Failed to get user info', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
   }
 }
 
@@ -254,15 +255,15 @@ export async function refreshToken(request: IRequest, env: Env): Promise<Respons
     const payload = await verifyToken(validation.data.refreshToken, env.JWT_SECRET);
 
     if (!payload) {
-      return errorResponse('Invalid or expired refresh token', 401, request as Request, env);
+      return errorResponse('Invalid or expired refresh token', HTTP_STATUS.UNAUTHORIZED, request as Request, env);
     }
 
     // Generate new access token
-    const accessToken = await signToken(payload, env.JWT_SECRET, '1h');
+    const accessToken = await signToken(payload, env.JWT_SECRET, JWT_EXPIRY.ACCESS_TOKEN);
 
-    return jsonResponse({ accessToken }, 200, request as Request, env);
+    return jsonResponse({ accessToken }, HTTP_STATUS.OK, request as Request, env);
   } catch (error) {
     console.error('Refresh token error:', error);
-    return errorResponse('Token refresh failed', 500, request as Request, env);
+    return errorResponse('Token refresh failed', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
   }
 }

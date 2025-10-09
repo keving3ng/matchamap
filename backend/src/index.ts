@@ -2,6 +2,7 @@ import { Router } from 'itty-router';
 import { Env } from './types';
 import { handleCorsPreflightRequest } from './utils/cors';
 import { handleHealth } from './routes/health';
+import { HTTP_STATUS } from './constants';
 import { listCafes, getCafe, createCafe, updateCafe, deleteCafe } from './routes/cafes';
 import { listDrinks, createDrink, updateDrink, deleteDrink } from './routes/drinks';
 import { listFeedItems } from './routes/feed';
@@ -86,11 +87,11 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     try {
       const response = await router.fetch(request, env);
-      return response || new Response('Not Found', { status: 404 });
+      return response || new Response('Not Found', { status: HTTP_STATUS.NOT_FOUND });
     } catch (error) {
       console.error('Unhandled error:', error);
       return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
-        status: 500,
+        status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
         headers: { 'Content-Type': 'application/json' }
       });
     }

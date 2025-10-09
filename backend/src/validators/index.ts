@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { AUTH_CONSTANTS } from '../constants';
 
 /**
  * Validation schemas using Zod for API input validation
@@ -14,7 +15,7 @@ export const emailSchema = z
 // Password validation
 export const passwordSchema = z
   .string()
-  .min(8, 'Password must be at least 8 characters')
+  .min(AUTH_CONSTANTS.PASSWORD_MIN_LENGTH, `Password must be at least ${AUTH_CONSTANTS.PASSWORD_MIN_LENGTH} characters`)
   .max(128, 'Password must be less than 128 characters')
   .regex(/[0-9]/, 'Password must contain at least one number')
   .regex(/[a-zA-Z]/, 'Password must contain at least one letter');
@@ -22,8 +23,8 @@ export const passwordSchema = z
 // Username validation
 export const usernameSchema = z
   .string()
-  .min(3, 'Username must be at least 3 characters')
-  .max(30, 'Username must be less than 30 characters')
+  .min(AUTH_CONSTANTS.USERNAME_MIN_LENGTH, `Username must be at least ${AUTH_CONSTANTS.USERNAME_MIN_LENGTH} characters`)
+  .max(AUTH_CONSTANTS.USERNAME_MAX_LENGTH, `Username must be less than ${AUTH_CONSTANTS.USERNAME_MAX_LENGTH} characters`)
   .regex(/^[a-zA-Z0-9_-]+$/, 'Username can only contain letters, numbers, underscores, and hyphens');
 
 // Auth schemas

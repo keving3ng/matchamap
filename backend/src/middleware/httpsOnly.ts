@@ -1,6 +1,7 @@
 import { IRequest } from 'itty-router';
 import { Env } from '../types';
 import { errorResponse } from '../utils/response';
+import { HTTP_STATUS } from '../constants';
 
 /**
  * HTTPS enforcement middleware
@@ -24,7 +25,7 @@ export function requireHTTPS() {
     if (proto !== 'https') {
       return errorResponse(
         'HTTPS required. Please use https:// instead of http://',
-        403,
+        HTTP_STATUS.FORBIDDEN,
         request as Request,
         env
       );
@@ -55,7 +56,7 @@ export function redirectToHTTPS() {
       const httpsUrl = new URL(request.url);
       httpsUrl.protocol = 'https:';
 
-      return Response.redirect(httpsUrl.toString(), 301); // Permanent redirect
+      return Response.redirect(httpsUrl.toString(), HTTP_STATUS.MOVED_PERMANENTLY); // Permanent redirect
     }
 
     return undefined;

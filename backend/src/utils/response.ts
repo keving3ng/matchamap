@@ -1,10 +1,11 @@
 import { Env } from '../types';
 import { getCorsHeaders } from './cors';
 import { getSecurityHeaders } from '../middleware/securityHeaders';
+import { HTTP_STATUS, CACHE_CONSTANTS } from '../constants';
 
 export function jsonResponse(
   data: unknown,
-  status = 200,
+  status = HTTP_STATUS.OK,
   request: Request,
   env: Env,
   cacheControl?: string
@@ -27,21 +28,21 @@ export function jsonResponse(
 
 export function errorResponse(
   error: string,
-  status = 400,
+  status = HTTP_STATUS.BAD_REQUEST,
   request: Request,
   env: Env
 ): Response {
-  return jsonResponse({ error }, status, request, env, 'no-store');
+  return jsonResponse({ error }, status, request, env, CACHE_CONSTANTS.NO_STORE);
 }
 
 export function notFoundResponse(request: Request, env: Env): Response {
-  return errorResponse('Not found', 404, request, env);
+  return errorResponse('Not found', HTTP_STATUS.NOT_FOUND, request, env);
 }
 
 export function badRequestResponse(message: string, request: Request, env: Env): Response {
-  return errorResponse(message, 400, request, env);
+  return errorResponse(message, HTTP_STATUS.BAD_REQUEST, request, env);
 }
 
 export function serverErrorResponse(request: Request, env: Env): Response {
-  return errorResponse('Internal server error', 500, request, env);
+  return errorResponse('Internal server error', HTTP_STATUS.INTERNAL_SERVER_ERROR, request, env);
 }

@@ -4,6 +4,7 @@ import { eq, isNull, inArray } from 'drizzle-orm'
 import { cafes, drinks } from '../../drizzle/schema'
 import { Env } from '../types'
 import { jsonResponse, badRequestResponse, errorResponse } from '../utils/response'
+import { HTTP_STATUS, CACHE_CONSTANTS } from '../constants'
 import { enrichCafeFromGoogleMaps } from '../utils/placesEnrichment'
 import {
   bulkImportSchema,
@@ -158,13 +159,13 @@ export async function bulkImportCafes(request: IRequest, env: Env) {
         message: `Imported ${successCount} cafe(s), ${failedCount} failed`,
         errors: errors.length > 0 ? errors : undefined,
       },
-      200,
+      HTTP_STATUS.OK,
       request as Request,
       env
     )
   } catch (error) {
     console.error('Bulk import error:', error)
-    return errorResponse((error as Error).message, 500, request as Request, env)
+    return errorResponse((error as Error).message, HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env)
   }
 }
 
@@ -239,13 +240,13 @@ export async function exportCafes(request: IRequest, env: Env) {
 
     return jsonResponse(
       { cafes: exportData },
-      200,
+      HTTP_STATUS.OK,
       request as Request,
       env,
-      'no-store'
+      CACHE_CONSTANTS.NO_STORE
     )
   } catch (error) {
     console.error('Export error:', error)
-    return errorResponse((error as Error).message, 500, request as Request, env)
+    return errorResponse((error as Error).message, HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env)
   }
 }

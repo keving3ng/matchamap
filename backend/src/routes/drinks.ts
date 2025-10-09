@@ -8,6 +8,7 @@ import {
   notFoundResponse,
   badRequestResponse,
 } from '../utils/response';
+import { HTTP_STATUS, CACHE_CONSTANTS } from '../constants';
 
 // GET /api/admin/cafes/:cafeId/drinks - List drinks for a cafe
 export async function listDrinks(request: IRequest, env: Env): Promise<Response> {
@@ -39,14 +40,14 @@ export async function listDrinks(request: IRequest, env: Env): Promise<Response>
 
     return jsonResponse(
       { drinks: drinksList },
-      200,
+      HTTP_STATUS.OK,
       request as Request,
       env,
-      'no-store'
+      CACHE_CONSTANTS.NO_STORE
     );
   } catch (error) {
     console.error('Error listing drinks:', error);
-    return errorResponse('Failed to fetch drinks', 500, request as Request, env);
+    return errorResponse('Failed to fetch drinks', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
   }
 }
 
@@ -107,14 +108,14 @@ export async function createDrink(request: IRequest, env: Env): Promise<Response
 
     return jsonResponse(
       { drink: newDrink[0] },
-      201,
+      HTTP_STATUS.CREATED,
       request as Request,
       env,
-      'no-store'
+      CACHE_CONSTANTS.NO_STORE
     );
   } catch (error) {
     console.error('Error creating drink:', error);
-    return errorResponse('Failed to create drink', 500, request as Request, env);
+    return errorResponse('Failed to create drink', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
   }
 }
 
@@ -165,14 +166,14 @@ export async function updateDrink(request: IRequest, env: Env): Promise<Response
 
     return jsonResponse(
       { drink: updated[0] },
-      200,
+      HTTP_STATUS.OK,
       request as Request,
       env,
-      'no-store'
+      CACHE_CONSTANTS.NO_STORE
     );
   } catch (error) {
     console.error('Error updating drink:', error);
-    return errorResponse('Failed to update drink', 500, request as Request, env);
+    return errorResponse('Failed to update drink', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
   }
 }
 
@@ -197,13 +198,13 @@ export async function deleteDrink(request: IRequest, env: Env): Promise<Response
 
     return jsonResponse(
       { message: 'Drink deleted successfully' },
-      200,
+      HTTP_STATUS.OK,
       request as Request,
       env,
-      'no-store'
+      CACHE_CONSTANTS.NO_STORE
     );
   } catch (error) {
     console.error('Error deleting drink:', error);
-    return errorResponse('Failed to delete drink', 500, request as Request, env);
+    return errorResponse('Failed to delete drink', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
   }
 }

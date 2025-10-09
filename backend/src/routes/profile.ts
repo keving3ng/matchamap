@@ -11,6 +11,7 @@ import {
   validateSocialUsername,
   validateUrl,
 } from '../utils/validation';
+import { HTTP_STATUS } from '../constants';
 
 /**
  * GET /api/users/:username/profile
@@ -34,7 +35,7 @@ export async function getUserProfile(request: IRequest, env: Env): Promise<Respo
       .get();
 
     if (!user) {
-      return errorResponse('User not found', 404, request as Request, env);
+      return errorResponse('User not found', HTTP_STATUS.NOT_FOUND, request as Request, env);
     }
 
     // Get user profile (create default if doesn't exist)
@@ -60,7 +61,7 @@ export async function getUserProfile(request: IRequest, env: Env): Promise<Respo
     const isOwnProfile = requestUser && requestUser.userId === user.id;
 
     if (!profile.isPublic && !isOwnProfile) {
-      return errorResponse('This profile is private', 403, request as Request, env);
+      return errorResponse('This profile is private', HTTP_STATUS.FORBIDDEN, request as Request, env);
     }
 
     // Parse preferences JSON
@@ -114,10 +115,10 @@ export async function getUserProfile(request: IRequest, env: Env): Promise<Respo
       },
     };
 
-    return jsonResponse(publicProfile, 200, request as Request, env);
+    return jsonResponse(publicProfile, HTTP_STATUS.OK, request as Request, env);
   } catch (error) {
     console.error('Get user profile error:', error);
-    return errorResponse('Failed to get user profile', 500, request as Request, env);
+    return errorResponse('Failed to get user profile', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
   }
 }
 
@@ -128,7 +129,7 @@ export async function getUserProfile(request: IRequest, env: Env): Promise<Respo
 export async function getMyProfile(request: AuthenticatedRequest, env: Env): Promise<Response> {
   try {
     if (!request.user) {
-      return errorResponse('Not authenticated', 401, request as Request, env);
+      return errorResponse('Not authenticated', HTTP_STATUS.UNAUTHORIZED, request as Request, env);
     }
 
     const db = getDb(env.DB);
@@ -141,7 +142,7 @@ export async function getMyProfile(request: AuthenticatedRequest, env: Env): Pro
       .get();
 
     if (!user) {
-      return errorResponse('User not found', 404, request as Request, env);
+      return errorResponse('User not found', HTTP_STATUS.NOT_FOUND, request as Request, env);
     }
 
     // Get profile (create if doesn't exist)
@@ -200,10 +201,10 @@ export async function getMyProfile(request: AuthenticatedRequest, env: Env): Pro
       },
     };
 
-    return jsonResponse(fullProfile, 200, request as Request, env);
+    return jsonResponse(fullProfile, HTTP_STATUS.OK, request as Request, env);
   } catch (error) {
     console.error('Get my profile error:', error);
-    return errorResponse('Failed to get profile', 500, request as Request, env);
+    return errorResponse('Failed to get profile', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
   }
 }
 
@@ -217,7 +218,7 @@ export async function updateMyProfile(
 ): Promise<Response> {
   try {
     if (!request.user) {
-      return errorResponse('Not authenticated', 401, request as Request, env);
+      return errorResponse('Not authenticated', HTTP_STATUS.UNAUTHORIZED, request as Request, env);
     }
 
     const body = (await request.json()) as Record<string, any>;
@@ -335,13 +336,13 @@ export async function updateMyProfile(
         ...updatedProfile,
         preferences,
       },
-      200,
+      HTTP_STATUS.OK,
       request as Request,
       env
     );
   } catch (error) {
     console.error('Update profile error:', error);
-    return errorResponse('Failed to update profile', 500, request as Request, env);
+    return errorResponse('Failed to update profile', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
   }
 }
 
@@ -353,14 +354,14 @@ export async function updateMyProfile(
 export async function uploadAvatar(request: AuthenticatedRequest, env: Env): Promise<Response> {
   try {
     if (!request.user) {
-      return errorResponse('Not authenticated', 401, request as Request, env);
+      return errorResponse('Not authenticated', HTTP_STATUS.UNAUTHORIZED, request as Request, env);
     }
 
     // TODO: Implement Cloudflare Images upload
     // For now, return placeholder
-    return errorResponse('Avatar upload not yet implemented', 501, request as Request, env);
+    return errorResponse('Avatar upload not yet implemented', HTTP_STATUS.NOT_IMPLEMENTED, request as Request, env);
   } catch (error) {
     console.error('Upload avatar error:', error);
-    return errorResponse('Failed to upload avatar', 500, request as Request, env);
+    return errorResponse('Failed to upload avatar', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
   }
 }

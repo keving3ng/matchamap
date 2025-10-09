@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { VALIDATION_CONSTANTS, AUTH_CONSTANTS } from '../constants'
 
 // Constants for magic strings
 export const DEFAULT_DRINK_NAME = 'Iced Matcha Latte'
@@ -9,7 +10,7 @@ export const DEFAULT_CITY = 'toronto'
  */
 export const drinkSchema = z.object({
   name: z.string().nullable().optional(),
-  score: z.number().min(0).max(10),
+  score: z.number().min(VALIDATION_CONSTANTS.SCORE_MIN).max(VALIDATION_CONSTANTS.SCORE_MAX),
   priceAmount: z.number().nullable().optional(),
   priceCurrency: z.string().nullable().optional(),
   gramsUsed: z.number().nullable().optional(),
@@ -28,7 +29,7 @@ export const cafeSchema = z.object({
   latitude: z.number().optional(),
   longitude: z.number().optional(),
   city: z.string().min(1, 'City is required'),
-  ambianceScore: z.number().min(0).max(10).nullable().optional(),
+  ambianceScore: z.number().min(VALIDATION_CONSTANTS.SCORE_MIN).max(VALIDATION_CONSTANTS.SCORE_MAX).nullable().optional(),
   chargeForAltMilk: z.number().min(0).nullable().optional(),
   quickNote: z.string().min(1, 'Quick note is required'),
   review: z.string().optional(),
@@ -70,12 +71,12 @@ export function validateUsername(username: string): { valid: boolean; error?: st
 
   const trimmed = username.trim()
 
-  if (trimmed.length < 3) {
-    return { valid: false, error: 'Username must be at least 3 characters' }
+  if (trimmed.length < AUTH_CONSTANTS.USERNAME_MIN_LENGTH) {
+    return { valid: false, error: `Username must be at least ${AUTH_CONSTANTS.USERNAME_MIN_LENGTH} characters` }
   }
 
-  if (trimmed.length > 20) {
-    return { valid: false, error: 'Username must be 20 characters or less' }
+  if (trimmed.length > AUTH_CONSTANTS.USERNAME_MAX_LENGTH) {
+    return { valid: false, error: `Username must be ${AUTH_CONSTANTS.USERNAME_MAX_LENGTH} characters or less` }
   }
 
   if (!/^[a-zA-Z0-9_]+$/.test(trimmed)) {
@@ -168,8 +169,8 @@ export function validateDisplayName(displayName: string | null): { valid: boolea
     return { valid: true } // Empty is OK
   }
 
-  if (trimmed.length > 50) {
-    return { valid: false, error: 'Display name must be 50 characters or less' }
+  if (trimmed.length > AUTH_CONSTANTS.DISPLAY_NAME_MAX_LENGTH) {
+    return { valid: false, error: `Display name must be ${AUTH_CONSTANTS.DISPLAY_NAME_MAX_LENGTH} characters or less` }
   }
 
   return { valid: true }
@@ -188,8 +189,8 @@ export function validateBio(bio: string | null): { valid: boolean; error?: strin
     return { valid: false, error: 'Bio must be a string' }
   }
 
-  if (bio.length > 500) {
-    return { valid: false, error: 'Bio must be 500 characters or less' }
+  if (bio.length > AUTH_CONSTANTS.BIO_MAX_LENGTH) {
+    return { valid: false, error: `Bio must be ${AUTH_CONSTANTS.BIO_MAX_LENGTH} characters or less` }
   }
 
   return { valid: true }
