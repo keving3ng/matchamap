@@ -17,7 +17,7 @@ migrations_dir = "drizzle/migrations"
 # Production environment variables (default)
 [vars]
 ENVIRONMENT = "production"
-ALLOWED_ORIGINS = "https://matchamap.pages.dev,https://*.matchamap.pages.dev,http://localhost:3000,http://localhost:5173,http://localhost:5174"
+ALLOWED_ORIGINS = "https://matchamap.club,https://*.matchamap.club,https://matchamap.pages.dev,https://*.matchamap.pages.dev,http://localhost:3000,http://localhost:5173,http://localhost:5174"
 
 # SECURITY: JWT_SECRET MUST be set as a Wrangler secret in production
 # NEVER commit JWT_SECRET to git - it must be set via Wrangler CLI:
