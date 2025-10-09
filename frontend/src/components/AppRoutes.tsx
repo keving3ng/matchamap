@@ -15,6 +15,7 @@ import StorePage from './StorePage'
 import SettingsPage from './SettingsPage'
 import AdminLayout from './admin/AdminLayout'
 import FeatureTogglesPage from './admin/FeatureTogglesPage'
+import AdminSettingsPage from './admin/AdminSettingsPage'
 import CafeManagementPage from './admin/CafeManagementPage'
 import NewsfeedManagementPage from './admin/NewsfeedManagementPage'
 import EventManagementPage from './admin/EventManagementPage'
@@ -139,7 +140,7 @@ export const AppRoutes: React.FC = () => {
           <Route path="/admin" element={
             <ProtectedRoute requireAdmin={true}>
               <AdminLayout>
-                <FeatureTogglesPage />
+                <CafeManagementPage />
               </AdminLayout>
             </ProtectedRoute>
           } />
@@ -203,6 +204,13 @@ export const AppRoutes: React.FC = () => {
             <ProtectedRoute requireAdmin={true}>
               <AdminLayout>
                 <BulkImporterPage />
+              </AdminLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/settings" element={
+            <ProtectedRoute requireAdmin={true}>
+              <AdminLayout>
+                <AdminSettingsPage />
               </AdminLayout>
             </ProtectedRoute>
           } />
