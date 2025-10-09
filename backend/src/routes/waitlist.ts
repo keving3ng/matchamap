@@ -1,5 +1,5 @@
 import { IRequest } from 'itty-router';
-import { eq, desc, count } from 'drizzle-orm';
+import { eq, desc, count, gte } from 'drizzle-orm';
 import { Env } from '../types';
 import { jsonResponse, errorResponse, badRequestResponse } from '../utils/response';
 import { drizzle } from 'drizzle-orm/d1';
@@ -107,19 +107,21 @@ export async function getWaitlistAdmin(request: IRequest, env: Env): Promise<Res
 
     // Calculate analytics
     const now = new Date();
-    const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-    const lastWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-
+    
+    // Daily signups: last 24 hours
+    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     const dailySignupsResult = await db
       .select({ count: count() })
       .from(waitlist)
-      .where(eq(waitlist.createdAt, yesterday.toISOString().split('T')[0]))
+      .where(gte(waitlist.createdAt, oneDayAgo.toISOString()))
       .get();
 
+    // Weekly signups: last 7 days
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const weeklySignupsResult = await db
       .select({ count: count() })
       .from(waitlist)
-      .where(eq(waitlist.createdAt, lastWeek.toISOString().split('T')[0]))
+      .where(gte(waitlist.createdAt, sevenDaysAgo.toISOString()))
       .get();
 
     const analytics = {
