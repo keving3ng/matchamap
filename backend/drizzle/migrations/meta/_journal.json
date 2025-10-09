@@ -40,19 +40,12 @@
     {
       "idx": 5,
       "version": "6",
-      "when": 1759506595328,
-      "tag": "0006_add_users_sessions",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "6",
       "when": 1759519099808,
       "tag": "0006_brief_trish_tilby",
       "breakpoints": true
     },
     {
-      "idx": 7,
+      "idx": 6,
       "version": "6",
       "when": 1759722037836,
       "tag": "0007_harsh_butterfly",
