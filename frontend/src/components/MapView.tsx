@@ -119,7 +119,8 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
     removeUserLocationMarker,
     centerOnLocation,
     drawRoute,
-    clearRoute: clearRouteVisual
+    clearRoute: clearRouteVisual,
+    refreshTiles
   } = useLeafletMap({
     cafes: filteredCafes,
     onPinClick,
@@ -219,6 +220,16 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
       clearRouteData()
     }
   }, [selectedCafe?.id, clearRouteVisual, clearRouteData])
+
+  // Force tile refresh when city changes to ensure tiles load properly
+  React.useEffect(() => {
+    // Small delay to allow city change to propagate and map to center
+    const timeoutId = setTimeout(() => {
+      refreshTiles()
+    }, 300)
+    
+    return () => clearTimeout(timeoutId)
+  }, [selectedCity, refreshTiles])
 
   return (
     <div className="flex-1 relative">
@@ -639,10 +650,12 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                   isProgrammaticChangeRef.current = true
                   setCity(cityKey)
                   setShowCityDropdown(false)
-                  // Pan map to new city center
+                  // Pan map to new city center with enhanced tile loading
                   if (centerOnLocation) {
                     const newCity = CITIES[cityKey]
                     centerOnLocation(newCity.center[0], newCity.center[1], newCity.zoom)
+                    // Additional tile refresh for better reliability
+                    setTimeout(() => refreshTiles(), 200)
                   }
                 }}
                 className={`w-full text-left px-3 py-2 text-sm hover:bg-matcha-50 transition-colors ${
