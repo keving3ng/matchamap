@@ -114,10 +114,14 @@ export const AppRoutes: React.FC = () => {
           />
         } />
       )}
-      {/* Login route - always available */}
-      <Route path="/login" element={<LoginPage />} />
-      {/* Profile route - always available */}
-      <Route path="/profile/:username" element={<UserProfilePage />} />
+      {/* Login route - only if user accounts enabled */}
+      {useFeatureToggle('ENABLE_USER_ACCOUNTS') && (
+        <Route path="/login" element={<LoginPage />} />
+      )}
+      {/* Profile route - only if user accounts AND profiles enabled */}
+      {useFeatureToggle('ENABLE_USER_ACCOUNTS') && useFeatureToggle('ENABLE_USER_PROFILES') && (
+        <Route path="/profile/:username" element={<UserProfilePage />} />
+      )}
       {isContactEnabled && (
         <Route path="/contact" element={<ContactPage />} />
       )}

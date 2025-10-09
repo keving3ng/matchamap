@@ -31,6 +31,7 @@ export const useLeafletMap = ({
   onMapMove
 }: UseLeafletMapOptions) => {
   const mapRef = useRef<L.Map | null>(null)
+  const tileLayerRef = useRef<L.TileLayer | null>(null)
   const markersRef = useRef<Map<number, L.Marker>>(new Map())
   const userLocationMarkerRef = useRef<L.Marker | null>(null)
   const routeLayerRef = useRef<L.Polyline | null>(null)
@@ -50,21 +51,19 @@ export const useLeafletMap = ({
       boxZoom: false,
     })
 
-    // Add tile layer with optimized preloading
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png', {
+    // Add tile layer with improved preloading for city switching
+    const tileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors, © CARTO',
       maxZoom: 19,
-      minZoom: 10, // Prevent excessive zoom out for Toronto area
-      keepBuffer: 4, // Keep 4 tiles outside viewport (default: 2) - balances UX and performance
-      updateWhenIdle: false, // Update tiles while dragging for smoother experience
-      updateWhenZooming: false, // Don't update during zoom transitions
-      updateInterval: 150, // Throttle tile updates during movement (default: 200ms)
-      // Bounds restriction to Toronto area to prevent unnecessary tile loading
-      bounds: [
-        [43.5, -79.7], // Southwest corner (slightly south and west of Toronto)
-        [43.9, -79.0]  // Northeast corner (slightly north and east of Toronto)
-      ]
+      minZoom: 8, // Allow more zoom out for global cities
+      keepBuffer: 6, // Increased from 4 to prevent grey areas during city switching
+      updateWhenIdle: false, // Load tiles during pan for smoother experience
+      updateWhenZooming: false, // Don't update during zoom animations
+      updateInterval: 100, // Faster updates (reduced from 150ms)
+      // Remove bounds restriction to allow global tile loading for all cities
     }).addTo(map)
+    
+    tileLayerRef.current = tileLayer
 
     mapRef.current = map
 
@@ -136,7 +135,22 @@ export const useLeafletMap = ({
   }
 
   const centerOnLocation = useCallback((lat: number, lng: number, zoom?: number) => {
-    mapRef.current?.setView([lat, lng], zoom ?? 15)
+    if (!mapRef.current) return
+    
+    // Pan to new location
+    mapRef.current.setView([lat, lng], zoom ?? 15)
+    
+    // Force tile layer refresh to ensure tiles load for new viewport
+    if (tileLayerRef.current) {
+      // Small delay to allow pan animation to complete
+      setTimeout(() => {
+        if (tileLayerRef.current && mapRef.current) {
+          tileLayerRef.current.redraw()
+          // Also invalidate map size to trigger tile recalculation
+          mapRef.current.invalidateSize()
+        }
+      }, 100)
+    }
   }, [])
 
   const addUserLocationMarker = (lat: number, lng: number) => {
@@ -218,6 +232,13 @@ export const useLeafletMap = ({
     }
   }, [])
 
+  const refreshTiles = useCallback(() => {
+    if (tileLayerRef.current && mapRef.current) {
+      tileLayerRef.current.redraw()
+      mapRef.current.invalidateSize()
+    }
+  }, [])
+
   return {
     containerRef,
     zoomIn,
@@ -227,6 +248,7 @@ export const useLeafletMap = ({
     removeUserLocationMarker,
     drawRoute,
     clearRoute,
+    refreshTiles,
     map: mapRef.current,
   }
 }

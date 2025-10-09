@@ -144,6 +144,8 @@ export interface User {
   email: string
   username: string
   role: UserRole
+  lastActiveAt?: string | null
+  isEmailVerified?: boolean
   createdAt: string
   updatedAt: string
 }

@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "description": "MatchaMap frontend - React + Vite",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",

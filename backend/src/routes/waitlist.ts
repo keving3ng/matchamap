@@ -86,11 +86,13 @@ export async function getWaitlistAdmin(request: IRequest, env: Env): Promise<Res
 
     // Apply sorting
     if (sortBy === 'email') {
-      query = sortOrder === 'desc' 
+      // @ts-expect-error - Drizzle ORM query builder type narrowing issue
+      query = sortOrder === 'desc'
         ? query.orderBy(desc(waitlist.email))
         : query.orderBy(waitlist.email);
     } else {
       // Default to created_at
+      // @ts-expect-error - Drizzle ORM query builder type narrowing issue
       query = sortOrder === 'desc'
         ? query.orderBy(desc(waitlist.createdAt))
         : query.orderBy(waitlist.createdAt);
