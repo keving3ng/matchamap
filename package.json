@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "description": "MatchaMap - Curated guide to matcha cafes in Toronto",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "workspaces": [
     "frontend",
     "backend",
