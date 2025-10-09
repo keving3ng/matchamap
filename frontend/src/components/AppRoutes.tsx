@@ -64,15 +64,15 @@ export const AppRoutes: React.FC = () => {
   const isStoreEnabled = useFeatureToggle('ENABLE_STORE')
   const isSettingsEnabled = useFeatureToggle('ENABLE_SETTINGS')
 
-  const { feedItems, eventItems, fetchAll } = useDataStore()
+  const { feedItems, eventItems, fetchCafes } = useDataStore()
   const { cafesWithDistance, selectedCafe } = useCafeStore()
   const { showPopover, expandedCard, setExpandedCard, closePopover } = useUIStore()
   const { stampedCafeIds, toggleStamp } = useVisitedCafesStore()
   const { handlePinClick, viewDetails } = useCafeSelection(cafesWithDistance)
 
-  // Fetch data on mount - get all cafes regardless of location
+  // Fetch only cafes on mount - feed/events lazy load when navigated to
   useEffect(() => {
-    fetchAll() // Fetch all cafes from all cities
+    fetchCafes() // Only fetch cafes (70% of users only use map)
   }, [])
 
   return (

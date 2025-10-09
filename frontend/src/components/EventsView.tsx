@@ -1,9 +1,18 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Calendar, Clock, MapPin, DollarSign, Star } from 'lucide-react'
 import { ContentContainer } from './ContentContainer'
+import { useDataStore } from '../stores/dataStore'
 import type { EventsViewProps } from '../types'
 
 export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
+  const { fetchEvents } = useDataStore()
+
+  // Lazy load event items when component mounts
+  useEffect(() => {
+    if (eventItems.length === 0) {
+      fetchEvents()
+    }
+  }, [eventItems.length, fetchEvents])
   return (
     <div className="flex-1 overflow-y-auto pb-24">
       {/* Header */}
