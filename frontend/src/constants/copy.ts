@@ -326,6 +326,7 @@ export const COPY = {
   // Admin (basic strings, admin has more specific copy in components)
   admin: {
     title: 'Admin Dashboard',
+    mode: 'Admin Mode',
     cafes: 'Cafes',
     drinks: 'Drinks',
     events: 'Events',

@@ -4,6 +4,8 @@ import { useAuthStore } from '../stores/authStore'
 import { getCurrentEnvironment } from '../hooks/useFeatureToggle'
 import { useNavigate } from 'react-router'
 import { Settings, AlertTriangle, LogOut, User } from 'lucide-react'
+import { COPY } from '../constants/copy'
+import { zIndex } from '../styles/spacing'
 
 interface AdminWrapperProps {
   children: React.ReactNode
@@ -61,21 +63,25 @@ export const AdminWrapper: React.FC<AdminWrapperProps> = ({ children }) => {
 
   return (
     <>
-      {/* Admin Control Bar - Fixed at top with exact height */}
+      {/* Admin Control Bar - Fixed at top with exact height, amber warning color for admin mode */}
       <div
-        className={`fixed top-0 left-0 right-0 w-full ${isAuthenticated ? 'bg-matcha-600' : isProdMode ? 'bg-red-600' : 'bg-purple-600'} text-white px-4 shadow-lg z-[10000] flex items-center justify-between`}
-        style={{ height: `${ADMIN_BANNER_HEIGHT}px` }}
+        className={`fixed top-0 left-0 right-0 w-full ${isAuthenticated ? 'bg-amber-600' : isProdMode ? 'bg-red-600' : 'bg-purple-600'} text-white px-4 shadow-lg flex items-center justify-between`}
+        style={{ 
+          height: `${ADMIN_BANNER_HEIGHT}px`,
+          zIndex: zIndex.adminBanner 
+        }}
       >
         <div className="flex items-center gap-4">
           {/* Authenticated User Info */}
           {isAuthenticated && user ? (
             <div className="flex items-center gap-2">
+              <AlertTriangle size={16} className="text-amber-200" />
               <User size={16} />
               <span className="font-semibold text-sm">
-                {user.username}
+                {COPY.admin.mode}
               </span>
-              <span className="text-xs bg-white/20 px-2 py-0.5 rounded uppercase">
-                {user.role}
+              <span className="text-xs bg-white/20 px-2 py-0.5 rounded">
+                {user.username} ({user.role})
               </span>
             </div>
           ) : (

@@ -71,4 +71,5 @@ export const zIndex = {
   fixed: 1000,
   modalBackdrop: 9998,
   modal: 9999,
+  adminBanner: 10000,
 } as const
