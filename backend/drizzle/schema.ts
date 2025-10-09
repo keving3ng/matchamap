@@ -213,6 +213,39 @@ export const userCheckins = sqliteTable('user_checkins', {
   uniqueUserCafe: unique().on(table.userId, table.cafeId),
 }));
 
+// Admin audit log table
+export const adminAuditLog = sqliteTable('admin_audit_log', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  
+  // Who performed the action
+  adminUserId: integer('admin_user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  adminUsername: text('admin_username').notNull(), // Denormalized for convenience
+  
+  // What action was performed
+  action: text('action', { enum: ['CREATE', 'UPDATE', 'DELETE'] }).notNull(),
+  resourceType: text('resource_type', { 
+    enum: ['cafe', 'drink', 'event', 'feed_item', 'user', 'user_role'] 
+  }).notNull(),
+  resourceId: integer('resource_id').notNull(), // ID of affected resource
+  
+  // Change details
+  changesSummary: text('changes_summary'), // Human-readable summary (e.g., "Updated cafe name from 'Old' to 'New'")
+  beforeState: text('before_state'), // JSON snapshot of resource before change (for UPDATE/DELETE)
+  afterState: text('after_state'), // JSON snapshot of resource after change (for CREATE/UPDATE)
+  
+  // Request metadata
+  ipAddress: text('ip_address'),
+  userAgent: text('user_agent'),
+  
+  // Timestamp
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+  adminUserIdx: index('audit_admin_user_idx').on(table.adminUserId),
+  actionIdx: index('audit_action_idx').on(table.action),
+  resourceIdx: index('audit_resource_idx').on(table.resourceType, table.resourceId),
+  createdAtIdx: index('audit_created_at_idx').on(table.createdAt),
+}));
+
 // Type exports for use in the application
 export type Cafe = typeof cafes.$inferSelect;
 export type NewCafe = typeof cafes.$inferInsert;
@@ -232,3 +265,5 @@ export type Waitlist = typeof waitlist.$inferSelect;
 export type NewWaitlist = typeof waitlist.$inferInsert;
 export type UserCheckin = typeof userCheckins.$inferSelect;
 export type NewUserCheckin = typeof userCheckins.$inferInsert;
+export type AdminAuditLog = typeof adminAuditLog.$inferSelect;
+export type NewAdminAuditLog = typeof adminAuditLog.$inferInsert;

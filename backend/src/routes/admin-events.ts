@@ -4,6 +4,8 @@ import { Env } from '../types';
 import { getDb, events, NewEvent } from '../db';
 import { jsonResponse, errorResponse } from '../utils/response';
 import { HTTP_STATUS, PAGINATION_CONSTANTS, CACHE_CONSTANTS } from '../constants';
+import { logAdminAction, generateChangesSummary } from '../utils/auditLog';
+import { AuthenticatedRequest } from '../middleware/auth';
 
 // GET /api/admin/events - Get all events (including unpublished)
 export async function listAllEvents(request: IRequest, env: Env): Promise<Response> {
@@ -99,6 +101,15 @@ export async function createEvent(request: IRequest, env: Env): Promise<Response
       published: body.published ?? true,
     }).returning();
 
+    // Log the audit action
+    await logAdminAction(request as AuthenticatedRequest, env, {
+      action: 'CREATE',
+      resourceType: 'event',
+      resourceId: result[0].id,
+      changesSummary: generateChangesSummary('CREATE', 'event', result[0].title),
+      afterState: result[0],
+    });
+
     return jsonResponse(result[0], HTTP_STATUS.CREATED, request as Request, env, CACHE_CONSTANTS.NO_STORE);
   } catch (error) {
     console.error('Error creating event:', error);
@@ -123,6 +134,8 @@ export async function updateEvent(request: IRequest, env: Env): Promise<Response
       return jsonResponse({ error: 'Event not found' }, HTTP_STATUS.NOT_FOUND, request as Request, env);
     }
 
+    const beforeState = existing;
+
     const result = await db
       .update(events)
       .set({
@@ -131,6 +144,16 @@ export async function updateEvent(request: IRequest, env: Env): Promise<Response
       })
       .where(eq(events.id, id))
       .returning();
+
+    // Log the audit action
+    await logAdminAction(request as AuthenticatedRequest, env, {
+      action: 'UPDATE',
+      resourceType: 'event',
+      resourceId: id,
+      changesSummary: generateChangesSummary('UPDATE', 'event', result[0].title, beforeState, result[0]),
+      beforeState,
+      afterState: result[0],
+    });
 
     return jsonResponse(result[0], HTTP_STATUS.OK, request as Request, env, CACHE_CONSTANTS.NO_STORE);
   } catch (error) {
@@ -156,6 +179,15 @@ export async function deleteEvent(request: IRequest, env: Env): Promise<Response
     }
 
     await db.delete(events).where(eq(events.id, id));
+
+    // Log the audit action
+    await logAdminAction(request as AuthenticatedRequest, env, {
+      action: 'DELETE',
+      resourceType: 'event',
+      resourceId: id,
+      changesSummary: generateChangesSummary('DELETE', 'event', existing.title),
+      beforeState: existing,
+    });
 
     return jsonResponse({ success: true, message: 'Event deleted' }, HTTP_STATUS.OK, request as Request, env, CACHE_CONSTANTS.NO_STORE);
   } catch (error) {

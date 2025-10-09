@@ -9,6 +9,8 @@ import {
   badRequestResponse,
 } from '../utils/response';
 import { HTTP_STATUS, PAGINATION_CONSTANTS, CACHE_CONSTANTS } from '../constants';
+import { logAdminAction, generateChangesSummary } from '../utils/auditLog';
+import { AuthenticatedRequest } from '../middleware/auth';
 
 // GET /api/cafes - List cafes with optional filtering
 export async function listCafes(request: IRequest, env: Env): Promise<Response> {
@@ -200,6 +202,15 @@ export async function createCafe(request: IRequest, env: Env): Promise<Response>
         .where(eq(cafes.id, existing[0].id))
         .returning();
 
+      // Log the audit action (restore + update)
+      await logAdminAction(request as AuthenticatedRequest, env, {
+        action: 'CREATE',
+        resourceType: 'cafe',
+        resourceId: updated[0].id,
+        changesSummary: generateChangesSummary('CREATE', 'cafe', updated[0].name),
+        afterState: updated[0],
+      });
+
       return jsonResponse(
         { cafe: updated[0] },
         HTTP_STATUS.CREATED,
@@ -219,6 +230,15 @@ export async function createCafe(request: IRequest, env: Env): Promise<Response>
       .insert(cafes)
       .values(cafeData)
       .returning();
+
+    // Log the audit action
+    await logAdminAction(request as AuthenticatedRequest, env, {
+      action: 'CREATE',
+      resourceType: 'cafe',
+      resourceId: newCafe[0].id,
+      changesSummary: generateChangesSummary('CREATE', 'cafe', newCafe[0].name),
+      afterState: newCafe[0],
+    });
 
     return jsonResponse(
       { cafe: newCafe[0] },
@@ -254,6 +274,8 @@ export async function updateCafe(request: IRequest, env: Env): Promise<Response>
     if (existing.length === 0) {
       return notFoundResponse(request as Request, env);
     }
+
+    const beforeState = existing[0];
 
     // Build update object with only valid cafe fields (matching current schema)
     const updateData: Record<string, any> = {};
@@ -298,6 +320,16 @@ export async function updateCafe(request: IRequest, env: Env): Promise<Response>
       .where(eq(cafes.id, cafeId))
       .returning();
 
+    // Log the audit action
+    await logAdminAction(request as AuthenticatedRequest, env, {
+      action: 'UPDATE',
+      resourceType: 'cafe',
+      resourceId: cafeId,
+      changesSummary: generateChangesSummary('UPDATE', 'cafe', updated[0].name, beforeState, updated[0]),
+      beforeState,
+      afterState: updated[0],
+    });
+
     return jsonResponse(
       { cafe: updated[0] },
       HTTP_STATUS.OK,
@@ -321,6 +353,17 @@ export async function deleteCafe(request: IRequest, env: Env): Promise<Response>
 
     const db = getDb(env.DB);
 
+    // Get the cafe before deletion for audit log
+    const beforeDelete = await db
+      .select()
+      .from(cafes)
+      .where(and(eq(cafes.id, cafeId), isNull(cafes.deletedAt)))
+      .limit(1);
+
+    if (beforeDelete.length === 0) {
+      return notFoundResponse(request as Request, env);
+    }
+
     // Soft delete by setting deletedAt
     const deleted = await db
       .update(cafes)
@@ -334,6 +377,15 @@ export async function deleteCafe(request: IRequest, env: Env): Promise<Response>
     if (deleted.length === 0) {
       return notFoundResponse(request as Request, env);
     }
+
+    // Log the audit action
+    await logAdminAction(request as AuthenticatedRequest, env, {
+      action: 'DELETE',
+      resourceType: 'cafe',
+      resourceId: cafeId,
+      changesSummary: generateChangesSummary('DELETE', 'cafe', beforeDelete[0].name),
+      beforeState: beforeDelete[0],
+    });
 
     return jsonResponse(
       { message: 'Cafe deleted successfully' },

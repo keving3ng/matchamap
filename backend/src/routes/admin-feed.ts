@@ -4,6 +4,8 @@ import { Env } from '../types';
 import { getDb, feedItems, NewFeedItem } from '../db';
 import { jsonResponse, errorResponse } from '../utils/response';
 import { HTTP_STATUS, PAGINATION_CONSTANTS, CACHE_CONSTANTS } from '../constants';
+import { logAdminAction, generateChangesSummary } from '../utils/auditLog';
+import { AuthenticatedRequest } from '../middleware/auth';
 
 // GET /api/admin/feed - Get all feed items (including unpublished)
 export async function listAllFeedItems(request: IRequest, env: Env): Promise<Response> {
@@ -113,6 +115,15 @@ export async function createFeedItem(request: IRequest, env: Env): Promise<Respo
       date: body.date,
     }).returning();
 
+    // Log the audit action
+    await logAdminAction(request as AuthenticatedRequest, env, {
+      action: 'CREATE',
+      resourceType: 'feed_item',
+      resourceId: result[0].id,
+      changesSummary: generateChangesSummary('CREATE', 'feed_item', result[0].title),
+      afterState: result[0],
+    });
+
     return jsonResponse(result[0], HTTP_STATUS.CREATED, request as Request, env, CACHE_CONSTANTS.NO_STORE);
   } catch (error) {
     console.error('Error creating feed item:', error);
@@ -137,6 +148,8 @@ export async function updateFeedItem(request: IRequest, env: Env): Promise<Respo
       return jsonResponse({ error: 'Feed item not found' }, HTTP_STATUS.NOT_FOUND, request as Request, env);
     }
 
+    const beforeState = existing;
+
     // Validate type if provided
     if (body.type) {
       const validTypes = ['new_location', 'score_update', 'announcement', 'menu_update', 'closure'];
@@ -158,6 +171,16 @@ export async function updateFeedItem(request: IRequest, env: Env): Promise<Respo
       })
       .where(eq(feedItems.id, id))
       .returning();
+
+    // Log the audit action
+    await logAdminAction(request as AuthenticatedRequest, env, {
+      action: 'UPDATE',
+      resourceType: 'feed_item',
+      resourceId: id,
+      changesSummary: generateChangesSummary('UPDATE', 'feed_item', result[0].title, beforeState, result[0]),
+      beforeState,
+      afterState: result[0],
+    });
 
     return jsonResponse(result[0], HTTP_STATUS.OK, request as Request, env, CACHE_CONSTANTS.NO_STORE);
   } catch (error) {
@@ -183,6 +206,15 @@ export async function deleteFeedItem(request: IRequest, env: Env): Promise<Respo
     }
 
     await db.delete(feedItems).where(eq(feedItems.id, id));
+
+    // Log the audit action
+    await logAdminAction(request as AuthenticatedRequest, env, {
+      action: 'DELETE',
+      resourceType: 'feed_item',
+      resourceId: id,
+      changesSummary: generateChangesSummary('DELETE', 'feed_item', existing.title),
+      beforeState: existing,
+    });
 
     return jsonResponse({ success: true, message: 'Feed item deleted' }, HTTP_STATUS.OK, request as Request, env, CACHE_CONSTANTS.NO_STORE);
   } catch (error) {
