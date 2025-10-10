@@ -24,7 +24,7 @@ export const App: React.FC = () => {
   }
 
   return (
-    <div className="w-full h-screen bg-gradient-to-br from-green-50 to-green-100 flex flex-col">
+    <div className="w-full h-full bg-gradient-to-br from-green-50 to-green-100 flex flex-col">
       <Header />
       <AppRoutes />
       <BottomNavigation />
