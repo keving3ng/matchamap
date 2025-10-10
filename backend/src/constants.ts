@@ -10,7 +10,7 @@
  */
 export const AUTH_CONSTANTS = {
   /** Minimum password length for user registration and validation */
-  PASSWORD_MIN_LENGTH: 8,
+  PASSWORD_MIN_LENGTH: 12,
   
   /** Access token expiry duration (1 hour) */
   ACCESS_TOKEN_EXPIRY: 3600, // 1 hour in seconds

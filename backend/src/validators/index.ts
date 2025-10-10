@@ -12,13 +12,23 @@ export const emailSchema = z
   .min(5, 'Email must be at least 5 characters')
   .max(254, 'Email must be less than 254 characters');
 
-// Password validation
+// Password validation - enhanced security requirements
 export const passwordSchema = z
   .string()
   .min(AUTH_CONSTANTS.PASSWORD_MIN_LENGTH, `Password must be at least ${AUTH_CONSTANTS.PASSWORD_MIN_LENGTH} characters`)
   .max(128, 'Password must be less than 128 characters')
+  .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+  .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
   .regex(/[0-9]/, 'Password must contain at least one number')
-  .regex(/[a-zA-Z]/, 'Password must contain at least one letter');
+  .regex(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>?]/, 'Password must contain at least one special character')
+  .refine((password) => {
+    // Check for weak patterns
+    const weakPatterns = [
+      /(.)\1{2,}/, // Three or more consecutive identical characters
+      /123456|abcdef|qwerty|password/i, // Common weak sequences
+    ];
+    return !weakPatterns.some(pattern => pattern.test(password));
+  }, 'Password contains common weak patterns. Please choose a stronger password.');
 
 // Username validation
 export const usernameSchema = z

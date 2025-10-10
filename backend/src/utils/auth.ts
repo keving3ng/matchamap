@@ -113,6 +113,7 @@ export async function verifyPassword(password: string, hashedPassword: string): 
 
 /**
  * Password validation rules
+ * Enhanced security requirements following OWASP guidelines
  */
 export function validatePassword(password: string): { valid: boolean; error?: string } {
   if (password.length < AUTH_CONSTANTS.PASSWORD_MIN_LENGTH) {
@@ -123,14 +124,36 @@ export function validatePassword(password: string): { valid: boolean; error?: st
     return { valid: false, error: `Password must be less than ${PASSWORD_MAX_LENGTH} characters` };
   }
 
+  // Check for at least one lowercase letter
+  if (!/[a-z]/.test(password)) {
+    return { valid: false, error: 'Password must contain at least one lowercase letter' };
+  }
+
+  // Check for at least one uppercase letter
+  if (!/[A-Z]/.test(password)) {
+    return { valid: false, error: 'Password must contain at least one uppercase letter' };
+  }
+
   // Check for at least one number
   if (!/\d/.test(password)) {
     return { valid: false, error: 'Password must contain at least one number' };
   }
 
-  // Check for at least one letter
-  if (!/[a-zA-Z]/.test(password)) {
-    return { valid: false, error: 'Password must contain at least one letter' };
+  // Check for at least one special character
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>?]/.test(password)) {
+    return { valid: false, error: 'Password must contain at least one special character (!@#$%^&*()_+-=[]{};\'"\\|,.<>?)' };
+  }
+
+  // Check for common weak patterns
+  const weakPatterns = [
+    /(.)\1{2,}/, // Three or more consecutive identical characters
+    /123456|abcdef|qwerty|password/i, // Common weak sequences
+  ];
+
+  for (const pattern of weakPatterns) {
+    if (pattern.test(password)) {
+      return { valid: false, error: 'Password contains common weak patterns. Please choose a stronger password.' };
+    }
   }
 
   return { valid: true };

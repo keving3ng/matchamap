@@ -35,7 +35,12 @@ ALLOWED_ORIGINS = "https://matchamap.club,https://*.matchamap.club,https://match
 # Development environment (for testing deployments before production)
 [env.dev]
 name = "matchamap-api-dev"
-vars = { ENVIRONMENT = "development", ALLOWED_ORIGINS = "http://localhost:3000,http://localhost:5173,http://localhost:5174", JWT_SECRET = "dev-secret-change-in-production-use-wrangler-secret" }
+vars = { ENVIRONMENT = "development", ALLOWED_ORIGINS = "http://localhost:3000,http://localhost:5173,http://localhost:5174" }
+
+# SECURITY: Development secrets must also be set via Wrangler CLI
+# Do not use hardcoded secrets even in development
+# Set: npx wrangler secret put JWT_SECRET --env dev
+# Set: npx wrangler secret put GOOGLE_PLACES_API_KEY --env dev
 
 # D1 Database binding for dev environment (same database)
 [[env.dev.d1_databases]]
