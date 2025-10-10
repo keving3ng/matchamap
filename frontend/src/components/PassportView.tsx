@@ -1,9 +1,10 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { TrendingUp } from 'lucide-react'
 import { ContentContainer } from './ContentContainer'
 import type { PassportViewProps } from '../types'
 
 export const PassportView: React.FC<PassportViewProps> = ({ cafes, visitedStamps, onToggleStamp }) => {
+  const [loadingStamps, setLoadingStamps] = useState<Set<number>>(new Set())
   const visitedCount: number = visitedStamps.length
   const totalCount: number = cafes.length
   const percentage: number = Math.round((visitedCount / totalCount) * 100)
@@ -63,10 +64,22 @@ export const PassportView: React.FC<PassportViewProps> = ({ cafes, visitedStamps
             return (
               <button
                 key={cafe.id}
-                onClick={() => onToggleStamp(cafe.id)}
-                className={`aspect-square rounded-2xl shadow-md transition-all transform active:scale-95 ${
+                onClick={async () => {
+                  setLoadingStamps(prev => new Set(prev).add(cafe.id))
+                  try {
+                    await onToggleStamp(cafe.id)
+                  } finally {
+                    setLoadingStamps(prev => {
+                      const newSet = new Set(prev)
+                      newSet.delete(cafe.id)
+                      return newSet
+                    })
+                  }
+                }}
+                disabled={loadingStamps.has(cafe.id)}
+                className={`aspect-square rounded-2xl shadow-md transition-all transform active:scale-95 disabled:cursor-wait ${
                   isVisited ? 'scale-100 shadow-lg' : 'opacity-40 grayscale scale-95'
-                }`}
+                } ${loadingStamps.has(cafe.id) ? 'animate-pulse' : ''}`}
               >
                 <div className="w-full h-full bg-gradient-to-br from-green-400 to-green-600 rounded-2xl p-3 flex flex-col items-center justify-center relative overflow-hidden">
                   {isVisited && (
@@ -83,11 +96,15 @@ export const PassportView: React.FC<PassportViewProps> = ({ cafes, visitedStamps
                     </div>
                   )}
 
-                  {isVisited && (
+                  {loadingStamps.has(cafe.id) ? (
+                    <div className="absolute top-1 right-1 bg-white rounded-full w-6 h-6 flex items-center justify-center shadow-md">
+                      <div className="animate-spin rounded-full h-3 w-3 border-2 border-green-600 border-t-transparent" />
+                    </div>
+                  ) : isVisited ? (
                     <div className="absolute top-1 right-1 bg-white rounded-full w-6 h-6 flex items-center justify-center shadow-md">
                       <span className="text-sm">✓</span>
                     </div>
-                  )}
+                  ) : null}
                 </div>
               </button>
             )

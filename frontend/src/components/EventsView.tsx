@@ -1,12 +1,13 @@
 import React from 'react'
 import { Calendar, Clock, MapPin, DollarSign, Star } from 'lucide-react'
 import { ContentContainer } from './ContentContainer'
+import { ListSkeleton } from './ui'
 import { useDataStore } from '../stores/dataStore'
 import { useLazyData } from '../hooks/useLazyData'
 import type { EventsViewProps } from '../types'
 
 export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
-  const { fetchEvents, eventsFetched } = useDataStore()
+  const { fetchEvents, eventsFetched, isLoading } = useDataStore()
 
   // Lazy load event items when component mounts (only if not already fetched)
   useLazyData(fetchEvents, eventsFetched)
@@ -21,7 +22,9 @@ export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
       {/* Event Items */}
       <ContentContainer maxWidth="md">
         <div className="px-4 py-4 space-y-4">
-          {eventItems.length === 0 ? (
+          {isLoading && eventItems.length === 0 ? (
+            <ListSkeleton count={3} />
+          ) : eventItems.length === 0 ? (
             <div className="bg-white rounded-2xl shadow-md border-2 border-green-100 p-8 text-center">
               <Calendar size={48} className="mx-auto text-gray-300 mb-3" />
               <p className="text-gray-500 text-lg font-medium">No upcoming events</p>

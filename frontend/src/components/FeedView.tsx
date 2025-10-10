@@ -1,12 +1,13 @@
 import React from 'react'
 import { MapPinned, Star, Calendar } from 'lucide-react'
 import { ContentContainer } from './ContentContainer'
+import { ListSkeleton } from './ui'
 import { useDataStore } from '../stores/dataStore'
 import { useLazyData } from '../hooks/useLazyData'
 import type { FeedViewProps } from '../types'
 
 export const FeedView: React.FC<FeedViewProps> = ({ feedItems }) => {
-  const { fetchFeed, feedFetched } = useDataStore()
+  const { fetchFeed, feedFetched, isLoading } = useDataStore()
 
   // Lazy load feed items when component mounts (only if not already fetched)
   useLazyData(fetchFeed, feedFetched)
@@ -21,7 +22,9 @@ export const FeedView: React.FC<FeedViewProps> = ({ feedItems }) => {
       {/* Feed Items */}
       <ContentContainer maxWidth="md">
         <div className="px-4 py-4 space-y-4">
-          {feedItems.length === 0 ? (
+          {isLoading && feedItems.length === 0 ? (
+            <ListSkeleton count={3} />
+          ) : feedItems.length === 0 ? (
             <div className="bg-white rounded-2xl shadow-md border-2 border-green-100 p-8 text-center">
               <Star size={48} className="mx-auto text-gray-300 mb-3" />
               <p className="text-gray-500 text-lg font-medium">No news items yet</p>
