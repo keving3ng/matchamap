@@ -615,45 +615,59 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                 className="w-full flex items-start justify-between group text-left mb-3"
               >
                 <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2 flex-wrap">
-                    <h3 className="font-bold text-xl text-charcoal-900">{cafe.name}</h3>
-                    {cafe.displayScore && (
-                      <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 text-white px-3 py-1 rounded-full font-bold text-sm shadow-md">
-                        {cafe.displayScore.toFixed(1)}
-                      </div>
-                    )}
+                  <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <h3 className="font-bold text-xl text-charcoal-900">{cafe.name}</h3>
+                      {cafe.displayScore && (
+                        <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 text-white px-3 py-1 rounded-full font-bold text-sm shadow-md">
+                          {cafe.displayScore.toFixed(1)}
+                        </div>
+                      )}
+                      
+                      {/* Social Review Links */}
+                      {(cafe.instagramPostLink || cafe.tiktokPostLink) && (
+                        <div className="flex gap-1.5">
+                          {cafe.instagramPostLink && (
+                            <a
+                              href={cafe.instagramPostLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 text-white rounded-full flex items-center justify-center hover:from-purple-600 hover:to-pink-600 transition shadow-md"
+                              aria-label={COPY.list.viewInstagramReview}
+                              title={COPY.list.viewInstagramReview}
+                            >
+                              <Instagram size={14} />
+                            </a>
+                          )}
+                          {cafe.tiktokPostLink && (
+                            <a
+                              href={cafe.tiktokPostLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="w-8 h-8 bg-gray-800 text-white rounded-full flex items-center justify-center hover:bg-gray-900 transition shadow-md"
+                              aria-label={COPY.list.viewTikTokReview}
+                              title={COPY.list.viewTikTokReview}
+                            >
+                              <TikTokIcon size={14} />
+                            </a>
+                          )}
+                        </div>
+                      )}
+                    </div>
                     
-                    {/* Social Review Links */}
-                    {(cafe.instagramPostLink || cafe.tiktokPostLink) && (
-                      <div className="flex gap-1.5">
-                        {cafe.instagramPostLink && (
-                          <a
-                            href={cafe.instagramPostLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 text-white rounded-full flex items-center justify-center hover:from-purple-600 hover:to-pink-600 transition shadow-md"
-                            aria-label={COPY.list.viewInstagramReview}
-                            title={COPY.list.viewInstagramReview}
-                          >
-                            <Instagram size={14} />
-                          </a>
-                        )}
-                        {cafe.tiktokPostLink && (
-                          <a
-                            href={cafe.tiktokPostLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="w-8 h-8 bg-gray-800 text-white rounded-full flex items-center justify-center hover:bg-gray-900 transition shadow-md"
-                            aria-label={COPY.list.viewTikTokReview}
-                            title={COPY.list.viewTikTokReview}
-                          >
-                            <TikTokIcon size={14} />
-                          </a>
-                        )}
-                      </div>
-                    )}
+                    {/* Smaller Directions button moved to top row */}
+                    <a
+                      href={getMapsUrl(cafe.address || '', cafe.link)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="inline-flex items-center justify-center gap-1 bg-gradient-to-r from-matcha-600 to-matcha-500 text-white px-2.5 py-1 rounded-md text-xs font-semibold hover:from-matcha-700 hover:to-matcha-600 transition-all duration-200 shadow-sm hover:shadow-md whitespace-nowrap"
+                    >
+                      <Navigation size={12} />
+                      <span>Directions</span>
+                    </a>
                   </div>
 
                   {/* Quick info section */}
@@ -685,6 +699,19 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                     {cafe.quickNote && (
                       <p className="text-sm text-gray-600 italic line-clamp-1">"{cafe.quickNote}"</p>
                     )}
+                    
+                    {/* Subtle view details link */}
+                    <div className="flex justify-end">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onViewDetails(cafe)
+                        }}
+                        className="text-xs text-matcha-600 hover:text-matcha-700 underline font-medium transition-colors"
+                      >
+                        View Details
+                      </button>
+                    </div>
                   </div>
                 </div>
                 <ChevronDown
@@ -695,17 +722,6 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                 />
               </button>
 
-              {/* Get Directions button - below content, responsive sizing */}
-              <a
-                href={getMapsUrl(cafe.address || '', cafe.link)}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className="inline-flex items-center justify-center gap-1.5 bg-gradient-to-r from-matcha-600 to-matcha-500 text-white px-3 py-1.5 sm:px-4 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold hover:from-matcha-700 hover:to-matcha-600 transition-all duration-200 shadow-sm hover:shadow-md whitespace-nowrap"
-              >
-                <Navigation size={14} className="sm:w-4 sm:h-4" />
-                <span>{COPY.map.directions}</span>
-              </a>
             </div>
 
             {expandedCard === cafe.id && (
