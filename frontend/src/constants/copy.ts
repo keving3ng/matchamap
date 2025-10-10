@@ -380,6 +380,14 @@ export const COPY = {
       unknown: 'Unknown',
     },
 
+    // Cafe Management
+    cafeManagement: {
+      missingFieldsTooltip: (count: number) => 
+        `${count} optional field${count !== 1 ? 's' : ''} missing`,
+      missingFieldsList: (fields: string[]) => 
+        `Missing: ${fields.join(', ')}`,
+    },
+
     // User Management
     userManagement: {
       title: 'User Management',

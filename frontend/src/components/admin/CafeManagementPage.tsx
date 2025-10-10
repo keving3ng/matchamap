@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { Coffee, Plus, Search, Edit, Trash2, Loader, AlertCircle } from 'lucide-react'
+import { Coffee, Plus, Search, Edit, Trash2, Loader, AlertCircle, Info } from 'lucide-react'
 import { useDataStore } from '../../stores/dataStore'
 import { api } from '../../utils/api'
 import { CafeForm } from './CafeForm'
 import { CafeFormWizard } from './CafeFormWizard'
 import { DrinksManagement } from './DrinksManagement'
 import { IconButton } from '../ui'
+import { COPY } from '../../constants/copy'
 import type { Cafe } from '../../types'
 
 export const CafeManagementPage: React.FC = () => {
@@ -20,6 +21,67 @@ export const CafeManagementPage: React.FC = () => {
   useEffect(() => {
     fetchCafes(undefined, true) // Bust cache on mount for admin
   }, [])
+
+  // Helper function to check for missing optional fields
+  const getMissingFields = (cafe: Cafe): string[] => {
+    const optionalFields = [
+      { key: 'address', label: 'Address' },
+      { key: 'review', label: 'Review' },
+      { key: 'hours', label: 'Hours' },
+      { key: 'instagram', label: 'Instagram' },
+      { key: 'instagramPostLink', label: 'Instagram Post' },
+      { key: 'tiktokPostLink', label: 'TikTok Post' },
+      { key: 'images', label: 'Images' },
+      { key: 'ambianceScore', label: 'Ambiance Score' },
+      { key: 'chargeForAltMilk', label: 'Alt Milk Pricing' },
+    ]
+    
+    return optionalFields
+      .filter(field => {
+        const value = cafe[field.key as keyof Cafe]
+        return value === null || value === undefined || value === ''
+      })
+      .map(field => field.label)
+  }
+
+  // Component for missing fields indicator with tooltip
+  const MissingFieldsIndicator: React.FC<{ cafe: Cafe }> = ({ cafe }) => {
+    const [showTooltip, setShowTooltip] = useState(false)
+    const missingFields = getMissingFields(cafe)
+    
+    if (missingFields.length === 0) {
+      return null
+    }
+
+    return (
+      <div 
+        className="relative inline-block"
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+        onClick={() => setShowTooltip(!showTooltip)} // For mobile
+      >
+        <span 
+          className="inline-flex items-center justify-center w-5 h-5 bg-amber-100 text-amber-600 border border-amber-300 rounded-full cursor-help hover:bg-amber-200 transition-colors"
+          title={COPY.admin.cafeManagement.missingFieldsList(missingFields)}
+        >
+          <Info size={12} />
+        </span>
+        
+        {showTooltip && (
+          <div className="absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg max-w-64 break-words">
+            <div className="font-semibold mb-1">
+              {COPY.admin.cafeManagement.missingFieldsTooltip(missingFields.length)}
+            </div>
+            <div className="text-gray-200">
+              {COPY.admin.cafeManagement.missingFieldsList(missingFields)}
+            </div>
+            {/* Tooltip arrow */}
+            <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+          </div>
+        )}
+      </div>
+    )
+  }
 
   const handleAddCafe = () => {
     setEditingCafe(null)
@@ -175,6 +237,7 @@ export const CafeManagementPage: React.FC = () => {
                           />
                         </span>
                       )}
+                      <MissingFieldsIndicator cafe={cafe} />
                       {cafe.displayScore && (
                         <span className="bg-green-500 text-white px-2.5 py-0.5 rounded-full font-bold text-sm">
                           {cafe.displayScore.toFixed(1)}
