@@ -39,31 +39,35 @@ MatchaMap is a full-stack React application with Cloudflare edge infrastructure,
 ## Technical Stack
 
 ### Frontend
-- **Framework**: React 18.3+
-- **Build Tool**: Vite 5.x
-- **Routing**: React Router 6.x
-- **State**: Zustand (lightweight global state)
-- **Styling**: Tailwind CSS 3.x
-- **Maps**: Leaflet 1.9.x
-- **Language**: TypeScript (strict mode)
+
+-   **Framework**: React 18.3+
+-   **Build Tool**: Vite 5.x
+-   **Routing**: React Router 6.x
+-   **State**: Zustand (lightweight global state)
+-   **Styling**: Tailwind CSS 3.x
+-   **Maps**: Leaflet 1.9.x
+-   **Language**: TypeScript (strict mode)
 
 ### Backend
-- **Runtime**: Cloudflare Workers
-- **Router**: itty-router (~450 bytes)
-- **ORM**: Drizzle ORM
-- **Migrations**: Drizzle Kit
-- **Language**: TypeScript
+
+-   **Runtime**: Cloudflare Workers
+-   **Router**: itty-router (~450 bytes)
+-   **ORM**: Drizzle ORM
+-   **Migrations**: Drizzle Kit
+-   **Language**: TypeScript
 
 ### Data
-- **Database**: Cloudflare D1 (SQLite)
-- **Storage**: Cloudflare R2 (S3-compatible)
-- **Cache**: HTTP Cache-Control headers
+
+-   **Database**: Cloudflare D1 (SQLite)
+-   **Storage**: Cloudflare R2 (S3-compatible)
+-   **Cache**: HTTP Cache-Control headers
 
 ### Hosting
-- **Frontend**: Cloudflare Pages
-- **Backend**: Cloudflare Workers
-- **CDN**: Cloudflare global network
-- **Auth**: Cloudflare Access
+
+-   **Frontend**: Cloudflare Pages
+-   **Backend**: Cloudflare Workers
+-   **CDN**: Cloudflare global network
+-   **Auth**: Cloudflare Access
 
 ## Database Schema
 
@@ -204,15 +208,17 @@ src/
 ### State Management
 
 **Zustand Stores** (global state):
-- Location data (user coordinates)
-- UI state (modals, panels)
-- City selection
-- Visited cafes (persisted to localStorage)
+
+-   Location data (user coordinates)
+-   UI state (modals, panels)
+-   City selection
+-   Visited cafes (persisted to localStorage)
 
 **Local State** (useState/useReducer):
-- Component-specific interactions
-- Form inputs
-- Temporary UI state
+
+-   Component-specific interactions
+-   Form inputs
+-   Temporary UI state
 
 ## Performance Specifications
 
@@ -242,17 +248,19 @@ CLS (Cumulative Layout Shift): < 0.1
 ### Optimization Strategies
 
 **Frontend:**
-- Code splitting by route
-- Lazy loading for map/heavy components
-- Image optimization (WebP, proper sizing)
-- Tailwind CSS purging
-- Aggressive caching (1 year for assets)
+
+-   Code splitting by route
+-   Lazy loading for map/heavy components
+-   Image optimization (WebP, proper sizing)
+-   Tailwind CSS purging
+-   Aggressive caching (1 year for assets)
 
 **Backend:**
-- Prepared SQL statements
-- Database query optimization
-- HTTP caching headers
-- Edge caching (Cloudflare CDN)
+
+-   Prepared SQL statements
+-   Database query optimization
+-   HTTP caching headers
+-   Edge caching (Cloudflare CDN)
 
 ## Mobile-First Design
 
@@ -260,24 +268,29 @@ CLS (Cumulative Layout Shift): < 0.1
 
 ```css
 /* Base: 320px-640px (mobile) */
-.container { /* mobile styles */ }
+.container {
+    /* mobile styles */
+}
 
 /* sm: 640px+ (tablet) */
-@media (min-width: 640px) { }
+@media (min-width: 640px) {
+}
 
 /* md: 768px+ (small desktop) */
-@media (min-width: 768px) { }
+@media (min-width: 768px) {
+}
 
 /* lg: 1024px+ (desktop) */
-@media (min-width: 1024px) { }
+@media (min-width: 1024px) {
+}
 ```
 
 ### Touch Interface
 
-- **Min touch target**: 44px × 44px
-- **Gestures**: Tap, scroll, pinch (map only)
-- **No hover dependencies**: All interactions work on touch
-- **Active states**: Visual feedback on all interactions
+-   **Min touch target**: 44px × 44px
+-   **Gestures**: Tap, scroll, pinch (map only)
+-   **No hover dependencies**: All interactions work on touch
+-   **Active states**: Visual feedback on all interactions
 
 ### Responsive Patterns
 
@@ -301,21 +314,21 @@ Map:
 ### Leaflet Configuration
 
 ```typescript
-const map = L.map('map', {
-  center: [43.6532, -79.3832], // Toronto
-  zoom: 12,
-  zoomControl: false,
-  scrollWheelZoom: true,
-  touchZoom: true,
-  doubleClickZoom: true,
-  boxZoom: false, // Disabled on mobile
-})
+const map = L.map("map", {
+    center: [43.6532, -79.3832], // Toronto
+    zoom: 12,
+    zoomControl: false,
+    scrollWheelZoom: true,
+    touchZoom: true,
+    doubleClickZoom: true,
+    boxZoom: false, // Disabled on mobile
+});
 
 // OpenStreetMap tiles
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 18,
-  attribution: '© OpenStreetMap contributors'
-}).addTo(map)
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 18,
+    attribution: "© OpenStreetMap contributors",
+}).addTo(map);
 ```
 
 ### Custom Markers
@@ -323,31 +336,31 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 ```typescript
 // Matcha-themed pin
 const matchaIcon = L.divIcon({
-  className: 'custom-marker',
-  html: `<div class="w-8 h-8 bg-matcha-500 rounded-full...">
+    className: "custom-marker",
+    html: `<div class="w-8 h-8 bg-matcha-500 rounded-full...">
     <div class="w-3 h-3 bg-white rounded-full"></div>
   </div>`,
-  iconSize: [32, 32],
-  iconAnchor: [16, 16]
-})
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+});
 ```
 
 ### Geolocation
 
 ```typescript
 // Platform-specific handling
-const options = getOptimalGeolocationOptions()
+const options = getOptimalGeolocationOptions();
 
 navigator.geolocation.getCurrentPosition(
-  (position) => {
-    const { latitude, longitude } = position.coords
-    // Update map center, calculate distances
-  },
-  (error) => {
-    // Graceful fallback to city center
-  },
-  options
-)
+    (position) => {
+        const { latitude, longitude } = position.coords;
+        // Update map center, calculate distances
+    },
+    (error) => {
+        // Graceful fallback to city center
+    },
+    options
+);
 ```
 
 ## Security
@@ -376,12 +389,12 @@ Cloudflare Access protects /admin/* routes
 ```typescript
 // Zod schema validation (backend)
 const CafeSchema = z.object({
-  name: z.string().min(1).max(100),
-  lat: z.number().min(43.0).max(44.0),
-  lng: z.number().min(-80.0).max(-79.0),
-  score: z.number().min(0).max(10),
-  // ...
-})
+    name: z.string().min(1).max(100),
+    lat: z.number().min(43.0).max(44.0),
+    lng: z.number().min(-80.0).max(-79.0),
+    score: z.number().min(0).max(10),
+    // ...
+});
 ```
 
 ## Monitoring & Analytics
@@ -406,9 +419,9 @@ Backend (Workers):
 
 ```typescript
 // Frontend tracking
-trackCafeStat(cafeId, 'view')
-trackCafeStat(cafeId, 'directions')
-trackFeedClick(feedItemId)
+trackCafeStat(cafeId, "view");
+trackCafeStat(cafeId, "directions");
+trackFeedClick(feedItemId);
 
 // Backend: Simple counter increments
 // See metrics-tracking-prd.md
@@ -420,7 +433,7 @@ trackFeedClick(feedItemId)
 
 ```bash
 # Frontend
-npm run dev         # Vite dev server (http://localhost:5173)
+npm run dev         # Vite dev server (http://localhost:3000)
 
 # Backend
 cd workers && npm run dev  # Wrangler dev (http://localhost:8787)
@@ -447,15 +460,18 @@ git push origin main  # Auto-deploys frontend via Cloudflare Pages
 ## Browser Support
 
 ### Primary (testing required)
-- **iOS Safari 14+** (primary mobile target)
-- **Chrome Mobile** (latest 2 versions)
+
+-   **iOS Safari 14+** (primary mobile target)
+-   **Chrome Mobile** (latest 2 versions)
 
 ### Secondary (best effort)
-- Chrome Desktop (latest)
-- Safari Desktop (latest)
-- Firefox Desktop (latest)
+
+-   Chrome Desktop (latest)
+-   Safari Desktop (latest)
+-   Firefox Desktop (latest)
 
 ### Polyfills
+
 None required (ES2020+ baseline)
 
 ## Cost Structure
@@ -558,11 +574,11 @@ CDN:
 
 ### Features (V2+)
 
-- User accounts (Cloudflare Access)
-- User-submitted reviews
-- Advanced search
-- Multi-city expansion
-- Mobile app (React Native)
+-   User accounts (Cloudflare Access)
+-   User-submitted reviews
+-   Advanced search
+-   Multi-city expansion
+-   Mobile app (React Native)
 
 ---
 

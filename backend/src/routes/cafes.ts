@@ -11,6 +11,7 @@ import {
 import { HTTP_STATUS, PAGINATION_CONSTANTS, CACHE_CONSTANTS } from '../constants';
 import { logAdminAction, generateChangesSummary } from '../utils/auditLog';
 import { AuthenticatedRequest } from '../middleware/auth';
+import { VALID_CITY_KEYS } from '../../../shared/types';
 
 // GET /api/cafes - List cafes with optional filtering
 export async function listCafes(request: IRequest, env: Env): Promise<Response> {
@@ -160,6 +161,16 @@ export async function createCafe(request: IRequest, env: Env): Promise<Response>
       return badRequestResponse('Missing required fields', request as Request, env);
     }
 
+    // Validate city key
+    const cityKey = (body.city || 'toronto').toLowerCase();
+    if (!VALID_CITY_KEYS.includes(cityKey as any)) {
+      return badRequestResponse(
+        `Invalid city. Must be one of: ${VALID_CITY_KEYS.join(', ')}`,
+        request as Request,
+        env
+      );
+    }
+
     const db = getDb(env.DB);
     const slug = body.slug || body.name.toLowerCase().replace(/\s+/g, '-');
 
@@ -177,7 +188,7 @@ export async function createCafe(request: IRequest, env: Env): Promise<Response>
       address: body.address || null,
       latitude: body.latitude,
       longitude: body.longitude,
-      city: (body.city || 'toronto').toLowerCase(), // Normalize to lowercase
+      city: cityKey, // Already validated and normalized
       ambianceScore: body.ambianceScore ?? null,
       chargeForAltMilk: body.chargeForAltMilk ?? null,
       quickNote: body.quickNote,
@@ -289,7 +300,17 @@ export async function updateCafe(request: IRequest, env: Env): Promise<Response>
     if (body.address !== undefined) updateData.address = body.address || null;
     if (body.latitude !== undefined) updateData.latitude = body.latitude;
     if (body.longitude !== undefined) updateData.longitude = body.longitude;
-    if (body.city !== undefined) updateData.city = body.city.toLowerCase(); // Normalize to lowercase
+    if (body.city !== undefined) {
+      const cityKey = body.city.toLowerCase();
+      if (!VALID_CITY_KEYS.includes(cityKey as any)) {
+        return badRequestResponse(
+          `Invalid city. Must be one of: ${VALID_CITY_KEYS.join(', ')}`,
+          request as Request,
+          env
+        );
+      }
+      updateData.city = cityKey;
+    }
 
     // Ratings
     if (body.ambianceScore !== undefined) updateData.ambianceScore = body.ambianceScore ?? null;

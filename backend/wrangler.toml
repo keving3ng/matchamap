@@ -17,7 +17,7 @@ migrations_dir = "drizzle/migrations"
 # Production environment variables (default)
 [vars]
 ENVIRONMENT = "production"
-ALLOWED_ORIGINS = "https://matchamap.club,https://*.matchamap.club,https://matchamap.pages.dev,https://*.matchamap.pages.dev,http://localhost:3000,http://localhost:5173,http://localhost:5174"
+ALLOWED_ORIGINS = "https://matchamap.club,https://*.matchamap.club,https://matchamap.pages.dev,https://*.matchamap.pages.dev,http://localhost:3000,http://localhost:5174"
 
 # SECURITY: Required secrets (set via Wrangler CLI)
 # NEVER commit secrets to git - they must be set via Wrangler CLI:
@@ -35,7 +35,7 @@ ALLOWED_ORIGINS = "https://matchamap.club,https://*.matchamap.club,https://match
 # Development environment (for testing deployments before production)
 [env.dev]
 name = "matchamap-api-dev"
-vars = { ENVIRONMENT = "development", ALLOWED_ORIGINS = "http://localhost:3000,http://localhost:5173,http://localhost:5174" }
+vars = { ENVIRONMENT = "development", ALLOWED_ORIGINS = "http://localhost:3000" }
 
 # SECURITY: Development secrets must also be set via Wrangler CLI
 # Do not use hardcoded secrets even in development

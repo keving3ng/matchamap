@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { X, Save, MapPin, Star, Coffee, ArrowRight, ArrowLeft, Search } from 'lucide-react'
 import { api } from '../../utils/api'
 import { formatHoursList } from '../../utils/formatHours'
+import { CITIES, CityKey } from '../../stores/cityStore'
 import type { Cafe } from '../../types'
 
 interface CafeFormWizardProps {
@@ -19,7 +20,7 @@ export const CafeFormWizard: React.FC<CafeFormWizardProps> = ({ onSave, onCancel
 
   const [formData, setFormData] = useState({
     name: '',
-    city: 'toronto' as 'toronto' | 'montreal' | 'tokyo',
+    city: 'toronto' as CityKey,
     lat: 0,
     lng: 0,
     address: '',
@@ -258,9 +259,11 @@ export const CafeFormWizard: React.FC<CafeFormWizardProps> = ({ onSave, onCancel
                     required
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   >
-                    <option value="toronto">Toronto</option>
-                    <option value="montreal">Montreal</option>
-                    <option value="tokyo">Tokyo</option>
+                    {Object.values(CITIES).map(city => (
+                      <option key={city.key} value={city.key}>
+                        {city.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
 

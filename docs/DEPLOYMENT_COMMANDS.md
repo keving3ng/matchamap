@@ -104,11 +104,13 @@ wrangler whoami
 ## Testing Production Endpoints
 
 ### Health Check
+
 ```bash
 curl https://matchamap-api-production.kevingeng33.workers.dev/api/health
 ```
 
 ### Test API Endpoints
+
 ```bash
 # Get cafes
 curl https://matchamap-api-production.kevingeng33.workers.dev/api/cafes
@@ -118,6 +120,7 @@ curl https://matchamap-api-production.kevingeng33.workers.dev/api/events
 ```
 
 ### Test Admin Endpoint (requires auth)
+
 ```bash
 curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   https://matchamap-api-production.kevingeng33.workers.dev/api/admin/cafes
@@ -172,41 +175,48 @@ cd frontend && npm run lint
 ## Important URLs
 
 ### Production
-- **Frontend**: https://matchamap.pages.dev
-- **API**: https://matchamap-api-production.kevingeng33.workers.dev
-- **Health Check**: https://matchamap-api-production.kevingeng33.workers.dev/api/health
+
+-   **Frontend**: https://matchamap.pages.dev
+-   **API**: https://matchamap-api-production.kevingeng33.workers.dev
+-   **Health Check**: https://matchamap-api-production.kevingeng33.workers.dev/api/health
 
 ### Development
-- **Frontend**: http://localhost:5173
-- **API**: http://localhost:8787
-- **Health Check**: http://localhost:8787/api/health
+
+-   **Frontend**: http://localhost:3000
+-   **API**: http://localhost:8787
+-   **Health Check**: http://localhost:8787/api/health
 
 ## Configuration Files
 
 ### Backend Configuration
-- **Wrangler Config**: `backend/wrangler.toml`
-- **Environment Variables**: Set via `wrangler secret put`
-- **Database Schema**: `backend/drizzle/schema.ts`
+
+-   **Wrangler Config**: `backend/wrangler.toml`
+-   **Environment Variables**: Set via `wrangler secret put`
+-   **Database Schema**: `backend/drizzle/schema.ts`
 
 ### Frontend Configuration
-- **Production API URL**: `frontend/.env.production`
-- **Feature Flags**: `frontend/src/config/features.yaml`
+
+-   **Production API URL**: `frontend/.env.production`
+-   **Feature Flags**: `frontend/src/config/features.yaml`
 
 ## Troubleshooting Commands
 
 ### Check Worker Logs
+
 ```bash
 cd backend
 wrangler tail --env production
 ```
 
 ### Verify D1 Database Binding
+
 ```bash
 # Check if database is properly bound to worker
 wrangler deployments list --env production
 ```
 
 ### Test CORS
+
 ```bash
 curl -H "Origin: https://matchamap.pages.dev" \
   -H "Access-Control-Request-Method: GET" \
@@ -217,15 +227,15 @@ curl -H "Origin: https://matchamap.pages.dev" \
 
 ## Security Checklist Before Production Deploy
 
-- [ ] JWT_SECRET set via `wrangler secret put` (never in code)
-- [ ] D1 database bound to production worker
-- [ ] Migrations run on production database
-- [ ] CORS origins configured correctly in wrangler.toml
-- [ ] HTTPS enforcement enabled (automatic in production)
-- [ ] Rate limiting configured
-- [ ] Admin routes protected with JWT + role check
-- [ ] Input validation (Zod schemas) in place
-- [ ] Security headers configured
+-   [ ] JWT_SECRET set via `wrangler secret put` (never in code)
+-   [ ] D1 database bound to production worker
+-   [ ] Migrations run on production database
+-   [ ] CORS origins configured correctly in wrangler.toml
+-   [ ] HTTPS enforcement enabled (automatic in production)
+-   [ ] Rate limiting configured
+-   [ ] Admin routes protected with JWT + role check
+-   [ ] Input validation (Zod schemas) in place
+-   [ ] Security headers configured
 
 ## Quick Deploy Checklist
 

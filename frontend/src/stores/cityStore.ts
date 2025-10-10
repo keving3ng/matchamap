@@ -1,8 +1,9 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { api } from '../utils/api'
+import { CityKey } from '../../../shared/types'
 
-export type CityKey = 'toronto' | 'montreal' | 'tokyo' | 'kyoto' | 'osaka' | 'new york' | 'mississauga' | 'scarborough'
+export type { CityKey }
 
 export interface City {
   key: CityKey
@@ -12,6 +13,15 @@ export interface City {
   zoom: number
 }
 
+/**
+ * City configuration for map navigation and display
+ * Keys MUST match VALID_CITY_KEYS in shared/types/index.ts
+ *
+ * To add a new city:
+ * 1. Add the key to VALID_CITY_KEYS in shared/types/index.ts
+ * 2. Add city details here
+ * 3. Deploy and admin UI will automatically include it
+ */
 export const CITIES: Record<CityKey, City> = {
   toronto: {
     key: 'toronto',
@@ -25,27 +35,6 @@ export const CITIES: Record<CityKey, City> = {
     name: 'Montreal',
     shortCode: 'MTL',
     center: [45.5017, -73.5673],
-    zoom: 13,
-  },
-  tokyo: {
-    key: 'tokyo',
-    name: 'Tokyo',
-    shortCode: 'TYO',
-    center: [35.6762, 139.6503],
-    zoom: 13,
-  },
-  kyoto: {
-    key: 'kyoto',
-    name: 'Kyoto',
-    shortCode: 'KYO',
-    center: [35.0116, 135.7681],
-    zoom: 13,
-  },
-  osaka: {
-    key: 'osaka',
-    name: 'Osaka',
-    shortCode: 'OSA',
-    center: [34.6937, 135.5023],
     zoom: 13,
   },
   'new york': {
@@ -67,6 +56,27 @@ export const CITIES: Record<CityKey, City> = {
     name: 'Scarborough',
     shortCode: 'SCA',
     center: [43.7731, -79.2578],
+    zoom: 13,
+  },
+  tokyo: {
+    key: 'tokyo',
+    name: 'Tokyo',
+    shortCode: 'TYO',
+    center: [35.6762, 139.6503],
+    zoom: 13,
+  },
+  kyoto: {
+    key: 'kyoto',
+    name: 'Kyoto',
+    shortCode: 'KYO',
+    center: [35.0116, 135.7681],
+    zoom: 13,
+  },
+  osaka: {
+    key: 'osaka',
+    name: 'Osaka',
+    shortCode: 'OSA',
+    center: [34.6937, 135.5023],
     zoom: 13,
   },
 }
@@ -103,18 +113,10 @@ export const useCityStore = create<CityState>()(
         try {
           const { cities } = await api.cities.getAll()
 
-          // Normalize city names to match CITIES keys
+          // City keys are already normalized in the database
+          // Just need to lowercase and filter to valid CITIES
           const availableCityKeys = cities
-            .map(cityData => {
-              const cityName = cityData.city.toLowerCase().trim()
-
-              // Handle variations (e.g., "new york city" -> "new york")
-              const normalized = cityName
-                .replace(/\s+city$/i, '') // Remove trailing "city"
-                .trim()
-
-              return normalized as CityKey
-            })
+            .map(cityData => cityData.city.toLowerCase().trim() as CityKey)
             .filter(cityKey => cityKey in CITIES)
             // Remove duplicates
             .filter((city, index, self) => self.indexOf(city) === index)

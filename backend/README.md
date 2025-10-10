@@ -4,11 +4,11 @@ Backend API for MatchaMap built with Cloudflare Workers, D1 Database, and Drizzl
 
 ## Tech Stack
 
-- **Runtime**: Cloudflare Workers
-- **Database**: Cloudflare D1 (SQLite at the edge)
-- **Router**: itty-router (450 bytes)
-- **ORM**: Drizzle ORM
-- **TypeScript**: Strict mode enabled
+-   **Runtime**: Cloudflare Workers
+-   **Database**: Cloudflare D1 (SQLite at the edge)
+-   **Router**: itty-router (450 bytes)
+-   **ORM**: Drizzle ORM
+-   **TypeScript**: Strict mode enabled
 
 ## Project Structure
 
@@ -113,18 +113,18 @@ The API will be available at `http://localhost:8787`
 
 1. Edit `drizzle/schema.ts`
 2. Generate migration:
-   ```bash
-   npm run db:generate
-   ```
+    ```bash
+    npm run db:generate
+    ```
 3. Apply migration locally:
-   ```bash
-   npm run db:migrate:local
-   ```
+    ```bash
+    npm run db:migrate:local
+    ```
 4. Test changes
 5. Apply to production:
-   ```bash
-   npm run db:migrate:prod
-   ```
+    ```bash
+    npm run db:migrate:prod
+    ```
 
 ### Testing Locally
 
@@ -164,18 +164,18 @@ wrangler rollback
 
 ### Public Endpoints (No Auth)
 
-- `GET /api/health` - Health check
-- `GET /api/cafes` - List cafes (with filters: city, neighborhood, minScore, maxPrice, limit, offset)
-- `GET /api/cafes/:id` - Get single cafe with drinks
-- `GET /api/neighborhoods` - List neighborhoods with cafe counts
-- `GET /api/feed` - List feed items (with filters: type, limit, offset)
-- `GET /api/events` - List events (with filters: upcoming, featured, limit)
+-   `GET /api/health` - Health check
+-   `GET /api/cafes` - List cafes (with filters: city, neighborhood, minScore, maxPrice, limit, offset)
+-   `GET /api/cafes/:id` - Get single cafe with drinks
+-   `GET /api/neighborhoods` - List neighborhoods with cafe counts
+-   `GET /api/feed` - List feed items (with filters: type, limit, offset)
+-   `GET /api/events` - List events (with filters: upcoming, featured, limit)
 
 ### Admin Endpoints (Cloudflare Access Required)
 
-- `POST /api/admin/cafes` - Create cafe
-- `PUT /api/admin/cafes/:id` - Update cafe
-- `DELETE /api/admin/cafes/:id` - Soft delete cafe
+-   `POST /api/admin/cafes` - Create cafe
+-   `PUT /api/admin/cafes/:id` - Update cafe
+-   `DELETE /api/admin/cafes/:id` - Soft delete cafe
 
 ## Environment Variables
 
@@ -184,24 +184,24 @@ Set in `wrangler.toml`:
 ```toml
 [vars]
 ENVIRONMENT = "development"
-ALLOWED_ORIGINS = "http://localhost:5173,https://matchamap.club,https://*.matchamap.club"
+ALLOWED_ORIGINS = "http://localhost:3000,https://matchamap.club,https://*.matchamap.club"
 ```
 
 ## Database Schema
 
 See `drizzle/schema.ts` for the complete schema. Main tables:
 
-- `cafes` - Cafe locations and details
-- `drinks` - Drink menu items
-- `neighborhoods` - Neighborhood boundaries
-- `feed_items` - News feed content
-- `events` - Upcoming events
+-   `cafes` - Cafe locations and details
+-   `drinks` - Drink menu items
+-   `neighborhoods` - Neighborhood boundaries
+-   `feed_items` - News feed content
+-   `events` - Upcoming events
 
 ## Caching Strategy
 
-- Public endpoints: `Cache-Control: public, max-age=300` (5 min)
-- Admin endpoints: `Cache-Control: no-store`
-- ETags supported on GET requests
+-   Public endpoints: `Cache-Control: public, max-age=300` (5 min)
+-   Admin endpoints: `Cache-Control: no-store`
+-   ETags supported on GET requests
 
 ## CORS Configuration
 
@@ -239,7 +239,7 @@ Check migration files in `drizzle/migrations/` for SQL syntax errors.
 
 ## Resources
 
-- [Cloudflare Workers Docs](https://developers.cloudflare.com/workers/)
-- [Drizzle ORM Docs](https://orm.drizzle.team/)
-- [itty-router Docs](https://itty.dev/)
-- [D1 Database Docs](https://developers.cloudflare.com/d1/)
+-   [Cloudflare Workers Docs](https://developers.cloudflare.com/workers/)
+-   [Drizzle ORM Docs](https://orm.drizzle.team/)
+-   [itty-router Docs](https://itty.dev/)
+-   [D1 Database Docs](https://developers.cloudflare.com/d1/)
