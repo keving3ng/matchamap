@@ -1,9 +1,11 @@
 import React, { useState } from 'react'
 import { MapPin, Navigation, Heart, CheckCircle, Instagram, ChevronDown, ChevronUp, Star, Coffee, MessageSquare, Clock, Lightbulb } from 'lucide-react'
+import { StatusBadge } from './ui'
 import { useAppFeatures } from '../hooks/useAppFeatures'
 import { getMapsUrl } from '../utils/mapsUrl'
 import { ContentContainer } from './ContentContainer'
 import { formatHoursCompact } from '../utils/formatHours'
+import { isCurrentlyOpen } from '../utils/hoursFormatter'
 import { sanitizeText } from '../utils/sanitize'
 import { COPY } from '../constants/copy'
 import type { DetailViewProps } from '../types'
@@ -37,9 +39,18 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
         <div className="bg-white rounded-2xl shadow-xl -mt-8 p-6 border-2 border-matcha-200 relative z-10 animate-slide-up">
           <div className="flex justify-between items-start mb-4">
             <div className="flex-1">
-              <h2 className="text-2xl font-bold text-charcoal-900 mb-1">{sanitizeText(cafe.name)}</h2>
+              <div className="flex items-center gap-2 mb-1">
+                <h2 className="text-2xl font-bold text-charcoal-900">{sanitizeText(cafe.name)}</h2>
+                {(() => {
+                  const cafeIsOpen = isCurrentlyOpen(cafe.hours)
+                  if (cafeIsOpen === false) {
+                    return <StatusBadge variant="error">{COPY.detail.closedNow}</StatusBadge>
+                  }
+                  return null
+                })()}
+              </div>
               {cafe.city && (
-                <div className="flex items-center gap-1.5 mt-1">
+                <div className="flex items-center gap-1.5">
                   <div className="w-1.5 h-1.5 bg-matcha-500 rounded-full"></div>
                   <p className="text-gray-600 font-medium">{sanitizeText(cafe.city)}</p>
                 </div>
@@ -68,6 +79,13 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
               </div>
             )}
           </div>
+
+          {/* Quick Note in header area */}
+          {cafe.quickNote && (
+            <div className="bg-gradient-to-r from-cream-50 to-matcha-50 -mx-6 px-6 py-3 mb-4">
+              <p className="text-sm text-gray-700 italic">"{cafe.quickNote}"</p>
+            </div>
+          )}
 
           <a
             href={mapsUrl}
@@ -138,11 +156,20 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
                           </span>
                         )}
                       </div>
+                      
+                      {/* Matcha badge moved to left side under title */}
+                      {drink.gramsUsed && (
+                        <div className="text-xs text-matcha-600 mb-2 bg-matcha-50 px-2 py-1 rounded-md inline-block">
+                          {COPY.detail.matchaAmount(drink.gramsUsed)}
+                        </div>
+                      )}
+                      
                       {drink.notes && (
                         <p className="text-sm text-gray-600 italic leading-relaxed">{drink.notes}</p>
                       )}
                     </div>
-                    <div className="text-right">
+                    
+                    <div className="text-right flex flex-col items-end">
                       <div className="flex items-center gap-1.5 font-bold text-xl text-matcha-600 mb-1.5">
                         <Star size={18} className="fill-matcha-600" />
                         {drink.score.toFixed(1)}
@@ -151,11 +178,6 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
                         <div className="text-sm font-semibold text-gray-700">
                           {drink.priceCurrency === 'CAD' ? '$' : drink.priceCurrency === 'USD' ? '$' : '¥'}
                           {drink.priceAmount.toFixed(2)}
-                        </div>
-                      )}
-                      {drink.gramsUsed && (
-                        <div className="text-xs text-matcha-600 mt-1.5 bg-matcha-50 px-2 py-1 rounded-md">
-                          {COPY.detail.matchaAmount(drink.gramsUsed)}
                         </div>
                       )}
                     </div>
@@ -225,66 +247,36 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
               <h3 className="text-xl font-bold text-charcoal-900">{COPY.detail.hours}</h3>
             </div>
             <div className="bg-white rounded-2xl shadow-lg p-5 border-2 border-matcha-100">
-              {/* Today's hours - always show */}
-              {hoursData.todayHours && (
-                <div className="bg-gradient-to-r from-matcha-50 to-cream-100 p-3 rounded-xl mb-3">
-                  <span className="font-bold text-matcha-700">{COPY.detail.today}: </span>
-                  <span className="text-gray-800 font-medium">{hoursData.todayHours.split(': ')[1]}</span>
-                </div>
-              )}
-
-              {/* Full week hours - expandable */}
-              {hoursData.allHours.length > 1 && (
-                <>
-                  <button
-                    onClick={() => setShowAllHours(!showAllHours)}
-                    className="text-sm text-matcha-600 hover:text-matcha-700 font-semibold flex items-center gap-1.5 transition-colors"
-                  >
-                    {showAllHours ? (
-                      <>
-                        <ChevronUp size={16} />
-                        {COPY.detail.showLess}
-                      </>
-                    ) : (
-                      <>
-                        <ChevronDown size={16} />
-                        {COPY.detail.showFullWeek}
-                      </>
-                    )}
-                  </button>
-
-                  {showAllHours && (
-                    <div className="mt-4 pt-4 border-t-2 border-matcha-100 space-y-2">
-                      {hoursData.allHours.map((hours, index) => (
-                        <div key={index} className="text-sm text-gray-700 font-medium flex items-center gap-2">
-                          <div className="w-1.5 h-1.5 bg-matcha-400 rounded-full"></div>
-                          {hours}
-                        </div>
-                      ))}
+              {/* Full week hours - always show with current day highlighted */}
+              <div className="space-y-2">
+                {hoursData.allHours.map((hours, index) => {
+                  // Check if this is today's hours by comparing the formatted hours with today's hours
+                  const isToday = hoursData.todayHours === hours
+                  
+                  return (
+                    <div 
+                      key={index} 
+                      className={`text-sm font-medium flex items-center gap-2 p-3 rounded-xl transition-colors ${
+                        isToday 
+                          ? 'bg-gradient-to-r from-matcha-50 to-cream-100 text-matcha-700 border-2 border-matcha-200' 
+                          : 'text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      <div className={`w-1.5 h-1.5 rounded-full ${isToday ? 'bg-matcha-500' : 'bg-gray-400'}`}></div>
+                      {hours}
+                      {isToday && (
+                        <span className="ml-auto text-xs bg-matcha-500 text-white px-2 py-0.5 rounded-full font-semibold">
+                          {COPY.detail.today}
+                        </span>
+                      )}
                     </div>
-                  )}
-                </>
-              )}
+                  )
+                })}
+              </div>
             </div>
           </div>
         )}
 
-        {cafe.quickNote && (
-          <div className="mt-8 animate-fade-in">
-            <div className="flex items-center gap-2.5 mb-4">
-              <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 p-2 rounded-xl shadow-md">
-                <Lightbulb size={20} className="text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-charcoal-900">{COPY.detail.quickNote}</h3>
-            </div>
-            <div className="bg-gradient-to-br from-yellow-50 to-cream-100 rounded-2xl shadow-lg p-6 border-2 border-yellow-200">
-              <div className="flex items-start gap-3">
-                <div className="text-3xl">💡</div>
-                <p className="text-gray-700 italic text-base leading-relaxed flex-1 pt-1">"{cafe.quickNote}"</p>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Social Media */}
         {(cafe.instagram || cafe.instagramPostLink || cafe.tiktokPostLink) && (
@@ -295,28 +287,44 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
               </div>
               <h3 className="text-xl font-bold text-charcoal-900">{COPY.detail.socialMedia}</h3>
             </div>
-            <div className="flex gap-3">
+            <div className="space-y-4">
+              {/* Cafe's Instagram (prominent) */}
               {cafe.instagram && (
                 <a
                   href={`https://instagram.com/${cafe.instagram.replace('@', '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 bg-gradient-to-br from-purple-500 via-pink-500 to-pink-600 text-white py-4 rounded-2xl font-bold shadow-lg flex items-center justify-center gap-2.5 hover:from-purple-600 hover:to-pink-700 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  className="w-full bg-gradient-to-br from-purple-500 via-pink-500 to-pink-600 text-white py-4 rounded-2xl font-bold shadow-lg flex items-center justify-center gap-2.5 hover:from-purple-600 hover:to-pink-700 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <Instagram size={22} />
-                  {COPY.detail.instagram}
+                  {cafe.name} on Instagram
                 </a>
               )}
-              {cafe.tiktokPostLink && (
-                <a
-                  href={cafe.tiktokPostLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 bg-gray-900 text-white py-4 rounded-2xl font-bold shadow-lg flex items-center justify-center gap-2.5 hover:bg-black transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  <span className="text-2xl">🎵</span>
-                  {COPY.detail.tiktok}
-                </a>
+              
+              {/* Review Links (subtle) */}
+              {(cafe.instagramPostLink || cafe.tiktokPostLink) && (
+                <div className="flex gap-4 justify-center text-sm">
+                  {cafe.instagramPostLink && (
+                    <a
+                      href={cafe.instagramPostLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-gray-600 underline hover:text-purple-600 transition"
+                    >
+                      {COPY.detail.seeInstagramReel}
+                    </a>
+                  )}
+                  {cafe.tiktokPostLink && (
+                    <a
+                      href={cafe.tiktokPostLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-gray-600 underline hover:text-gray-800 transition"
+                    >
+                      {COPY.detail.seeTikTokReview}
+                    </a>
+                  )}
+                </div>
               )}
             </div>
           </div>

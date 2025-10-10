@@ -44,6 +44,7 @@ export const COPY = {
     today: 'Today',
     follow: 'Follow',
     openNow: 'Open Now',
+    closedNow: 'Closed',
     underPrice: (price: number) => `Under $${price}`,
     ratingFilter: (rating: number) => `${rating}+ ★`,
     drinkType: 'Drink Type',
@@ -57,6 +58,8 @@ export const COPY = {
     walkingDistance: (distance: string) => distance,
     viewInstagramReview: 'View Instagram review',
     viewTikTokReview: 'View TikTok review',
+    seeInstagramReel: 'See Instagram Reel',
+    seeTikTokReview: 'See TikTok Review',
   },
 
   // Location Dialogs
@@ -140,6 +143,9 @@ export const COPY = {
     icedMatchaLatte: 'Iced Matcha Latte',
     awayDistance: (distance: string, time: string) => `${distance} away • ${time} walk`,
     scoreOutOf: '/ 10',
+    seeInstagramReel: 'See Instagram Reel',
+    seeTikTokReview: 'See TikTok Review',
+    closedNow: 'Closed',
   },
 
   // Passport View

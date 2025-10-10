@@ -1,6 +1,7 @@
 import React from 'react'
 import { MapPin, Navigation, Crosshair, Coffee, Star, Building2, ChevronDown, Route, Instagram } from 'lucide-react'
 import { TikTokIcon } from './TikTokIcon'
+import { StatusBadge } from './ui'
 import { useLeafletMap } from '../hooks/useLeafletMap'
 import { useGeolocation } from '../hooks/useGeolocation'
 import { useVisitedCafes } from '../hooks/useVisitedCafes'
@@ -359,25 +360,34 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
             <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-3 animate-scale-in" style={{ animationDelay: '0.1s' }}></div>
 
             <div className="flex justify-between items-start mb-2">
-              <div>
-                <h3 className="font-bold text-lg text-gray-800">{selectedCafe.name}</h3>
-                {selectedCafe.address && <p className="text-sm text-gray-500">{selectedCafe.address}</p>}
+              <div className="flex-1 mr-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="font-bold text-lg text-gray-800">{selectedCafe.name}</h3>
+                  {(() => {
+                    const cafeIsOpen = isCurrentlyOpen(selectedCafe.hours)
+                    if (cafeIsOpen === false) {
+                      return <StatusBadge variant="error">{COPY.map.closedNow}</StatusBadge>
+                    }
+                    return null
+                  })()}
+                </div>
+                {selectedCafe.address && <p className="text-xs text-gray-500">{selectedCafe.address}</p>}
               </div>
               {selectedCafe.displayScore && (
-                <div className="bg-green-500 text-white px-3 py-1 rounded-full font-bold text-lg">
+                <div className="bg-green-500 text-white px-3 py-1 rounded-full font-bold text-lg ml-2 flex-shrink-0">
                   {selectedCafe.displayScore.toFixed(1)}
                 </div>
               )}
             </div>
             {selectedCafe.distanceInfo ? (
-              <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
+              <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
                 <Navigation size={16} className="text-green-600" />
                 <span>{selectedCafe.distanceInfo.formattedKm} • {selectedCafe.distanceInfo.walkTime} walk</span>
               </div>
             ) : (
               <button
                 onClick={handleLocationClick}
-                className="flex items-center gap-2 text-sm text-gray-500 mb-3 hover:text-gray-700 transition"
+                className="flex items-center gap-2 text-sm text-gray-500 mb-2 hover:text-gray-700 transition"
               >
                 <MapPin size={16} className="text-gray-400" />
                 <span className="underline decoration-dotted">{COPY.map.enableLocationServices}</span>
@@ -386,12 +396,12 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
 
             {/* Quick Note */}
             {selectedCafe.quickNote && (
-              <p className="text-sm text-gray-600 italic mb-3">"{selectedCafe.quickNote}"</p>
+              <p className="text-sm text-gray-600 italic mb-2">"{selectedCafe.quickNote}"</p>
             )}
 
             {/* Drinks List */}
             {selectedCafe.drinks && selectedCafe.drinks.length > 0 && (
-              <div className="mb-3">
+              <div className="mb-2">
                 <div className="flex items-center gap-1 text-xs font-semibold text-gray-700 mb-1">
                   <Coffee size={12} />
                   {COPY.map.drinks}
@@ -423,7 +433,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
             {selectedCafe.hours && (() => {
               const hoursData = formatHoursCompact(selectedCafe.hours)
               return hoursData && hoursData.todayHours ? (
-                <div className="mb-3">
+                <div className="mb-2">
                   <p className="text-xs font-semibold text-gray-700 mb-1">{COPY.map.hours}</p>
                   <p className="text-xs text-gray-600">
                     <span className="font-semibold text-green-600">{COPY.map.today}: </span>
@@ -477,35 +487,47 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                 </button>
               )}
 
-              {/* Social Review Links - Mobile */}
-              {(selectedCafe.instagramPostLink || selectedCafe.tiktokPostLink) && (
+              {/* Social Links - Mobile */}
+              {(selectedCafe.instagram || selectedCafe.instagramPostLink || selectedCafe.tiktokPostLink) && (
                 <div className="pt-2 border-t border-gray-100">
-                  <div className="flex gap-2">
-                    {selectedCafe.instagramPostLink && (
-                      <a
-                        href={selectedCafe.instagramPostLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-br from-purple-500 to-pink-500 text-white py-2 px-3 rounded-lg font-medium hover:from-purple-600 hover:to-pink-600 transition text-sm min-h-[44px]"
-                        aria-label={COPY.map.viewInstagramReview}
-                      >
-                        <Instagram size={16} />
-                        <span className="text-xs">Review</span>
-                      </a>
-                    )}
-                    {selectedCafe.tiktokPostLink && (
-                      <a
-                        href={selectedCafe.tiktokPostLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-1 flex items-center justify-center gap-2 bg-gray-800 text-white py-2 px-3 rounded-lg font-medium hover:bg-gray-900 transition text-sm min-h-[44px]"
-                        aria-label={COPY.map.viewTikTokReview}
-                      >
-                        <TikTokIcon size={16} />
-                        <span className="text-xs">Review</span>
-                      </a>
-                    )}
-                  </div>
+                  {/* Cafe's Instagram (prominent) */}
+                  {selectedCafe.instagram && (
+                    <a
+                      href={`https://instagram.com/${selectedCafe.instagram.replace('@', '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full flex items-center justify-center gap-2 bg-gradient-to-br from-purple-500 to-pink-500 text-white py-3 rounded-lg font-medium hover:from-purple-600 hover:to-pink-600 transition text-sm min-h-[44px] mb-2"
+                    >
+                      <Instagram size={16} />
+                      <span>{selectedCafe.name} on Instagram</span>
+                    </a>
+                  )}
+                  
+                  {/* Review Links (subtle) */}
+                  {(selectedCafe.instagramPostLink || selectedCafe.tiktokPostLink) && (
+                    <div className="flex gap-2 text-xs">
+                      {selectedCafe.instagramPostLink && (
+                        <a
+                          href={selectedCafe.instagramPostLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gray-600 underline hover:text-purple-600 transition"
+                        >
+                          {COPY.map.seeInstagramReel}
+                        </a>
+                      )}
+                      {selectedCafe.tiktokPostLink && (
+                        <a
+                          href={selectedCafe.tiktokPostLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gray-600 underline hover:text-gray-800 transition"
+                        >
+                          {COPY.map.seeTikTokReview}
+                        </a>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -519,12 +541,21 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
             <div className="space-y-4">
               {/* Header */}
               <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="font-bold text-xl text-gray-800">{selectedCafe.name}</h3>
-                  {selectedCafe.address && <p className="text-gray-500 mt-1">{selectedCafe.address}</p>}
+                <div className="flex-1 mr-4">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-bold text-xl text-gray-800">{selectedCafe.name}</h3>
+                    {(() => {
+                      const cafeIsOpen = isCurrentlyOpen(selectedCafe.hours)
+                      if (cafeIsOpen === false) {
+                        return <StatusBadge variant="error">{COPY.map.closedNow}</StatusBadge>
+                      }
+                      return null
+                    })()}
+                  </div>
+                  {selectedCafe.address && <p className="text-sm text-gray-500">{selectedCafe.address}</p>}
                 </div>
                 {selectedCafe.displayScore && (
-                  <div className="bg-green-500 text-white px-4 py-2 rounded-full font-bold text-xl">
+                  <div className="bg-green-500 text-white px-4 py-2 rounded-full font-bold text-xl ml-3 flex-shrink-0">
                     {selectedCafe.displayScore.toFixed(1)}
                   </div>
                 )}
@@ -647,21 +678,32 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
               {/* Social Links */}
               {(selectedCafe.instagram || selectedCafe.instagramPostLink || selectedCafe.tiktokPostLink) && (
                 <div>
-                  <h4 className="font-semibold text-gray-800 mb-3">{COPY.map.follow}</h4>
-                  <div className="space-y-2">
-                    {/* Review Links (Priority) */}
+                  <h4 className="font-semibold text-gray-800 mb-3">Social Media</h4>
+                  <div className="space-y-3">
+                    {/* Cafe's Instagram (prominent) */}
+                    {selectedCafe.instagram && (
+                      <a
+                        href={`https://instagram.com/${selectedCafe.instagram?.replace('@', '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full flex items-center justify-center gap-2 bg-gradient-to-br from-purple-500 to-pink-500 text-white py-3 rounded-lg font-medium hover:from-purple-600 hover:to-pink-600 transition text-sm"
+                      >
+                        <Instagram size={16} />
+                        <span>{selectedCafe.name} on Instagram</span>
+                      </a>
+                    )}
+                    
+                    {/* Review Links (subtle) */}
                     {(selectedCafe.instagramPostLink || selectedCafe.tiktokPostLink) && (
-                      <div className="flex gap-2">
+                      <div className="flex gap-3 text-sm justify-center">
                         {selectedCafe.instagramPostLink && (
                           <a
                             href={selectedCafe.instagramPostLink}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-br from-purple-500 to-pink-500 text-white py-2 px-3 rounded-lg font-medium hover:from-purple-600 hover:to-pink-600 transition text-sm"
-                            aria-label={COPY.map.viewInstagramReview}
+                            className="text-gray-600 underline hover:text-purple-600 transition"
                           >
-                            <Instagram size={16} />
-                            <span>Review</span>
+                            {COPY.map.seeInstagramReel}
                           </a>
                         )}
                         {selectedCafe.tiktokPostLink && (
@@ -669,27 +711,12 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                             href={selectedCafe.tiktokPostLink}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex-1 flex items-center justify-center gap-2 bg-gray-800 text-white py-2 px-3 rounded-lg font-medium hover:bg-gray-900 transition text-sm"
-                            aria-label={COPY.map.viewTikTokReview}
+                            className="text-gray-600 underline hover:text-gray-800 transition"
                           >
-                            <TikTokIcon size={16} />
-                            <span>Review</span>
+                            {COPY.map.seeTikTokReview}
                           </a>
                         )}
                       </div>
-                    )}
-                    
-                    {/* Profile Link (if no review link exists) */}
-                    {selectedCafe.instagram && !selectedCafe.instagramPostLink && (
-                      <a
-                        href={`https://instagram.com/${selectedCafe.instagram?.replace('@', '')}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center gap-2 bg-gradient-to-br from-purple-500 to-pink-500 text-white py-2 px-3 rounded-lg font-medium hover:from-purple-600 hover:to-pink-600 transition text-sm w-full"
-                      >
-                        <Instagram size={16} />
-                        <span>{COPY.detail.instagram}</span>
-                      </a>
                     )}
                   </div>
                 </div>
