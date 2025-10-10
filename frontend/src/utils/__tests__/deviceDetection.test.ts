@@ -95,19 +95,19 @@ describe('deviceDetection', () => {
     it('should return iOS general advice for non-Safari browsers', () => {
       mockUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/94.0.4606.76 Mobile/15E148 Safari/604.1')
       const advice = getLocationRequestAdvice()
-      expect(advice).toContain('Location Services for your browser')
+      expect(advice).toContain('Enable Location Services in Settings → Privacy & Security → Location Services')
     })
 
     it('should return Android specific advice', () => {
       mockUserAgent('Mozilla/5.0 (Linux; Android 11; SM-G991B) AppleWebKit/537.36')
       const advice = getLocationRequestAdvice()
-      expect(advice).toContain('Settings → Apps → [Browser] → Permissions')
+      expect(advice).toContain('Settings → Apps → [Your Browser] → Permissions → Location')
     })
 
     it('should return generic advice for desktop', () => {
       mockUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36')
       const advice = getLocationRequestAdvice()
-      expect(advice).toContain('location services are enabled for your browser')
+      expect(advice).toContain('location services are enabled in your device settings')
     })
   })
 
