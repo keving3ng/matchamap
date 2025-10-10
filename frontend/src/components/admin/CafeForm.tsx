@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import { X, Save, MapPin, Coffee, RefreshCw } from 'lucide-react'
+import { X, Save, MapPin, Coffee, RefreshCw, Lock } from 'lucide-react'
 import { api } from '../../utils/api'
+import { COPY } from '../../constants/copy'
 import type { Cafe } from '../../types'
 
 interface CafeFormProps {
@@ -129,6 +130,7 @@ export const CafeForm: React.FC<CafeFormProps> = ({ cafe, onSave, onCancel }) =>
       const slug = formData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '')
 
       // Transform to backend API format (matching Drizzle schema)
+      // Note: Coordinates are read-only in the form but still included in submission
       const payload = {
         name: formData.name,
         slug,
@@ -282,30 +284,40 @@ export const CafeForm: React.FC<CafeFormProps> = ({ cafe, onSave, onCancel }) =>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Latitude *
               </label>
-              <input
-                type="number"
-                name="latitude"
-                value={formData.latitude}
-                onChange={handleChange}
-                step="0.000001"
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              />
+              <div className="relative">
+                <input
+                  type="number"
+                  name="latitude"
+                  value={formData.latitude}
+                  step="0.000001"
+                  required
+                  disabled
+                  className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
+                  title={COPY.admin.cafeEditor.coordsReadOnly}
+                />
+                <Lock className="absolute right-3 top-2.5 h-4 w-4 text-gray-400" />
+              </div>
+              <p className="text-xs text-gray-500 mt-1">{COPY.admin.cafeEditor.coordsAutoUpdated}</p>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Longitude *
               </label>
-              <input
-                type="number"
-                name="longitude"
-                value={formData.longitude}
-                onChange={handleChange}
-                step="0.000001"
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              />
+              <div className="relative">
+                <input
+                  type="number"
+                  name="longitude"
+                  value={formData.longitude}
+                  step="0.000001"
+                  required
+                  disabled
+                  className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
+                  title={COPY.admin.cafeEditor.coordsReadOnly}
+                />
+                <Lock className="absolute right-3 top-2.5 h-4 w-4 text-gray-400" />
+              </div>
+              <p className="text-xs text-gray-500 mt-1">{COPY.admin.cafeEditor.coordsAutoUpdated}</p>
             </div>
 
             {/* Cafe Details */}
