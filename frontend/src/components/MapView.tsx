@@ -1,5 +1,6 @@
 import React from 'react'
-import { MapPin, Navigation, Crosshair, Coffee, Star, Building2, ChevronDown, Route } from 'lucide-react'
+import { MapPin, Navigation, Crosshair, Coffee, Star, Building2, ChevronDown, Route, Instagram } from 'lucide-react'
+import { TikTokIcon } from './TikTokIcon'
 import { useLeafletMap } from '../hooks/useLeafletMap'
 import { useGeolocation } from '../hooks/useGeolocation'
 import { useVisitedCafes } from '../hooks/useVisitedCafes'
@@ -475,6 +476,38 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                   )}
                 </button>
               )}
+
+              {/* Social Review Links - Mobile */}
+              {(selectedCafe.instagramPostLink || selectedCafe.tiktokPostLink) && (
+                <div className="pt-2 border-t border-gray-100">
+                  <div className="flex gap-2">
+                    {selectedCafe.instagramPostLink && (
+                      <a
+                        href={selectedCafe.instagramPostLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-br from-purple-500 to-pink-500 text-white py-2 px-3 rounded-lg font-medium hover:from-purple-600 hover:to-pink-600 transition text-sm min-h-[44px]"
+                        aria-label={COPY.map.viewInstagramReview}
+                      >
+                        <Instagram size={16} />
+                        <span className="text-xs">Review</span>
+                      </a>
+                    )}
+                    {selectedCafe.tiktokPostLink && (
+                      <a
+                        href={selectedCafe.tiktokPostLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 flex items-center justify-center gap-2 bg-gray-800 text-white py-2 px-3 rounded-lg font-medium hover:bg-gray-900 transition text-sm min-h-[44px]"
+                        aria-label={COPY.map.viewTikTokReview}
+                      >
+                        <TikTokIcon size={16} />
+                        <span className="text-xs">Review</span>
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -615,25 +648,47 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
               {(selectedCafe.instagram || selectedCafe.instagramPostLink || selectedCafe.tiktokPostLink) && (
                 <div>
                   <h4 className="font-semibold text-gray-800 mb-3">{COPY.map.follow}</h4>
-                  <div className="flex gap-2">
-                    {(selectedCafe.instagram || selectedCafe.instagramPostLink) && (
-                      <a
-                        href={selectedCafe.instagramPostLink || `https://instagram.com/${selectedCafe.instagram?.replace('@', '')}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-1 bg-gradient-to-br from-purple-500 to-pink-500 text-white py-2 px-3 rounded-lg font-medium text-center hover:from-purple-600 hover:to-pink-600 transition text-sm"
-                      >
-                        {COPY.detail.instagram}
-                      </a>
+                  <div className="space-y-2">
+                    {/* Review Links (Priority) */}
+                    {(selectedCafe.instagramPostLink || selectedCafe.tiktokPostLink) && (
+                      <div className="flex gap-2">
+                        {selectedCafe.instagramPostLink && (
+                          <a
+                            href={selectedCafe.instagramPostLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-br from-purple-500 to-pink-500 text-white py-2 px-3 rounded-lg font-medium hover:from-purple-600 hover:to-pink-600 transition text-sm"
+                            aria-label={COPY.map.viewInstagramReview}
+                          >
+                            <Instagram size={16} />
+                            <span>Review</span>
+                          </a>
+                        )}
+                        {selectedCafe.tiktokPostLink && (
+                          <a
+                            href={selectedCafe.tiktokPostLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 flex items-center justify-center gap-2 bg-gray-800 text-white py-2 px-3 rounded-lg font-medium hover:bg-gray-900 transition text-sm"
+                            aria-label={COPY.map.viewTikTokReview}
+                          >
+                            <TikTokIcon size={16} />
+                            <span>Review</span>
+                          </a>
+                        )}
+                      </div>
                     )}
-                    {selectedCafe.tiktokPostLink && (
+                    
+                    {/* Profile Link (if no review link exists) */}
+                    {selectedCafe.instagram && !selectedCafe.instagramPostLink && (
                       <a
-                        href={selectedCafe.tiktokPostLink}
+                        href={`https://instagram.com/${selectedCafe.instagram?.replace('@', '')}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex-1 bg-gray-800 text-white py-2 px-3 rounded-lg font-medium text-center hover:bg-gray-900 transition text-sm"
+                        className="flex items-center justify-center gap-2 bg-gradient-to-br from-purple-500 to-pink-500 text-white py-2 px-3 rounded-lg font-medium hover:from-purple-600 hover:to-pink-600 transition text-sm w-full"
                       >
-                        {COPY.detail.tiktok}
+                        <Instagram size={16} />
+                        <span>{COPY.detail.instagram}</span>
                       </a>
                     )}
                   </div>

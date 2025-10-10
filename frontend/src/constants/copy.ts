@@ -55,6 +55,8 @@ export const COPY = {
     routeError: 'Unable to load route',
     walkingTime: (duration: string) => `${duration} walk`,
     walkingDistance: (distance: string) => distance,
+    viewInstagramReview: 'View Instagram review',
+    viewTikTokReview: 'View TikTok review',
   },
 
   // Location Dialogs
@@ -108,6 +110,8 @@ export const COPY = {
     filterByCity: 'Filter by City',
     citiesSelected: (count: number) => `${count} cities selected`,
     clearAll: 'Clear All',
+    viewInstagramReview: 'View Instagram review',
+    viewTikTokReview: 'View TikTok review',
   },
 
   // Detail View
