@@ -187,7 +187,7 @@ export async function login(request: IRequest, env: Env): Promise<Response> {
 
 /**
  * POST /api/auth/logout
- * Invalidate user session
+ * Invalidate user session and delete from database
  */
 export async function logout(request: AuthenticatedRequest, env: Env): Promise<Response> {
   try {
@@ -195,9 +195,17 @@ export async function logout(request: AuthenticatedRequest, env: Env): Promise<R
       return badRequestResponse('Not authenticated', request as Request, env);
     }
 
-    // In a real app, you might want to invalidate the token
-    // For JWT, we rely on token expiry
-    // For sessions table, we can delete expired sessions or specific session
+    const db = getDb(env.DB);
+
+    // Delete all sessions for this user to ensure complete logout
+    // This provides additional security by invalidating all user sessions
+    await db
+      .delete(sessions)
+      .where(eq(sessions.userId, request.user.userId))
+      .run();
+
+    // Log security event for audit purposes
+    console.log(`User logout - User ID: ${request.user.userId}, Username: ${request.user.username}`);
 
     return jsonResponse(
       { message: 'Logged out successfully' },
