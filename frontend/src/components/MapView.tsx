@@ -487,47 +487,48 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                 </button>
               )}
 
-              {/* Social Links - Mobile */}
-              {(selectedCafe.instagram || selectedCafe.instagramPostLink || selectedCafe.tiktokPostLink) && (
+              {/* Cafe's Instagram - Mobile */}
+              {selectedCafe.instagram && (
                 <div className="pt-2 border-t border-gray-100">
-                  {/* Cafe's Instagram (prominent) */}
-                  {selectedCafe.instagram && (
-                    <a
-                      href={`https://instagram.com/${selectedCafe.instagram.replace('@', '')}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full flex items-center justify-center gap-2 bg-gradient-to-br from-purple-500 to-pink-500 text-white py-3 rounded-lg font-medium hover:from-purple-600 hover:to-pink-600 transition text-sm min-h-[44px] mb-2"
-                    >
-                      <Instagram size={16} />
-                      <span>{selectedCafe.name} on Instagram</span>
-                    </a>
-                  )}
-                  
-                  {/* Review Links (subtle) */}
-                  {(selectedCafe.instagramPostLink || selectedCafe.tiktokPostLink) && (
-                    <div className="flex gap-2 text-xs">
-                      {selectedCafe.instagramPostLink && (
-                        <a
-                          href={selectedCafe.instagramPostLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-gray-600 underline hover:text-purple-600 transition"
-                        >
-                          {COPY.map.seeInstagramReel}
-                        </a>
-                      )}
-                      {selectedCafe.tiktokPostLink && (
-                        <a
-                          href={selectedCafe.tiktokPostLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-gray-600 underline hover:text-gray-800 transition"
-                        >
-                          {COPY.map.seeTikTokReview}
-                        </a>
-                      )}
-                    </div>
-                  )}
+                  <a
+                    href={`https://instagram.com/${selectedCafe.instagram.replace('@', '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full flex items-center justify-center gap-2 bg-gradient-to-br from-purple-500 to-pink-500 text-white py-3 rounded-lg font-medium hover:from-purple-600 hover:to-pink-600 transition text-sm min-h-[44px]"
+                  >
+                    <Instagram size={16} />
+                    <span>{selectedCafe.instagram.startsWith('@') ? selectedCafe.instagram : `@${selectedCafe.instagram}`}</span>
+                  </a>
+                </div>
+              )}
+
+              {/* Review Links - Mobile */}
+              {(selectedCafe.instagramPostLink || selectedCafe.tiktokPostLink) && (
+                <div className="pt-2 border-t border-gray-100">
+                  <div className="flex gap-2">
+                    {selectedCafe.instagramPostLink && (
+                      <a
+                        href={selectedCafe.instagramPostLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 bg-white border-2 border-purple-300 text-purple-600 py-2.5 px-4 rounded-xl font-semibold hover:bg-purple-50 active:scale-[0.98] transition-all duration-200 ease-out flex items-center justify-center gap-2 min-h-[44px] text-sm"
+                      >
+                        <Instagram size={16} />
+                        <span>{COPY.map.seeInstagramReel}</span>
+                      </a>
+                    )}
+                    {selectedCafe.tiktokPostLink && (
+                      <a
+                        href={selectedCafe.tiktokPostLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 bg-white border-2 border-gray-300 text-gray-700 py-2.5 px-4 rounded-xl font-semibold hover:bg-gray-50 active:scale-[0.98] transition-all duration-200 ease-out flex items-center justify-center gap-2 min-h-[44px] text-sm"
+                      >
+                        <TikTokIcon size={16} />
+                        <span>{COPY.map.seeTikTokReview}</span>
+                      </a>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -675,48 +676,48 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                 )}
               </div>
 
-              {/* Social Links */}
-              {(selectedCafe.instagram || selectedCafe.instagramPostLink || selectedCafe.tiktokPostLink) && (
+              {/* Cafe's Instagram */}
+              {selectedCafe.instagram && (
                 <div>
-                  <h4 className="font-semibold text-gray-800 mb-3">Social Media</h4>
-                  <div className="space-y-3">
-                    {/* Cafe's Instagram (prominent) */}
-                    {selectedCafe.instagram && (
+                  <h4 className="font-semibold text-gray-800 mb-3">Follow</h4>
+                  <a
+                    href={`https://instagram.com/${selectedCafe.instagram?.replace('@', '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full flex items-center justify-center gap-2 bg-gradient-to-br from-purple-500 to-pink-500 text-white py-3 rounded-lg font-medium hover:from-purple-600 hover:to-pink-600 transition text-sm"
+                  >
+                    <Instagram size={16} />
+                    <span>{selectedCafe.instagram.startsWith('@') ? selectedCafe.instagram : `@${selectedCafe.instagram}`}</span>
+                  </a>
+                </div>
+              )}
+
+              {/* Review Links */}
+              {(selectedCafe.instagramPostLink || selectedCafe.tiktokPostLink) && (
+                <div>
+                  <h4 className="font-semibold text-gray-800 mb-3">Our Reviews</h4>
+                  <div className="flex gap-2">
+                    {selectedCafe.instagramPostLink && (
                       <a
-                        href={`https://instagram.com/${selectedCafe.instagram?.replace('@', '')}`}
+                        href={selectedCafe.instagramPostLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-full flex items-center justify-center gap-2 bg-gradient-to-br from-purple-500 to-pink-500 text-white py-3 rounded-lg font-medium hover:from-purple-600 hover:to-pink-600 transition text-sm"
+                        className="flex-1 bg-white border-2 border-purple-300 text-purple-600 py-3 px-4 rounded-xl font-semibold hover:bg-purple-50 active:scale-[0.98] transition-all duration-200 ease-out flex items-center justify-center gap-2 min-h-[44px] text-sm"
                       >
                         <Instagram size={16} />
-                        <span>{selectedCafe.name} on Instagram</span>
+                        <span>{COPY.map.seeInstagramReel}</span>
                       </a>
                     )}
-                    
-                    {/* Review Links (subtle) */}
-                    {(selectedCafe.instagramPostLink || selectedCafe.tiktokPostLink) && (
-                      <div className="flex gap-3 text-sm justify-center">
-                        {selectedCafe.instagramPostLink && (
-                          <a
-                            href={selectedCafe.instagramPostLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-gray-600 underline hover:text-purple-600 transition"
-                          >
-                            {COPY.map.seeInstagramReel}
-                          </a>
-                        )}
-                        {selectedCafe.tiktokPostLink && (
-                          <a
-                            href={selectedCafe.tiktokPostLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-gray-600 underline hover:text-gray-800 transition"
-                          >
-                            {COPY.map.seeTikTokReview}
-                          </a>
-                        )}
-                      </div>
+                    {selectedCafe.tiktokPostLink && (
+                      <a
+                        href={selectedCafe.tiktokPostLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 bg-white border-2 border-gray-300 text-gray-700 py-3 px-4 rounded-xl font-semibold hover:bg-gray-50 active:scale-[0.98] transition-all duration-200 ease-out flex items-center justify-center gap-2 min-h-[44px] text-sm"
+                      >
+                        <TikTokIcon size={16} />
+                        <span>{COPY.map.seeTikTokReview}</span>
+                      </a>
                     )}
                   </div>
                 </div>

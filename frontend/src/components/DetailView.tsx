@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { MapPin, Navigation, Heart, CheckCircle, Instagram, ChevronDown, ChevronUp, Star, Coffee, MessageSquare, Clock, Lightbulb } from 'lucide-react'
+import { TikTokIcon } from './TikTokIcon'
 import { StatusBadge } from './ui'
 import { useAppFeatures } from '../hooks/useAppFeatures'
 import { getMapsUrl } from '../utils/mapsUrl'
@@ -57,11 +58,8 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
               )}
             </div>
             {cafe.displayScore && (
-              <div className="bg-gradient-to-br from-matcha-500 via-matcha-600 to-matcha-700 text-white px-5 py-2.5 rounded-2xl font-bold text-2xl shadow-lg animate-scale-in">
-                <div className="text-center">
-                  {cafe.displayScore.toFixed(1)}
-                  <div className="text-[10px] font-normal opacity-90">/ 10</div>
-                </div>
+              <div className="bg-gradient-to-br from-matcha-500 via-matcha-600 to-matcha-700 text-white px-5 py-3 rounded-2xl font-bold text-2xl shadow-lg animate-scale-in">
+                {cafe.displayScore.toFixed(1)}
               </div>
             )}
           </div>
@@ -278,53 +276,58 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
         )}
 
 
-        {/* Social Media */}
-        {(cafe.instagram || cafe.instagramPostLink || cafe.tiktokPostLink) && (
+        {/* Cafe's Instagram */}
+        {cafe.instagram && (
           <div className="mt-8 animate-fade-in">
             <div className="flex items-center gap-2.5 mb-4">
               <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 p-2 rounded-xl shadow-md">
                 <Instagram size={20} className="text-white" />
               </div>
-              <h3 className="text-xl font-bold text-charcoal-900">{COPY.detail.socialMedia}</h3>
+              <h3 className="text-xl font-bold text-charcoal-900">{COPY.detail.follow}</h3>
             </div>
-            <div className="space-y-4">
-              {/* Cafe's Instagram (prominent) */}
-              {cafe.instagram && (
+            <a
+              href={`https://instagram.com/${cafe.instagram.replace('@', '')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full bg-gradient-to-br from-purple-500 via-pink-500 to-pink-600 text-white py-4 rounded-2xl font-bold shadow-lg flex items-center justify-center gap-2.5 hover:from-purple-600 hover:to-pink-700 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <Instagram size={22} />
+              {cafe.instagram.startsWith('@') ? cafe.instagram : `@${cafe.instagram}`}
+            </a>
+          </div>
+        )}
+
+        {/* Review Links */}
+        {(cafe.instagramPostLink || cafe.tiktokPostLink) && (
+          <div className="mt-8 animate-fade-in">
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 p-2 rounded-xl shadow-md">
+                <Star size={20} className="text-white fill-white" />
+              </div>
+              <h3 className="text-xl font-bold text-charcoal-900">{COPY.detail.ourReviews}</h3>
+            </div>
+            <div className="flex gap-3">
+              {cafe.instagramPostLink && (
                 <a
-                  href={`https://instagram.com/${cafe.instagram.replace('@', '')}`}
+                  href={cafe.instagramPostLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full bg-gradient-to-br from-purple-500 via-pink-500 to-pink-600 text-white py-4 rounded-2xl font-bold shadow-lg flex items-center justify-center gap-2.5 hover:from-purple-600 hover:to-pink-700 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  className="flex-1 bg-white border-2 border-purple-300 text-purple-600 py-3.5 px-4 rounded-xl font-semibold hover:bg-purple-50 active:scale-[0.98] transition-all duration-200 ease-out flex items-center justify-center gap-2 min-h-[44px] shadow-md hover:shadow-lg"
                 >
-                  <Instagram size={22} />
-                  {cafe.name} on Instagram
+                  <Instagram size={18} />
+                  <span>{COPY.detail.seeInstagramReel}</span>
                 </a>
               )}
-              
-              {/* Review Links (subtle) */}
-              {(cafe.instagramPostLink || cafe.tiktokPostLink) && (
-                <div className="flex gap-4 justify-center text-sm">
-                  {cafe.instagramPostLink && (
-                    <a
-                      href={cafe.instagramPostLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-gray-600 underline hover:text-purple-600 transition"
-                    >
-                      {COPY.detail.seeInstagramReel}
-                    </a>
-                  )}
-                  {cafe.tiktokPostLink && (
-                    <a
-                      href={cafe.tiktokPostLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-gray-600 underline hover:text-gray-800 transition"
-                    >
-                      {COPY.detail.seeTikTokReview}
-                    </a>
-                  )}
-                </div>
+              {cafe.tiktokPostLink && (
+                <a
+                  href={cafe.tiktokPostLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 bg-white border-2 border-gray-300 text-gray-700 py-3.5 px-4 rounded-xl font-semibold hover:bg-gray-50 active:scale-[0.98] transition-all duration-200 ease-out flex items-center justify-center gap-2 min-h-[44px] shadow-md hover:shadow-lg"
+                >
+                  <TikTokIcon size={18} />
+                  <span>{COPY.detail.seeTikTokReview}</span>
+                </a>
               )}
             </div>
           </div>

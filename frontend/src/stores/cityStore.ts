@@ -102,11 +102,24 @@ export const useCityStore = create<CityState>()(
       loadAvailableCities: async () => {
         try {
           const { cities } = await api.cities.getAll()
+
+          // Normalize city names to match CITIES keys
           const availableCityKeys = cities
-            .map(cityData => cityData.city as CityKey)
+            .map(cityData => {
+              const cityName = cityData.city.toLowerCase().trim()
+
+              // Handle variations (e.g., "new york city" -> "new york")
+              const normalized = cityName
+                .replace(/\s+city$/i, '') // Remove trailing "city"
+                .trim()
+
+              return normalized as CityKey
+            })
             .filter(cityKey => cityKey in CITIES)
-          
-          set({ 
+            // Remove duplicates
+            .filter((city, index, self) => self.indexOf(city) === index)
+
+          set({
             availableCities: availableCityKeys,
             availableCitiesLoaded: true
           })
@@ -119,7 +132,7 @@ export const useCityStore = create<CityState>()(
         } catch (error) {
           console.error('Failed to load available cities:', error)
           // Fallback to all cities if API fails
-          set({ 
+          set({
             availableCities: Object.keys(CITIES) as CityKey[],
             availableCitiesLoaded: true
           })

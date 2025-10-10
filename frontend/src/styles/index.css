@@ -3,16 +3,23 @@
 @tailwind utilities;
 
 @layer base {
-  html {
+  html, body {
+    height: 100vh;
+    height: 100dvh; /* Use dynamic viewport height for mobile browsers */
+    overflow: hidden; /* Prevent body scrolling */
     font-family: Inter, system-ui, sans-serif;
   }
-  
+
   body {
     @apply bg-cream-100 text-charcoal-900;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-  
+
+  #root {
+    height: 100%;
+  }
+
   /* Ensure minimum touch target size */
   button, a {
     @apply min-h-[44px] min-w-[44px];

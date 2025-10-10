@@ -1,11 +1,11 @@
 import React, { useState, useMemo } from 'react'
-import { Navigation, MapPin, ChevronDown, Crosshair, Filter, X, Search, Coffee, Star, Building2, Instagram } from 'lucide-react'
+import { Navigation, MapPin, ChevronDown, Crosshair, Filter, X, Search, Coffee, Star, Building2, Instagram, Clock } from 'lucide-react'
 import { TikTokIcon } from './TikTokIcon'
 import { useGeolocation } from '../hooks/useGeolocation'
 import { useUIStore } from '../stores/uiStore'
 import { getLocationRequestAdvice, getOptimalGeolocationOptions } from '../utils/deviceDetection'
 import { getMapsUrl } from '../utils/mapsUrl'
-import { isCurrentlyOpen } from '../utils/hoursFormatter'
+import { isCurrentlyOpen, formatHoursCompact } from '../utils/hoursFormatter'
 import { ContentContainer } from './ContentContainer'
 import { useCityStore, CITIES, type CityKey } from '../stores/cityStore'
 import { COPY } from '../constants/copy'
@@ -609,118 +609,99 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                 expandedCard === cafe.id ? 'border-matcha-400' : 'border-matcha-100'
               }`}
             >
-            <div className="p-5">
+            <div className="p-4">
+              {/* Clickable header to expand/collapse */}
               <button
                 onClick={() => onToggleExpand(expandedCard === cafe.id ? null : cafe.id)}
-                className="w-full flex items-start justify-between group text-left mb-3"
+                className="w-full text-left group"
               >
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <h3 className="font-bold text-xl text-charcoal-900">{cafe.name}</h3>
-                      {cafe.displayScore && (
-                        <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 text-white px-3 py-1 rounded-full font-bold text-sm shadow-md">
-                          {cafe.displayScore.toFixed(1)}
-                        </div>
-                      )}
-                      
-                      {/* Social Review Links */}
-                      {(cafe.instagramPostLink || cafe.tiktokPostLink) && (
-                        <div className="flex gap-1.5">
-                          {cafe.instagramPostLink && (
-                            <a
-                              href={cafe.instagramPostLink}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={(e) => e.stopPropagation()}
-                              className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 text-white rounded-full flex items-center justify-center hover:from-purple-600 hover:to-pink-600 transition shadow-md"
-                              aria-label={COPY.list.viewInstagramReview}
-                              title={COPY.list.viewInstagramReview}
-                            >
-                              <Instagram size={14} />
-                            </a>
-                          )}
-                          {cafe.tiktokPostLink && (
-                            <a
-                              href={cafe.tiktokPostLink}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={(e) => e.stopPropagation()}
-                              className="w-8 h-8 bg-gray-800 text-white rounded-full flex items-center justify-center hover:bg-gray-900 transition shadow-md"
-                              aria-label={COPY.list.viewTikTokReview}
-                              title={COPY.list.viewTikTokReview}
-                            >
-                              <TikTokIcon size={14} />
-                            </a>
-                          )}
-                        </div>
-                      )}
+                <div className="flex items-start gap-3">
+                  {/* Score Badge - Large and prominent */}
+                  {cafe.displayScore && (
+                    <div className="flex-shrink-0 bg-gradient-to-br from-matcha-500 to-matcha-600 text-white w-14 h-14 rounded-2xl flex items-center justify-center font-bold text-lg shadow-md group-hover:scale-105 transition-transform">
+                      {cafe.displayScore.toFixed(1)}
                     </div>
-                    
-                    {/* Smaller Directions button moved to top row */}
-                    <a
-                      href={getMapsUrl(cafe.address || '', cafe.link)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                      className="inline-flex items-center justify-center gap-1 bg-gradient-to-r from-matcha-600 to-matcha-500 text-white px-2.5 py-1 rounded-md text-xs font-semibold hover:from-matcha-700 hover:to-matcha-600 transition-all duration-200 shadow-sm hover:shadow-md whitespace-nowrap"
-                    >
-                      <Navigation size={12} />
-                      <span>Directions</span>
-                    </a>
-                  </div>
+                  )}
 
-                  {/* Quick info section */}
-                  <div className="space-y-1.5">
-                    <div className="flex items-center gap-3 text-sm flex-wrap">
-                      {cafe.distanceInfo ? (
-                        <span className="flex items-center gap-1.5 text-matcha-700 font-medium">
-                          <Navigation size={16} className="text-matcha-600" />
-                          {/* Only show walk time if distance is reasonable for walking (< 5km) */}
-                          {cafe.distanceInfo.kilometers > 5
-                            ? cafe.distanceInfo.formattedKm
-                            : `${cafe.distanceInfo.formattedKm} • ${cafe.distanceInfo.walkTime} walk`
-                          }
-                        </span>
-                      ) : (
-                        <span className="flex items-center gap-1.5 text-gray-400">
-                          <MapPin size={16} />
-                          {COPY.list.tapLocationForDistance}
-                        </span>
-                      )}
+                  {/* Main content area */}
+                  <div className="flex-1 min-w-0">
+                    {/* Cafe name and city */}
+                    <h3 className="font-bold text-lg text-charcoal-900 mb-1 line-clamp-1">{cafe.name}</h3>
+
+                    {/* Metadata row */}
+                    <div className="flex items-center gap-2 text-sm mb-2 flex-wrap">
                       {cafe.city && (
                         <span className="text-gray-600 text-xs px-2 py-0.5 bg-gray-100 rounded-full font-medium capitalize">
                           {cafe.city}
+                        </span>
+                      )}
+                      {cafe.distanceInfo ? (
+                        <span className="flex items-center gap-1 text-matcha-700 font-medium text-xs">
+                          <Navigation size={14} className="text-matcha-600" />
+                          {cafe.distanceInfo.kilometers > 5
+                            ? cafe.distanceInfo.formattedKm
+                            : `${cafe.distanceInfo.formattedKm} • ${cafe.distanceInfo.walkTime}`
+                          }
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1 text-gray-400 text-xs">
+                          <MapPin size={14} />
+                          {COPY.list.tapLocationForDistance}
                         </span>
                       )}
                     </div>
 
                     {/* Quick note preview */}
                     {cafe.quickNote && (
-                      <p className="text-sm text-gray-600 italic line-clamp-1">"{cafe.quickNote}"</p>
+                      <p className="text-sm text-gray-600 italic line-clamp-2 mb-3">"{cafe.quickNote}"</p>
                     )}
-                    
-                    {/* Subtle view details link */}
-                    <div className="flex justify-end">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          onViewDetails(cafe)
-                        }}
-                        className="text-xs text-matcha-600 hover:text-matcha-700 underline font-medium transition-colors"
-                      >
-                        View Details
-                      </button>
-                    </div>
                   </div>
+
+                  {/* Chevron indicator */}
+                  <ChevronDown
+                    size={20}
+                    className={`text-matcha-600 transition-all flex-shrink-0 ${
+                      expandedCard === cafe.id ? 'rotate-180' : 'group-hover:translate-y-0.5'
+                    }`}
+                  />
                 </div>
-                <ChevronDown
-                  size={24}
-                  className={`text-matcha-600 transition-all flex-shrink-0 ml-2 ${
-                    expandedCard === cafe.id ? 'rotate-180' : 'group-hover:translate-y-0.5'
-                  }`}
-                />
               </button>
+
+              {/* Action buttons - outside clickable area */}
+              <div className="mt-3 pt-3 border-t border-gray-100 flex items-center gap-2 flex-wrap">
+                {/* Primary actions */}
+                <button
+                  onClick={() => onViewDetails(cafe)}
+                  className="flex-1 min-w-[120px] bg-gradient-to-r from-matcha-600 to-matcha-500 text-white py-2.5 px-4 rounded-xl font-semibold hover:from-matcha-700 hover:to-matcha-600 transition-all duration-200 shadow-md hover:shadow-lg active:scale-[0.98] text-sm flex items-center justify-center gap-1.5"
+                >
+                  <span>View Details</span>
+                  <ChevronDown size={14} className="-rotate-90" />
+                </button>
+
+                <a
+                  href={getMapsUrl(cafe.address || '', cafe.link)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 min-w-[120px] bg-white border-2 border-blue-300 text-blue-600 py-2.5 px-4 rounded-xl font-semibold hover:bg-blue-50 active:scale-[0.98] transition-all duration-200 shadow-md hover:shadow-lg text-sm flex items-center justify-center gap-1.5"
+                >
+                  <Navigation size={14} />
+                  <span>Directions</span>
+                </a>
+
+                {/* Cafe's Instagram - icon button */}
+                {cafe.instagram && (
+                  <a
+                    href={`https://instagram.com/${cafe.instagram.replace('@', '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-11 h-11 bg-gradient-to-br from-purple-500 to-pink-500 text-white rounded-xl flex items-center justify-center hover:from-purple-600 hover:to-pink-600 transition-all shadow-md hover:shadow-lg active:scale-95"
+                    aria-label={`Follow ${cafe.name} on Instagram`}
+                    title={cafe.instagram.startsWith('@') ? cafe.instagram : `@${cafe.instagram}`}
+                  >
+                    <Instagram size={18} />
+                  </a>
+                )}
+              </div>
 
             </div>
 
@@ -735,6 +716,42 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                       </div>
                     </div>
                   )}
+
+                  {/* Hours */}
+                  {cafe.hours && (() => {
+                    const hoursData = formatHoursCompact(cafe.hours)
+                    const cafeIsOpen = isCurrentlyOpen(cafe.hours)
+
+                    if (hoursData?.todayHours) {
+                      // Extract just the time portion after the colon
+                      const timeMatch = hoursData.todayHours.match(/:\s*(.+)/)
+                      const hoursText = timeMatch ? timeMatch[1] : hoursData.todayHours
+
+                      return (
+                        <div className="bg-gradient-to-r from-matcha-50 to-cream-100 rounded-xl p-3">
+                          <div className="flex items-start gap-2.5">
+                            <Clock size={18} className="text-matcha-600 mt-0.5 flex-shrink-0" />
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-bold text-charcoal-900">{COPY.map.today}</span>
+                                {cafeIsOpen !== null && (
+                                  <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
+                                    cafeIsOpen
+                                      ? 'bg-green-100 text-green-700'
+                                      : 'bg-gray-100 text-gray-600'
+                                  }`}>
+                                    {cafeIsOpen ? COPY.map.openNow : COPY.map.closedNow}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-sm font-medium text-gray-700">{hoursText}</p>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    }
+                    return null
+                  })()}
 
                   {/* Drinks List */}
                   {cafe.drinks && cafe.drinks.length > 0 && (
@@ -780,16 +797,41 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                     </div>
                   )}
 
-                  {/* View Details Button */}
-                  <div className="pt-2">
-                    <button
-                      onClick={() => onViewDetails(cafe)}
-                      className="w-full bg-gradient-to-r from-matcha-600 via-matcha-500 to-matcha-600 text-white py-3 rounded-xl font-bold hover:from-matcha-700 hover:to-matcha-700 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
-                    >
-                      {COPY.map.viewFullDetails}
-                      <ChevronDown size={18} className="-rotate-90" />
-                    </button>
-                  </div>
+                  {/* Review Links - Expanded view only */}
+                  {(cafe.instagramPostLink || cafe.tiktokPostLink) && (
+                    <div className="pt-4 border-t border-gray-200">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 p-1.5 rounded-lg">
+                          <Star size={14} className="text-white fill-white" />
+                        </div>
+                        <span className="text-sm font-bold text-charcoal-900">Our Reviews</span>
+                      </div>
+                      <div className="flex gap-2">
+                        {cafe.instagramPostLink && (
+                          <a
+                            href={cafe.instagramPostLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 bg-white border-2 border-purple-300 text-purple-600 py-2.5 px-3 rounded-xl font-semibold hover:bg-purple-50 active:scale-[0.98] transition-all duration-200 shadow-md hover:shadow-lg text-sm flex items-center justify-center gap-2"
+                          >
+                            <Instagram size={16} />
+                            <span>Instagram</span>
+                          </a>
+                        )}
+                        {cafe.tiktokPostLink && (
+                          <a
+                            href={cafe.tiktokPostLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 bg-white border-2 border-gray-300 text-gray-700 py-2.5 px-3 rounded-xl font-semibold hover:bg-gray-50 active:scale-[0.98] transition-all duration-200 shadow-md hover:shadow-lg text-sm flex items-center justify-center gap-2"
+                          >
+                            <TikTokIcon size={16} />
+                            <span>TikTok</span>
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

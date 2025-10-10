@@ -120,7 +120,7 @@ export const useLeafletMap = ({
     cafes.forEach(cafe => {
       const isSelected = selectedCafeId === cafe.id
       const isVisited = visitedCafeIds.includes(cafe.id)
-      
+
       const markerHtml = createMatchaMarker(cafe, { isSelected, isVisited })
 
       const customIcon = L.divIcon({
@@ -133,11 +133,32 @@ export const useLeafletMap = ({
 
       const marker = L.marker([cafe.lat ?? cafe.latitude, cafe.lng ?? cafe.longitude], { icon: customIcon })
         .addTo(mapRef.current!)
-        .on('click', () => onPinClick(cafe))
+        .on('click', () => {
+          // If zoomed out too far, zoom in to a reasonable level first
+          const currentZoom = mapRef.current?.getZoom() ?? initialZoom
+          const REASONABLE_ZOOM = 15 // Good zoom level to see cafe details
+
+          if (currentZoom < REASONABLE_ZOOM) {
+            // Smoothly pan and zoom to the cafe location
+            mapRef.current?.setView(
+              [cafe.lat ?? cafe.latitude, cafe.lng ?? cafe.longitude],
+              REASONABLE_ZOOM,
+              { animate: true, duration: 0.5 }
+            )
+
+            // Wait for animation to complete before showing popover
+            setTimeout(() => {
+              onPinClick(cafe)
+            }, 500)
+          } else {
+            // Already zoomed in enough, just show the popover
+            onPinClick(cafe)
+          }
+        })
 
       markersRef.current.set(cafe.id, marker)
     })
-  }, [cafes, onPinClick, selectedCafeId, visitedCafeIds])
+  }, [cafes, onPinClick, selectedCafeId, visitedCafeIds, initialZoom])
 
   const zoomIn = () => {
     mapRef.current?.zoomIn()
