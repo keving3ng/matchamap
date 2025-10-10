@@ -5,6 +5,7 @@ import { api } from '../../utils/api'
 import { CafeForm } from './CafeForm'
 import { CafeFormWizard } from './CafeFormWizard'
 import { DrinksManagement } from './DrinksManagement'
+import { IconButton } from '../ui'
 import type { Cafe } from '../../types'
 
 export const CafeManagementPage: React.FC = () => {
@@ -189,13 +190,6 @@ export const CafeManagementPage: React.FC = () => {
 
                   <div className="flex flex-wrap gap-2">
                     <button
-                      onClick={() => setManagingDrinksCafe(cafe)}
-                      className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition"
-                    >
-                      <Coffee size={16} />
-                      Drinks
-                    </button>
-                    <button
                       onClick={() => handleEditCafe(cafe)}
                       className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
                     >
@@ -203,17 +197,21 @@ export const CafeManagementPage: React.FC = () => {
                       Edit
                     </button>
                     <button
+                      onClick={() => setManagingDrinksCafe(cafe)}
+                      className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition"
+                    >
+                      <Coffee size={16} />
+                      Drinks
+                    </button>
+                    <IconButton
                       onClick={() => handleDeleteCafe(cafe.id)}
                       disabled={isDeleting === cafe.id}
-                      className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition disabled:opacity-50"
-                    >
-                      {isDeleting === cafe.id ? (
-                        <Loader className="animate-spin" size={16} />
-                      ) : (
-                        <Trash2 size={16} />
-                      )}
-                      Delete
-                    </button>
+                      icon={isDeleting === cafe.id ? Loader : Trash2}
+                      variant="ghost"
+                      className="text-red-600 hover:bg-red-50 disabled:opacity-50"
+                      ariaLabel="Delete cafe"
+                      loading={isDeleting === cafe.id}
+                    />
                   </div>
                 </div>
               </div>
