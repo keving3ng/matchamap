@@ -222,34 +222,47 @@ export async function setDefaultDrink(request: IRequest, env: Env): Promise<Resp
       return notFoundResponse(request as Request, env);
     }
 
-    // Check if drink exists and belongs to this cafe
-    const drinkExists = await db
-      .select()
-      .from(drinks)
-      .where(and(eq(drinks.id, drinkId), eq(drinks.cafeId, cafeId)))
-      .limit(1);
+    // Use transaction to ensure atomicity and handle both validation and updates
+    let beforeState: any;
+    let updated: any[];
+    
+    try {
+      const result = await db.batch([
+        // First, get the drink to validate it exists and belongs to this cafe
+        db.select()
+          .from(drinks)
+          .where(and(eq(drinks.id, drinkId), eq(drinks.cafeId, cafeId)))
+          .limit(1),
+        // Remove default flag from all drinks for this cafe
+        db.update(drinks)
+          .set({ isDefault: false })
+          .where(eq(drinks.cafeId, cafeId)),
+        // Set this drink as default
+        db.update(drinks)
+          .set({ 
+            isDefault: true,
+            updatedAt: sql`CURRENT_TIMESTAMP`
+          })
+          .where(and(eq(drinks.id, drinkId), eq(drinks.cafeId, cafeId)))
+          .returning()
+      ]);
 
-    if (drinkExists.length === 0) {
-      return notFoundResponse(request as Request, env);
+      const drinkCheck = result[0] as any[];
+      updated = result[2] as any[];
+
+      if (drinkCheck.length === 0) {
+        return notFoundResponse(request as Request, env);
+      }
+
+      if (updated.length === 0) {
+        return notFoundResponse(request as Request, env);
+      }
+
+      beforeState = drinkCheck[0];
+    } catch (error) {
+      console.error('Transaction failed:', error);
+      return errorResponse('Failed to set default drink', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
     }
-
-    const beforeState = drinkExists[0];
-
-    // Remove default flag from all drinks for this cafe
-    await db
-      .update(drinks)
-      .set({ isDefault: false })
-      .where(eq(drinks.cafeId, cafeId));
-
-    // Set this drink as default
-    const updated = await db
-      .update(drinks)
-      .set({ 
-        isDefault: true,
-        updatedAt: sql`CURRENT_TIMESTAMP`
-      })
-      .where(eq(drinks.id, drinkId))
-      .returning();
 
     // Get all drinks for this cafe to return
     const allDrinks = await db

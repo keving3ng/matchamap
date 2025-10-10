@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Plus, Edit, Trash2, Coffee, Star } from 'lucide-react'
+import { Plus, Edit, Trash2, Coffee, Star, Crown } from 'lucide-react'
 import { api } from '../../utils/api'
 import type { DrinkItem } from '../../types'
 import { DrinkForm } from './DrinkForm'
@@ -76,6 +76,8 @@ export const DrinksManagement: React.FC<DrinksManagementProps> = ({ cafeId, cafe
     } catch (err) {
       setError(COPY.admin.drinksManagement.setAsDefaultError)
       console.error('Error setting default drink:', err)
+      // Reload drinks to sync UI with backend state on error
+      await loadDrinks()
     } finally {
       setSettingDefaultId(null)
     }
@@ -215,13 +217,13 @@ export const DrinksManagement: React.FC<DrinksManagementProps> = ({ cafeId, cafe
                         
                         {!drink.isDefault && (
                           <IconButton
-                            icon={Star}
+                            icon={Crown}
                             variant="ghost"
                             ariaLabel={COPY.admin.drinksManagement.setAsDefault}
                             onClick={() => handleSetAsDefault(drink.id)}
                             loading={settingDefaultId === drink.id}
                             disabled={settingDefaultId !== null}
-                            className="text-yellow-600 hover:bg-yellow-50"
+                            className="text-amber-600 hover:bg-amber-50"
                           />
                         )}
                         
