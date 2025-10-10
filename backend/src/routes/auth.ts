@@ -145,12 +145,20 @@ export async function login(request: IRequest, env: Env): Promise<Response> {
       role: user.role,
     };
 
-    const accessToken = await signToken(tokenPayload, env.JWT_SECRET, JWT_EXPIRY.ACCESS_TOKEN);
-    const refreshToken = await signToken(tokenPayload, env.JWT_SECRET, JWT_EXPIRY.REFRESH_TOKEN);
+    // Use extended token expiration for admin users
+    const accessTokenExpiry = user.role === 'admin' ? JWT_EXPIRY.ACCESS_TOKEN_ADMIN : JWT_EXPIRY.ACCESS_TOKEN;
+    const refreshTokenExpiry = user.role === 'admin' ? JWT_EXPIRY.REFRESH_TOKEN_ADMIN : JWT_EXPIRY.REFRESH_TOKEN;
 
-    // Store session
+    const accessToken = await signToken(tokenPayload, env.JWT_SECRET, accessTokenExpiry);
+    const refreshToken = await signToken(tokenPayload, env.JWT_SECRET, refreshTokenExpiry);
+
+    // Log token generation for security auditing (sanitized for privacy)
+    console.log(`Token generated - User ID: ${user.id}, Role: ${user.role}, Access Token Expiry: ${accessTokenExpiry}, Refresh Token Expiry: ${refreshTokenExpiry}`);
+
+    // Store session with role-based expiry duration
     const sessionToken = generateSessionToken();
-    const expiresAt = new Date(Date.now() + AUTH_CONSTANTS.SESSION_EXPIRY_MS).toISOString();
+    const sessionExpiry = user.role === 'admin' ? AUTH_CONSTANTS.SESSION_EXPIRY_MS_ADMIN : AUTH_CONSTANTS.SESSION_EXPIRY_MS;
+    const expiresAt = new Date(Date.now() + sessionExpiry).toISOString();
 
     await db.insert(sessions).values({
       userId: user.id,
@@ -258,8 +266,14 @@ export async function refreshToken(request: IRequest, env: Env): Promise<Respons
       return errorResponse('Invalid or expired refresh token', HTTP_STATUS.UNAUTHORIZED, request as Request, env);
     }
 
+    // Use extended token expiration for admin users
+    const accessTokenExpiry = payload.role === 'admin' ? JWT_EXPIRY.ACCESS_TOKEN_ADMIN : JWT_EXPIRY.ACCESS_TOKEN;
+    
     // Generate new access token
-    const accessToken = await signToken(payload, env.JWT_SECRET, JWT_EXPIRY.ACCESS_TOKEN);
+    const accessToken = await signToken(payload, env.JWT_SECRET, accessTokenExpiry);
+
+    // Log token refresh for security auditing (sanitized for privacy)
+    console.log(`Token refreshed - User ID: ${payload.userId}, Role: ${payload.role}, Access Token Expiry: ${accessTokenExpiry}`);
 
     return jsonResponse({ accessToken }, HTTP_STATUS.OK, request as Request, env);
   } catch (error) {

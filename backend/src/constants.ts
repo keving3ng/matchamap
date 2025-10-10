@@ -18,8 +18,11 @@ export const AUTH_CONSTANTS = {
   /** Refresh token expiry duration (7 days) */
   REFRESH_TOKEN_EXPIRY: 604800, // 7 days in seconds
   
-  /** Session expiry duration in milliseconds (7 days) */
+  /** Session expiry duration in milliseconds (7 days) for regular users */
   SESSION_EXPIRY_MS: 7 * 24 * 60 * 60 * 1000, // 7 days
+  
+  /** Session expiry duration in milliseconds (30 days) for admin users */
+  SESSION_EXPIRY_MS_ADMIN: 30 * 24 * 60 * 60 * 1000, // 30 days
   
   /** Minimum username length */
   USERNAME_MIN_LENGTH: 3,
@@ -171,11 +174,18 @@ export const APP_CONSTANTS = {
 /**
  * JWT Token Expiry Strings
  * Used for JWT signing - these are string representations for the jose library
+ * Note: These reference AUTH_CONSTANTS values where possible for consistency
  */
 export const JWT_EXPIRY = {
-  /** Access token expiry (1 hour) */
+  /** Access token expiry (1 hour) for regular users - matches AUTH_CONSTANTS.ACCESS_TOKEN_EXPIRY */
   ACCESS_TOKEN: '1h',
   
-  /** Refresh token expiry (7 days) */
+  /** Access token expiry (24 hours) for admin users */
+  ACCESS_TOKEN_ADMIN: '24h',
+  
+  /** Refresh token expiry (7 days) for regular users - matches AUTH_CONSTANTS.REFRESH_TOKEN_EXPIRY */
   REFRESH_TOKEN: '7d',
+  
+  /** Refresh token expiry (30 days) for admin users - matches AUTH_CONSTANTS.SESSION_EXPIRY_MS_ADMIN duration */
+  REFRESH_TOKEN_ADMIN: '30d',
 } as const;
