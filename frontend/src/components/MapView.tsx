@@ -419,7 +419,12 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
             {selectedCafe.distanceInfo ? (
               <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
                 <Navigation size={16} className="text-green-600" />
-                <span>{selectedCafe.distanceInfo.formattedKm} • {selectedCafe.distanceInfo.walkTime} walk</span>
+                <span>
+                  {selectedCafe.distanceInfo.walkTime
+                    ? `${selectedCafe.distanceInfo.formattedKm} • ${selectedCafe.distanceInfo.walkTime} walk`
+                    : selectedCafe.distanceInfo.formattedKm
+                  }
+                </span>
               </div>
             ) : (
               <button
@@ -604,7 +609,12 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                 {selectedCafe.distanceInfo ? (
                   <div className="flex items-center gap-2 text-gray-600">
                     <Navigation size={18} className="text-green-600" />
-                    <span>{selectedCafe.distanceInfo.formattedKm} • {selectedCafe.distanceInfo.walkTime} walk</span>
+                    <span>
+                      {selectedCafe.distanceInfo.walkTime
+                        ? `${selectedCafe.distanceInfo.formattedKm} • ${selectedCafe.distanceInfo.walkTime} walk`
+                        : selectedCafe.distanceInfo.formattedKm
+                      }
+                    </span>
                   </div>
                 ) : (
                   <button

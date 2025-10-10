@@ -115,6 +115,7 @@ export const COPY = {
     clearAll: 'Clear All',
     viewInstagramReview: 'View Instagram review',
     viewTikTokReview: 'View TikTok review',
+    details: 'Details',
   },
 
   // Detail View

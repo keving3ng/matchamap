@@ -73,7 +73,12 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
             {cafe.distanceInfo && (
               <div className="flex items-center gap-2 text-matcha-700 bg-white/60 px-3 py-2 rounded-lg w-fit">
                 <Navigation size={16} className="text-matcha-600" />
-                <span className="text-sm font-semibold">{cafe.distanceInfo.formattedKm} away • {cafe.distanceInfo.walkTime} walk</span>
+                <span className="text-sm font-semibold">
+                  {cafe.distanceInfo.walkTime
+                    ? `${cafe.distanceInfo.formattedKm} away • ${cafe.distanceInfo.walkTime} walk`
+                    : `${cafe.distanceInfo.formattedKm} away`
+                  }
+                </span>
               </div>
             )}
           </div>

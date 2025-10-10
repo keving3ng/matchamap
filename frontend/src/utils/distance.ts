@@ -10,7 +10,7 @@ export interface DistanceResult {
   miles: number
   formattedKm: string
   formattedMiles: string
-  walkTime: string
+  walkTime: string | null
 }
 
 /**
@@ -75,8 +75,9 @@ export const formatDistance = (distance: number, unit: 'km' | 'miles'): string =
 /**
  * Calculate estimated walking time based on distance
  * Assumes average walking speed of 5 km/h (3.1 mph)
+ * Returns null for walks over 1 hour
  */
-export const calculateWalkTime = (distanceKm: number): string => {
+export const calculateWalkTime = (distanceKm: number): string | null => {
   const walkingSpeedKmh = 5 // Average walking speed
   const timeHours = distanceKm / walkingSpeedKmh
   const timeMinutes = Math.round(timeHours * 60)
@@ -86,13 +87,8 @@ export const calculateWalkTime = (distanceKm: number): string => {
   } else if (timeMinutes < 60) {
     return `${timeMinutes} min`
   } else {
-    const hours = Math.floor(timeMinutes / 60)
-    const remainingMinutes = timeMinutes % 60
-    if (remainingMinutes === 0) {
-      return `${hours}h`
-    } else {
-      return `${hours}h ${remainingMinutes}m`
-    }
+    // Don't show walk times over an hour
+    return null
   }
 }
 

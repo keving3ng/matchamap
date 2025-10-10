@@ -72,7 +72,7 @@ export interface CafeWithDistance extends Cafe {
     miles: number
     formattedKm: string
     formattedMiles: string
-    walkTime: string
+    walkTime: string | null
   } | null
 }
 
