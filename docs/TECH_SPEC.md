@@ -1,8 +1,13 @@
 # MatchaMap Technical Specifications
 
 **Version:** 2.0
-**Date:** October 1, 2025
+**Date:** October 10, 2025
 **Status:** Updated for Full Stack Architecture
+
+> **📌 Authoritative Source:**
+> This document is the **single source of truth** for database schema and API endpoint specifications.
+> All other documents reference this file to avoid duplication.
+> For guidance on using patterns, see `../CLAUDE.md`.
 
 ## System Architecture
 

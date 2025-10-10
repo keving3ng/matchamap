@@ -4,22 +4,13 @@
 
 MatchaMap is a mobile-first web application providing a curated, map-based guide to matcha cafes in Toronto. The platform features expert reviews, ratings, and location-based discovery tools with a Japanese-inspired aesthetic.
 
-## Tech Stack
+**Tech Stack:** React 18.3+ | Zustand | Vite | Tailwind CSS | Cloudflare Workers + D1 | TypeScript (strict mode)
 
--   **Framework**: React 18.3+ (functional components, hooks-first)
--   **State Management**: Zustand (lightweight, performant global state)
--   **Build Tool**: Vite 5+ (fast builds, HMR, ES modules)
--   **Styling**: Tailwind CSS 3+ with custom design tokens
--   **Routing**: React Router 6+ (client-side routing)
--   **Maps**: Leaflet (vanilla JS in React components)
--   **Backend**: Cloudflare Workers + D1 Database (SQLite at edge)
--   **API**: REST API with itty-router + Drizzle ORM
--   **Hosting**: Cloudflare Pages (edge deployment, global CDN)
--   **TypeScript**: Strict mode enabled for type safety
+---
 
-## Architecture Principles
+## Architecture Principles (Top 3 Priority)
 
-### 1. Performance-First (Top 3 Priority)
+### 1. Performance-First ⚡
 
 **MUST maintain these targets:**
 -   **LCP**: < 2.5 seconds
@@ -35,7 +26,7 @@ MatchaMap is a mobile-first web application providing a curated, map-based guide
 -   Keep Zustand stores focused and minimal
 -   Test on real mobile devices, not just desktop emulation
 
-### 2. Mobile-First Design (Top 3 Priority)
+### 2. Mobile-First Design 📱
 
 **ALWAYS start with mobile (320px), then scale up:**
 -   Base styles = mobile (320px-640px)
@@ -49,7 +40,7 @@ MatchaMap is a mobile-first web application providing a curated, map-based guide
 -   One-handed operation priority
 -   No hover-dependent interactions
 
-### 3. Lean & Efficient (Top 3 Priority)
+### 3. Lean & Efficient 🎯
 
 **Keep it simple:**
 -   Avoid over-engineering
@@ -58,69 +49,186 @@ MatchaMap is a mobile-first web application providing a curated, map-based guide
 -   Remove unused code aggressively
 -   Bundle analysis on every major change
 
-## State Management Philosophy
+---
 
-### Zustand Stores (Preferred for Global State)
+## Critical Patterns (ALWAYS Follow)
 
-**When to use Zustand:**
--   Shared state across multiple components
--   Persistent state (localStorage/sessionStorage)
--   Complex state with multiple actions
--   Authentication, user preferences, UI state
+### Pattern 1: Copy Constants (i18n-Ready)
 
-**Store organization:**
-```
-frontend/src/stores/
-├── locationStore.ts      # User geolocation
-├── visitedCafesStore.ts  # Passport/visited tracking
-├── uiStore.ts            # UI state (modals, panels)
-└── authStore.ts          # Authentication state
-```
+**CRITICAL:** ALWAYS use the centralized copy constants (`frontend/src/constants/copy.ts`) for ALL user-facing strings. NEVER use hardcoded strings in components.
 
-**Store rules:**
--   Keep stores focused and single-purpose
--   Use persist middleware for data that survives refresh
--   Always type stores with TypeScript interfaces
--   Export typed hooks, not raw store
+**Why?**
+- ✅ Single source of truth
+- ✅ Type safety with full autocomplete
+- ✅ Future i18n ready
+- ✅ Easy audits
+- ✅ Consistent messaging
 
-### Custom Hooks (Preferred for Component Logic)
+**✅ CORRECT:**
+```tsx
+import { COPY } from '@/constants/copy'
 
-**When to use hooks:**
--   Reusable component logic
--   API calls and data fetching
--   Complex local state management
--   Side effects and lifecycle management
-
-**Hook organization:**
-```
-frontend/src/hooks/
-├── useGeolocation.ts         # Browser geolocation
-├── useDistanceCalculation.ts # Cafe distance math
-├── useCafeSelection.ts       # Cafe selection logic
-├── useVisitedCafes.ts        # Wrapper around store
-├── useFeatureToggle.ts       # Feature flags
-├── useUserFeatures.ts        # ⭐ User feature toggles (social, accounts)
-└── useLazyData.ts            # ⭐ Lazy loading with cache checking
+const Header = () => (
+  <button onClick={handleClick}>
+    {COPY.map.getDirections}
+  </button>
+)
 ```
 
-**Hook rules:**
--   Name all hooks with `use` prefix
--   One hook = one concern
--   Document complex hooks with JSDoc
--   Return objects, not arrays (better for destructuring)
--   Avoid deeply nested hooks
+**❌ INCORRECT:**
+```tsx
+const Header = () => (
+  <button onClick={handleClick}>
+    Get Directions  {/* DON'T DO THIS */}
+  </button>
+)
+```
 
-### Lazy Loading Pattern (useLazyData)
+**Adding new copy:**
+```typescript
+// In frontend/src/constants/copy.ts
+export const COPY = {
+  // ... existing copy
+  myFeature: {
+    title: 'My Feature',
+    description: 'A great new feature',
+    errorMessage: (error: string) => `Error: ${error}`,
+  },
+} as const
+```
+
+**Exceptions (only):**
+- ❌ Dynamic data from API (cafe names, addresses, reviews)
+- ❌ Technical console logs (debug messages not shown to users)
+- ❌ Test data (mock strings in test files)
+
+---
+
+### Pattern 2: API Client (Centralized Communication)
+
+**CRITICAL:** ALWAYS use the centralized API client (`frontend/src/utils/api.ts`) for all backend communication. NEVER use direct `fetch()` calls (except in authStore.ts).
+
+**Why?**
+- ✅ Consistent base URL (VITE_API_URL with /api prefix)
+- ✅ Automatic auth token injection
+- ✅ Consistent error handling
+- ✅ Type safety
+- ✅ Cache-busting for GET requests
+- ✅ No environment variable confusion
+
+**✅ CORRECT:**
+```tsx
+import { api } from '../utils/api'
+
+const handleSubmit = async () => {
+  try {
+    await api.waitlist.join(email)
+    setSuccess(true)
+  } catch (error) {
+    console.error('Failed:', error)
+  }
+}
+```
+
+**❌ INCORRECT:**
+```tsx
+// DON'T DO THIS - bypasses all centralized handling
+const response = await fetch(`${import.meta.env.VITE_API_URL}/api/waitlist`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ email })
+})
+```
+
+**Adding new API endpoints:**
+```typescript
+// In frontend/src/utils/api.ts
+export const myFeatureAPI = {
+  async doSomething(data: SomeType): Promise<ResponseType> {
+    return fetchAPI('/my-endpoint', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  },
+}
+
+export const api = {
+  cafes: cafeAPI,
+  myFeature: myFeatureAPI,  // Add here
+}
+```
+
+**Exception:** `authStore.ts` uses direct fetch to avoid circular dependency (it provides tokens to fetchAPI).
+
+---
+
+### Pattern 3: Shared UI Components (Design System)
+
+**IMPORTANT:** Always use shared components from `frontend/src/components/ui/` instead of inline styles or duplicating component code.
+
+**Available Components:**
+- **Buttons:** `PrimaryButton`, `SecondaryButton`, `TertiaryButton`, `IconButton`, `FilterButton`
+- **Badges:** `ScoreBadge`, `DrinkScoreBadge`, `StatusBadge`, `FeatureBadge`, `NotificationBadge`
+- **Dialogs:** `AlertDialog`, `InfoCard`
+- **Loading:** `Skeleton`, `CafeCardSkeleton`, `ListSkeleton`, `DetailPageSkeleton`
+
+**✅ CORRECT:**
+```tsx
+import { PrimaryButton, ScoreBadge, AlertDialog } from '@/components/ui'
+
+<PrimaryButton icon={Navigation} onClick={handleClick}>
+  Get Directions
+</PrimaryButton>
+
+<ScoreBadge score={8.5} size="lg" />
+
+<AlertDialog
+  variant="error"
+  title="Location Access Needed"
+  message="We need your location to show nearby cafes."
+  primaryAction={{ label: "Try Again", onClick: handleRetry }}
+/>
+```
+
+**❌ INCORRECT:**
+```tsx
+// DON'T create custom buttons - use shared components
+<button className="bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-xl">
+  Get Directions
+</button>
+```
+
+**Benefits:**
+- 80% less code per instance
+- Automatic 44px touch targets (WCAG compliant)
+- Consistent active states (`active:scale-[0.98]`)
+- Built-in accessibility (focus rings, aria-labels)
+- Type-safe props
+
+**Design Tokens:**
+```typescript
+import { spacing, borderRadius, shadows, zIndex } from '@/styles/spacing'
+
+spacing.cardPadding      // 16px
+spacing.sectionGap       // 24px
+spacing.minTouchTarget   // 44px
+borderRadius.xl          // 24px
+zIndex.modal             // 9999
+```
+
+---
+
+### Pattern 4: Lazy Loading (useLazyData Hook)
 
 **IMPORTANT:** Always use the `useLazyData` hook for lazy loading data in view components.
 
-**Why use useLazyData:**
-- ✅ **Automatic cache checking** - Won't refetch data that's already loaded
-- ✅ **Consistent pattern** - Same behavior across all views
-- ✅ **Performance optimization** - Reduces unnecessary API calls
-- ✅ **Semantic clarity** - Makes lazy loading intent explicit
+**Why?**
+- ✅ Automatic cache checking (won't refetch data already loaded)
+- ✅ Consistent pattern across all views
+- ✅ Performance optimization (reduces unnecessary API calls)
+- ✅ Semantic clarity
 
-**Usage:**
+**✅ CORRECT:**
 ```tsx
 import { useLazyData } from '../hooks/useLazyData'
 import { useDataStore } from '../stores/dataStore'
@@ -147,712 +255,80 @@ export const FeedView: React.FC<FeedViewProps> = ({ feedItems }) => {
 - Components that need to refetch on every mount
 - Initial page load data (use AppRoutes.tsx instead)
 
-## Copy & Internationalization
+---
 
-**CRITICAL:** ALWAYS use the centralized copy constants (`frontend/src/constants/copy.ts`) for ALL user-facing strings. NEVER use hardcoded strings in components.
+## State Management Philosophy
 
-### Why Use Copy Constants?
+### Zustand Stores (Global State)
 
-The `COPY` constant in `copy.ts` provides:
-1. ✅ **Single source of truth** - Update copy in one place, reflects everywhere
-2. ✅ **Type safety** - Full TypeScript autocomplete for all strings
-3. ✅ **Future i18n ready** - Easy migration to react-i18next later
-4. ✅ **Easy audits** - Grep for `COPY.` to find all user-facing text
-5. ✅ **Consistent messaging** - No duplicate/conflicting wording
+**When to use:**
+- Shared state across multiple components
+- Persistent state (localStorage/sessionStorage)
+- Complex state with multiple actions
+- Authentication, user preferences, UI state
 
-### Copy Constants Usage
-
-**✅ CORRECT - Use the COPY constant:**
-```tsx
-import { COPY } from '@/constants/copy'
-
-const Header = () => (
-  <button onClick={handleClick}>
-    {COPY.map.getDirections}
-  </button>
-)
+**Store organization:**
+```
+frontend/src/stores/
+├── locationStore.ts      # User geolocation
+├── visitedCafesStore.ts  # Passport/visited tracking
+├── uiStore.ts            # UI state (modals, panels)
+└── authStore.ts          # Authentication state
 ```
 
-**❌ INCORRECT - Hardcoded strings:**
-```tsx
-// DON'T DO THIS
-const Header = () => (
-  <button onClick={handleClick}>
-    Get Directions
-  </button>
-)
-```
+**Rules:**
+- Keep stores focused and single-purpose
+- Use persist middleware for data that survives refresh
+- Always type stores with TypeScript interfaces
+- Export typed hooks, not raw store
 
-### Adding New Copy
+### Custom Hooks (Component Logic)
 
-When adding new user-facing strings:
+**When to use:**
+- Reusable component logic
+- API calls and data fetching
+- Complex local state management
+- Side effects and lifecycle management
 
-1. **Add to `copy.ts` first:**
-```typescript
-// In frontend/src/constants/copy.ts
-export const COPY = {
-  // ... existing copy
-  myFeature: {
-    title: 'My Feature',
-    description: 'A great new feature',
-    submitButton: 'Submit',
-    errorMessage: (error: string) => `Error: ${error}`,
-  },
-} as const
-```
+**Rules:**
+- Name all hooks with `use` prefix
+- One hook = one concern
+- Document complex hooks with JSDoc
+- Return objects, not arrays (better for destructuring)
+- Avoid deeply nested hooks
 
-2. **Use in components:**
-```typescript
-import { COPY } from '@/constants/copy'
+---
 
-<h1>{COPY.myFeature.title}</h1>
-<p>{COPY.myFeature.description}</p>
-<button>{COPY.myFeature.submitButton}</button>
-{error && <p>{COPY.myFeature.errorMessage(error)}</p>}
-```
+## Code Organization (STRICT)
 
-### Copy Organization
-
-Copy is organized by feature/section:
-- **`header`** - Header navigation and menu
-- **`menu`** - Dropdown menu items
-- **`map`** - Map view strings (buttons, filters, popovers)
-- **`location`** - Location permission dialogs (permission denied, loading, errors)
-- **`list`** - List view strings (sort, filter, search)
-- **`detail`** - Detail page strings (sections, labels, buttons)
-- **`passport`** - Passport feature strings
-- **`feed`** - Feed view strings
-- **`events`** - Events view strings
-- **`common`** - Shared strings (Loading, Error, Save, Cancel, etc.)
-- **`admin`** - Admin panel strings
-
-### When NOT to Use Copy Constants
-
-The ONLY exceptions to using copy constants:
-- ❌ **Dynamic data from API** - Cafe names, addresses, reviews (comes from database)
-- ❌ **Technical console logs** - Debug messages not shown to users
-- ❌ **Test data** - Mock strings in test files
-
-**All other user-facing strings MUST use the COPY constant.**
-
-## API Communication
-
-**CRITICAL:** ALWAYS use the centralized API client (`frontend/src/utils/api.ts`) for all backend communication. NEVER use direct `fetch()` calls in components or hooks (except in authStore.ts which has a special case to avoid circular dependencies).
-
-### Why Use the Centralized API Client?
-
-The generic `fetchAPI()` function in `api.ts` provides:
-1. ✅ **Consistent base URL** - Uses `VITE_API_URL` automatically with `/api` prefix
-2. ✅ **Automatic auth token injection** - Adds `Authorization` header from authStore
-3. ✅ **Consistent error handling** - Standardized error responses
-4. ✅ **Type safety** - Full TypeScript support for requests/responses
-5. ✅ **Cache-busting** - Built-in cache control for GET requests
-6. ✅ **No environment variable confusion** - Single source of truth
-
-### API Client Usage
-
-**✅ CORRECT - Use the API client:**
-```tsx
-import { api } from '../utils/api'
-
-// In a component or hook
-const handleSubmit = async () => {
-  try {
-    await api.waitlist.join(email)
-    setSuccess(true)
-  } catch (error) {
-    console.error('Failed:', error)
-  }
-}
-```
-
-**❌ INCORRECT - Direct fetch() calls:**
-```tsx
-// DON'T DO THIS - bypasses all centralized handling
-const response = await fetch(`${import.meta.env.VITE_API_URL}/api/waitlist`, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ email })
-})
-```
-
-### Adding New API Endpoints
-
-When adding a new backend endpoint, always add it to `api.ts`:
-
-1. **Create the endpoint function:**
-```typescript
-// In frontend/src/utils/api.ts
-export const myFeatureAPI = {
-  async doSomething(data: SomeType): Promise<ResponseType> {
-    return fetchAPI('/my-endpoint', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    })
-  },
-}
-```
-
-2. **Export it in the main API object:**
-```typescript
-export const api = {
-  cafes: cafeAPI,
-  feed: feedAPI,
-  events: eventsAPI,
-  health: healthAPI,
-  places: placesAPI,
-  drinks: drinksAPI,
-  admin: adminAPI,
-  waitlist: waitlistAPI,
-  myFeature: myFeatureAPI,  // Add here
-}
-```
-
-3. **Use it in components:**
-```typescript
-import { api } from '@/utils/api'
-const result = await api.myFeature.doSomething(data)
-```
-
-### Special Case: authStore.ts
-
-The ONLY exception to the "always use api.ts" rule is `authStore.ts`. It uses direct fetch calls because:
-- The generic `fetchAPI()` function depends on `authStore` to get the access token
-- This would create a circular dependency if `authStore` tried to use `fetchAPI()`
-- Authentication endpoints don't need auth tokens (they generate them)
-
-**All other code MUST use the centralized API client.**
-
-## Shared UI Component Library
-
-**IMPORTANT:** Always use shared components from `frontend/src/components/ui/` instead of inline styles or duplicating component code.
-
-### Component Library Location
-
-All shared UI components live in `frontend/src/components/ui/`:
+### Directory Structure
 
 ```
-frontend/src/components/ui/
-├── Button.tsx      # All button variants
-├── Badge.tsx       # Score and status badges
-├── AlertDialog.tsx # Alerts and info cards
-├── Skeleton.tsx    # Loading states
-└── index.ts        # Centralized exports
+frontend/src/
+├── components/
+│   ├── ui/              # ⭐ SHARED UI COMPONENTS (use these!)
+│   ├── Header.tsx
+│   ├── MapView.tsx
+│   └── __tests__/       # Component tests
+├── hooks/               # Custom React hooks ONLY
+├── stores/              # Zustand stores ONLY
+├── utils/               # Pure utility functions ONLY
+├── types/               # Frontend-specific types
+├── styles/              # Global CSS, Tailwind, design tokens
+│   └── spacing.ts       # ⭐ Design tokens
+├── constants/
+│   └── copy.ts          # ⭐ All user-facing strings
+└── App.tsx              # Root component
 ```
 
-### When to Use Shared Components
+### File Naming Conventions
 
-**ALWAYS use shared components for:**
-- ✅ Buttons (Primary, Secondary, Tertiary, Icon, Filter)
-- ✅ Score displays and badges
-- ✅ Alert dialogs and notifications
-- ✅ Loading states (skeletons)
-- ✅ Status indicators
+- **Components**: PascalCase (e.g., `CafeCard.tsx`)
+- **Hooks**: camelCase with 'use' prefix (e.g., `useGeolocation.ts`)
+- **Utilities**: camelCase (e.g., `distanceCalculator.ts`)
+- **Stores**: camelCase (e.g., `locationStore.ts`)
 
-**DON'T create custom components for:**
-- ❌ Generic buttons (use PrimaryButton, SecondaryButton, etc.)
-- ❌ Score badges (use ScoreBadge, DrinkScoreBadge)
-- ❌ Alert/error/success messages (use AlertDialog)
-- ❌ Loading placeholders (use Skeleton)
-
-### Button Components
-
-**Import from centralized index:**
-```tsx
-import { PrimaryButton, SecondaryButton, IconButton, FilterButton } from '@/components/ui'
-```
-
-**PrimaryButton** - Main action buttons with green gradient:
-```tsx
-<PrimaryButton
-  icon={Navigation}
-  iconPosition="left"
-  onClick={handleClick}
-  fullWidth
->
-  Get Directions
-</PrimaryButton>
-```
-
-**SecondaryButton** - Secondary actions with border:
-```tsx
-<SecondaryButton icon={Info} onClick={handleInfo}>
-  Learn More
-</SecondaryButton>
-```
-
-**IconButton** - Circular icon-only buttons:
-```tsx
-<IconButton
-  icon={MapPin}
-  variant="primary" // primary | secondary | ghost
-  badge={true}      // Shows notification dot
-  loading={isLoading}
-  ariaLabel="Find my location"
-  onClick={handleLocation}
-/>
-```
-
-**FilterButton** - Pill-shaped filter/toggle buttons:
-```tsx
-<FilterButton
-  icon={Filter}
-  active={showFilters}
-  hasBadge={filtersActive}
-  onClick={toggleFilters}
->
-  Filters
-</FilterButton>
-```
-
-**All buttons include:**
-- 44px minimum touch targets (WCAG compliant)
-- Active state animations (`active:scale-[0.98]`)
-- Proper focus rings for accessibility
-- Disabled states with visual feedback
-- TypeScript types with full autocomplete
-
-### Badge Components
-
-**Import:**
-```tsx
-import { ScoreBadge, DrinkScoreBadge, StatusBadge, FeatureBadge } from '@/components/ui'
-```
-
-**ScoreBadge** - Main cafe scores:
-```tsx
-<ScoreBadge
-  score={cafe.displayScore}
-  size="lg" // sm | md | lg | xl
-/>
-```
-
-**DrinkScoreBadge** - Inline drink scores with star:
-```tsx
-<DrinkScoreBadge score={drink.score} />
-```
-
-**StatusBadge** - Status indicators:
-```tsx
-<StatusBadge variant="success"> // success | warning | error | info | default
-  Open Now
-</StatusBadge>
-```
-
-**FeatureBadge** - Highlight featured items:
-```tsx
-<FeatureBadge>Featured</FeatureBadge>
-```
-
-### Dialog Components
-
-**Import:**
-```tsx
-import { AlertDialog, InfoCard } from '@/components/ui'
-```
-
-**AlertDialog** - Replaces all inline alert/error/success messages:
-```tsx
-<AlertDialog
-  variant="error"          // success | error | warning | info
-  title="Location Access Needed"
-  message="We need your location to show nearby cafes."
-  primaryAction={{
-    label: "Try Again",
-    onClick: handleRetry
-  }}
-  secondaryAction={{
-    label: "Skip",
-    onClick: handleSkip
-  }}
-/>
-```
-
-**InfoCard** - Static information cards:
-```tsx
-<InfoCard
-  variant="success"
-  icon={CheckCircle}
-  title="Quick Tip"
->
-  Enable location for accurate distances!
-</InfoCard>
-```
-
-### Loading States
-
-**Import:**
-```tsx
-import { Skeleton, CafeCardSkeleton, ListSkeleton, DetailPageSkeleton } from '@/components/ui'
-```
-
-**Usage:**
-```tsx
-{loading ? (
-  <ListSkeleton count={5} />
-) : (
-  <CafeList cafes={cafes} />
-)}
-```
-
-**Custom skeletons:**
-```tsx
-<Skeleton
-  variant="rectangular" // text | circular | rectangular
-  width="60%"
-  height={24}
-  animation="shimmer" // pulse | shimmer | none
-/>
-```
-
-### Design Tokens & Spacing
-
-**ALWAYS use design tokens from `frontend/src/styles/spacing.ts`:**
-
-```typescript
-import { spacing, borderRadius, shadows, zIndex } from '@/styles/spacing'
-
-// Semantic spacing (preferred)
-spacing.cardPadding      // 16px - Standard card padding
-spacing.sectionGap       // 24px - Gap between sections
-spacing.listGap          // 12px - Gap between list items
-spacing.minTouchTarget   // 44px - WCAG minimum
-
-// Border radius
-borderRadius.lg          // 16px - Cards
-borderRadius.xl          // 24px - Large cards
-borderRadius.full        // 9999px - Pills/circular
-
-// Shadows
-shadows.md               // Standard card shadow
-shadows.xl               // Elevated elements
-
-// Z-index (prevent z-index chaos)
-zIndex.modal             // 9999
-zIndex.modalBackdrop     // 9998
-zIndex.fixed             // 1000
-```
-
-**In Tailwind classes, prefer design tokens:**
-```tsx
-// ✅ GOOD - Uses design tokens
-<div className="p-4 rounded-xl shadow-md">
-
-// ❌ AVOID - Arbitrary values
-<div className="p-[16px] rounded-[24px]" style={{boxShadow: '0 4px 6px rgba(0,0,0,0.1)'}}>
-```
-
-### Mobile Interaction Hooks
-
-**Location:** `frontend/src/hooks/useSwipeGesture.ts`
-
-**useSwipeGesture** - Detect swipe gestures:
-```tsx
-import { useSwipeGesture } from '@/hooks/useSwipeGesture'
-
-const swipeHandlers = useSwipeGesture({
-  onSwipeLeft: () => handleDismiss(),
-  onSwipeRight: () => handleExpand(),
-  threshold: 50,      // minimum pixels to trigger
-  velocity: 0.3,      // minimum speed
-  preventScroll: true // prevent native scroll
-})
-
-<div {...swipeHandlers}>
-  Swipeable content
-</div>
-```
-
-**useLongPress** - Detect long press:
-```tsx
-import { useLongPress } from '@/hooks/useSwipeGesture'
-
-const longPressHandlers = useLongPress(() => {
-  handleQuickAction()
-}, { delay: 500 })
-
-<button {...longPressHandlers}>
-  Long press me
-</button>
-```
-
-**Use cases:**
-- Swipe to dismiss cards
-- Swipe for quick actions
-- Long press for context menus
-- Long press to add to favorites
-
-### Animation Guidelines
-
-**Available animations in Tailwind config:**
-- `animate-slide-up` - Bottom sheet entry
-- `animate-slide-down` - Dropdown expansion
-- `animate-slide-in-left` - Left sidebar entry
-- `animate-slide-in-right` - Right sidebar entry
-- `animate-fade-in` - Gentle appearance
-- `animate-fade-out` - Gentle dismissal
-- `animate-scale-in` - Pop-in effect
-- `animate-bounce-subtle` - Gentle bounce (feedback)
-- `animate-shimmer` - Loading state (skeletons)
-
-**Animation rules:**
-- All animations < 300ms (mobile best practice)
-- Use CSS animations (hardware accelerated)
-- Prefer transforms over position/size changes
-- Easing: `cubic-bezier(0.16, 1, 0.3, 1)` for natural feel
-
-**Usage:**
-```tsx
-<div className="animate-slide-up">
-  Animated content
-</div>
-```
-
-## Key Features (V1)
-
-1. **Interactive Map Interface**
-
-    - Toronto-centered map with cafe pins
-    - Popover with key cafe info
-    - User location centering (optional)
-    - Toggle to list view
-
-2. **List View**
-
-    - Expandable card interface
-    - Sorting by neighborhood, rating, distance
-    - Compact and expanded view states
-
-3. **Location Detail Pages**
-
-    - Static pages generated from JSON data
-    - Primary/secondary scores, reviews, social links
-    - Navigation integration with maps apps
-
-4. **Matcha Passport**
-
-    - Local storage visit tracking
-    - Progress visualization
-    - "I've been here" checkbox functionality
-
-5. **News/Blog Feed**
-
-    - Updates about new cafes and changes
-    - Blog-style layout fed from same JSON data
-
-6. **FAQ/About Section**
-    - Rating rubric explanation
-    - About the reviewer
-    - How to suggest locations
-
-## User Management & Social Features
-
-### 7. **User Accounts & Authentication**
-
-**Feature Flag:** `ENABLE_USER_ACCOUNTS`
-
-- User registration and login with email/password
-- Email verification system
-- Password reset functionality  
-- JWT-based authentication with secure httpOnly cookies
-- Profile management (display name, avatar, bio)
-- Account roles: `user` (default) and `admin`
-
-### 8. **Social Features**
-
-**Feature Flag:** `ENABLE_USER_SOCIAL` (depends on `ENABLE_USER_ACCOUNTS`)
-
-- User profiles with public activity feeds
-- Cafe check-ins and visit tracking
-- User-generated reviews and ratings
-- Follow/unfollow system (coming soon)
-- Reputation scoring based on review quality
-
-**Use the `useUserFeatures` hook for feature-dependent UI:**
-```tsx
-import { useUserFeatures } from '@/hooks/useUserFeatures'
-
-const MyComponent = () => {
-  const { hasUserAccounts, hasUserSocial } = useUserFeatures()
-  
-  return (
-    <div>
-      {hasUserAccounts && <LoginButton />}
-      {hasUserSocial && <CheckInButton />}
-    </div>
-  )
-}
-```
-
-### 9. **Admin Panel**
-
-**Access:** Protected by Cloudflare Access + admin role verification
-
-**Features:**
-- **User Management**
-  - List all users with search and filtering
-  - View user details, activity, and stats
-  - Role management (promote/demote admin status)
-  - User deletion with cascade data removal
-  - Activity analytics (active users, new registrations)
-
-- **Content Management**
-  - Cafe management (CRUD operations)
-  - Event management
-  - Feed/blog post management
-  - Drink management
-
-- **Analytics Dashboard**
-  - User engagement metrics
-  - Popular cafes and content
-  - System health monitoring
-
-**Admin UI Components:**
-- Built with shared UI component library (`@/components/ui`)
-- Uses centralized copy constants (`COPY.admin.*`)
-- Mobile-responsive design with card-based layouts
-- Real-time loading states and error handling
-
-**Security:**
-- All admin routes require `requireAdminAuth()` middleware
-- Self-protection (admins can't delete/demote themselves)
-- Input validation and SQL injection protection
-- Rate limiting on all endpoints
-
-## Data Management
-
-### Backend Architecture (Phase 1+)
-
--   **Database**: Cloudflare D1 (SQLite at the edge)
--   **API**: Cloudflare Workers with REST endpoints
--   **Admin**: Custom React admin UI (protected by Cloudflare Access)
--   **Analytics**: Simple counter-based metrics (no external tools)
-
-### API Endpoints
-
-**Public API:**
-- `GET /api/cafes` - List all cafes
-- `GET /api/cafes/:id` - Single cafe details
-- `GET /api/feed` - News feed items
-- `GET /api/events` - Upcoming events
-
-**Authentication API:**
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
-- `POST /api/auth/logout` - User logout
-- `POST /api/auth/verify-email` - Email verification
-- `POST /api/auth/forgot-password` - Password reset request
-- `POST /api/auth/reset-password` - Password reset completion
-
-**User API (requires authentication):**
-- `GET /api/profile` - Get user profile
-- `PUT /api/profile` - Update user profile
-- `POST /api/profile/avatar` - Upload avatar
-- `POST /api/checkins` - Record cafe check-in
-- `GET /api/checkins` - User's check-in history
-
-**Admin API (Cloudflare Access + admin role protected):**
-- `POST /api/admin/cafes` - Create cafe
-- `PUT /api/admin/cafes/:id` - Update cafe
-- `DELETE /api/admin/cafes/:id` - Soft delete cafe
-- `GET /api/admin/cafe-stats` - Analytics dashboard
-- `GET /api/admin/users` - List all users (with search/filter)
-- `GET /api/admin/users/:id` - Get user details
-- `PUT /api/admin/users/:id/role` - Update user role
-- `DELETE /api/admin/users/:id` - Delete user account
-- `GET /api/admin/users/stats` - User analytics (active, new, admin counts)
-
-**Analytics API (fire-and-forget):**
-- `POST /api/stats/cafe/:id/:stat` - Track cafe metrics
-- `POST /api/stats/feed/:id` - Track feed clicks
-- `POST /api/stats/event/:id` - Track event clicks
-
-### Update Workflow
-
-1. Login to admin UI (protected by Cloudflare Access)
-2. Edit cafe data via admin forms
-3. Changes saved to D1 database instantly
-4. Frontend fetches updated data from API
-5. No rebuild or deploy needed
-
-## Code Organization & Location Rules
-
-### Directory Structure (STRICT)
-
-```
-matchamap/              # Monorepo root
-├── frontend/           # React frontend application
-│   ├── src/
-│   │   ├── components/          # React components ONLY
-│   │   │   ├── ui/              # ⭐ SHARED UI COMPONENTS (use these!)
-│   │   │   │   ├── Button.tsx   # All button variants
-│   │   │   │   ├── Badge.tsx    # Score and status badges
-│   │   │   │   ├── AlertDialog.tsx # Alerts and info cards
-│   │   │   │   ├── Skeleton.tsx # Loading states
-│   │   │   │   └── index.ts     # Centralized exports
-│   │   │   ├── Header.tsx
-│   │   │   ├── BottomNavigation.tsx
-│   │   │   ├── AppRoutes.tsx
-│   │   │   ├── MapView.tsx
-│   │   │   ├── ListView.tsx
-│   │   │   ├── DetailView.tsx
-│   │   │   └── __tests__/      # Component tests
-│   │   ├── admin/              # Admin UI components
-│   │   │   ├── StatsPage.tsx   # Analytics dashboard
-│   │   │   └── CafeEditor.tsx  # Cafe CRUD forms
-│   │   ├── hooks/              # Custom React hooks ONLY
-│   │   │   ├── useGeolocation.ts
-│   │   │   ├── useCafeSelection.ts
-│   │   │   ├── useDistanceCalculation.ts
-│   │   │   └── useSwipeGesture.ts # ⭐ Mobile gesture detection
-│   │   ├── stores/             # Zustand stores ONLY
-│   │   │   ├── locationStore.ts
-│   │   │   ├── uiStore.ts
-│   │   │   ├── cityStore.ts
-│   │   │   └── visitedCafesStore.ts
-│   │   ├── utils/              # Pure utility functions ONLY
-│   │   │   ├── distanceCalculator.ts
-│   │   │   ├── deviceDetection.ts
-│   │   │   └── analytics.ts    # Tracking utilities
-│   │   ├── types/              # Frontend-specific types
-│   │   │   └── index.ts
-│   │   ├── styles/             # Global CSS, Tailwind, design tokens
-│   │   │   ├── index.css
-│   │   │   └── spacing.ts      # ⭐ Design tokens (spacing, shadows, z-index)
-│   │   ├── App.tsx             # Root component (composition only)
-│   │   └── main.tsx            # React entry point
-│   ├── public/                 # Static assets
-│   ├── index.html
-│   ├── vite.config.js
-│   ├── tailwind.config.js
-│   ├── tsconfig.json
-│   └── package.json
-├── backend/            # Cloudflare Workers API
-│   ├── src/
-│   │   ├── index.ts        # Workers entry point
-│   │   ├── routes/
-│   │   │   ├── cafes.ts    # Cafe CRUD endpoints
-│   │   │   ├── stats.ts    # Analytics endpoints
-│   │   │   └── admin.ts    # Admin endpoints
-│   │   └── db/
-│   │       └── schema.ts   # Drizzle ORM schema
-│   ├── migrations/         # Database migrations
-│   ├── wrangler.toml
-│   ├── tsconfig.json
-│   └── package.json
-├── shared/             # Shared types and utilities
-│   ├── types/
-│   │   └── index.ts        # Cafe, Event, API types
-│   ├── tsconfig.json
-│   └── package.json
-├── docs/               # Project documentation
-├── package.json        # Root workspace config
-└── README.md
-```
-
-### Component Rules
-
-**MUST follow these patterns:**
+### Component Rules (MUST Follow)
 
 1. **Functional components only** - No class components
 2. **TypeScript required** - All components use `.tsx`
@@ -860,156 +336,146 @@ matchamap/              # Monorepo root
 4. **Named exports** - Use `export const Component` (not default)
 5. **File = Component** - One component per file, file name matches component name
 
-**Component composition:**
+---
+
+## Anti-Patterns & Best Practices
+
+### ❌ Don't Do This
+
+**Hardcoded strings in components:**
 ```tsx
-// ✅ GOOD - Focused, single-purpose
-export const CafeCard: React.FC<CafeCardProps> = ({ cafe }) => {
-  // Component logic
-}
-
-// ❌ BAD - Multiple components in one file
-export const CafeCard = () => {}
-export const CafeList = () => {}
+<button>Get Directions</button>  // Use COPY.map.getDirections
 ```
 
-**When to extract a component:**
--   Logic repeated 2+ times → Create reusable component
--   Component file > 300 lines → Split into smaller components
--   Complex UI section → Extract to named component
--   Different responsibilities → Separate components
-
-### Styling & Design System
-
-**Design Tokens (Tailwind Config):**
-
-```javascript
-// tailwind.config.js
-colors: {
-  matcha: {
-    50: '#e8f5eb',
-    100: '#d1ebd7',
-    // ... full scale
-    500: '#51aa63',  // Primary
-    600: '#418853',
-    // ... to 900
-  },
-  cream: { /* ... */ },
-  charcoal: { /* ... */ }
-}
-```
-
-**Use design tokens, not arbitrary values:**
+**Direct fetch() calls:**
 ```tsx
-// ✅ GOOD - Uses design tokens
-<div className="bg-matcha-500 text-cream-50">
-
-// ❌ BAD - Arbitrary values
-<div className="bg-[#51aa63] text-[#faf7f2]">
+await fetch('/api/cafes')  // Use api.cafes.getAll()
 ```
 
-**Animation Philosophy:**
-
-Small, purposeful animations that enhance UX without hurting performance:
--   **Duration**: 150-300ms (never > 500ms)
--   **Easing**: `ease-out` for exits, `ease-in-out` for movements
--   **Prefer CSS animations** over JS (better performance)
--   **Use transforms** (translateX, scale) over position/size changes
--   **Animate sparingly** - only state changes and transitions
-
-**Animation patterns:**
-```css
-/* ✅ GOOD - CSS keyframe animation */
-@keyframes slide-down {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* ❌ AVOID - JS-driven animations unless necessary */
+**Custom buttons with inline styles:**
+```tsx
+<button className="bg-gradient...">Click</button>  // Use PrimaryButton
 ```
 
-### TypeScript Rules
+**Arbitrary Tailwind values:**
+```tsx
+<div className="p-[16px]">  // Use design tokens or spacing.cardPadding
+```
 
-**STRICT mode enabled** - No `any` types allowed
+**Using `any` types:**
+```tsx
+const data: any = {}  // Define proper types
+```
+
+**God components (>300 lines):**
+```tsx
+// Split into smaller focused components
+```
+
+**Prop drilling:**
+```tsx
+// Use Zustand store instead
+```
+
+### ✅ Do This Instead
 
 ```tsx
-// ✅ GOOD - Fully typed
+import { COPY } from '@/constants/copy'
+import { api } from '@/utils/api'
+import { PrimaryButton } from '@/components/ui'
+import { spacing } from '@/styles/spacing'
+
+// Proper types
 interface CafeCardProps {
   cafe: CafeWithDistance
   onSelect: (cafe: CafeWithDistance) => void
 }
 
-// ❌ BAD - Using any
-interface BadProps {
-  data: any
-  onClick: (item: any) => void
+// Named export
+export const CafeCard: React.FC<CafeCardProps> = ({ cafe, onSelect }) => {
+  const handleClick = async () => {
+    await api.cafes.getById(cafe.id)
+  }
+
+  return (
+    <div className="p-4">  {/* Use Tailwind spacing classes */}
+      <PrimaryButton onClick={handleClick}>
+        {COPY.map.getDirections}
+      </PrimaryButton>
+    </div>
+  )
 }
 ```
 
-**Type organization:**
--   Shared types (API contracts) → `shared/types/index.ts`
--   Frontend-specific types → `frontend/src/types/index.ts`
--   Backend-specific types → `backend/src/types/` (if needed)
--   Component-specific types → Same file as component
--   Store types → Same file as store definition
+---
 
-### Finding Code (For Claude Code)
+## When to Refactor
 
-**To find a component:**
-```bash
-# Search by component name
-glob "frontend/**/*ComponentName*.tsx"
+**Extract to component when:**
+- Code duplicated 2+ times
+- File > 300 lines
+- Complex section that could be named
+- Different responsibility/concern
 
-# Search by functionality
-grep "functionName" --type ts --path frontend/
-```
+**Extract to hook when:**
+- Reusable logic across components
+- Complex state management
+- Side effects need coordination
+- API/data fetching logic
 
-**To find where something is used:**
-```bash
-# Find all imports
-grep "import.*ComponentName" --type ts
+**Extract to Zustand store when:**
+- State shared across 3+ components
+- State needs persistence
+- Complex state with many actions
+- Authentication/global UI state
 
-# Find all usages
-grep "ComponentName" --type tsx
-```
+**Extract to utility when:**
+- Pure function (no React dependencies)
+- Math/calculation logic
+- Data transformation
+- Reusable helpers
 
-**Common locations:**
--   ⭐ Shared UI components → `frontend/src/components/ui/` (ALWAYS check here first!)
--   ⭐ Copy constants → `frontend/src/constants/copy.ts` (ALWAYS use for user-facing strings!)
--   UI components → `frontend/src/components/`
--   Business logic → `frontend/src/hooks/`
--   Global state → `frontend/src/stores/`
--   Pure functions → `frontend/src/utils/`
--   Design tokens → `frontend/src/styles/spacing.ts`
--   Frontend types → `frontend/src/types/`
--   API endpoints → `backend/src/routes/`
--   Database schema → `backend/src/db/`
--   Shared types → `shared/types/`
+---
+
+## Documentation Quick Reference
+
+**Need detailed info?** Reference these docs in the `docs/` folder:
+
+| Task | Document |
+|------|----------|
+| **Database schema** | `docs/TECH_SPEC.md` → Database Schema section |
+| **API endpoints** | `docs/TECH_SPEC.md` → API Architecture section |
+| **Deployment** | `docs/DEPLOYMENT.md` |
+| **Backend setup** | `docs/QUICKSTART_BACKEND.md` |
+| **Feature flags** | `docs/feature-flags-guide.md` |
+| **Social features** | `docs/social-features-guide.md` |
+| **Analytics** | `docs/metrics-tracking-prd.md` |
+| **Adding cities** | `docs/adding-new-cities.md` |
+| **Full tech spec** | `docs/TECH_SPEC.md` |
+| **Doc navigation** | `docs/README.md` ⭐ START HERE |
+
+---
 
 ## Common Commands
 
 ```bash
-# Development (from root)
+# Development
 npm run dev              # Start frontend dev server (Vite)
-npm run dev:frontend     # Start frontend explicitly
 npm run dev:backend      # Start backend dev server (Wrangler)
 
 # Build & Deploy
 npm run build            # Build all workspaces
-npm run build:frontend   # Build frontend only
 npm run deploy:backend   # Deploy backend to Cloudflare
 
 # Quality checks (run before commit)
-npm run typecheck        # Check TypeScript types in all workspaces
+npm run typecheck        # Check TypeScript types
 npm run lint             # Lint frontend code
 
-# Testing (when implemented)
-npm run test             # Run test suite
-
-# Backend-specific (from backend/ directory)
+# Backend (from backend/ directory)
 cd backend
 npm run db:generate      # Generate Drizzle migrations
-npm run db:push          # Push schema to D1
-npm run db:migrate       # Apply migrations
+npm run db:migrate:local # Apply migrations locally
+npm run db:migrate:prod  # Apply migrations to production
 npm run tail             # View live logs
 ```
 
@@ -1020,39 +486,64 @@ npm run tail             # View live logs
 4. ✅ Test on mobile viewport (320px)
 5. ✅ Check bundle size didn't explode
 
+---
+
+## Key Features (V1)
+
+1. **Interactive Map Interface** - Toronto-centered map with cafe pins, popover with info
+2. **List View** - Expandable card interface with sorting (neighborhood, rating, distance)
+3. **Location Detail Pages** - Static pages with scores, reviews, social links, navigation
+4. **Matcha Passport** - Local storage visit tracking with progress visualization
+5. **News/Blog Feed** - Updates about new cafes and changes
+6. **FAQ/About Section** - Rating rubric, about the reviewer
+
+**V2 Features:** User accounts, social features (check-ins, reviews, photos, following)
+→ See `docs/social-features-guide.md`
+
+---
+
+## User Management & Social Features
+
+**Feature Flag:** `ENABLE_USER_ACCOUNTS`, `ENABLE_USER_SOCIAL`
+
+**Use the `useUserFeatures` hook:**
+```tsx
+import { useUserFeatures } from '@/hooks/useUserFeatures'
+
+const { hasUserAccounts, hasUserSocial } = useUserFeatures()
+
+{hasUserAccounts && <LoginButton />}
+{hasUserSocial && <CheckInButton />}
+```
+
+**Implemented:**
+- ✅ User registration and login (email/password)
+- ✅ JWT-based authentication with refresh tokens
+- ✅ Email verification system
+- ✅ Profile management
+- ⏳ Social features (Phase 2 - see docs/social-features-guide.md)
+
+---
+
 ## Testing Approach
 
 ### Manual Testing Checklist
 
--   [ ] Mobile responsiveness (320px-768px)
--   [ ] Touch interactions work properly
--   [ ] Map functionality on mobile
--   [ ] Geolocation permission handling
--   [ ] Local storage persistence
--   [ ] Performance on slow networks
+- [ ] Mobile responsiveness (320px-768px)
+- [ ] Touch interactions work properly
+- [ ] Map functionality on mobile
+- [ ] Geolocation permission handling
+- [ ] Local storage persistence
+- [ ] Performance on slow networks
 
-### Cross-Browser Testing
+**Cross-Browser Testing:**
+- Safari (iOS) - Primary mobile target
+- Chrome (Android) - Secondary mobile target
+- Desktop browsers - Tertiary support
 
--   Safari (iOS) - Primary mobile target
--   Chrome (Android) - Secondary mobile target
--   Desktop browsers - Tertiary support
-
-## File Naming Conventions
-
--   **Components**: PascalCase (e.g., `CafeCard.jsx`)
--   **Pages**: PascalCase (e.g., `CafeDetailPage.jsx`)
--   **Hooks**: camelCase with 'use' prefix (e.g., `useGeolocation.js`)
--   **Utilities**: camelCase (e.g., `distanceCalculator.js`)
--   **Styles**: kebab-case (e.g., `global.css`)
+---
 
 ## Git Workflow
-
-### Branch Strategy
-
--   `main` - Production-ready code
--   `develop` - Integration branch
--   `feature/*` - Feature development
--   `hotfix/*` - Production fixes
 
 ### Commit Message Format
 
@@ -1062,173 +553,33 @@ type(scope): description
 feat(map): add geolocation functionality
 fix(passport): resolve localStorage persistence issue
 docs(readme): update deployment instructions
-style(ui): improve mobile navigation spacing
 ```
+
+**Types:** feat, fix, docs, style, refactor, test, chore
+
+---
 
 ## Environment & Deployment
 
-### Cloudflare Pages Configuration
+**Cloudflare Pages (Frontend):**
+- Framework preset: Vite
+- Build command: `npm run build`
+- Build output directory: `dist`
+- Auto-deploys on push to `main`
 
-**Frontend (Cloudflare Pages):**
--   Framework preset: Vite
--   Build command: `cd frontend && npm run build`
--   Build output directory: `frontend/dist`
--   Root directory: `/` (monorepo root)
--   Node version: 18+
-
-**Backend (Cloudflare Workers):**
--   Deploy command: `cd backend && npm run deploy`
--   Wrangler configuration: `backend/wrangler.toml`
--   D1 database binding: `DB`
+**Cloudflare Workers (Backend):**
+- Deploy: `cd backend && npm run deploy`
+- Wrangler configuration: `backend/wrangler.toml`
+- D1 database binding: `DB`
 
 **Environment Variables:**
+- Frontend: Feature flags in `frontend/src/config/features.yaml`
+- Backend: Managed by Wrangler (see `docs/DEPLOYMENT.md`)
 
-Frontend uses a YAML config file for feature toggles:
-```yaml
-# frontend/src/config/features.yaml
-ENABLE_PASSPORT: true
-ENABLE_EVENTS: false
-ENABLE_MENU: false
-SHOW_COMING_SOON: false
-```
+**Content Updates (V2+):**
+With backend in place, content updates via admin UI (protected by Cloudflare Access). No rebuild or deploy needed.
 
-Backend uses wrangler.toml for configuration:
-```toml
-# backend/wrangler.toml
-[vars]
-ALLOWED_ORIGINS = "https://matchamap.com"
-```
-
-**Why not .env?**
--   No secrets in frontend (all public data)
--   Backend secrets managed by Wrangler
--   Easier to track in version control
--   Type-safe with TypeScript
-
-**Deployment Process:**
-
-*Frontend:*
-1. Push to `main` branch
-2. Cloudflare Pages auto-builds frontend
-3. Deployed to global CDN edge
-4. Verify at production URL
-
-*Backend:*
-1. Deploy manually: `npm run deploy:backend`
-2. Or set up GitHub Actions for auto-deploy
-3. Backend deploys independently of frontend
-
-**Branch Previews:**
--   Every frontend branch gets preview URL
--   Backend uses staging environment
--   Perfect for testing before merge
-
-### Content Updates (V2+)
-
-With the backend in place, content updates happen via:
-1. Login to admin UI (protected by Cloudflare Access)
-2. Edit cafe data via admin forms
-3. Changes saved to D1 database instantly
-4. Frontend fetches updated data from API
-5. No rebuild or deploy needed
-
-## Analytics & Metrics
-
-### Simple Counter-Based Tracking
-
-**What we track (no external tools):**
-- Cafe views, direction clicks, passport marks
-- Social media clicks (Instagram, TikTok)
-- Feed article clicks
-- Event clicks
-
-**Implementation:**
-```typescript
-// Frontend: frontend/src/utils/analytics.ts
-export async function trackCafeStat(
-  cafeId: number,
-  stat: 'view' | 'directions' | 'passport' | 'instagram' | 'tiktok'
-): Promise<void> {
-  // Fire and forget - don't block UI
-  fetch(`/api/stats/cafe/${cafeId}/${stat}`, { method: 'POST' })
-    .catch(() => {}) // Ignore errors silently
-}
-
-// Usage in components
-useEffect(() => {
-  trackCafeStat(cafe.id, 'view')
-}, [cafe.id])
-```
-
-**Backend: Simple counter increments**
-```typescript
-// backend/src/routes/stats.ts
-await env.DB.prepare(`
-  INSERT INTO cafe_stats (cafe_id, views, updated_at)
-  VALUES (?, 1, CURRENT_TIMESTAMP)
-  ON CONFLICT(cafe_id)
-  DO UPDATE SET views = views + 1, updated_at = CURRENT_TIMESTAMP
-`).bind(cafeId).run()
-```
-
-**Admin Dashboard:**
-- Custom React component at `frontend/src/admin/StatsPage.tsx`
-- Sortable table showing views, CTR, passport usage
-- Protected by Cloudflare Access
-- See [metrics-tracking-prd.md](docs/metrics-tracking-prd.md)
-
-**What we DON'T track:**
-- User sessions or identities
-- Cross-session behavior
-- Personal information
-- Complex funnels or cohorts
-
-**When to add more:**
-- Session tracking → When you have 1000+ daily users
-- Discovery funnels → When optimizing user flows
-- Search terms → When you have 100+ cafes
-
-## Future Considerations (V2+)
-
--   User-submitted reviews
--   Social features (favorites, sharing)
--   Geographic expansion beyond Toronto
--   Advanced search (when > 200 cafes)
--   User accounts and authentication
--   Enhanced passport features with rewards
-
-## Quick Reference
-
-### Color Palette
-
--   Primary Matcha: `#51aa63`
--   Light Matcha: `#82ca94`
--   Dark Matcha: `#356e44`
--   Cream Background: `#faf7f2`
--   Charcoal Text: `#2e2e2e`
--   Accent Pink: `#f8bbd9`
-
-### Breakpoints
-
--   Mobile: 320px-640px (base)
--   Tablet: 640px-1024px (`sm:`)
--   Desktop: 1024px+ (`lg:`)
-
-### Key Dependencies
-
-**Frontend:**
--   `react` - UI Framework
--   `react-router-dom` - Client-side routing
--   `zustand` - Lightweight state management
--   `vite` - Build tool and dev server
--   `tailwindcss` - Styling
--   `leaflet` - Maps
-
-**Backend:**
--   `@cloudflare/workers-types` - Workers TypeScript types
--   `itty-router` - Minimal routing (~450 bytes)
--   `drizzle-orm` - Type-safe ORM
--   `drizzle-kit` - Database migrations
+---
 
 ## Troubleshooting
 
@@ -1243,125 +594,58 @@ await env.DB.prepare(`
 
 ```bash
 npm run build -- --verbose    # Verbose build output
-npm run dev -- --host        # Expose dev server to network
+npm run typecheck             # Check for type errors
 ```
-
-## Development Best Practices (Opinionated for Claude Code)
-
-### Code Review Checklist
-
-Before marking any task complete, verify:
-
-**1. TypeScript**
--   [ ] No `any` types
--   [ ] All props interfaces defined
--   [ ] `npm run typecheck` passes
-
-**2. Performance**
--   [ ] No unnecessary re-renders
--   [ ] Heavy computations memoized
--   [ ] Lazy loading where appropriate
--   [ ] Bundle size < 100KB per page
-
-**3. Mobile-First**
--   [ ] Tested at 320px width
--   [ ] Touch targets ≥ 44px
--   [ ] No hover-only interactions
--   [ ] Works one-handed
-
-**4. State Management**
--   [ ] Global state → Zustand store
--   [ ] Local state → useState/useReducer
--   [ ] Reusable logic → Custom hook
--   [ ] Pure functions → Utils
-
-**5. Code Quality**
--   [ ] Component < 300 lines
--   [ ] Single responsibility per component
--   [ ] Descriptive variable names
--   [ ] No magic numbers/strings
-
-### Anti-Patterns to Avoid
-
-❌ **Don't do this:**
--   **Hardcoded strings** in components (use COPY constant)
--   Creating custom buttons with inline styles (use shared Button components)
--   Duplicating alert/dialog UI (use AlertDialog component)
--   Custom score badge styling (use ScoreBadge, DrinkScoreBadge)
--   Arbitrary spacing values (use design tokens from spacing.ts)
--   Direct fetch() calls in components/hooks (use api.ts client)
--   Using wrong env variable names (only VITE_API_URL exists)
--   Class components
--   Inline styles (use Tailwind + shared components)
--   Default exports (use named exports)
--   `any` types in TypeScript
--   God components (>500 lines)
--   Prop drilling (use Zustand instead)
--   Hover-dependent mobile interactions
--   Heavy animations (>300ms)
--   Arbitrary Tailwind values
--   Multiple components per file
-
-✅ **Do this instead:**
--   **Import COPY constant** for all user-facing strings (`COPY.map.getDirections`)
--   Import shared components from `@/components/ui`
--   Use PrimaryButton, SecondaryButton, IconButton for all buttons
--   Use AlertDialog for all alerts/errors/success messages
--   Use ScoreBadge for all score displays
--   Use design tokens from `@/styles/spacing`
--   Use api.ts client for all API calls (api.cafes.getAll(), api.waitlist.join(), etc.)
--   Use VITE_API_URL environment variable (consistent across all environments)
--   Functional components
--   Tailwind classes + shared component library
--   Named exports
--   Proper TypeScript types
--   Small, focused components
--   Zustand stores for shared state
--   Touch-first interactions (44px minimum)
--   CSS animations 150-300ms
--   Design token values
--   One component per file
-
-### When to Refactor
-
-**Extract to component when:**
--   Code duplicated 2+ times
--   File > 300 lines
--   Complex section that could be named
--   Different responsibility/concern
-
-**Extract to hook when:**
--   Reusable logic across components
--   Complex state management
--   Side effects need coordination
--   API/data fetching logic
-
-**Extract to Zustand store when:**
--   State shared across 3+ components
--   State needs persistence
--   Complex state with many actions
--   Authentication/global UI state
-
-**Extract to utility when:**
--   Pure function (no React dependencies)
--   Math/calculation logic
--   Data transformation
--   Reusable helpers
-
-## Support Resources
-
--   [React Documentation](https://react.dev/)
--   [Zustand Documentation](https://docs.pmnd.rs/zustand/)
--   [Vite Documentation](https://vitejs.dev/)
--   [React Router Documentation](https://reactrouter.com/)
--   [Tailwind CSS Documentation](https://tailwindcss.com/docs)
--   [TypeScript Documentation](https://www.typescriptlang.org/docs/)
--   [Leaflet Documentation](https://leafletjs.com/reference.html)
--   [Cloudflare Pages Documentation](https://developers.cloudflare.com/pages/)
 
 ---
 
-_Last updated: 2025-10-03_
-_Project Phase: V1 Development_
-_React: 18.3+ | Zustand: Latest | TypeScript: Strict Mode_
+## Code Review Checklist
+
+Before marking any task complete, verify:
+
+**TypeScript:**
+- [ ] No `any` types
+- [ ] All props interfaces defined
+- [ ] `npm run typecheck` passes
+
+**Performance:**
+- [ ] No unnecessary re-renders
+- [ ] Heavy computations memoized
+- [ ] Lazy loading where appropriate
+- [ ] Bundle size < 100KB per page
+
+**Mobile-First:**
+- [ ] Tested at 320px width
+- [ ] Touch targets ≥ 44px
+- [ ] No hover-only interactions
+- [ ] Works one-handed
+
+**Patterns:**
+- [ ] Copy constants used (no hardcoded strings)
+- [ ] API client used (no direct fetch)
+- [ ] Shared UI components used (no custom buttons)
+- [ ] Design tokens used (no arbitrary values)
+
+**Code Quality:**
+- [ ] Component < 300 lines
+- [ ] Single responsibility per component
+- [ ] Descriptive variable names
+- [ ] No magic numbers/strings
+
+---
+
+## Support Resources
+
+- **Documentation:** Start with `docs/README.md`
+- [React Documentation](https://react.dev/)
+- [Zustand Documentation](https://docs.pmnd.rs/zustand/)
+- [Vite Documentation](https://vitejs.dev/)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+- [Cloudflare Pages Documentation](https://developers.cloudflare.com/pages/)
+
+---
+
+_Last updated: 2025-10-10_
+_Project Phase: V2 Development (User Accounts + Social Features)_
+_React: 18.3+ | Zustand | Vite | TypeScript: Strict Mode_
 _UI Component Library: Available in `frontend/src/components/ui/`_
