@@ -9,6 +9,7 @@ import { IconButton } from '../ui'
 import { COPY } from '../../constants/copy'
 import { OPTIONAL_CAFE_FIELDS, type OptionalCafeField } from '../../constants/cafeFields'
 import { borderRadius, zIndex } from '../../styles/spacing'
+import { CITIES } from '../../stores/cityStore'
 import type { Cafe } from '../../types'
 
 export const CafeManagementPage: React.FC = () => {
@@ -109,12 +110,13 @@ export const CafeManagementPage: React.FC = () => {
         </span>
         
         {isTooltipOpen && (
-          <div 
-            className={`absolute left-1/2 transform -translate-x-1/2 px-3 py-2 bg-gray-800 text-white text-sm shadow-lg break-words ${getTooltipPosition()}`}
+          <div
+            className={`absolute left-1/2 transform -translate-x-1/2 px-4 py-3 bg-gray-800 text-white text-sm shadow-xl ${getTooltipPosition()}`}
             style={{
               zIndex: zIndex.modal,
               borderRadius: borderRadius.lg,
-              maxWidth: '256px' // Using pixels instead of max-w-64
+              maxWidth: '480px',
+              minWidth: '280px'
             }}
           >
             <div className="font-semibold mb-1">
@@ -236,9 +238,11 @@ export const CafeManagementPage: React.FC = () => {
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             >
               <option value="all">All Cities</option>
-              <option value="toronto">Toronto</option>
-              <option value="montreal">Montreal</option>
-              <option value="tokyo">Tokyo</option>
+              {Object.values(CITIES).map(city => (
+                <option key={city.key} value={city.key}>
+                  {city.name}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -322,8 +326,8 @@ export const CafeManagementPage: React.FC = () => {
                       onClick={() => handleDeleteCafe(cafe.id)}
                       disabled={isDeleting === cafe.id}
                       icon={isDeleting === cafe.id ? Loader : Trash2}
-                      variant="ghost"
-                      className="text-red-600 hover:bg-red-50 disabled:opacity-50"
+                      variant="danger"
+                      shape="square"
                       ariaLabel="Delete cafe"
                       loading={isDeleting === cafe.id}
                     />

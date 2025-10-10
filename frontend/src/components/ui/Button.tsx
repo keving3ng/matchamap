@@ -173,14 +173,15 @@ interface IconButtonProps {
   disabled?: boolean
   icon: LucideIcon
   className?: string
-  variant?: 'primary' | 'secondary' | 'ghost'
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger'
   badge?: boolean
   loading?: boolean
   ariaLabel: string
+  shape?: 'circle' | 'square'
 }
 
 /**
- * IconButton - Circular icon-only button
+ * IconButton - Icon-only button (circular or square)
  * Mobile-first design with proper touch targets (44px x 44px)
  */
 export const IconButton: React.FC<IconButtonProps> = ({
@@ -191,12 +192,19 @@ export const IconButton: React.FC<IconButtonProps> = ({
   variant = 'ghost',
   badge = false,
   loading = false,
-  ariaLabel
+  ariaLabel,
+  shape = 'circle'
 }) => {
   const variantStyles = {
     primary: 'bg-green-600 text-white hover:bg-green-700',
     secondary: 'bg-green-100 text-green-700 hover:bg-green-200',
-    ghost: 'bg-white/95 backdrop-blur-sm text-green-700 hover:bg-white shadow-lg'
+    ghost: 'bg-white/95 backdrop-blur-sm text-green-700 hover:bg-white shadow-lg',
+    danger: 'bg-red-100 text-red-600 hover:bg-red-200'
+  }
+
+  const shapeStyles = {
+    circle: 'rounded-full',
+    square: 'rounded-lg'
   }
 
   return (
@@ -207,7 +215,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
       className={`
         relative
         w-11 h-11
-        rounded-full
+        ${shapeStyles[shape]}
         flex items-center justify-center
         active:scale-95
         transition-all duration-200 ease-out

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { X, Save, MapPin, Coffee, RefreshCw, Lock } from 'lucide-react'
 import { api } from '../../utils/api'
 import { COPY } from '../../constants/copy'
+import { CITIES } from '../../stores/cityStore'
 import type { Cafe } from '../../types'
 
 interface CafeFormProps {
@@ -220,9 +221,11 @@ export const CafeForm: React.FC<CafeFormProps> = ({ cafe, onSave, onCancel }) =>
                 required
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               >
-                <option value="toronto">Toronto</option>
-                <option value="montreal">Montreal</option>
-                <option value="tokyo">Tokyo</option>
+                {Object.values(CITIES).map(city => (
+                  <option key={city.key} value={city.key}>
+                    {city.name}
+                  </option>
+                ))}
               </select>
             </div>
 
