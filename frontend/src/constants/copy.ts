@@ -335,6 +335,12 @@ export const COPY = {
     users: 'Users',
     settings: 'Settings',
 
+    // Cafe Editor
+    cafeEditor: {
+      coordsReadOnly: 'Coordinates cannot be edited here',
+      coordsAutoUpdated: 'Coordinates are automatically updated when you refresh from Google Maps',
+    },
+
     // Waitlist Management
     waitlist: {
       title: 'Waitlist Signups',
