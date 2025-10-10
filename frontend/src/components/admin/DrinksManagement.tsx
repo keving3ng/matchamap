@@ -4,6 +4,8 @@ import { api } from '../../utils/api'
 import type { DrinkItem } from '../../types'
 import { DrinkForm } from './DrinkForm'
 import { useDataStore } from '../../stores/dataStore'
+import { COPY } from '../../constants/copy'
+import { IconButton } from '../ui/Button'
 
 interface DrinksManagementProps {
   cafeId: number
@@ -17,6 +19,7 @@ export const DrinksManagement: React.FC<DrinksManagementProps> = ({ cafeId, cafe
   const [error, setError] = useState<string | null>(null)
   const [showDrinkForm, setShowDrinkForm] = useState(false)
   const [editingDrink, setEditingDrink] = useState<DrinkItem | null>(null)
+  const [settingDefaultId, setSettingDefaultId] = useState<number | null>(null)
   const { fetchCafes } = useDataStore()
 
   useEffect(() => {
@@ -56,6 +59,26 @@ export const DrinksManagement: React.FC<DrinksManagementProps> = ({ cafeId, cafe
   const handleAddNew = () => {
     setEditingDrink(null)
     setShowDrinkForm(true)
+  }
+
+  const handleSetAsDefault = async (drinkId: number) => {
+    if (!confirm(COPY.admin.drinksManagement.setAsDefaultConfirm)) return
+
+    try {
+      setSettingDefaultId(drinkId)
+      const response = await api.drinks.setAsDefault(cafeId, drinkId)
+      
+      // Optimistic update: update drinks list with the response
+      setDrinks(response.drinks)
+      
+      // Refresh cafe data in the store to update map view with cache busting
+      await fetchCafes(undefined, true)
+    } catch (err) {
+      setError(COPY.admin.drinksManagement.setAsDefaultError)
+      console.error('Error setting default drink:', err)
+    } finally {
+      setSettingDefaultId(null)
+    }
   }
 
   const handleFormClose = async () => {
@@ -140,8 +163,9 @@ export const DrinksManagement: React.FC<DrinksManagementProps> = ({ cafeId, cafe
                             {drink.name || 'Iced Matcha Latte'}
                           </h3>
                           {drink.isDefault && (
-                            <span className="px-2 py-1 bg-green-500 text-white text-xs rounded">
-                              Default
+                            <span className="px-2 py-1 bg-green-500 text-white text-xs rounded flex items-center gap-1">
+                              <Star size={12} className="fill-current" />
+                              {COPY.admin.drinksManagement.defaultLabel}
                             </span>
                           )}
                         </div>
@@ -181,18 +205,33 @@ export const DrinksManagement: React.FC<DrinksManagementProps> = ({ cafeId, cafe
                       </div>
 
                       <div className="flex gap-2 ml-4">
-                        <button
+                        <IconButton
+                          icon={Edit}
+                          variant="ghost"
+                          ariaLabel="Edit drink"
                           onClick={() => handleEdit(drink)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded transition"
-                        >
-                          <Edit size={18} />
-                        </button>
-                        <button
+                          className="text-blue-600 hover:bg-blue-50"
+                        />
+                        
+                        {!drink.isDefault && (
+                          <IconButton
+                            icon={Star}
+                            variant="ghost"
+                            ariaLabel={COPY.admin.drinksManagement.setAsDefault}
+                            onClick={() => handleSetAsDefault(drink.id)}
+                            loading={settingDefaultId === drink.id}
+                            disabled={settingDefaultId !== null}
+                            className="text-yellow-600 hover:bg-yellow-50"
+                          />
+                        )}
+                        
+                        <IconButton
+                          icon={Trash2}
+                          variant="ghost"
+                          ariaLabel="Delete drink"
                           onClick={() => handleDelete(drink.id)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded transition"
-                        >
-                          <Trash2 size={18} />
-                        </button>
+                          className="text-red-600 hover:bg-red-50"
+                        />
                       </div>
                     </div>
                   </div>

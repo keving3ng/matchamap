@@ -199,6 +199,92 @@ export async function updateDrink(request: IRequest, env: Env): Promise<Response
   }
 }
 
+// PUT /api/admin/cafes/:cafeId/drinks/:drinkId/set-default - Set drink as default
+export async function setDefaultDrink(request: IRequest, env: Env): Promise<Response> {
+  try {
+    const cafeId = parseInt(request.params?.cafeId || '');
+    const drinkId = parseInt(request.params?.drinkId || '');
+    
+    if (isNaN(cafeId) || isNaN(drinkId)) {
+      return badRequestResponse('Invalid cafe ID or drink ID', request as Request, env);
+    }
+
+    const db = getDb(env.DB);
+
+    // Verify cafe exists
+    const cafeResults = await db
+      .select()
+      .from(cafes)
+      .where(eq(cafes.id, cafeId))
+      .limit(1);
+
+    if (cafeResults.length === 0) {
+      return notFoundResponse(request as Request, env);
+    }
+
+    // Check if drink exists and belongs to this cafe
+    const drinkExists = await db
+      .select()
+      .from(drinks)
+      .where(and(eq(drinks.id, drinkId), eq(drinks.cafeId, cafeId)))
+      .limit(1);
+
+    if (drinkExists.length === 0) {
+      return notFoundResponse(request as Request, env);
+    }
+
+    const beforeState = drinkExists[0];
+
+    // Remove default flag from all drinks for this cafe
+    await db
+      .update(drinks)
+      .set({ isDefault: false })
+      .where(eq(drinks.cafeId, cafeId));
+
+    // Set this drink as default
+    const updated = await db
+      .update(drinks)
+      .set({ 
+        isDefault: true,
+        updatedAt: sql`CURRENT_TIMESTAMP`
+      })
+      .where(eq(drinks.id, drinkId))
+      .returning();
+
+    // Get all drinks for this cafe to return
+    const allDrinks = await db
+      .select()
+      .from(drinks)
+      .where(eq(drinks.cafeId, cafeId))
+      .orderBy(drinks.isDefault); // Default drinks first
+
+    // Log the audit action
+    await logAdminAction(request as AuthenticatedRequest, env, {
+      action: 'UPDATE',
+      resourceType: 'drink',
+      resourceId: drinkId,
+      changesSummary: generateChangesSummary('UPDATE', 'drink', updated[0].name ?? undefined, beforeState, updated[0]),
+      beforeState,
+      afterState: updated[0],
+    });
+
+    return jsonResponse(
+      { 
+        message: 'Default drink updated successfully',
+        drink: updated[0],
+        drinks: allDrinks
+      },
+      HTTP_STATUS.OK,
+      request as Request,
+      env,
+      CACHE_CONSTANTS.NO_STORE
+    );
+  } catch (error) {
+    console.error('Error setting default drink:', error);
+    return errorResponse('Failed to set default drink', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
+  }
+}
+
 // DELETE /api/admin/drinks/:id - Delete drink
 export async function deleteDrink(request: IRequest, env: Env): Promise<Response> {
   try {

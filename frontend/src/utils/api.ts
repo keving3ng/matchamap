@@ -363,6 +363,15 @@ export const drinksAPI = {
   },
 
   /**
+   * Set drink as default (admin only)
+   */
+  async setAsDefault(cafeId: number, drinkId: number): Promise<{ message: string; drink: Drink; drinks: Drink[] }> {
+    return fetchAPI(`/admin/cafes/${cafeId}/drinks/${drinkId}/set-default`, {
+      method: 'PUT',
+    })
+  },
+
+  /**
    * Delete drink (admin only)
    */
   async delete(id: number): Promise<{ message: string }> {
