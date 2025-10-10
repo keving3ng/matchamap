@@ -31,6 +31,14 @@ export const CafeManagementPage: React.FC = () => {
       return OPTIONAL_CAFE_FIELDS
         .filter(field => {
           const value = cafe[field.key as keyof Cafe]
+          
+          // For numeric fields (chargeForAltMilk, ambianceScore), 0 is valid
+          const isNumericField = field.key === 'ambianceScore' || field.key === 'chargeForAltMilk'
+          if (isNumericField) {
+            return value === null || value === undefined
+          }
+          
+          // For string fields, null/undefined/empty are all missing
           return value === null || value === undefined || value === ''
         })
         .map(field => field.label)
