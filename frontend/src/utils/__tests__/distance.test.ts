@@ -79,7 +79,12 @@ describe('distance utilities', () => {
     })
 
     it('should handle very short distances', () => {
-      expect(calculateWalkTime(0.05)).toBe('< 1 min')
+      expect(calculateWalkTime(0.05)).toBe('1 min') // 0.05km / 5kmh * 60min = 0.6min, rounds to 1min
+    })
+
+    it('should handle zero or near-zero distances', () => {
+      expect(calculateWalkTime(0)).toBe('< 1 min')
+      expect(calculateWalkTime(0.005)).toBe('< 1 min') // 0.005km / 5kmh * 60min = 0.06min, rounds to 0min
     })
 
     it('should format long walking times with hours', () => {

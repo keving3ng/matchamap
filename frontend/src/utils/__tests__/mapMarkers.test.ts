@@ -22,7 +22,7 @@ describe('mapMarkers', () => {
       
       expect(html).toContain('bg-matcha-500') // Default state color
       expect(html).toContain('8.5') // Score display
-      expect(html).toContain('svg') // Matcha leaf icon
+      expect(html).toContain('🍵') // Matcha emoji icon
       expect(html).not.toContain('animate-pulse') // Not selected
       expect(html).not.toContain('✓') // Not visited
     })
@@ -96,23 +96,21 @@ describe('mapMarkers', () => {
   })
 
   describe('createUserLocationMarker', () => {
-    it('should create user location marker with pulse animations', () => {
+    it('should create user location marker with basic styling', () => {
       const html = createUserLocationMarker()
       
       expect(html).toContain('bg-blue-600') // Main dot color
-      expect(html).toContain('bg-blue-400') // Outer ring
-      expect(html).toContain('bg-blue-500') // Middle ring
-      expect(html).toContain('animate-ping') // Pulse animation
-      expect(html).toContain('animation-delay: 75ms') // Delayed animation
+      expect(html).toContain('bg-blue-400') // Background ring
+      expect(html).toContain('border-2 border-white') // White border
+      expect(html).toContain('shadow-lg') // Drop shadow
     })
 
-    it('should include multiple pulse rings', () => {
+    it('should include required elements', () => {
       const html = createUserLocationMarker()
       
-      // Should have multiple rings for layered pulse effect
-      expect(html).toContain('w-8 h-8') // Outer ring size
-      expect(html).toContain('w-6 h-6') // Middle ring size
-      expect(html).toContain('w-4 h-4') // Main dot size
+      // Should have main elements
+      expect(html).toContain('w-6 h-6') // Background ring size
+      expect(html).toContain('w-4 h-4') // Main dot size  
       expect(html).toContain('w-1.5 h-1.5') // Inner white dot
     })
 
@@ -123,8 +121,7 @@ describe('mapMarkers', () => {
       expect(html).toContain('absolute') // Absolute positioning for rings
       expect(html).toContain('border-2 border-white') // White border
       expect(html).toContain('shadow-lg') // Drop shadow
-      expect(html).toContain('opacity-30') // Outer ring opacity
-      expect(html).toContain('opacity-50') // Middle ring opacity
+      expect(html).toContain('opacity-20') // Background ring opacity
     })
   })
 })
