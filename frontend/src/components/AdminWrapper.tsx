@@ -1,11 +1,10 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { useAdminStore } from '../stores/adminStore'
 import { useAuthStore } from '../stores/authStore'
 import { getCurrentEnvironment } from '../hooks/useFeatureToggle'
 import { useNavigate } from 'react-router'
 import { Settings, AlertTriangle, LogOut, User } from 'lucide-react'
 import { COPY } from '../constants/copy'
-import { zIndex } from '../styles/spacing'
 
 interface AdminWrapperProps {
   children: React.ReactNode
@@ -22,18 +21,6 @@ export const AdminWrapper: React.FC<AdminWrapperProps> = ({ children }) => {
   // Show banner if in dev mode with admin mode active, or if authenticated as admin
   const showBanner = (currentEnv === 'dev' && adminModeActive) || (isAuthenticated && user?.role === 'admin')
 
-  // Add CSS variable to document root for banner height
-  useEffect(() => {
-    if (showBanner) {
-      document.documentElement.style.setProperty('--admin-banner-height', `${ADMIN_BANNER_HEIGHT}px`)
-    } else {
-      document.documentElement.style.setProperty('--admin-banner-height', '0px')
-    }
-
-    return () => {
-      document.documentElement.style.setProperty('--admin-banner-height', '0px')
-    }
-  }, [showBanner])
 
   // Only show wrapper in actual dev environment (not simulated prod mode)
   if (!showBanner) {
@@ -62,13 +49,12 @@ export const AdminWrapper: React.FC<AdminWrapperProps> = ({ children }) => {
   }
 
   return (
-    <>
-      {/* Admin Control Bar - Fixed at top with exact height, amber warning color for admin mode */}
+    <div className="w-full h-screen flex flex-col">
+      {/* Admin Control Bar - Part of document flow, amber warning color for admin mode */}
       <div
-        className={`fixed top-0 left-0 right-0 w-full ${isAuthenticated ? 'bg-amber-600' : isProdMode ? 'bg-red-600' : 'bg-purple-600'} text-white px-4 shadow-lg flex items-center justify-between`}
+        className={`w-full ${isAuthenticated ? 'bg-amber-600' : isProdMode ? 'bg-red-600' : 'bg-purple-600'} text-white px-4 shadow-lg flex items-center justify-between flex-shrink-0`}
         style={{ 
           height: `${ADMIN_BANNER_HEIGHT}px`,
-          zIndex: zIndex.adminBanner 
         }}
       >
         <div className="flex items-center gap-4">
@@ -154,12 +140,11 @@ export const AdminWrapper: React.FC<AdminWrapperProps> = ({ children }) => {
         </div>
       </div>
 
-      {/* Spacer for fixed bar with exact height */}
-      <div style={{ height: `${ADMIN_BANNER_HEIGHT}px` }} />
-
-      {/* App Content */}
-      {children}
-    </>
+      {/* App Content - Takes remaining space */}
+      <div className="flex-1 min-h-0">
+        {children}
+      </div>
+    </div>
   )
 }
 
