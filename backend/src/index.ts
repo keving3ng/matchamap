@@ -23,6 +23,31 @@ import { notFoundResponse } from './utils/response';
 
 const router = Router();
 
+/**
+ * Validate required environment variables at startup
+ * Fail fast with clear error messages if missing
+ */
+function validateEnvironment(env: Env): void {
+  const requiredSecrets = [
+    { key: 'JWT_SECRET', description: 'JWT signing secret' },
+    { key: 'GOOGLE_PLACES_API_KEY', description: 'Google Places API key' }
+  ];
+  
+  const missing = requiredSecrets.filter(({ key }) => !env[key as keyof Env]);
+  
+  if (missing.length > 0) {
+    const errors = missing.map(({ key, description }) => 
+      `- ${key}: ${description}`
+    ).join('\n');
+    
+    throw new Error(
+      `Missing required environment variables:\n${errors}\n\n` +
+      `Set them via Wrangler CLI:\n` +
+      missing.map(({ key }) => `npx wrangler secret put ${key}`).join('\n')
+    );
+  }
+}
+
 // Apply HTTPS enforcement globally (in production only)
 router.all('*', requireHTTPS());
 
@@ -100,10 +125,25 @@ router.all('*', (request, env: Env) => notFoundResponse(request, env));
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     try {
+      // Validate environment variables on first request
+      validateEnvironment(env);
+      
       const response = await router.fetch(request, env);
       return response || new Response('Not Found', { status: HTTP_STATUS.NOT_FOUND });
     } catch (error) {
       console.error('Unhandled error:', error);
+      
+      // Return specific error for configuration issues
+      if (error instanceof Error && error.message.includes('Missing required environment variables')) {
+        return new Response(JSON.stringify({ 
+          error: 'Configuration Error',
+          details: error.message
+        }), {
+          status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      
       return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
         status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
         headers: { 'Content-Type': 'application/json' }

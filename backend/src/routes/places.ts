@@ -57,9 +57,13 @@ function extractPlaceIdFromUrl(url: string): string | null {
  * POST /api/admin/places/lookup
  * Look up a place from Google Maps URL and return structured data
  */
+interface LookupPlaceBody {
+  googleMapsUrl: string;
+}
+
 export async function lookupPlace(request: IRequest, env: Env): Promise<Response> {
   try {
-    const body = await request.json() as any;
+    const body = await request.json() as LookupPlaceBody;
     const { googleMapsUrl } = body;
 
     if (!googleMapsUrl) {
@@ -96,7 +100,7 @@ export async function lookupPlace(request: IRequest, env: Env): Promise<Response
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Goog-Api-Key': env.GOOGLE_PLACES_API_KEY || '',
+          'X-Goog-Api-Key': env.GOOGLE_PLACES_API_KEY,
           'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location,places.currentOpeningHours,places.internationalPhoneNumber,places.websiteUri,places.rating,places.userRatingCount,places.googleMapsUri',
         },
         body: JSON.stringify({
@@ -107,8 +111,23 @@ export async function lookupPlace(request: IRequest, env: Env): Promise<Response
 
       if (!searchResponse.ok) {
         const errorText = await searchResponse.text();
-        console.error('Google Places Text Search error:', errorText);
-        throw new Error(`Google Places API returned ${searchResponse.status}`);
+        console.error('Google Places Text Search error:', {
+          status: searchResponse.status,
+          statusText: searchResponse.statusText,
+          body: errorText,
+          placeName,
+        });
+        
+        // Return specific error message based on status code
+        if (searchResponse.status === 400) {
+          throw new Error('Invalid Google Maps URL or place ID');
+        } else if (searchResponse.status === 403) {
+          throw new Error('Google API key is invalid or disabled');
+        } else if (searchResponse.status === 429) {
+          throw new Error('Google API rate limit exceeded. Please try again later.');
+        } else {
+          throw new Error(`Google Places API error: ${searchResponse.status} ${searchResponse.statusText}`);
+        }
       }
 
       const searchData = await searchResponse.json() as { places?: any[] };
@@ -136,15 +155,32 @@ export async function lookupPlace(request: IRequest, env: Env): Promise<Response
 
       const response = await fetch(apiUrl, {
         headers: {
-          'X-Goog-Api-Key': env.GOOGLE_PLACES_API_KEY || '',
+          'X-Goog-Api-Key': env.GOOGLE_PLACES_API_KEY,
           'X-Goog-FieldMask': fields,
         },
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Google Places API error:', errorText);
-        throw new Error(`Google Places API returned ${response.status}`);
+        console.error('Google Places API error:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText,
+          placeId,
+        });
+        
+        // Return specific error message based on status code
+        if (response.status === 400) {
+          throw new Error('Invalid Google Maps URL or place ID');
+        } else if (response.status === 403) {
+          throw new Error('Google API key is invalid or disabled');
+        } else if (response.status === 404) {
+          throw new Error('Place not found. Please verify the Google Maps URL.');
+        } else if (response.status === 429) {
+          throw new Error('Google API rate limit exceeded. Please try again later.');
+        } else {
+          throw new Error(`Google Places API error: ${response.status} ${response.statusText}`);
+        }
       }
 
       data = await response.json();
@@ -175,9 +211,25 @@ export async function lookupPlace(request: IRequest, env: Env): Promise<Response
     );
   } catch (error) {
     console.error('Error looking up place:', error);
+    
+    // Return specific error message if available, otherwise generic message
+    const errorMessage = error instanceof Error ? error.message : 'Failed to lookup place from Google Maps';
+    
+    // Determine appropriate HTTP status code
+    let statusCode = HTTP_STATUS.INTERNAL_SERVER_ERROR;
+    if (error instanceof Error) {
+      if (error.message.includes('not found') || error.message.includes('Invalid Google Maps URL')) {
+        statusCode = HTTP_STATUS.NOT_FOUND;
+      } else if (error.message.includes('rate limit')) {
+        statusCode = HTTP_STATUS.TOO_MANY_REQUESTS;
+      } else if (error.message.includes('API key is invalid')) {
+        statusCode = HTTP_STATUS.FORBIDDEN;
+      }
+    }
+    
     return errorResponse(
-      'Failed to lookup place from Google Maps',
-      HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      errorMessage,
+      statusCode,
       request as Request,
       env
     );
