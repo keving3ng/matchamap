@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react'
-import { Navigation, MapPin, ChevronDown, Crosshair, Filter, X, Search, Coffee, Star, Building2 } from 'lucide-react'
+import { Navigation, MapPin, ChevronDown, Crosshair, Filter, X, Search, Coffee, Star, Building2, Instagram } from 'lucide-react'
+import { TikTokIcon } from './TikTokIcon'
 import { useGeolocation } from '../hooks/useGeolocation'
 import { useUIStore } from '../stores/uiStore'
 import { getLocationRequestAdvice, getOptimalGeolocationOptions } from '../utils/deviceDetection'
@@ -619,6 +620,38 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                     {cafe.displayScore && (
                       <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 text-white px-3 py-1 rounded-full font-bold text-sm shadow-md">
                         {cafe.displayScore.toFixed(1)}
+                      </div>
+                    )}
+                    
+                    {/* Social Review Links */}
+                    {(cafe.instagramPostLink || cafe.tiktokPostLink) && (
+                      <div className="flex gap-1.5">
+                        {cafe.instagramPostLink && (
+                          <a
+                            href={cafe.instagramPostLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 text-white rounded-full flex items-center justify-center hover:from-purple-600 hover:to-pink-600 transition shadow-md"
+                            aria-label={COPY.list.viewInstagramReview}
+                            title={COPY.list.viewInstagramReview}
+                          >
+                            <Instagram size={14} />
+                          </a>
+                        )}
+                        {cafe.tiktokPostLink && (
+                          <a
+                            href={cafe.tiktokPostLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="w-8 h-8 bg-gray-800 text-white rounded-full flex items-center justify-center hover:bg-gray-900 transition shadow-md"
+                            aria-label={COPY.list.viewTikTokReview}
+                            title={COPY.list.viewTikTokReview}
+                          >
+                            <TikTokIcon size={14} />
+                          </a>
+                        )}
                       </div>
                     )}
                   </div>
