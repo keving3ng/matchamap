@@ -5,7 +5,7 @@ import { handleHealth } from './routes/health';
 import { HTTP_STATUS } from './constants';
 import { listCafes, getCafe, createCafe, updateCafe, deleteCafe } from './routes/cafes';
 import { listCities } from './routes/cities';
-import { listDrinks, createDrink, updateDrink, deleteDrink } from './routes/drinks';
+import { listDrinks, createDrink, updateDrink, deleteDrink, setDefaultDrink } from './routes/drinks';
 import { listFeedItems } from './routes/feed';
 import { listAllFeedItems, getFeedItem, createFeedItem, updateFeedItem, deleteFeedItem } from './routes/admin-feed';
 import { listEvents } from './routes/events';
@@ -59,6 +59,7 @@ router.post('/api/admin/places/lookup', writeRateLimit(), requireAdminAuth(), lo
 // Drinks management endpoints
 router.get('/api/admin/cafes/:cafeId/drinks', publicRateLimit(), requireAdminAuth(), listDrinks);
 router.post('/api/admin/cafes/:cafeId/drinks', writeRateLimit(), requireAdminAuth(), createDrink);
+router.put('/api/admin/cafes/:cafeId/drinks/:drinkId/set-default', writeRateLimit(), requireAdminAuth(), setDefaultDrink);
 router.put('/api/admin/drinks/:id', writeRateLimit(), requireAdminAuth(), updateDrink);
 router.delete('/api/admin/drinks/:id', writeRateLimit(), requireAdminAuth(), deleteDrink);
 

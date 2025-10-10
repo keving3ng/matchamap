@@ -427,6 +427,16 @@ export const COPY = {
       minutesAgo: (minutes: number) => `${minutes} minute${minutes === 1 ? '' : 's'} ago`,
       hoursAgo: (hours: number) => `${hours} hour${hours === 1 ? '' : 's'} ago`,
     },
+
+    // Drinks Management
+    drinksManagement: {
+      setAsDefault: 'Set as Default',
+      defaultLabel: 'Default',
+      setAsDefaultConfirm: 'Set this drink as the default?',
+      setAsDefaultSuccess: 'Default drink updated successfully',
+      setAsDefaultError: 'Failed to set as default',
+      settingDefault: 'Setting as default...',
+    },
   },
 } as const
 
