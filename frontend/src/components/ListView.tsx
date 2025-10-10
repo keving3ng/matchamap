@@ -6,7 +6,7 @@ import { getLocationRequestAdvice, getOptimalGeolocationOptions } from '../utils
 import { getMapsUrl } from '../utils/mapsUrl'
 import { isCurrentlyOpen } from '../utils/hoursFormatter'
 import { ContentContainer } from './ContentContainer'
-import { CITIES, type CityKey } from '../stores/cityStore'
+import { useCityStore, CITIES, type CityKey } from '../stores/cityStore'
 import { COPY } from '../constants/copy'
 import type { ListViewProps } from '../types'
 
@@ -20,6 +20,8 @@ interface FilterState {
 }
 
 export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggleExpand, onViewDetails }) => {
+  const { getAvailableCities, loadAvailableCities, availableCitiesLoaded } = useCityStore()
+  const availableCities = getAvailableCities()
   const [sortBy, setSortBy] = useState<SortOption>('rating')
   const [showFilters, setShowFilters] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
@@ -46,6 +48,13 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
     // Always refresh location when clicked (cheap operation, useful for moving users)
     requestLocation()
   }
+
+  // Load available cities on mount
+  React.useEffect(() => {
+    if (!availableCitiesLoaded) {
+      loadAvailableCities()
+    }
+  }, [availableCitiesLoaded, loadAvailableCities])
 
   // Auto-trigger location when distance filter is selected
   React.useEffect(() => {
@@ -291,18 +300,29 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                       <div className="px-3 py-2 border-b border-gray-200">
                         <h3 className="text-xs font-bold text-gray-500 uppercase">{COPY.list.filterByCity}</h3>
                       </div>
-                      {(Object.keys(CITIES) as CityKey[]).map(cityKey => (
+                      <button
+                        onClick={() => {
+                          setFilters(prev => ({ ...prev, selectedCities: [] }))
+                          setShowCityDropdown(false)
+                        }}
+                        className={`w-full text-left px-4 py-2.5 text-sm hover:bg-matcha-50 transition-colors ${
+                          filters.selectedCities.length === 0 ? 'bg-matcha-50 text-matcha-700 font-bold' : 'text-gray-700'
+                        }`}
+                      >
+                        {COPY.list.allCities}
+                      </button>
+                      {availableCities.map(city => (
                         <button
-                          key={cityKey}
+                          key={city.key}
                           onClick={() => {
-                            toggleCity(cityKey)
+                            toggleCity(city.key)
                           }}
                           className={`w-full text-left px-4 py-2.5 text-sm hover:bg-matcha-50 transition-colors flex items-center justify-between ${
-                            filters.selectedCities.includes(cityKey) ? 'bg-matcha-50 text-matcha-700 font-bold' : 'text-gray-700'
+                            filters.selectedCities.includes(city.key) ? 'bg-matcha-50 text-matcha-700 font-bold' : 'text-gray-700'
                           }`}
                         >
-                          <span>{CITIES[cityKey].name}</span>
-                          {filters.selectedCities.includes(cityKey) && (
+                          <span>{city.name}</span>
+                          {filters.selectedCities.includes(city.key) && (
                             <span className="text-matcha-600">✓</span>
                           )}
                         </button>
@@ -757,18 +777,29 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
               <div className="px-3 py-2 border-b border-gray-200">
                 <h3 className="text-xs font-bold text-gray-500 uppercase">{COPY.list.filterByCity}</h3>
               </div>
-              {(Object.keys(CITIES) as CityKey[]).map(cityKey => (
+              <button
+                onClick={() => {
+                  setFilters(prev => ({ ...prev, selectedCities: [] }))
+                  setShowCityDropdown(false)
+                }}
+                className={`w-full text-left px-4 py-2.5 text-sm hover:bg-matcha-50 transition-colors ${
+                  filters.selectedCities.length === 0 ? 'bg-matcha-50 text-matcha-700 font-bold' : 'text-gray-700'
+                }`}
+              >
+                {COPY.list.allCities}
+              </button>
+              {availableCities.map(city => (
                 <button
-                  key={cityKey}
+                  key={city.key}
                   onClick={() => {
-                    toggleCity(cityKey)
+                    toggleCity(city.key)
                   }}
                   className={`w-full text-left px-4 py-2.5 text-sm hover:bg-matcha-50 transition-colors flex items-center justify-between ${
-                    filters.selectedCities.includes(cityKey) ? 'bg-matcha-50 text-matcha-700 font-bold' : 'text-gray-700'
+                    filters.selectedCities.includes(city.key) ? 'bg-matcha-50 text-matcha-700 font-bold' : 'text-gray-700'
                   }`}
                 >
-                  <span>{CITIES[cityKey].name}</span>
-                  {filters.selectedCities.includes(cityKey) && (
+                  <span>{city.name}</span>
+                  {filters.selectedCities.includes(city.key) && (
                     <span className="text-matcha-600">✓</span>
                   )}
                 </button>

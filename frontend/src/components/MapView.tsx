@@ -19,8 +19,9 @@ import type { MapViewProps } from '../types'
 export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCafe, onPinClick, onViewDetails, onClosePopover }) => {
   const mapsUrl = selectedCafe ? getMapsUrl(selectedCafe.address || '', selectedCafe.link) : ''
   const { visitedCafeIds } = useVisitedCafes()
-  const { selectedCity, setCity, getCity } = useCityStore()
+  const { selectedCity, setCity, getCity, getAvailableCities, loadAvailableCities, availableCitiesLoaded } = useCityStore()
   const currentCity = getCity()
+  const availableCities = getAvailableCities()
   const { selectedDrinkType, setSelectedDrinkType } = useUIStore()
   const routeDisplayEnabled = useFeatureToggle('ENABLE_ROUTE_DISPLAY')
 
@@ -145,6 +146,13 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
 
   // Track programmatic city changes to avoid infinite loops
   const isProgrammaticChangeRef = React.useRef(false)
+
+  // Load available cities on mount
+  React.useEffect(() => {
+    if (!availableCitiesLoaded) {
+      loadAvailableCities()
+    }
+  }, [availableCitiesLoaded, loadAvailableCities])
 
   // Add user location marker when coordinates are available
   React.useEffect(() => {
@@ -641,28 +649,27 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
         <>
           <div className="fixed inset-0 z-[9997]" onClick={() => setShowCityDropdown(false)} />
           <div className="fixed top-[4.5rem] left-4 bg-white rounded-lg shadow-2xl border border-gray-200 py-1 z-[9998] min-w-[140px]">
-            {(Object.keys(CITIES) as CityKey[]).map(cityKey => (
+            {availableCities.map(city => (
               <button
-                key={cityKey}
+                key={city.key}
                 onClick={(e) => {
                   e.stopPropagation()
                   // Mark this as a programmatic change to avoid loop
                   isProgrammaticChangeRef.current = true
-                  setCity(cityKey)
+                  setCity(city.key)
                   setShowCityDropdown(false)
                   // Pan map to new city center with enhanced tile loading
                   if (centerOnLocation) {
-                    const newCity = CITIES[cityKey]
-                    centerOnLocation(newCity.center[0], newCity.center[1], newCity.zoom)
+                    centerOnLocation(city.center[0], city.center[1], city.zoom)
                     // Additional tile refresh for better reliability
                     setTimeout(() => refreshTiles(), 200)
                   }
                 }}
                 className={`w-full text-left px-3 py-2 text-sm hover:bg-matcha-50 transition-colors ${
-                  selectedCity === cityKey ? 'bg-matcha-50 text-matcha-700 font-bold' : 'text-gray-700'
+                  selectedCity === city.key ? 'bg-matcha-50 text-matcha-700 font-bold' : 'text-gray-700'
                 }`}
               >
-                {CITIES[cityKey].name}
+                {city.name}
               </button>
             ))}
           </div>
