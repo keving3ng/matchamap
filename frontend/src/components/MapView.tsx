@@ -843,7 +843,11 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
       )}
 
       {/* Quick Filters - Horizontal Scrollable */}
-      <div className="absolute top-4 left-4 right-4 z-[1003]">
+      <div className={`absolute top-4 right-4 z-[1003] transition-all duration-300 ${
+        showPopover && selectedCafe
+          ? 'left-4 md:left-[22rem] lg:left-[26rem] xl:left-[30rem]' // Shift right on desktop when card is visible
+          : 'left-4'
+      }`}>
         <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-1">
           {/* City Selector - Navigation, not filter */}
           <div className="relative flex-shrink-0">
