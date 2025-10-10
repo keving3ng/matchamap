@@ -16,6 +16,7 @@ interface AuthState {
   login: (credentials: LoginRequest) => Promise<void>
   register: (data: RegisterRequest) => Promise<void>
   logout: () => void
+  clearAuth: () => void
   refreshAccessToken: () => Promise<boolean>
   getCurrentUser: () => Promise<void>
   clearError: () => void
@@ -111,6 +112,22 @@ export const useAuthStore = create<AuthState>()(
         }
 
         // Clear auth state
+        set({
+          user: null,
+          accessToken: null,
+          refreshToken: null,
+          isAuthenticated: false,
+          error: null,
+          isLoading: false,
+        })
+
+        // Explicitly clear sessionStorage to ensure tokens are removed
+        sessionStorage.removeItem('matchamap-auth')
+      },
+
+      clearAuth: () => {
+        // Clear auth state without calling logout endpoint
+        // Used when token is already invalid (401/403 responses)
         set({
           user: null,
           accessToken: null,

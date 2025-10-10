@@ -4,6 +4,7 @@
  */
 
 import { useAuthStore } from '../stores/authStore'
+import { useSessionExpiry } from '../hooks/useSessionExpiry'
 import type { Cafe, Drink, FeedItem, Event, PublicUserProfile, UpdateProfileRequest, UserProfile, CityWithCount, User } from '../../../shared/types'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
@@ -41,6 +42,19 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit & { bustCache
     })
 
     if (!response.ok) {
+      // Handle authentication errors (401/403)
+      if (response.status === 401 || response.status === 403) {
+        // Clear expired tokens from auth store
+        useAuthStore.getState().clearAuth()
+        
+        // Show session expired dialog with current path for redirect
+        const currentPath = window.location.pathname + window.location.search
+        useSessionExpiry.getState().showSessionExpiredDialog(currentPath)
+        
+        // Return a specific error for auth failures
+        throw new Error('Authentication required')
+      }
+
       const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
       throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`)
     }
