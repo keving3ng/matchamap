@@ -149,6 +149,10 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
   // Track programmatic city changes to avoid infinite loops
   const isProgrammaticChangeRef = React.useRef(false)
 
+  // Track city transitions for smooth loading state
+  const [isTransitioningCity, setIsTransitioningCity] = React.useState(false)
+  const [spinDuration, setSpinDuration] = React.useState(1)
+
   // Load available cities on mount
   React.useEffect(() => {
     if (!availableCitiesLoaded) {
@@ -231,14 +235,26 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
     }
   }, [selectedCafe?.id, clearRouteVisual, clearRouteData])
 
-  // Force tile refresh when city changes to ensure tiles load properly
+  // Handle city transitions with smooth loading state
   React.useEffect(() => {
-    // Small delay to allow city change to propagate and map to center
-    const timeoutId = setTimeout(() => {
+    // Start transition (show overlay)
+    setIsTransitioningCity(true)
+
+    // Refresh tiles during the fade
+    const refreshTimeoutId = setTimeout(() => {
       refreshTiles()
-    }, 300)
-    
-    return () => clearTimeout(timeoutId)
+    }, 200)
+
+    // End transition (hide overlay) after tiles have loaded
+    // Longer duration for gentle intermission feel
+    const transitionTimeoutId = setTimeout(() => {
+      setIsTransitioningCity(false)
+    }, 900) // Longer for smooth 500ms fade durations
+
+    return () => {
+      clearTimeout(refreshTimeoutId)
+      clearTimeout(transitionTimeoutId)
+    }
   }, [selectedCity, refreshTiles])
 
   return (
@@ -250,6 +266,27 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
         style={{ minHeight: '400px' }}
         onClick={onClosePopover}
       />
+
+      {/* City Transition Overlay - Instant up, quick fade down */}
+      <div
+        className={`absolute inset-0 bg-cream-50 z-[1002] pointer-events-none transition-opacity ease-in-out ${
+          isTransitioningCity
+            ? 'opacity-100 duration-0'      // Instant when appearing
+            : 'opacity-0 duration-150'       // Quick fade when disappearing
+        }`}
+      >
+        {/* Spinning matcha emoji */}
+        {isTransitioningCity && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div
+              className="text-4xl animate-spin"
+              style={{ animationDuration: `${spinDuration}s` }}
+            >
+              🍵
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Location Permission Dialog */}
       {error && error.code === 1 && ( // PERMISSION_DENIED
@@ -737,15 +774,24 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                 key={city.key}
                 onClick={(e) => {
                   e.stopPropagation()
+                  setShowCityDropdown(false)
+
+                  // Only transition if we're actually changing cities
+                  if (city.key === selectedCity) {
+                    return
+                  }
+
+                  // Show overlay instantly (duration-0), then change city
+                  setIsTransitioningCity(true)
+                  // Randomize spin speed for whimsy (0.3s to 2s)
+                  setSpinDuration(0.3 + Math.random() * 1.7)
                   // Mark this as a programmatic change to avoid loop
                   isProgrammaticChangeRef.current = true
                   setCity(city.key)
-                  setShowCityDropdown(false)
-                  // Pan map to new city center with enhanced tile loading
+                  // Pan map to new city center
+                  // Note: The useEffect will handle the tile refresh and fade out
                   if (centerOnLocation) {
                     centerOnLocation(city.center[0], city.center[1], city.zoom)
-                    // Additional tile refresh for better reliability
-                    setTimeout(() => refreshTiles(), 200)
                   }
                 }}
                 className={`w-full text-left px-3 py-2 text-sm hover:bg-matcha-50 transition-colors ${
@@ -797,7 +843,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
       )}
 
       {/* Quick Filters - Horizontal Scrollable */}
-      <div className="absolute top-4 left-4 right-4 z-[1001]">
+      <div className="absolute top-4 left-4 right-4 z-[1003]">
         <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-1">
           {/* City Selector - Navigation, not filter */}
           <div className="relative flex-shrink-0">
