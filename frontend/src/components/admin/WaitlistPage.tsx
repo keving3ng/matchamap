@@ -206,7 +206,7 @@ export const WaitlistPage: React.FC = () => {
                 <Calendar className="h-5 w-5 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Daily</p>
+                <p className="text-sm text-gray-600">{COPY.admin.waitlist.last24Hours}</p>
                 <p className="text-xl font-semibold">
                   {COPY.admin.waitlist.dailySignups(data.analytics.dailySignups)}
                 </p>
