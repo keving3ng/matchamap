@@ -173,9 +173,15 @@ export const APP_CONSTANTS = {
  * Used for JWT signing - these are string representations for the jose library
  */
 export const JWT_EXPIRY = {
-  /** Access token expiry (1 hour) */
+  /** Access token expiry (1 hour) for regular users */
   ACCESS_TOKEN: '1h',
   
-  /** Refresh token expiry (7 days) */
+  /** Access token expiry (24 hours) for admin users */
+  ACCESS_TOKEN_ADMIN: '24h',
+  
+  /** Refresh token expiry (7 days) for regular users */
   REFRESH_TOKEN: '7d',
+  
+  /** Refresh token expiry (30 days) for admin users */
+  REFRESH_TOKEN_ADMIN: '30d',
 } as const;

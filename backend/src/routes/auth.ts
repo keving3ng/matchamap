@@ -145,8 +145,15 @@ export async function login(request: IRequest, env: Env): Promise<Response> {
       role: user.role,
     };
 
-    const accessToken = await signToken(tokenPayload, env.JWT_SECRET, JWT_EXPIRY.ACCESS_TOKEN);
-    const refreshToken = await signToken(tokenPayload, env.JWT_SECRET, JWT_EXPIRY.REFRESH_TOKEN);
+    // Use extended token expiration for admin users
+    const accessTokenExpiry = user.role === 'admin' ? JWT_EXPIRY.ACCESS_TOKEN_ADMIN : JWT_EXPIRY.ACCESS_TOKEN;
+    const refreshTokenExpiry = user.role === 'admin' ? JWT_EXPIRY.REFRESH_TOKEN_ADMIN : JWT_EXPIRY.REFRESH_TOKEN;
+
+    const accessToken = await signToken(tokenPayload, env.JWT_SECRET, accessTokenExpiry);
+    const refreshToken = await signToken(tokenPayload, env.JWT_SECRET, refreshTokenExpiry);
+
+    // Log token generation for security auditing
+    console.log(`Token generated - User: ${user.email}, Role: ${user.role}, Access Token Expiry: ${accessTokenExpiry}, Refresh Token Expiry: ${refreshTokenExpiry}`);
 
     // Store session
     const sessionToken = generateSessionToken();
@@ -258,8 +265,14 @@ export async function refreshToken(request: IRequest, env: Env): Promise<Respons
       return errorResponse('Invalid or expired refresh token', HTTP_STATUS.UNAUTHORIZED, request as Request, env);
     }
 
+    // Use extended token expiration for admin users
+    const accessTokenExpiry = payload.role === 'admin' ? JWT_EXPIRY.ACCESS_TOKEN_ADMIN : JWT_EXPIRY.ACCESS_TOKEN;
+    
     // Generate new access token
-    const accessToken = await signToken(payload, env.JWT_SECRET, JWT_EXPIRY.ACCESS_TOKEN);
+    const accessToken = await signToken(payload, env.JWT_SECRET, accessTokenExpiry);
+
+    // Log token refresh for security auditing
+    console.log(`Token refreshed - User: ${payload.email}, Role: ${payload.role}, Access Token Expiry: ${accessTokenExpiry}`);
 
     return jsonResponse({ accessToken }, HTTP_STATUS.OK, request as Request, env);
   } catch (error) {
