@@ -31,15 +31,17 @@ MatchaMap deploys to Cloudflare's edge infrastructure for zero-latency global pe
 ## Prerequisites
 
 ### Required Tools
-- **Node.js**: 18.x or later
-- **npm**: 9.x or later
-- **Wrangler CLI**: `npm install -g wrangler`
-- **Git**: For version control
+
+-   **Node.js**: 18.x or later
+-   **npm**: 9.x or later
+-   **Wrangler CLI**: `npm install -g wrangler`
+-   **Git**: For version control
 
 ### Cloudflare Account
-- Sign up at https://dash.cloudflare.com
-- Free tier is sufficient for V1
-- No credit card required for development
+
+-   Sign up at https://dash.cloudflare.com
+-   Free tier is sufficient for V1
+-   No credit card required for development
 
 ## Local Development
 
@@ -49,7 +51,7 @@ MatchaMap deploys to Cloudflare's edge infrastructure for zero-latency global pe
 # Start React dev server
 npm run dev
 
-# Runs on http://localhost:5173
+# Runs on http://localhost:3000
 # Hot module reloading enabled
 # Points to local Workers API (if running)
 ```
@@ -84,20 +86,22 @@ cd workers && npm run dev
 ### Initial Setup
 
 1. **Connect Repository**
-   ```bash
-   # Via Cloudflare Dashboard:
-   Pages → Create Project → Connect to Git
-   Select: GitHub/GitLab repository
-   ```
+
+    ```bash
+    # Via Cloudflare Dashboard:
+    Pages → Create Project → Connect to Git
+    Select: GitHub/GitLab repository
+    ```
 
 2. **Build Configuration**
-   ```
-   Framework preset: Vite
-   Build command: npm run build
-   Build output directory: dist
-   Root directory: /
-   Branch: main
-   ```
+
+    ```
+    Framework preset: Vite
+    Build command: npm run build
+    Build output directory: dist
+    Root directory: /
+    Branch: main
+    ```
 
 3. **Environment Variables** (none needed for V1)
 
@@ -225,38 +229,41 @@ ENVIRONMENT = "staging"
 ### Frontend Domain
 
 1. **Add Custom Domain** (Cloudflare Pages Dashboard)
-   ```
-   Pages → Settings → Custom Domains
-   Add: matchamap.com
-   ```
+
+    ```
+    Pages → Settings → Custom Domains
+    Add: matchamap.com
+    ```
 
 2. **DNS Configuration** (automatic if using Cloudflare DNS)
-   ```
-   Type: CNAME
-   Name: @
-   Target: matchamap.pages.dev
-   Proxy: Enabled
-   ```
+
+    ```
+    Type: CNAME
+    Name: @
+    Target: matchamap.pages.dev
+    Proxy: Enabled
+    ```
 
 3. **SSL Certificate**
-   - Automatic via Cloudflare Universal SSL
-   - Active within minutes
+    - Automatic via Cloudflare Universal SSL
+    - Active within minutes
 
 ### API Domain
 
 1. **Add Route** (Workers Dashboard)
-   ```
-   Workers → matchamap-api → Triggers
-   Add Route: api.matchamap.com/*
-   ```
+
+    ```
+    Workers → matchamap-api → Triggers
+    Add Route: api.matchamap.com/*
+    ```
 
 2. **DNS Configuration**
-   ```
-   Type: CNAME
-   Name: api
-   Target: matchamap.com
-   Proxy: Enabled
-   ```
+    ```
+    Type: CNAME
+    Name: api
+    Target: matchamap.com
+    Proxy: Enabled
+    ```
 
 ## Cloudflare Access (Admin Protection)
 
@@ -333,8 +340,8 @@ Workers → matchamap-api → Analytics
 
 ```typescript
 // Track custom events
-analytics.track('cafe_view', { cafeId: 42 })
-analytics.track('directions_click', { cafeId: 42 })
+analytics.track("cafe_view", { cafeId: 42 });
+analytics.track("directions_click", { cafeId: 42 });
 ```
 
 ## CI/CD Pipeline
@@ -346,31 +353,31 @@ analytics.track('directions_click', { cafeId: 42 })
 name: Deploy to Cloudflare
 
 on:
-  push:
-    branches: [main]
+    push:
+        branches: [main]
 
 jobs:
-  deploy-frontend:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-      - run: npm install
-      - run: npm run build
-      - uses: cloudflare/pages-action@v1
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: matchamap
+    deploy-frontend:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - uses: actions/setup-node@v3
+            - run: npm install
+            - run: npm run build
+            - uses: cloudflare/pages-action@v1
+              with:
+                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  projectName: matchamap
 
-  deploy-workers:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - run: cd workers && npm install
-      - run: cd workers && npm run deploy
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    deploy-workers:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - run: cd workers && npm install
+            - run: cd workers && npm run deploy
+              env:
+                  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 ```
 
 ## Troubleshooting
@@ -503,39 +510,44 @@ npx wrangler d1 execute matchamap-db --file=migrations/rollback.sql
 ## Production Checklist
 
 ### Pre-Launch
-- [ ] Frontend builds successfully
-- [ ] Workers deploy successfully
-- [ ] Database migrations applied
-- [ ] Custom domain configured
-- [ ] SSL certificate active
-- [ ] Admin routes protected (Cloudflare Access)
-- [ ] Analytics configured
-- [ ] Performance tested (Lighthouse > 90)
-- [ ] Mobile tested on real devices
+
+-   [ ] Frontend builds successfully
+-   [ ] Workers deploy successfully
+-   [ ] Database migrations applied
+-   [ ] Custom domain configured
+-   [ ] SSL certificate active
+-   [ ] Admin routes protected (Cloudflare Access)
+-   [ ] Analytics configured
+-   [ ] Performance tested (Lighthouse > 90)
+-   [ ] Mobile tested on real devices
 
 ### Post-Launch
-- [ ] Monitoring dashboards configured
-- [ ] Backup cron job running
-- [ ] Error alerting setup
-- [ ] Team access configured
-- [ ] Documentation updated
+
+-   [ ] Monitoring dashboards configured
+-   [ ] Backup cron job running
+-   [ ] Error alerting setup
+-   [ ] Team access configured
+-   [ ] Documentation updated
 
 ## Maintenance
 
 ### Daily
-- Monitor Cloudflare Analytics
-- Check error rates in Workers
+
+-   Monitor Cloudflare Analytics
+-   Check error rates in Workers
 
 ### Weekly
-- Review performance metrics
-- Check database size
-- Update content via admin UI
+
+-   Review performance metrics
+-   Check database size
+-   Update content via admin UI
 
 ### Monthly
-- Dependency updates
-- Security patches
-- Database backup verification
-- Cost review (should be $0)
+
+-   Dependency updates
+-   Security patches
+-   Database backup verification
+-   Cost review (should be $0)
 
 ---
 

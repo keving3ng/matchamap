@@ -159,8 +159,9 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
       }
 
       // City filter (multi-select)
+      // City keys are already normalized in database, no need to toLowerCase
       if (filters.selectedCities.length > 0) {
-        if (!cafe.city || !filters.selectedCities.includes(cafe.city.toLowerCase() as CityKey)) {
+        if (!cafe.city || !filters.selectedCities.includes(cafe.city as CityKey)) {
           return false
         }
       }

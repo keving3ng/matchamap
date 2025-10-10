@@ -26,21 +26,23 @@
 ### 4. Restrict the API Key (Security)
 
 **Restrict which APIs can use this key:**
+
 1. Under "API restrictions", select "Restrict key"
 2. Check only: **Places API (New)**
 3. Click Save
 
 **Add HTTP referrer restrictions (optional for local dev):**
-- For local development: No restrictions needed
-- For production: Add your domain (e.g., `https://matchamap.pages.dev/*`)
+
+-   For local development: No restrictions needed
+-   For production: Add your domain (e.g., `https://matchamap.pages.dev/*`)
 
 ### 5. Add API Key to Your Project
 
 1. Open `backend/wrangler.toml`
 2. Replace `YOUR_API_KEY_HERE` with your actual API key:
-   ```toml
-   GOOGLE_PLACES_API_KEY = "AIzaSy..."
-   ```
+    ```toml
+    GOOGLE_PLACES_API_KEY = "AIzaSy..."
+    ```
 3. Save the file
 
 ### 6. Restart Your Backend Server
@@ -54,7 +56,7 @@ That's it! The Google Maps lookup feature is now enabled.
 
 ## Testing the Integration
 
-1. Go to your admin panel: http://localhost:5173/admin/cafes
+1. Go to your admin panel: http://localhost:3000/admin/cafes
 2. Click "Add New Cafe"
 3. Paste a Google Maps URL (e.g., `https://www.google.com/maps/place/...`)
 4. Click Continue
@@ -70,33 +72,37 @@ That's it! The Google Maps lookup feature is now enabled.
 6. **Important**: Use the full URL, not shortened goo.gl links
 
 Example URL format:
+
 ```
 https://www.google.com/maps/place/Cafe+Name/@43.6532,-79.3832,17z/data=...!1sChIJ...
 ```
 
 ## Pricing
 
-- **Free tier**: $200/month credit (renews monthly)
-- **Cost per lookup**: ~$0.04-0.05 per cafe
-- **Your usage**: If adding 20 cafes/month = $1/month (well within free tier!)
+-   **Free tier**: $200/month credit (renews monthly)
+-   **Cost per lookup**: ~$0.04-0.05 per cafe
+-   **Your usage**: If adding 20 cafes/month = $1/month (well within free tier!)
 
 You'll never pay anything unless you add 4000+ cafes in a single month.
 
 ## Troubleshooting
 
 ### "Could not extract place ID from URL"
-- Make sure you're using the full Google Maps URL
-- Avoid shortened goo.gl links (they won't work)
-- The URL should contain place data (click "Share" to get the right URL)
+
+-   Make sure you're using the full Google Maps URL
+-   Avoid shortened goo.gl links (they won't work)
+-   The URL should contain place data (click "Share" to get the right URL)
 
 ### "Google Places API returned 403"
-- Check that Places API (New) is enabled in Google Cloud Console
-- Verify your API key is correct in wrangler.toml
-- Make sure the API key has Places API (New) enabled
+
+-   Check that Places API (New) is enabled in Google Cloud Console
+-   Verify your API key is correct in wrangler.toml
+-   Make sure the API key has Places API (New) enabled
 
 ### "Google Places API returned 400"
-- The place ID might be invalid
-- Try getting a fresh URL from Google Maps
+
+-   The place ID might be invalid
+-   Try getting a fresh URL from Google Maps
 
 ## Need Help?
 

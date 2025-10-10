@@ -80,6 +80,28 @@ export interface CafeWithDistance extends Cafe {
 // CITY TYPES
 // ============================================================================
 
+/**
+ * Valid city keys that can be stored in the database
+ * These must match the keys in the frontend CITIES constant
+ *
+ * To add a new city:
+ * 1. Add the key here
+ * 2. Add city details to frontend/src/stores/cityStore.ts CITIES constant
+ * 3. Deploy and admin UI will automatically include the new city
+ */
+export const VALID_CITY_KEYS = [
+  'toronto',
+  'montreal',
+  'new york',
+  'mississauga',
+  'scarborough',
+  'tokyo',
+  'kyoto',
+  'osaka',
+] as const
+
+export type CityKey = typeof VALID_CITY_KEYS[number]
+
 export interface CityWithCount {
   city: string
   cafe_count: number
