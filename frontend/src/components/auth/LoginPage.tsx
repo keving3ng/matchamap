@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router'
 import { useAuthStore } from '../../stores/authStore'
+import { useSessionExpiry } from '../../hooks/useSessionExpiry'
 import { LoginForm } from './LoginForm'
 import { RegisterForm } from './RegisterForm'
 import { COPY } from '../../constants/copy'
@@ -9,21 +10,30 @@ export const LoginPage: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { isAuthenticated, user } = useAuthStore()
+  const { clearIntendedDestination } = useSessionExpiry()
   const [mode, setMode] = useState<'login' | 'register'>('login')
 
-  // Get the redirect path from location state
-  const from = (location.state as { from?: string })?.from
+  // Get the redirect path from location state or query parameter
+  const searchParams = new URLSearchParams(location.search)
+  const redirectParam = searchParams.get('redirect')
+  const from = redirectParam || (location.state as { from?: string })?.from
 
   useEffect(() => {
     // If already authenticated, redirect appropriately
     if (isAuthenticated && user) {
+      // Clear any stored intended destination
+      clearIntendedDestination()
+      
       // Admins go to admin panel, regular users go to their profile
       const destination = from || (user.role === 'admin' ? '/admin' : `/profile/${user.username}`)
       navigate(destination, { replace: true })
     }
-  }, [isAuthenticated, user, navigate, from])
+  }, [isAuthenticated, user, navigate, from, clearIntendedDestination])
 
   const handleSuccess = () => {
+    // Clear any stored intended destination
+    clearIntendedDestination()
+    
     // After successful login/register, redirect based on role
     if (user) {
       const destination = from || (user.role === 'admin' ? '/admin' : `/profile/${user.username}`)

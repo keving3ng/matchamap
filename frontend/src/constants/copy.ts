@@ -267,6 +267,14 @@ export const COPY = {
     passwordsDoNotMatch: 'Passwords do not match',
     usernameTooShort: 'Username must be at least 3 characters long',
     usernameInvalidChars: 'Username can only contain letters, numbers, and underscores',
+
+    // Session Expiration
+    sessionExpired: {
+      title: 'Session Expired',
+      message: 'Your session has expired. Please sign in again to continue.',
+      signInAgain: 'Sign In Again',
+      dismiss: 'Dismiss',
+    },
   },
 
   // Profile

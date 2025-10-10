@@ -3,6 +3,7 @@ import Header from './components/Header'
 import BottomNavigation from './components/BottomNavigation'
 import AppRoutes from './components/AppRoutes'
 import ComingSoon from './components/ComingSoon'
+import { SessionExpiredDialog } from './components/SessionExpiredDialog'
 import { useAppFeatures } from './hooks/useAppFeatures'
 
 const SESSION_KEY = 'matchamap_unlocked'
@@ -28,6 +29,7 @@ export const App: React.FC = () => {
       <Header />
       <AppRoutes />
       <BottomNavigation />
+      <SessionExpiredDialog />
     </div>
   )
 }
