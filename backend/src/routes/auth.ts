@@ -152,12 +152,13 @@ export async function login(request: IRequest, env: Env): Promise<Response> {
     const accessToken = await signToken(tokenPayload, env.JWT_SECRET, accessTokenExpiry);
     const refreshToken = await signToken(tokenPayload, env.JWT_SECRET, refreshTokenExpiry);
 
-    // Log token generation for security auditing
-    console.log(`Token generated - User: ${user.email}, Role: ${user.role}, Access Token Expiry: ${accessTokenExpiry}, Refresh Token Expiry: ${refreshTokenExpiry}`);
+    // Log token generation for security auditing (sanitized for privacy)
+    console.log(`Token generated - User ID: ${user.id}, Role: ${user.role}, Access Token Expiry: ${accessTokenExpiry}, Refresh Token Expiry: ${refreshTokenExpiry}`);
 
-    // Store session
+    // Store session with role-based expiry duration
     const sessionToken = generateSessionToken();
-    const expiresAt = new Date(Date.now() + AUTH_CONSTANTS.SESSION_EXPIRY_MS).toISOString();
+    const sessionExpiry = user.role === 'admin' ? AUTH_CONSTANTS.SESSION_EXPIRY_MS_ADMIN : AUTH_CONSTANTS.SESSION_EXPIRY_MS;
+    const expiresAt = new Date(Date.now() + sessionExpiry).toISOString();
 
     await db.insert(sessions).values({
       userId: user.id,
@@ -271,8 +272,8 @@ export async function refreshToken(request: IRequest, env: Env): Promise<Respons
     // Generate new access token
     const accessToken = await signToken(payload, env.JWT_SECRET, accessTokenExpiry);
 
-    // Log token refresh for security auditing
-    console.log(`Token refreshed - User: ${payload.email}, Role: ${payload.role}, Access Token Expiry: ${accessTokenExpiry}`);
+    // Log token refresh for security auditing (sanitized for privacy)
+    console.log(`Token refreshed - User ID: ${payload.userId}, Role: ${payload.role}, Access Token Expiry: ${accessTokenExpiry}`);
 
     return jsonResponse({ accessToken }, HTTP_STATUS.OK, request as Request, env);
   } catch (error) {
