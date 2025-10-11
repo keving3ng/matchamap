@@ -36,6 +36,7 @@ export const COPY = {
     viewDetails: 'View Details',
     viewFullDetails: 'View Full Details',
     getDirections: 'Get Directions',
+    backToMap: 'Back to Map',
     enableLocationServices: 'Enable location services',
     findLocation: 'Find my location',
     locationFound: 'Location found',
@@ -58,8 +59,8 @@ export const COPY = {
     walkingDistance: (distance: string) => distance,
     viewInstagramReview: 'View Instagram review',
     viewTikTokReview: 'View TikTok review',
-    seeInstagramReel: 'See Instagram Reel',
-    seeTikTokReview: 'See TikTok Review',
+    seeInstagramReel: 'Reel',
+    seeTikTokReview: 'TikTok',
   },
 
   // Location Dialogs
@@ -145,8 +146,8 @@ export const COPY = {
     icedMatchaLatte: 'Iced Matcha Latte',
     awayDistance: (distance: string, time: string) => `${distance} away • ${time} walk`,
     scoreOutOf: '/ 10',
-    seeInstagramReel: 'See Instagram Reel',
-    seeTikTokReview: 'See TikTok Review',
+    seeInstagramReel: 'Reel',
+    seeTikTokReview: 'TikTok',
     closedNow: 'Closed',
   },
 

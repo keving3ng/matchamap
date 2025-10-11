@@ -50,8 +50,18 @@ export const Header: React.FC = () => {
         <div className="flex items-center gap-3">
           {currentView === 'detail' && (
             <button
-              onClick={() => navigate(-1)}
+              onClick={() => {
+                // Check if we came from the map (most common case)
+                // If so, go back to map root, otherwise use browser back
+                if (document.referrer.includes(window.location.origin) && 
+                    (document.referrer.endsWith('/') || document.referrer.includes('/#'))) {
+                  navigate('/')
+                } else {
+                  navigate(-1)
+                }
+              }}
               className="p-2 hover:bg-matcha-700 rounded-lg transition"
+              aria-label={COPY.map.backToMap}
             >
               <ArrowLeft size={24} />
             </button>

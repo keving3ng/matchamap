@@ -160,14 +160,18 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
     }
   }, [availableCitiesLoaded, loadAvailableCities])
 
+  // Track if location was manually requested (vs automatic)
+  const wasManuallyRequestedRef = React.useRef(false)
+
   // Add user location marker when coordinates are available
   React.useEffect(() => {
     if (coordinates) {
       addUserLocationMarker(coordinates.latitude, coordinates.longitude)
-      // Auto-center on user location ONLY when first received
-      if (centerOnLocation && !hasAutoCenteredRef.current) {
+      // Auto-center on user location when first received OR when manually requested
+      if (centerOnLocation && (!hasAutoCenteredRef.current || wasManuallyRequestedRef.current)) {
         centerOnLocation(coordinates.latitude, coordinates.longitude)
         hasAutoCenteredRef.current = true
+        wasManuallyRequestedRef.current = false // Reset manual request flag
       }
     } else {
       removeUserLocationMarker()
@@ -176,10 +180,13 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
   }, [coordinates, addUserLocationMarker, removeUserLocationMarker, centerOnLocation])
 
   const handleLocationClick = () => {
+    // Mark this as a manual request so location updates will center the map
+    wasManuallyRequestedRef.current = true
+    
     // Always refresh location when clicked (cheap operation, useful for moving users)
     requestLocation()
 
-    // Also center map if we already have coordinates
+    // Also center map immediately if we already have coordinates
     if (coordinates && centerOnLocation) {
       centerOnLocation(coordinates.latitude, coordinates.longitude)
     }
@@ -390,15 +397,15 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
 
           {/* Mobile Bottom Sheet */}
           <div
-            className="absolute bottom-4 left-4 right-4 bg-white rounded-2xl shadow-2xl p-4 z-[9999] border-2 border-green-200 map-popover md:hidden transform transition-all duration-300 ease-out animate-slide-up"
+            className="absolute bottom-4 left-4 right-4 bg-white rounded-2xl shadow-2xl p-4 z-[9999] border-2 border-green-200 map-popover md:hidden transform transition-all duration-300 ease-out animate-slide-up max-h-[40vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Handle indicator */}
             <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-3 animate-scale-in" style={{ animationDelay: '0.1s' }}></div>
 
-            <div className="flex justify-between items-start mb-2">
-              <div className="flex-1 mr-3">
-                <div className="flex items-center gap-2 mb-1">
+            <div className="flex justify-between items-start mb-1.5">
+              <div className="flex-1 mr-2">
+                <div className="flex items-center gap-2 mb-0.5">
                   <h3 className="font-bold text-lg text-gray-800">{selectedCafe.name}</h3>
                   {(() => {
                     const cafeIsOpen = isCurrentlyOpen(selectedCafe.hours)
@@ -408,7 +415,16 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                     return null
                   })()}
                 </div>
-                {selectedCafe.address && <p className="text-xs text-gray-500">{selectedCafe.address}</p>}
+                {selectedCafe.address && (
+                  <a 
+                    href={mapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-gray-500 underline hover:text-gray-700 transition"
+                  >
+                    {selectedCafe.address}
+                  </a>
+                )}
               </div>
               {selectedCafe.displayScore && (
                 <div className="bg-green-500 text-white px-3 py-1 rounded-full font-bold text-lg ml-2 flex-shrink-0">
@@ -417,14 +433,14 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
               )}
             </div>
             {selectedCafe.distanceInfo ? (
-              <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+              <div className="flex items-center gap-2 text-sm text-gray-600 mb-1.5">
                 <Navigation size={16} className="text-green-600" />
                 <span>{selectedCafe.distanceInfo.formattedKm} • {selectedCafe.distanceInfo.walkTime} walk</span>
               </div>
             ) : (
               <button
                 onClick={handleLocationClick}
-                className="flex items-center gap-2 text-sm text-gray-500 mb-2 hover:text-gray-700 transition"
+                className="flex items-center gap-2 text-sm text-gray-500 mb-1.5 hover:text-gray-700 transition"
               >
                 <MapPin size={16} className="text-gray-400" />
                 <span className="underline decoration-dotted">{COPY.map.enableLocationServices}</span>
@@ -433,12 +449,12 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
 
             {/* Quick Note */}
             {selectedCafe.quickNote && (
-              <p className="text-sm text-gray-600 italic mb-2">"{selectedCafe.quickNote}"</p>
+              <p className="text-sm text-gray-600 italic mb-1.5">"{selectedCafe.quickNote}"</p>
             )}
 
             {/* Drinks List */}
             {selectedCafe.drinks && selectedCafe.drinks.length > 0 && (
-              <div className="mb-2">
+              <div className="mb-1.5">
                 <div className="flex items-center gap-1 text-xs font-semibold text-gray-700 mb-1">
                   <Coffee size={12} />
                   {COPY.map.drinks}
@@ -590,7 +606,16 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                       return null
                     })()}
                   </div>
-                  {selectedCafe.address && <p className="text-sm text-gray-500">{selectedCafe.address}</p>}
+                  {selectedCafe.address && (
+                    <a 
+                      href={mapsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-gray-500 underline hover:text-gray-700 transition"
+                    >
+                      {selectedCafe.address}
+                    </a>
+                  )}
                 </div>
                 {selectedCafe.displayScore && (
                   <div className="bg-green-500 text-white px-4 py-2 rounded-full font-bold text-xl ml-3 flex-shrink-0">
@@ -681,12 +706,12 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                   {COPY.map.getDirections}
                 </a>
 
-                {/* Primary Action: View Full Details */}
+                {/* Primary Action: View Details */}
                 <button
                   onClick={() => onViewDetails(selectedCafe)}
                   className="w-full bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-green-600 transition shadow-md"
                 >
-                  {COPY.map.viewFullDetails}
+                  {COPY.map.viewDetails}
                 </button>
 
                 {/* Secondary Action: Show Route on Map - Feature toggled */}
