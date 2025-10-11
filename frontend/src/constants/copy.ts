@@ -194,6 +194,7 @@ export const COPY = {
     description: 'Description',
     hostedAt: 'Hosted at',
     viewOnInstagram: 'View on Instagram',
+    getDirections: 'Get Directions',
   },
 
   // Contact Page

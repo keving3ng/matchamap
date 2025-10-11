@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Calendar, Plus, Search, Edit, Trash2, Star, MoreVertical, Download, Upload, Eye, ExternalLink, Check } from 'lucide-react'
+import { Calendar, Plus, Search, Edit, Trash2, Star, MoreVertical, Download, Upload, Eye, ExternalLink, Check, Clock, MapPin, DollarSign } from 'lucide-react'
 import { api } from '../../utils/api'
 import { COPY } from '../../constants/copy'
 import { useCafeStore } from '../../stores/cafeStore'
@@ -35,10 +35,10 @@ export const EventManagementPage: React.FC = () => {
     loadEvents()
   }, [])
 
-  const loadEvents = async () => {
+  const loadEvents = async (bustCache = false) => {
     try {
       setLoading(true)
-      const response = await api.events.getAllAdmin({ limit: 100 })
+      const response = await api.events.getAllAdmin({ limit: 100 }, bustCache)
       setEvents(response.events)
     } catch (error) {
       console.error('Failed to load events:', error)
@@ -81,7 +81,7 @@ export const EventManagementPage: React.FC = () => {
       } else {
         await api.events.create(editableFields)
       }
-      await loadEvents()
+      await loadEvents(true)
       setShowEditor(false)
       setEditingEvent(null)
     } catch (error) {
@@ -95,7 +95,7 @@ export const EventManagementPage: React.FC = () => {
 
     try {
       await api.events.delete(id)
-      await loadEvents()
+      await loadEvents(true)
       setOpenMenuId(null)
     } catch (error) {
       console.error('Failed to delete event:', error)
@@ -112,7 +112,7 @@ export const EventManagementPage: React.FC = () => {
 
     try {
       await api.events.update(event.id, { featured: newFeaturedStatus })
-      await loadEvents()
+      await loadEvents(true)
       setOpenMenuId(null)
     } catch (error) {
       console.error('Failed to toggle featured status:', error)
@@ -122,7 +122,7 @@ export const EventManagementPage: React.FC = () => {
   const handleTogglePublished = async (event: Event) => {
     try {
       await api.events.update(event.id, { published: !event.published })
-      await loadEvents()
+      await loadEvents(true)
       setOpenMenuId(null)
     } catch (error) {
       console.error('Failed to toggle published status:', error)
@@ -185,9 +185,7 @@ export const EventManagementPage: React.FC = () => {
   }
 
   const handleViewDetailsPage = (event: Event) => {
-    // Navigate to event details page (we'll create this route)
-    const slug = event.title.toLowerCase().replace(/\s+/g, '-')
-    window.open(`/events/${slug}`, '_blank')
+    window.open(`/events/${event.id}`, '_blank')
     setOpenMenuId(null)
   }
 
@@ -196,6 +194,24 @@ export const EventManagementPage: React.FC = () => {
     event.venue.toLowerCase().includes(searchQuery.toLowerCase()) ||
     event.location.toLowerCase().includes(searchQuery.toLowerCase())
   )
+
+  // Helper function to get Instagram URL from handle or post link
+  const getInstagramUrl = (image: string | null | undefined): string | null => {
+    if (!image) return null
+
+    // Check if it's already a full URL
+    if (image.startsWith('http')) {
+      return image
+    }
+
+    // Check if it's an Instagram handle (starts with @)
+    if (image.startsWith('@')) {
+      return `https://instagram.com/${image.replace('@', '')}`
+    }
+
+    // Assume it's a handle without @
+    return `https://instagram.com/${image}`
+  }
 
   // Preview Modal Component
   const PreviewModal = () => {
@@ -230,12 +246,19 @@ export const EventManagementPage: React.FC = () => {
 
               <div className="p-4">
                 <div className="flex items-start gap-4">
-                  {previewEvent.image && (
-                    <div className={`w-16 h-16 bg-gradient-to-br ${
-                      previewEvent.featured ? 'from-green-500 to-green-700' : 'from-green-400 to-green-600'
-                    } rounded-xl flex items-center justify-center text-4xl flex-shrink-0 shadow-md`}>
-                      {previewEvent.image}
-                    </div>
+                  {/* Instagram link icon or emoji */}
+                  {previewEvent.image && getInstagramUrl(previewEvent.image) && (
+                    <a
+                      href={getInstagramUrl(previewEvent.image)!}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`w-16 h-16 bg-gradient-to-br ${
+                        previewEvent.featured ? 'from-green-500 to-green-700' : 'from-green-400 to-green-600'
+                      } rounded-xl flex items-center justify-center text-4xl flex-shrink-0 shadow-md hover:scale-105 transition-transform`}
+                      title={COPY.events.viewOnInstagram}
+                    >
+                      🍵
+                    </a>
                   )}
 
                   <div className="flex-1">
@@ -248,18 +271,18 @@ export const EventManagementPage: React.FC = () => {
                       </div>
 
                       <div className="flex items-center gap-1.5 text-sm text-gray-700">
-                        <span className="w-3.5"></span>
+                        <Clock size={14} className="text-green-600" />
                         <span>{previewEvent.time}</span>
                       </div>
 
                       <div className="flex items-center gap-1.5 text-sm text-gray-700">
-                        <span className="w-3.5"></span>
+                        <MapPin size={14} className="text-green-600" />
                         <span>{previewEvent.venue}, {previewEvent.location}</span>
                       </div>
 
                       {previewEvent.price && (
                         <div className="flex items-center gap-1.5 text-sm font-semibold text-green-700">
-                          <span className="w-3.5"></span>
+                          <DollarSign size={14} className="text-green-600" />
                           <span>{previewEvent.price}</span>
                         </div>
                       )}
@@ -267,7 +290,7 @@ export const EventManagementPage: React.FC = () => {
                   </div>
                 </div>
 
-                <p className="text-gray-700 mt-3 leading-relaxed">{previewEvent.description}</p>
+                <p className="text-gray-700 mt-3 leading-relaxed whitespace-pre-wrap">{previewEvent.description}</p>
               </div>
             </article>
           </div>
@@ -319,34 +342,23 @@ export const EventManagementPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Venue</label>
-                <input
-                  type="text"
-                  value={formData.venue}
-                  onChange={(e) => setFormData({ ...formData, venue: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="Enter venue name..."
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Location</label>
-                <input
-                  type="text"
-                  value={formData.location}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="Enter full address..."
-                />
-              </div>
-
-              <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1">
                   {COPY.admin.eventManagement.selectCafe}
                 </label>
                 <select
                   value={formData.cafeId ?? ''}
-                  onChange={(e) => setFormData({ ...formData, cafeId: e.target.value ? parseInt(e.target.value) : null })}
+                  onChange={(e) => {
+                    const cafeId = e.target.value ? parseInt(e.target.value) : null
+                    const selectedCafe = cafeId ? cafesWithDistance.find(c => c.id === cafeId) : null
+
+                    setFormData({
+                      ...formData,
+                      cafeId,
+                      // Auto-fill venue and location if cafe is selected
+                      venue: selectedCafe ? selectedCafe.name : formData.venue,
+                      location: selectedCafe ? selectedCafe.address : formData.location,
+                    })
+                  }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 >
                   <option value="">{COPY.admin.eventManagement.noCafeLinked}</option>
@@ -356,6 +368,41 @@ export const EventManagementPage: React.FC = () => {
                     </option>
                   ))}
                 </select>
+                {formData.cafeId && (
+                  <p className="text-xs text-green-600 mt-1">✓ Venue and location auto-filled from cafe</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Venue {formData.cafeId && <span className="text-xs text-gray-500">(auto-filled)</span>}
+                </label>
+                <input
+                  type="text"
+                  value={formData.venue}
+                  onChange={(e) => setFormData({ ...formData, venue: e.target.value })}
+                  disabled={!!formData.cafeId}
+                  className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${
+                    formData.cafeId ? 'bg-gray-100 text-gray-600 cursor-not-allowed' : ''
+                  }`}
+                  placeholder="Enter venue name..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Location {formData.cafeId && <span className="text-xs text-gray-500">(auto-filled)</span>}
+                </label>
+                <input
+                  type="text"
+                  value={formData.location}
+                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  disabled={!!formData.cafeId}
+                  className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${
+                    formData.cafeId ? 'bg-gray-100 text-gray-600 cursor-not-allowed' : ''
+                  }`}
+                  placeholder="Enter full address..."
+                />
               </div>
 
               <div>

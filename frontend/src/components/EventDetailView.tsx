@@ -117,6 +117,17 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({ event }) => {
               {COPY.events.viewOnInstagram}
             </a>
           )}
+
+          {/* Get Directions Button */}
+          <a
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3.5 rounded-xl font-semibold hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 mb-3"
+          >
+            <Navigation size={20} />
+            {COPY.events.getDirections}
+          </a>
         </div>
 
         {/* Description Section */}
