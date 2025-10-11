@@ -238,11 +238,13 @@ export const eventsAPI = {
   async getAll(filters?: {
     upcoming?: boolean
     featured?: boolean
+    cafeId?: number
     limit?: number
   }, bustCache = false): Promise<{ events: Event[] }> {
     const params = new URLSearchParams()
     if (filters?.upcoming !== undefined) params.append('upcoming', filters.upcoming.toString())
     if (filters?.featured !== undefined) params.append('featured', filters.featured.toString())
+    if (filters?.cafeId !== undefined) params.append('cafeId', filters.cafeId.toString())
     if (filters?.limit) params.append('limit', filters.limit.toString())
 
     const query = params.toString() ? `?${params.toString()}` : ''

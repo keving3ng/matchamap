@@ -178,8 +178,22 @@ export const COPY = {
   // Events View
   events: {
     title: 'Events',
+    subtitle: 'Toronto matcha community gatherings & workshops',
     noEvents: 'No upcoming events',
     checkBackSoon: 'Check back soon for matcha events!',
+    featuredEvent: 'Featured Event',
+    viewCafe: 'View Cafe',
+    viewDetails: 'View Details',
+    goingCount: (count: number) => `${count} matchamappers are going!`,
+    eventDetails: 'Event Details',
+    date: 'Date',
+    time: 'Time',
+    venue: 'Venue',
+    location: 'Location',
+    price: 'Price',
+    description: 'Description',
+    hostedAt: 'Hosted at',
+    viewOnInstagram: 'View on Instagram',
   },
 
   // Contact Page
@@ -414,9 +428,9 @@ export const COPY = {
 
     // Cafe Management
     cafeManagement: {
-      missingFieldsTooltip: (count: number) => 
+      missingFieldsTooltip: (count: number) =>
         `${count} optional field${count !== 1 ? 's' : ''} missing`,
-      missingFieldsList: (fields: string[]) => 
+      missingFieldsList: (fields: string[]) =>
         `Missing: ${fields.join(', ')}`,
     },
 
@@ -476,6 +490,38 @@ export const COPY = {
       setAsDefaultSuccess: 'Default drink updated successfully',
       setAsDefaultError: 'Failed to set as default',
       settingDefault: 'Setting as default...',
+    },
+
+    // Event Management
+    eventManagement: {
+      title: 'Event Management',
+      subtitle: 'Create and manage matcha-related events',
+      addNewEvent: 'Add New Event',
+      editEvent: 'Edit Event',
+      createEvent: 'Create Event',
+      searchPlaceholder: 'Search events...',
+      noEventsFound: 'No events found',
+      exportJson: 'Export JSON',
+      importJson: 'Import JSON',
+      copyToClipboard: 'Copy to Clipboard',
+      preview: 'Preview',
+      viewDetailsPage: 'View Details Page',
+      makeFeatured: 'Make Featured',
+      removeFeatured: 'Remove Featured',
+      publish: 'Publish',
+      unpublish: 'Unpublish',
+      deleteEvent: 'Delete Event',
+      confirmDelete: 'Are you sure you want to delete this event?',
+      confirmMakeFeatured: 'Make this the featured event? This will remove featured status from other events.',
+      jsonCopied: 'Event JSON copied to clipboard!',
+      jsonExported: 'Event exported as JSON',
+      importSuccess: (count: number) => `Successfully imported ${count} event${count !== 1 ? 's' : ''}`,
+      importError: 'Failed to import events',
+      linkField: 'Link (Instagram Handle or Post URL)',
+      linkFieldPlaceholder: '@username or https://instagram.com/p/...',
+      selectCafe: 'Link to Cafe (Optional)',
+      selectCafePlaceholder: 'Choose a cafe...',
+      noCafeLinked: 'No cafe linked',
     },
   },
 } as const

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { MapPin, Navigation, Crosshair, Coffee, Star, Building2, ChevronDown, Route, Instagram } from 'lucide-react'
 import { TikTokIcon } from './TikTokIcon'
 import { useLeafletMap } from '../hooks/useLeafletMap'
@@ -14,8 +14,10 @@ import { getMapsUrl } from '../utils/mapsUrl'
 import { formatHoursCompact, isCurrentlyOpen } from '../utils/hoursFormatter'
 import { formatDuration } from '../utils/routing'
 import { findClosestCity } from '../utils/cityDetection'
+import { api } from '../utils/api'
 import { COPY } from '../constants/copy'
 import type { MapViewProps } from '../types'
+import type { Event } from '../../../shared/types'
 
 export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCafe, onPinClick, onViewDetails, onClosePopover }) => {
   const mapsUrl = selectedCafe ? getMapsUrl(selectedCafe.address || '', selectedCafe.link) : ''
@@ -32,6 +34,28 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
   const [minRating, setMinRating] = React.useState<number | null>(null)
   const [maxPrice, setMaxPrice] = React.useState<number | null>(null)
   const [openNow, setOpenNow] = React.useState(false)
+
+  // Event indicators state
+  const [cafeIdsWithEvents, setCafeIdsWithEvents] = React.useState<number[]>([])
+
+  // Fetch upcoming events to determine which cafes have events
+  React.useEffect(() => {
+    const fetchEventsForCafes = async () => {
+      try {
+        const response = await api.events.getAll({ upcoming: true })
+        const cafeIds = response.events
+          .filter(event => event.cafeId !== null)
+          .map(event => event.cafeId!)
+        // Remove duplicates
+        const uniqueCafeIds = Array.from(new Set(cafeIds))
+        setCafeIdsWithEvents(uniqueCafeIds)
+      } catch (error) {
+        console.error('Failed to fetch events for map indicators:', error)
+      }
+    }
+
+    fetchEventsForCafes()
+  }, [])
 
   // Get unique drink types from all cafes
   const availableDrinkTypes = React.useMemo(() => {
@@ -128,6 +152,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
     onPinClick,
     selectedCafeId: selectedCafe?.id || null,
     visitedCafeIds,
+    cafeIdsWithEvents,
     initialCenter: currentCity.center,
     initialZoom: currentCity.zoom,
     onMapMove: handleMapMove,

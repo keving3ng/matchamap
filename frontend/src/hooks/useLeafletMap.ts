@@ -16,6 +16,7 @@ interface UseLeafletMapOptions {
   onPinClick: (cafe: CafeWithDistance) => void
   selectedCafeId?: number | null
   visitedCafeIds?: number[]
+  cafeIdsWithEvents?: number[]
   initialCenter?: [number, number]
   initialZoom?: number
   onMapMove?: (center: { lat: number; lng: number }) => void
@@ -26,6 +27,7 @@ export const useLeafletMap = ({
   onPinClick,
   selectedCafeId,
   visitedCafeIds = [],
+  cafeIdsWithEvents = [],
   initialCenter = [43.6532, -79.3832],
   initialZoom = 13,
   onMapMove
@@ -120,8 +122,9 @@ export const useLeafletMap = ({
     cafes.forEach(cafe => {
       const isSelected = selectedCafeId === cafe.id
       const isVisited = visitedCafeIds.includes(cafe.id)
+      const hasUpcomingEvent = cafeIdsWithEvents.includes(cafe.id)
 
-      const markerHtml = createMatchaMarker(cafe, { isSelected, isVisited })
+      const markerHtml = createMatchaMarker(cafe, { isSelected, isVisited, hasUpcomingEvent })
 
       const customIcon = L.divIcon({
         html: markerHtml,
@@ -158,7 +161,7 @@ export const useLeafletMap = ({
 
       markersRef.current.set(cafe.id, marker)
     })
-  }, [cafes, onPinClick, selectedCafeId, visitedCafeIds, initialZoom])
+  }, [cafes, onPinClick, selectedCafeId, visitedCafeIds, cafeIdsWithEvents, initialZoom])
 
   const zoomIn = () => {
     mapRef.current?.zoomIn()
