@@ -117,7 +117,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       {/* Sidebar Navigation - Hidden on mobile unless menu is open */}
       <div className={`${
         mobileMenuOpen ? 'flex' : 'hidden'
-      } md:flex w-full md:w-64 bg-white border-r border-gray-200 shadow-lg flex-col`}>
+      } md:flex w-full md:w-64 bg-white border-r border-gray-200 shadow-lg flex-col overflow-y-auto`}>
         {/* Sidebar Header - Desktop only */}
         <div className="hidden md:block p-6 border-b border-gray-200">
           <div className="flex items-center gap-2 text-green-700">
