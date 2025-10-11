@@ -1,3 +1,13 @@
+/**
+ * Legacy Public Feed API (Deprecated)
+ * 
+ * NOTE: This serves the old blog/article-style feed items.
+ * In Phase 2, this will be replaced by activity feed endpoints
+ * serving user-generated content (check-ins, reviews, photos).
+ * 
+ * Current status: Functional but deprecated
+ * Migration plan: See docs/feed-refactoring-plan.md
+ */
 import { IRequest } from 'itty-router';
 import { eq, and, desc } from 'drizzle-orm';
 import { Env } from '../types';

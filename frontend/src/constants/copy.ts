@@ -167,9 +167,12 @@ export const COPY = {
 
   // Feed View
   feed: {
-    title: 'Feed',
+    title: 'Activity Feed',
+    subtitle: 'See what the community is up to',
+    noActivity: 'No recent activity',
+    checkBackSoon: 'Check back soon for updates from the community!',
+    // Legacy blog/article strings (deprecated - will be removed in Phase 2)
     noUpdates: 'No updates yet',
-    checkBackSoon: 'Check back soon for matcha news and updates!',
   },
 
   // Events View
@@ -353,7 +356,8 @@ export const COPY = {
     cafes: 'Cafes',
     drinks: 'Drinks',
     events: 'Events',
-    feed: 'News Feed',
+    feed: 'Feed (Legacy)', // Mark as legacy for Phase 2 replacement
+    newsfeed: 'Feed Management (Deprecated)', // Add deprecation note
     stats: 'Analytics',
     users: 'Users',
     settings: 'Settings',

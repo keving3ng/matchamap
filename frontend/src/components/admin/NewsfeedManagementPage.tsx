@@ -3,6 +3,16 @@ import { Newspaper, Plus, Search, Edit, Trash2, Eye, EyeOff } from 'lucide-react
 import { api } from '../../utils/api'
 import type { FeedItem } from '../../../../shared/types'
 
+/**
+ * Legacy Feed Management Page (Deprecated)
+ * 
+ * NOTE: This is the old blog/article-style feed system.
+ * In Phase 2, this will be replaced by auto-generated activity feed
+ * from user actions (check-ins, reviews, photos).
+ * 
+ * Current status: Functional but deprecated
+ * Migration plan: See docs/feed-refactoring-plan.md
+ */
 export const NewsfeedManagementPage: React.FC = () => {
   const [feedItems, setFeedItems] = useState<FeedItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -246,10 +256,13 @@ export const NewsfeedManagementPage: React.FC = () => {
             <div>
               <h1 className="text-xl md:text-2xl font-bold text-green-800 mb-2 flex items-center gap-2">
                 <Newspaper size={28} />
-                Newsfeed Management
+                Feed Management (Legacy)
               </h1>
               <p className="text-sm md:text-base text-gray-600">
-                Manage news updates, announcements, and blog posts
+                ⚠️ <strong>Deprecated:</strong> This will be replaced by auto-generated activity feed in Phase 2
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                See docs/feed-refactoring-plan.md for migration details
               </p>
             </div>
 

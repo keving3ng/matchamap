@@ -1,3 +1,13 @@
+/**
+ * Legacy Feed Management Routes (Deprecated)
+ * 
+ * NOTE: This is the old blog/article-style feed system.
+ * In Phase 2, this will be replaced by auto-generated activity feed
+ * from user actions (check-ins, reviews, photos).
+ * 
+ * Current status: Functional but deprecated
+ * Migration plan: See docs/feed-refactoring-plan.md
+ */
 import { IRequest } from 'itty-router';
 import { eq, desc, and } from 'drizzle-orm';
 import { Env } from '../types';

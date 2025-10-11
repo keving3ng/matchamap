@@ -151,7 +151,10 @@ export const cafeAPI = {
 }
 
 /**
- * Feed API endpoints
+ * Feed API endpoints (Legacy - Deprecated)
+ * 
+ * TODO(Phase 2): Replace with activity_feed system
+ * See: docs/feed-refactoring-plan.md
  */
 export const feedAPI = {
   /**

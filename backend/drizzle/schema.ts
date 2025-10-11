@@ -64,7 +64,9 @@ export const drinks = sqliteTable('drinks', {
   defaultIdx: index('drinks_default_idx').on(table.isDefault),
 }));
 
-// Feed items table
+// Feed items table (Legacy - Blog/Article Style)
+// NOTE: This table will be replaced by activity_feed in Phase 2
+// See docs/feed-refactoring-plan.md for new schema design
 export const feedItems = sqliteTable('feed_items', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   type: text('type').notNull(), // new_location, score_update, announcement, menu_update, closure

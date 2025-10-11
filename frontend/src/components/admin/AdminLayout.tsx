@@ -29,7 +29,7 @@ const coreNavItems: NavItem[] = [
   },
   {
     id: 'newsfeed',
-    label: 'Newsfeed',
+    label: 'Feed (Legacy)',
     icon: <Newspaper size={20} />,
     path: '/admin/newsfeed',
   },
