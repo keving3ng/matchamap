@@ -1,5 +1,5 @@
 import { IRequest } from 'itty-router';
-import { eq, and, sql } from 'drizzle-orm';
+import { eq, and, sql, desc, asc } from 'drizzle-orm';
 import { Env } from '../types';
 import { getDb, drinks, cafes } from '../db';
 import {
@@ -347,5 +347,182 @@ export async function deleteDrink(request: IRequest, env: Env): Promise<Response
   } catch (error) {
     console.error('Error deleting drink:', error);
     return errorResponse('Failed to delete drink', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
+  }
+}
+
+// GET /api/drinks - List all drinks with filtering and pagination
+export async function getDrinks(request: IRequest, env: Env): Promise<Response> {
+  try {
+    const url = new URL(request.url);
+    const cafeId = url.searchParams.get('cafeId');
+    const minScore = url.searchParams.get('minScore');
+    const maxPrice = url.searchParams.get('maxPrice');
+    const limit = parseInt(url.searchParams.get('limit') || '50');
+    const offset = parseInt(url.searchParams.get('offset') || '0');
+    const sort = url.searchParams.get('sort') || 'score';
+    const order = url.searchParams.get('order') || 'desc';
+
+    // Validate parameters
+    if (cafeId && isNaN(parseInt(cafeId))) {
+      return badRequestResponse('Invalid cafeId parameter', request as Request, env);
+    }
+    if (minScore && isNaN(parseFloat(minScore))) {
+      return badRequestResponse('Invalid minScore parameter', request as Request, env);
+    }
+    if (maxPrice && isNaN(parseFloat(maxPrice))) {
+      return badRequestResponse('Invalid maxPrice parameter', request as Request, env);
+    }
+    if (isNaN(limit) || limit < 1 || limit > 100) {
+      return badRequestResponse('Invalid limit parameter (1-100)', request as Request, env);
+    }
+    if (isNaN(offset) || offset < 0) {
+      return badRequestResponse('Invalid offset parameter', request as Request, env);
+    }
+    if (!['name', 'score', 'price', 'createdAt'].includes(sort)) {
+      return badRequestResponse('Invalid sort parameter', request as Request, env);
+    }
+    if (!['asc', 'desc'].includes(order)) {
+      return badRequestResponse('Invalid order parameter', request as Request, env);
+    }
+
+    const db = getDb(env.DB);
+
+    // Build the query with filters
+    let query = db
+      .select({
+        id: drinks.id,
+        name: drinks.name,
+        description: drinks.description,
+        score: drinks.score,
+        priceAmount: drinks.priceAmount,
+        price: drinks.priceAmount, // Alias for backward compatibility
+        priceCurrency: drinks.priceCurrency,
+        gramsUsed: drinks.gramsUsed,
+        isDefault: drinks.isDefault,
+        createdAt: drinks.createdAt,
+        updatedAt: drinks.updatedAt,
+        cafeId: drinks.cafeId,
+        cafe: {
+          id: cafes.id,
+          name: cafes.name,
+          slug: cafes.slug,
+          city: cafes.city,
+        },
+      })
+      .from(drinks)
+      .leftJoin(cafes, eq(drinks.cafeId, cafes.id));
+
+    // Apply filters
+    const conditions = [];
+    if (cafeId) {
+      conditions.push(eq(drinks.cafeId, parseInt(cafeId)));
+    }
+    if (minScore) {
+      conditions.push(sql`${drinks.score} >= ${parseFloat(minScore)}`);
+    }
+    if (maxPrice) {
+      conditions.push(sql`${drinks.priceAmount} <= ${parseFloat(maxPrice)}`);
+    }
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+
+    // Apply sorting
+    const sortColumn = sort === 'price' ? drinks.priceAmount : drinks[sort as keyof typeof drinks];
+    query = query.orderBy(order === 'desc' ? desc(sortColumn) : asc(sortColumn));
+
+    // Get total count for pagination
+    let countQuery = db
+      .select({ count: sql`COUNT(*)` })
+      .from(drinks)
+      .leftJoin(cafes, eq(drinks.cafeId, cafes.id));
+
+    if (conditions.length > 0) {
+      countQuery = countQuery.where(and(...conditions));
+    }
+
+    const [results, countResult] = await Promise.all([
+      query.limit(limit).offset(offset),
+      countQuery
+    ]);
+
+    const total = Number(countResult[0]?.count || 0);
+    const hasMore = offset + limit < total;
+
+    return jsonResponse(
+      {
+        drinks: results,
+        total,
+        hasMore,
+        pagination: {
+          limit,
+          offset,
+          total,
+        },
+      },
+      HTTP_STATUS.OK,
+      request as Request,
+      env,
+      CACHE_CONSTANTS.PUBLIC_CACHE
+    );
+  } catch (error) {
+    console.error('Error fetching drinks:', error);
+    return errorResponse('Failed to fetch drinks', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
+  }
+}
+
+// GET /api/drinks/:id - Get single drink with cafe information
+export async function getDrink(request: IRequest, env: Env): Promise<Response> {
+  try {
+    const drinkId = parseInt(request.params?.id || '');
+    if (isNaN(drinkId)) {
+      return badRequestResponse('Invalid drink ID', request as Request, env);
+    }
+
+    const db = getDb(env.DB);
+
+    const result = await db
+      .select({
+        id: drinks.id,
+        name: drinks.name,
+        description: drinks.description,
+        score: drinks.score,
+        priceAmount: drinks.priceAmount,
+        price: drinks.priceAmount, // Alias for backward compatibility
+        priceCurrency: drinks.priceCurrency,
+        gramsUsed: drinks.gramsUsed,
+        isDefault: drinks.isDefault,
+        createdAt: drinks.createdAt,
+        updatedAt: drinks.updatedAt,
+        cafeId: drinks.cafeId,
+        cafe: {
+          id: cafes.id,
+          name: cafes.name,
+          slug: cafes.slug,
+          city: cafes.city,
+          latitude: cafes.latitude,
+          longitude: cafes.longitude,
+        },
+      })
+      .from(drinks)
+      .leftJoin(cafes, eq(drinks.cafeId, cafes.id))
+      .where(eq(drinks.id, drinkId))
+      .limit(1);
+
+    if (result.length === 0) {
+      return notFoundResponse(request as Request, env);
+    }
+
+    return jsonResponse(
+      { drink: result[0] },
+      HTTP_STATUS.OK,
+      request as Request,
+      env,
+      CACHE_CONSTANTS.PUBLIC_CACHE
+    );
+  } catch (error) {
+    console.error('Error fetching drink:', error);
+    return errorResponse('Failed to fetch drink', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
   }
 }
