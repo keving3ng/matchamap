@@ -1,6 +1,6 @@
 import React from 'react'
 import { useNavigate, useLocation } from 'react-router'
-import { MapPin, List, User } from 'lucide-react'
+import { MapPin, List, User, Newspaper, Calendar } from 'lucide-react'
 import { getCurrentEnvironment } from '../hooks/useFeatureToggle'
 import { useAppFeatures } from '../hooks/useAppFeatures'
 
@@ -9,7 +9,7 @@ export const BottomNavigation: React.FC = () => {
   const location = useLocation()
   const currentEnv = getCurrentEnvironment()
 
-  const { isPassportEnabled, isEventsEnabled } = useAppFeatures()
+  const { isPassportEnabled, isFeedEnabled, isEventsEnabled } = useAppFeatures()
 
   // Check if admin banner is shown (only in dev mode)
   const hasAdminBanner = currentEnv === 'dev'
@@ -48,15 +48,17 @@ export const BottomNavigation: React.FC = () => {
           <List size={24} strokeWidth={currentView === 'list' ? 2.5 : 2} />
           <span className={`text-xs ${currentView === 'list' ? 'font-semibold' : ''}`}>List</span>
         </button>
-        <button
-          onClick={() => navigate('/feed')}
-          className={`flex flex-col items-center gap-1 transition ${
-            currentView === 'feed' ? 'text-green-600' : 'text-gray-400'
-          }`}
-        >
-          <span className="text-2xl">📰</span>
-          <span className={`text-xs ${currentView === 'feed' ? 'font-semibold' : ''}`}>Feed</span>
-        </button>
+        {isFeedEnabled && (
+          <button
+            onClick={() => navigate('/feed')}
+            className={`flex flex-col items-center gap-1 transition ${
+              currentView === 'feed' ? 'text-green-600' : 'text-gray-400'
+            }`}
+          >
+            <Newspaper size={24} strokeWidth={currentView === 'feed' ? 2.5 : 2} />
+            <span className={`text-xs ${currentView === 'feed' ? 'font-semibold' : ''}`}>Feed</span>
+          </button>
+        )}
         {isEventsEnabled && (
           <button
             onClick={() => navigate('/events')}
@@ -64,7 +66,7 @@ export const BottomNavigation: React.FC = () => {
               currentView === 'events' ? 'text-green-600' : 'text-gray-400'
             }`}
           >
-            <span className="text-2xl">🎪</span>
+            <Calendar size={24} strokeWidth={currentView === 'events' ? 2.5 : 2} />
             <span className={`text-xs ${currentView === 'events' ? 'font-semibold' : ''}`}>Events</span>
           </button>
         )}

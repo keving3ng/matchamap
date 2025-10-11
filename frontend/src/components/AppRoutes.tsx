@@ -77,7 +77,7 @@ const CafeDetailWrapper: React.FC = () => {
 }
 
 export const AppRoutes: React.FC = () => {
-  const { isEventsEnabled, isPassportEnabled } = useAppFeatures()
+  const { isFeedEnabled, isEventsEnabled, isPassportEnabled } = useAppFeatures()
   const isAdminEnabled = useFeatureToggle('ENABLE_ADMIN_PANEL')
   const isContactEnabled = useFeatureToggle('ENABLE_CONTACT')
   const isAboutEnabled = useFeatureToggle('ENABLE_ABOUT')
@@ -115,9 +115,11 @@ export const AppRoutes: React.FC = () => {
           onViewDetails={viewDetails}
         />
       } />
-      <Route path="/feed" element={
-        <FeedView feedItems={feedItems} />
-      } />
+      {isFeedEnabled && (
+        <Route path="/feed" element={
+          <FeedView feedItems={feedItems} />
+        } />
+      )}
       {isEventsEnabled && (
         <Route path="/events" element={
           <EventsView eventItems={eventItems} />
