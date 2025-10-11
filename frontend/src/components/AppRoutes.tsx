@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, Suspense } from 'react'
 import { Routes, Route, Navigate, useParams } from 'react-router'
 import MapView from './MapView'
 import ListView from './ListView'
@@ -13,18 +13,19 @@ import ContactPage from './ContactPage'
 import AboutPage from './AboutPage'
 import StorePage from './StorePage'
 import SettingsPage from './SettingsPage'
-import AdminLayout from './admin/AdminLayout'
-import FeatureTogglesPage from './admin/FeatureTogglesPage'
-import AdminSettingsPage from './admin/AdminSettingsPage'
-import CafeManagementPage from './admin/CafeManagementPage'
-import NewsfeedManagementPage from './admin/NewsfeedManagementPage'
-import EventManagementPage from './admin/EventManagementPage'
-import ApiManagementPage from './admin/ApiManagementPage'
-import UserManagementPage from './admin/UserManagementPage'
-import ProductsManagementPage from './admin/ProductsManagementPage'
-import MiscAdminPage from './admin/MiscAdminPage'
-import BulkImporterPage from './admin/BulkImporterPage'
-import WaitlistPage from './admin/WaitlistPage'
+// Lazy load admin components for better performance
+const AdminLayout = React.lazy(() => import('./admin/AdminLayout'))
+const FeatureTogglesPage = React.lazy(() => import('./admin/FeatureTogglesPage'))
+const AdminSettingsPage = React.lazy(() => import('./admin/AdminSettingsPage'))
+const CafeManagementPage = React.lazy(() => import('./admin/CafeManagementPage'))
+const NewsfeedManagementPage = React.lazy(() => import('./admin/NewsfeedManagementPage'))
+const EventManagementPage = React.lazy(() => import('./admin/EventManagementPage'))
+const ApiManagementPage = React.lazy(() => import('./admin/ApiManagementPage'))
+const UserManagementPage = React.lazy(() => import('./admin/UserManagementPage'))
+const ProductsManagementPage = React.lazy(() => import('./admin/ProductsManagementPage'))
+const MiscAdminPage = React.lazy(() => import('./admin/MiscAdminPage'))
+const BulkImporterPage = React.lazy(() => import('./admin/BulkImporterPage'))
+const WaitlistPage = React.lazy(() => import('./admin/WaitlistPage'))
 import { useFeatureToggle } from '../hooks/useFeatureToggle'
 import { useAppFeatures } from '../hooks/useAppFeatures'
 import { useDataStore } from '../stores/dataStore'
@@ -32,6 +33,22 @@ import { useCafeStore } from '../stores/cafeStore'
 import { useUIStore } from '../stores/uiStore'
 import { useVisitedCafesStore } from '../stores/visitedCafesStore'
 import { useCafeSelection } from '../hooks/useCafeSelection'
+import { Skeleton } from './ui/Skeleton'
+
+// Loading fallback component for admin pages
+const AdminLoadingFallback: React.FC = () => (
+  <div className="flex-1 overflow-y-auto p-6">
+    <div className="max-w-4xl mx-auto space-y-6">
+      <Skeleton variant="text" width="40%" height={32} className="mb-4" />
+      <div className="bg-white rounded-lg shadow p-6 space-y-4">
+        <Skeleton variant="rectangular" height={200} />
+        <Skeleton variant="text" width="60%" height={20} />
+        <Skeleton variant="text" width="80%" height={20} />
+        <Skeleton variant="text" width="40%" height={20} />
+      </div>
+    </div>
+  </div>
+)
 
 // Wrapper component for cafe detail view with URL params
 const CafeDetailWrapper: React.FC = () => {
@@ -137,81 +154,104 @@ export const AppRoutes: React.FC = () => {
       )}
       {isAdminEnabled && (
         <>
+          {/* Admin routes wrapped with Suspense for lazy loading */}
           <Route path="/admin" element={
             <ProtectedRoute requireAdmin={true}>
-              <AdminLayout>
-                <CafeManagementPage />
-              </AdminLayout>
+              <Suspense fallback={<AdminLoadingFallback />}>
+                <AdminLayout>
+                  <CafeManagementPage />
+                </AdminLayout>
+              </Suspense>
             </ProtectedRoute>
           } />
           <Route path="/admin/cafes" element={
             <ProtectedRoute requireAdmin={true}>
-              <AdminLayout>
-                <CafeManagementPage />
-              </AdminLayout>
+              <Suspense fallback={<AdminLoadingFallback />}>
+                <AdminLayout>
+                  <CafeManagementPage />
+                </AdminLayout>
+              </Suspense>
             </ProtectedRoute>
           } />
           <Route path="/admin/newsfeed" element={
             <ProtectedRoute requireAdmin={true}>
-              <AdminLayout>
-                <NewsfeedManagementPage />
-              </AdminLayout>
+              <Suspense fallback={<AdminLoadingFallback />}>
+                <AdminLayout>
+                  <NewsfeedManagementPage />
+                </AdminLayout>
+              </Suspense>
             </ProtectedRoute>
           } />
           <Route path="/admin/events" element={
             <ProtectedRoute requireAdmin={true}>
-              <AdminLayout>
-                <EventManagementPage />
-              </AdminLayout>
+              <Suspense fallback={<AdminLoadingFallback />}>
+                <AdminLayout>
+                  <EventManagementPage />
+                </AdminLayout>
+              </Suspense>
             </ProtectedRoute>
           } />
           <Route path="/admin/users" element={
             <ProtectedRoute requireAdmin={true}>
-              <AdminLayout>
-                <UserManagementPage />
-              </AdminLayout>
+              <Suspense fallback={<AdminLoadingFallback />}>
+                <AdminLayout>
+                  <UserManagementPage />
+                </AdminLayout>
+              </Suspense>
             </ProtectedRoute>
           } />
           <Route path="/admin/waitlist" element={
             <ProtectedRoute requireAdmin={true}>
-              <AdminLayout>
-                <WaitlistPage />
-              </AdminLayout>
+              <Suspense fallback={<AdminLoadingFallback />}>
+                <AdminLayout>
+                  <WaitlistPage />
+                </AdminLayout>
+              </Suspense>
             </ProtectedRoute>
           } />
           <Route path="/admin/products" element={
             <ProtectedRoute requireAdmin={true}>
-              <AdminLayout>
-                <ProductsManagementPage />
-              </AdminLayout>
+              <Suspense fallback={<AdminLoadingFallback />}>
+                <AdminLayout>
+                  <ProductsManagementPage />
+                </AdminLayout>
+              </Suspense>
             </ProtectedRoute>
           } />
           <Route path="/admin/api" element={
             <ProtectedRoute requireAdmin={true}>
-              <AdminLayout>
-                <ApiManagementPage />
-              </AdminLayout>
+              <Suspense fallback={<AdminLoadingFallback />}>
+                <AdminLayout>
+                  <ApiManagementPage />
+                </AdminLayout>
+              </Suspense>
             </ProtectedRoute>
           } />
           <Route path="/admin/misc" element={
             <ProtectedRoute requireAdmin={true}>
-              <AdminLayout>
-                <MiscAdminPage />
-              </AdminLayout>
+              <Suspense fallback={<AdminLoadingFallback />}>
+                <AdminLayout>
+                  <MiscAdminPage />
+                </AdminLayout>
+              </Suspense>
             </ProtectedRoute>
           } />
           <Route path="/admin/import" element={
             <ProtectedRoute requireAdmin={true}>
-              <AdminLayout>
-                <BulkImporterPage />
-              </AdminLayout>
+              <Suspense fallback={<AdminLoadingFallback />}>
+                <AdminLayout>
+                  <BulkImporterPage />
+                </AdminLayout>
+              </Suspense>
             </ProtectedRoute>
           } />
           <Route path="/admin/settings" element={
             <ProtectedRoute requireAdmin={true}>
-              <AdminLayout>
-                <AdminSettingsPage />
-              </AdminLayout>
+              <Suspense fallback={<AdminLoadingFallback />}>
+                <AdminLayout>
+                  <AdminSettingsPage />
+                </AdminLayout>
+              </Suspense>
             </ProtectedRoute>
           } />
         </>
