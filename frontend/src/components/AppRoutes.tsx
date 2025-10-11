@@ -80,16 +80,37 @@ const CafeDetailWrapper: React.FC = () => {
 
 // Wrapper component for event detail view with URL params
 const EventDetailWrapper: React.FC = () => {
-  const { slug } = useParams<{ slug: string }>()
-  const { eventItems } = useDataStore()
+  const { id } = useParams<{ id: string }>()
+  const { eventItems, eventsFetched, isLoading, fetchEvents } = useDataStore()
 
-  // Find event by slug
-  const event = eventItems.find(e => {
-    // Create slug from event title for comparison
-    const eventSlug = e.title.toLowerCase().replace(/\s+/g, '-')
-    return eventSlug === slug
-  })
+  // Fetch events if not already fetched
+  useEffect(() => {
+    if (!eventsFetched && !isLoading) {
+      fetchEvents()
+    }
+  }, [eventsFetched, isLoading, fetchEvents])
 
+  // Find event by ID
+  const eventId = parseInt(id || '', 10)
+  const event = eventItems.find(e => e.id === eventId)
+
+  // Show loading state while events are being fetched
+  if (!eventsFetched || isLoading) {
+    return (
+      <div className="flex-1 overflow-y-auto pb-24 pt-0">
+        <Skeleton variant="rectangular" height={224} className="mb-4" />
+        <div className="px-4 max-w-2xl mx-auto">
+          <Skeleton variant="text" width="80%" height={32} className="mb-4" />
+          <Skeleton variant="rectangular" height={200} className="mb-4" />
+          <Skeleton variant="text" width="100%" height={20} className="mb-2" />
+          <Skeleton variant="text" width="100%" height={20} className="mb-2" />
+          <Skeleton variant="text" width="60%" height={20} />
+        </div>
+      </div>
+    )
+  }
+
+  // If events are loaded but event not found, redirect to events list
   if (!event) {
     return <Navigate to="/events" replace />
   }
@@ -160,7 +181,7 @@ export const AppRoutes: React.FC = () => {
           <Route path="/events" element={
             <EventsView eventItems={eventItems} />
           } />
-          <Route path="/events/:slug" element={<EventDetailWrapper />} />
+          <Route path="/events/:id" element={<EventDetailWrapper />} />
         </>
       )}
       {isPassportEnabled && (

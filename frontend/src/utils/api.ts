@@ -258,14 +258,14 @@ export const eventsAPI = {
     published?: boolean
     limit?: number
     offset?: number
-  }): Promise<{ events: Event[]; hasMore: boolean }> {
+  }, bustCache = false): Promise<{ events: Event[]; hasMore: boolean }> {
     const params = new URLSearchParams()
     if (filters?.published !== undefined) params.append('published', filters.published.toString())
     if (filters?.limit) params.append('limit', filters.limit.toString())
     if (filters?.offset) params.append('offset', filters.offset.toString())
 
     const query = params.toString() ? `?${params.toString()}` : ''
-    return fetchAPI(`/admin/events${query}`)
+    return fetchAPI(`/admin/events${query}`, { bustCache })
   },
 
   /**

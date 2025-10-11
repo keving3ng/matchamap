@@ -130,6 +130,7 @@ export const useDataStore = create<DataStore>((set, get) => ({
         description: event.description,
         image: event.image || '',
         price: event.price || '',
+        cafeId: event.cafeId || null,
         featured: event.featured || false,
         published: event.published !== false, // Default to true if not specified
       }))
