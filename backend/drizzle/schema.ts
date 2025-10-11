@@ -108,7 +108,7 @@ export const events = sqliteTable('events', {
   cafeId: integer('cafe_id').references(() => cafes.id),
 
   description: text('description').notNull(),
-  image: text('image'),
+  link: text('link'), // Instagram handle or post link
   price: text('price'),
 
   featured: integer('featured', { mode: 'boolean' }).default(false),

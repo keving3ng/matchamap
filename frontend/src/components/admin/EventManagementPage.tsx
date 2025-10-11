@@ -22,7 +22,7 @@ export const EventManagementPage: React.FC = () => {
     location: '',
     description: '',
     price: '',
-    image: '',
+    link: '',
     cafeId: null,
     featured: false,
     published: true,
@@ -57,7 +57,7 @@ export const EventManagementPage: React.FC = () => {
       location: '',
       description: '',
       price: '',
-      image: '',
+      link: '',
       cafeId: null,
       featured: false,
       published: true,
@@ -196,21 +196,21 @@ export const EventManagementPage: React.FC = () => {
   )
 
   // Helper function to get Instagram URL from handle or post link
-  const getInstagramUrl = (image: string | null | undefined): string | null => {
-    if (!image) return null
+  const getInstagramUrl = (link: string | null | undefined): string | null => {
+    if (!link) return null
 
     // Check if it's already a full URL
-    if (image.startsWith('http')) {
-      return image
+    if (link.startsWith('http')) {
+      return link
     }
 
     // Check if it's an Instagram handle (starts with @)
-    if (image.startsWith('@')) {
-      return `https://instagram.com/${image.replace('@', '')}`
+    if (link.startsWith('@')) {
+      return `https://instagram.com/${link.replace('@', '')}`
     }
 
     // Assume it's a handle without @
-    return `https://instagram.com/${image}`
+    return `https://instagram.com/${link}`
   }
 
   // Preview Modal Component
@@ -247,9 +247,9 @@ export const EventManagementPage: React.FC = () => {
               <div className="p-4">
                 <div className="flex items-start gap-4">
                   {/* Instagram link icon or emoji */}
-                  {previewEvent.image && getInstagramUrl(previewEvent.image) && (
+                  {previewEvent.link && getInstagramUrl(previewEvent.link) && (
                     <a
-                      href={getInstagramUrl(previewEvent.image)!}
+                      href={getInstagramUrl(previewEvent.link)!}
                       target="_blank"
                       rel="noopener noreferrer"
                       className={`w-16 h-16 bg-gradient-to-br ${
@@ -433,8 +433,8 @@ export const EventManagementPage: React.FC = () => {
                   </label>
                   <input
                     type="text"
-                    value={formData.image || ''}
-                    onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                    value={formData.link || ''}
+                    onChange={(e) => setFormData({ ...formData, link: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder={COPY.admin.eventManagement.linkFieldPlaceholder}
                   />

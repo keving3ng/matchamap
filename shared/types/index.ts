@@ -155,7 +155,7 @@ export interface Event {
   location: string
   venue: string
   description: string
-  image?: string | null
+  link?: string | null // Instagram handle or post link
   price?: string | null
   featured: boolean
   published: boolean
