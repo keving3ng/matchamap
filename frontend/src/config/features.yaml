@@ -10,8 +10,8 @@ ENABLE_PASSPORT:
 # News Feed - Updates and announcements
 # Displays latest cafe additions, score updates, and matcha-related announcements
 ENABLE_FEED:
-  dev: true
-  prod: true
+  dev: false
+  prod: false
 
 # Search Functionality
 # Allows users to search for cafes by name, neighborhood, or other criteria
@@ -42,7 +42,7 @@ SHOW_COMING_SOON:
 # Displays upcoming matcha-related events, workshops, and festivals in Toronto
 ENABLE_EVENTS:
   dev: true
-  prod: false
+  prod: true
 
 # Hamburger Menu
 # Top-right navigation menu for additional features and settings
