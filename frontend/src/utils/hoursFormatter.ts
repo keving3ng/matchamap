@@ -52,7 +52,10 @@ export function formatHoursCompact(hours: string | null | undefined): HoursData 
  */
 function parseTime(timeStr: string): number | null {
   const match = timeStr.trim().match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i)
-  if (!match) return null
+  if (!match) {
+    console.warn(`Failed to parse time: "${timeStr}"`)
+    return null
+  }
 
   let hours = parseInt(match[1], 10)
   const minutes = parseInt(match[2], 10)
@@ -76,7 +79,10 @@ export function isCurrentlyOpen(hours: string | null | undefined): boolean | nul
 
   try {
     const hoursData = formatHoursCompact(hours)
-    if (!hoursData?.todayHours) return null
+    if (!hoursData?.todayHours) {
+      console.warn('No hours data for today:', hours)
+      return null
+    }
 
     // Check if today shows "Closed"
     if (hoursData.todayHours.toLowerCase().includes('closed')) {
@@ -98,13 +104,20 @@ export function isCurrentlyOpen(hours: string | null | undefined): boolean | nul
 
     // Check if current time falls within any of the ranges
     for (const range of ranges) {
-      const rangeParts = range.split('–').map(s => s.trim())
-      if (rangeParts.length !== 2) continue
+      // Handle all Unicode dash variations: – (en-dash), — (em-dash), - (hyphen), − (minus)
+      const rangeParts = range.split(/[–—\-−]/).map(s => s.trim())
+      if (rangeParts.length !== 2) {
+        console.warn('Invalid time range format:', range, 'from', hoursData.todayHours)
+        continue
+      }
 
       const openTime = parseTime(rangeParts[0])
       const closeTime = parseTime(rangeParts[1])
 
-      if (openTime === null || closeTime === null) continue
+      if (openTime === null || closeTime === null) {
+        console.warn('Failed to parse times:', rangeParts, 'from', hoursData.todayHours)
+        continue
+      }
 
       // Handle cases where closing time is past midnight (rare for cafes but possible)
       if (closeTime < openTime) {
@@ -122,7 +135,8 @@ export function isCurrentlyOpen(hours: string | null | undefined): boolean | nul
 
     // Not within any time range
     return false
-  } catch {
+  } catch (error) {
+    console.error('Error in isCurrentlyOpen:', error, 'Hours:', hours)
     return null
   }
 }
