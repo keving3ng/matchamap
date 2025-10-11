@@ -33,8 +33,8 @@ export const COPY = {
   // Map View
   map: {
     directions: 'Directions',
-    viewDetails: 'View Details',
-    viewFullDetails: 'View Full Details',
+    viewDetails: 'Details',
+    viewFullDetails: 'Details',
     getDirections: 'Get Directions',
     backToMap: 'Back to Map',
     enableLocationServices: 'Enable location services',
@@ -422,7 +422,7 @@ export const COPY = {
       deleteSuccess: 'User deleted successfully',
       deleteError: 'Failed to delete user',
       loadError: 'Failed to load users',
-      viewDetails: 'View Details',
+      viewDetails: 'Details',
       makeAdmin: 'Make Admin',
       makeUser: 'Make User',
       deleteUser: 'Delete User',
