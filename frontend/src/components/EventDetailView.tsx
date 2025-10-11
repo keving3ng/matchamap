@@ -26,7 +26,7 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({ event }) => {
     return null
   }, [event.cafeId, cafesWithDistance])
 
-  const instagramUrl = getInstagramUrl(event.image)
+  const instagramUrl = getInstagramUrl(event.link)
 
   const handleViewCafe = () => {
     if (linkedCafe) {

@@ -102,9 +102,9 @@ export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
             <div className="p-4">
               <div className="flex items-start gap-4">
                 {/* Instagram link icon or emoji */}
-                {event.image && getInstagramUrl(event.image) && (
+                {event.link && getInstagramUrl(event.link) && (
                   <a
-                    href={getInstagramUrl(event.image)!}
+                    href={getInstagramUrl(event.link)!}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={`w-16 h-16 bg-gradient-to-br ${
@@ -212,9 +212,9 @@ export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
                         <div className="p-4">
                           <div className="flex items-start gap-4">
                             {/* Instagram link icon or emoji */}
-                            {event.image && getInstagramUrl(event.image) && (
+                            {event.link && getInstagramUrl(event.link) && (
                               <a
-                                href={getInstagramUrl(event.image)!}
+                                href={getInstagramUrl(event.link)!}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="w-16 h-16 bg-gradient-to-br from-gray-400 to-gray-500 rounded-xl flex items-center justify-center text-4xl flex-shrink-0 shadow-md hover:scale-105 transition-transform"
