@@ -721,7 +721,6 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                   {/* Hours */}
                   {cafe.hours && (() => {
                     const hoursData = formatHoursCompact(cafe.hours)
-                    const cafeIsOpen = isCurrentlyOpen(cafe.hours)
 
                     if (hoursData?.todayHours) {
                       // Extract just the time portion after the colon
@@ -733,18 +732,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                           <div className="flex items-start gap-2.5">
                             <Clock size={18} className="text-matcha-600 mt-0.5 flex-shrink-0" />
                             <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="text-sm font-bold text-charcoal-900">{COPY.map.today}</span>
-                                {cafeIsOpen !== null && (
-                                  <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
-                                    cafeIsOpen
-                                      ? 'bg-green-100 text-green-700'
-                                      : 'bg-gray-100 text-gray-600'
-                                  }`}>
-                                    {cafeIsOpen ? COPY.map.openNow : COPY.map.closedNow}
-                                  </span>
-                                )}
-                              </div>
+                              <span className="text-sm font-bold text-charcoal-900 block mb-1">{COPY.map.today}</span>
                               <p className="text-sm font-medium text-gray-700">{hoursText}</p>
                             </div>
                           </div>

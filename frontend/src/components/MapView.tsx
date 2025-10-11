@@ -1,7 +1,6 @@
 import React from 'react'
 import { MapPin, Navigation, Crosshair, Coffee, Star, Building2, ChevronDown, Route, Instagram } from 'lucide-react'
 import { TikTokIcon } from './TikTokIcon'
-import { StatusBadge } from './ui'
 import { useLeafletMap } from '../hooks/useLeafletMap'
 import { useGeolocation } from '../hooks/useGeolocation'
 import { useVisitedCafes } from '../hooks/useVisitedCafes'
@@ -405,18 +404,9 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
 
             <div className="flex justify-between items-start mb-1.5">
               <div className="flex-1 mr-2">
-                <div className="flex items-center gap-2 mb-0.5">
-                  <h3 className="font-bold text-lg text-gray-800">{selectedCafe.name}</h3>
-                  {(() => {
-                    const cafeIsOpen = isCurrentlyOpen(selectedCafe.hours)
-                    if (cafeIsOpen === false) {
-                      return <StatusBadge variant="error">{COPY.map.closedNow}</StatusBadge>
-                    }
-                    return null
-                  })()}
-                </div>
+                <h3 className="font-bold text-lg text-gray-800 mb-0.5">{selectedCafe.name}</h3>
                 {selectedCafe.address && (
-                  <a 
+                  <a
                     href={mapsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -596,18 +586,9 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
               {/* Header */}
               <div className="flex justify-between items-start">
                 <div className="flex-1 mr-4">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-bold text-xl text-gray-800">{selectedCafe.name}</h3>
-                    {(() => {
-                      const cafeIsOpen = isCurrentlyOpen(selectedCafe.hours)
-                      if (cafeIsOpen === false) {
-                        return <StatusBadge variant="error">{COPY.map.closedNow}</StatusBadge>
-                      }
-                      return null
-                    })()}
-                  </div>
+                  <h3 className="font-bold text-xl text-gray-800 mb-1">{selectedCafe.name}</h3>
                   {selectedCafe.address && (
-                    <a 
+                    <a
                       href={mapsUrl}
                       target="_blank"
                       rel="noopener noreferrer"

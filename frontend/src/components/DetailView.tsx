@@ -1,12 +1,10 @@
 import React, { useState } from 'react'
 import { MapPin, Navigation, Heart, CheckCircle, Instagram, ChevronDown, ChevronUp, Star, Coffee, MessageSquare, Clock, Lightbulb } from 'lucide-react'
 import { TikTokIcon } from './TikTokIcon'
-import { StatusBadge } from './ui'
 import { useAppFeatures } from '../hooks/useAppFeatures'
 import { getMapsUrl } from '../utils/mapsUrl'
 import { ContentContainer } from './ContentContainer'
 import { formatHoursCompact } from '../utils/formatHours'
-import { isCurrentlyOpen } from '../utils/hoursFormatter'
 import { sanitizeText } from '../utils/sanitize'
 import { COPY } from '../constants/copy'
 import type { DetailViewProps } from '../types'
@@ -40,16 +38,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
         <div className="bg-white rounded-2xl shadow-xl -mt-8 p-6 border-2 border-matcha-200 relative z-10 animate-slide-up">
           <div className="flex justify-between items-start mb-4">
             <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <h2 className="text-2xl font-bold text-charcoal-900">{sanitizeText(cafe.name)}</h2>
-                {(() => {
-                  const cafeIsOpen = isCurrentlyOpen(cafe.hours)
-                  if (cafeIsOpen === false) {
-                    return <StatusBadge variant="error">{COPY.detail.closedNow}</StatusBadge>
-                  }
-                  return null
-                })()}
-              </div>
+              <h2 className="text-2xl font-bold text-charcoal-900 mb-1">{sanitizeText(cafe.name)}</h2>
               {cafe.city && (
                 <div className="flex items-center gap-1.5">
                   <div className="w-1.5 h-1.5 bg-matcha-500 rounded-full"></div>
