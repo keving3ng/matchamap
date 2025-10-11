@@ -357,6 +357,20 @@ export const COPY = {
     stats: 'Analytics',
     users: 'Users',
     settings: 'Settings',
+    // Error Boundaries
+    errorBoundary: {
+      title: 'Something went wrong in the admin panel',
+      description: "Don't worry - your data is safe. You can try refreshing or go back to continue working.",
+      tryAgain: 'Try Again',
+      goBack: 'Go Back',
+      showDetails: 'Show Technical Details',
+      hideDetails: 'Hide Technical Details',
+      copyReport: 'Copy Error Report',
+      reportIssue: 'Report Issue',
+      helpText: 'If this error persists, please copy the error report and contact the development team.',
+      componentError: (componentName: string) => `${componentName} Error`,
+      componentErrorDescription: 'This component encountered an error and couldn\'t load properly. You can try refreshing this section.',
+    },
 
     // Cafe Editor
     cafeEditor: {

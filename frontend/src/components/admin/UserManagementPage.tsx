@@ -3,6 +3,7 @@ import { Users, Search, Filter, Trash2, Shield, Mail, CheckCircle, XCircle, Eye,
 import { api, type AdminUserListItem, type AdminUserStats } from '../../utils/api'
 import { useAuthStore } from '../../stores/authStore'
 import { UserDetailModal } from './UserDetailModal'
+import { ComponentErrorBoundary } from './ComponentErrorBoundary'
 import { AlertDialog } from '../../components/ui'
 import { COPY } from '../../constants/copy'
 import { formatDate, formatRelativeTime } from '../../utils/dateFormatter'
@@ -378,10 +379,12 @@ export const UserManagementPage: React.FC = () => {
 
       {/* User Detail Modal */}
       {viewingUserId && (
-        <UserDetailModal
-          userId={viewingUserId}
-          onClose={() => setViewingUserId(null)}
-        />
+        <ComponentErrorBoundary componentName="User Detail Modal">
+          <UserDetailModal
+            userId={viewingUserId}
+            onClose={() => setViewingUserId(null)}
+          />
+        </ComponentErrorBoundary>
       )}
       
       {/* Error Alert Dialog */}

@@ -15,6 +15,7 @@ import StorePage from './StorePage'
 import SettingsPage from './SettingsPage'
 // Lazy load admin components for better performance
 const AdminLayout = React.lazy(() => import('./admin/AdminLayout'))
+const AdminErrorBoundary = React.lazy(() => import('./admin/AdminErrorBoundary'))
 const FeatureTogglesPage = React.lazy(() => import('./admin/FeatureTogglesPage'))
 const AdminSettingsPage = React.lazy(() => import('./admin/AdminSettingsPage'))
 const CafeManagementPage = React.lazy(() => import('./admin/CafeManagementPage'))
@@ -156,103 +157,125 @@ export const AppRoutes: React.FC = () => {
       )}
       {isAdminEnabled && (
         <>
-          {/* Admin routes wrapped with Suspense for lazy loading */}
+          {/* Admin routes wrapped with Suspense for lazy loading and error boundaries */}
           <Route path="/admin" element={
             <ProtectedRoute requireAdmin={true}>
               <Suspense fallback={<AdminLoadingFallback />}>
-                <AdminLayout>
-                  <CafeManagementPage />
-                </AdminLayout>
+                <AdminErrorBoundary>
+                  <AdminLayout>
+                    <CafeManagementPage />
+                  </AdminLayout>
+                </AdminErrorBoundary>
               </Suspense>
             </ProtectedRoute>
           } />
           <Route path="/admin/cafes" element={
             <ProtectedRoute requireAdmin={true}>
               <Suspense fallback={<AdminLoadingFallback />}>
-                <AdminLayout>
-                  <CafeManagementPage />
-                </AdminLayout>
+                <AdminErrorBoundary>
+                  <AdminLayout>
+                    <CafeManagementPage />
+                  </AdminLayout>
+                </AdminErrorBoundary>
               </Suspense>
             </ProtectedRoute>
           } />
           <Route path="/admin/newsfeed" element={
             <ProtectedRoute requireAdmin={true}>
               <Suspense fallback={<AdminLoadingFallback />}>
-                <AdminLayout>
-                  <NewsfeedManagementPage />
-                </AdminLayout>
+                <AdminErrorBoundary>
+                  <AdminLayout>
+                    <NewsfeedManagementPage />
+                  </AdminLayout>
+                </AdminErrorBoundary>
               </Suspense>
             </ProtectedRoute>
           } />
           <Route path="/admin/events" element={
             <ProtectedRoute requireAdmin={true}>
               <Suspense fallback={<AdminLoadingFallback />}>
-                <AdminLayout>
-                  <EventManagementPage />
-                </AdminLayout>
+                <AdminErrorBoundary>
+                  <AdminLayout>
+                    <EventManagementPage />
+                  </AdminLayout>
+                </AdminErrorBoundary>
               </Suspense>
             </ProtectedRoute>
           } />
           <Route path="/admin/users" element={
             <ProtectedRoute requireAdmin={true}>
               <Suspense fallback={<AdminLoadingFallback />}>
-                <AdminLayout>
-                  <UserManagementPage />
-                </AdminLayout>
+                <AdminErrorBoundary>
+                  <AdminLayout>
+                    <UserManagementPage />
+                  </AdminLayout>
+                </AdminErrorBoundary>
               </Suspense>
             </ProtectedRoute>
           } />
           <Route path="/admin/waitlist" element={
             <ProtectedRoute requireAdmin={true}>
               <Suspense fallback={<AdminLoadingFallback />}>
-                <AdminLayout>
-                  <WaitlistPage />
-                </AdminLayout>
+                <AdminErrorBoundary>
+                  <AdminLayout>
+                    <WaitlistPage />
+                  </AdminLayout>
+                </AdminErrorBoundary>
               </Suspense>
             </ProtectedRoute>
           } />
           <Route path="/admin/products" element={
             <ProtectedRoute requireAdmin={true}>
               <Suspense fallback={<AdminLoadingFallback />}>
-                <AdminLayout>
-                  <ProductsManagementPage />
-                </AdminLayout>
+                <AdminErrorBoundary>
+                  <AdminLayout>
+                    <ProductsManagementPage />
+                  </AdminLayout>
+                </AdminErrorBoundary>
               </Suspense>
             </ProtectedRoute>
           } />
           <Route path="/admin/api" element={
             <ProtectedRoute requireAdmin={true}>
               <Suspense fallback={<AdminLoadingFallback />}>
-                <AdminLayout>
-                  <ApiManagementPage />
-                </AdminLayout>
+                <AdminErrorBoundary>
+                  <AdminLayout>
+                    <ApiManagementPage />
+                  </AdminLayout>
+                </AdminErrorBoundary>
               </Suspense>
             </ProtectedRoute>
           } />
           <Route path="/admin/misc" element={
             <ProtectedRoute requireAdmin={true}>
               <Suspense fallback={<AdminLoadingFallback />}>
-                <AdminLayout>
-                  <MiscAdminPage />
-                </AdminLayout>
+                <AdminErrorBoundary>
+                  <AdminLayout>
+                    <MiscAdminPage />
+                  </AdminLayout>
+                </AdminErrorBoundary>
               </Suspense>
             </ProtectedRoute>
           } />
           <Route path="/admin/import" element={
             <ProtectedRoute requireAdmin={true}>
               <Suspense fallback={<AdminLoadingFallback />}>
-                <AdminLayout>
-                  <BulkImporterPage />
-                </AdminLayout>
+                <AdminErrorBoundary>
+                  <AdminLayout>
+                    <BulkImporterPage />
+                  </AdminLayout>
+                </AdminErrorBoundary>
               </Suspense>
             </ProtectedRoute>
           } />
           <Route path="/admin/settings" element={
             <ProtectedRoute requireAdmin={true}>
               <Suspense fallback={<AdminLoadingFallback />}>
-                <AdminLayout>
-                  <AdminSettingsPage />
-                </AdminLayout>
+                <AdminErrorBoundary>
+                  <AdminLayout>
+                    <AdminSettingsPage />
+                  </AdminLayout>
+                </AdminErrorBoundary>
               </Suspense>
             </ProtectedRoute>
           } />
