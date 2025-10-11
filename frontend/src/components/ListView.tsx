@@ -675,7 +675,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                   onClick={() => onViewDetails(cafe)}
                   className="flex-1 min-w-[120px] bg-gradient-to-r from-matcha-600 to-matcha-500 text-white py-2.5 px-4 rounded-xl font-semibold hover:from-matcha-700 hover:to-matcha-600 transition-all duration-200 shadow-md hover:shadow-lg active:scale-[0.98] text-sm flex items-center justify-center gap-1.5"
                 >
-                  <span>View Details</span>
+                  <span>{COPY.map.viewDetails}</span>
                   <ChevronDown size={14} className="-rotate-90" />
                 </button>
 
