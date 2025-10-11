@@ -5,6 +5,7 @@ import { api } from '../../utils/api'
 import { CafeForm } from './CafeForm'
 import { CafeFormWizard } from './CafeFormWizard'
 import { DrinksManagement } from './DrinksManagement'
+import { ComponentErrorBoundary } from './ComponentErrorBoundary'
 import { IconButton } from '../ui'
 import { COPY } from '../../constants/copy'
 import { OPTIONAL_CAFE_FIELDS, type OptionalCafeField } from '../../constants/cafeFields'
@@ -348,25 +349,31 @@ export const CafeManagementPage: React.FC = () => {
 
       {/* Cafe Form Modal - Use wizard for adding, regular form for editing */}
       {showForm && editingCafe === null ? (
-        <CafeFormWizard
-          onSave={handleSaveCafe}
-          onCancel={() => setShowForm(false)}
-        />
+        <ComponentErrorBoundary componentName="Cafe Creation Wizard">
+          <CafeFormWizard
+            onSave={handleSaveCafe}
+            onCancel={() => setShowForm(false)}
+          />
+        </ComponentErrorBoundary>
       ) : showForm && editingCafe ? (
-        <CafeForm
-          cafe={editingCafe}
-          onSave={handleSaveCafe}
-          onCancel={() => setShowForm(false)}
-        />
+        <ComponentErrorBoundary componentName="Cafe Editor">
+          <CafeForm
+            cafe={editingCafe}
+            onSave={handleSaveCafe}
+            onCancel={() => setShowForm(false)}
+          />
+        </ComponentErrorBoundary>
       ) : null}
 
       {/* Drinks Management Modal */}
       {managingDrinksCafe && (
-        <DrinksManagement
-          cafeId={managingDrinksCafe.id}
-          cafeName={managingDrinksCafe.name}
-          onClose={() => setManagingDrinksCafe(null)}
-        />
+        <ComponentErrorBoundary componentName="Drinks Management">
+          <DrinksManagement
+            cafeId={managingDrinksCafe.id}
+            cafeName={managingDrinksCafe.name}
+            onClose={() => setManagingDrinksCafe(null)}
+          />
+        </ComponentErrorBoundary>
       )}
     </div>
   )
