@@ -125,6 +125,46 @@ export const eventSchema = z.object({
 
 export const updateEventSchema = eventSchema.partial();
 
+// Enhanced drink schemas (replacing the existing ones above)
+export const createDrinkRequestSchema = z.object({
+  name: z.string().min(1, 'Name is required').max(255, 'Name too long').optional().nullable(),
+  score: z.number().min(0, 'Score must be at least 0').max(100, 'Score must be at most 100'),
+  priceAmount: z.number().min(0, 'Price cannot be negative').optional().nullable(),
+  priceCurrency: z.string().max(10, 'Currency code too long').optional().nullable(),
+  gramsUsed: z.number().min(0, 'Grams used cannot be negative').optional().nullable(),
+  isDefault: z.boolean().default(false),
+  notes: z.string().max(1000, 'Notes too long').optional().nullable(),
+});
+
+export const updateDrinkRequestSchema = z.object({
+  name: z.string().min(1, 'Name is required').max(255, 'Name too long').optional().nullable(),
+  score: z.number().min(0, 'Score must be at least 0').max(100, 'Score must be at most 100').optional(),
+  priceAmount: z.number().min(0, 'Price cannot be negative').optional().nullable(),
+  priceCurrency: z.string().max(10, 'Currency code too long').optional().nullable(),
+  gramsUsed: z.number().min(0, 'Grams used cannot be negative').optional().nullable(),
+  isDefault: z.boolean().optional(),
+  notes: z.string().max(1000, 'Notes too long').optional().nullable(),
+});
+
+export const getDrinksQuerySchema = z.object({
+  cafeId: z.coerce.number().int().positive().optional(),
+  minScore: z.coerce.number().min(0).max(100).optional(),
+  maxPrice: z.coerce.number().min(0).optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(50),
+  offset: z.coerce.number().int().min(0).default(0),
+  sort: z.enum(['name', 'score', 'price', 'createdAt'], {
+    errorMap: () => ({ message: 'Sort must be one of: name, score, price, createdAt' }),
+  }).default('score'),
+  order: z.enum(['asc', 'desc'], {
+    errorMap: () => ({ message: 'Order must be either asc or desc' }),
+  }).default('desc'),
+});
+
+// Places schemas
+export const lookupPlaceRequestSchema = z.object({
+  googleMapsUrl: z.string().url('Invalid URL format').min(1, 'Google Maps URL is required'),
+});
+
 // Query parameter schemas
 export const listCafesQuerySchema = z.object({
   city: citySchema.optional(),
