@@ -2,6 +2,7 @@ import { IRequest } from 'itty-router';
 import { Env } from '../types';
 import { jsonResponse, errorResponse, badRequestResponse } from '../utils/response';
 import { HTTP_STATUS, CACHE_CONSTANTS } from '../constants';
+import { safeValidate, lookupPlaceRequestSchema } from '../validators';
 
 /**
  * Extract place ID from various Google Maps URL formats
@@ -57,18 +58,17 @@ function extractPlaceIdFromUrl(url: string): string | null {
  * POST /api/admin/places/lookup
  * Look up a place from Google Maps URL and return structured data
  */
-interface LookupPlaceBody {
-  googleMapsUrl: string;
-}
-
 export async function lookupPlace(request: IRequest, env: Env): Promise<Response> {
   try {
-    const body = await request.json() as LookupPlaceBody;
-    const { googleMapsUrl } = body;
+    const body = await request.json();
 
-    if (!googleMapsUrl) {
-      return badRequestResponse('Google Maps URL is required', request as Request, env);
+    // Validate input using Zod schema
+    const validation = safeValidate(lookupPlaceRequestSchema, body);
+    if (!validation.success) {
+      return badRequestResponse(validation.error, request as Request, env);
     }
+
+    const { googleMapsUrl } = validation.data;
 
     // Extract place ID from URL
     const placeId = extractPlaceIdFromUrl(googleMapsUrl);

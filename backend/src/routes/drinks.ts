@@ -11,6 +11,12 @@ import {
 import { HTTP_STATUS, CACHE_CONSTANTS } from '../constants';
 import { logAdminAction, generateChangesSummary } from '../utils/auditLog';
 import { AuthenticatedRequest } from '../middleware/auth';
+import { 
+  safeValidate, 
+  createDrinkRequestSchema, 
+  updateDrinkRequestSchema, 
+  getDrinksQuerySchema 
+} from '../validators';
 
 // GET /api/admin/cafes/:cafeId/drinks - List drinks for a cafe
 export async function listDrinks(request: IRequest, env: Env): Promise<Response> {
@@ -61,15 +67,18 @@ export async function createDrink(request: IRequest, env: Env): Promise<Response
       return badRequestResponse('Invalid cafe ID', request as Request, env);
     }
 
-    const body = await request.json() as any;
+    const body = await request.json();
 
-    // Validation - only score is required
-    if (body.score === undefined || body.score === null) {
-      return badRequestResponse('Score is required', request as Request, env);
+    // Validate input using Zod schema
+    const validation = safeValidate(createDrinkRequestSchema, body);
+    if (!validation.success) {
+      return badRequestResponse(validation.error, request as Request, env);
     }
 
+    const validatedData = validation.data;
+
     // Default name to "Iced Matcha Latte" if not provided
-    const drinkName = body.name || 'Iced Matcha Latte';
+    const drinkName = validatedData.name || 'Iced Matcha Latte';
 
     const db = getDb(env.DB);
 
@@ -85,7 +94,7 @@ export async function createDrink(request: IRequest, env: Env): Promise<Response
     }
 
     // If this is set as default, unset other defaults
-    if (body.isDefault) {
+    if (validatedData.isDefault) {
       await db
         .update(drinks)
         .set({ isDefault: false })
@@ -95,12 +104,12 @@ export async function createDrink(request: IRequest, env: Env): Promise<Response
     const drinkData = {
       cafeId,
       name: drinkName,
-      score: body.score,
-      priceAmount: body.priceAmount || null,
-      priceCurrency: body.priceCurrency || null,
-      gramsUsed: body.gramsUsed || null,
-      isDefault: body.isDefault || false,
-      notes: body.notes || null,
+      score: validatedData.score,
+      priceAmount: validatedData.priceAmount || null,
+      priceCurrency: validatedData.priceCurrency || null,
+      gramsUsed: validatedData.gramsUsed || null,
+      isDefault: validatedData.isDefault || false,
+      notes: validatedData.notes || null,
     };
 
     const newDrink = await db
@@ -138,7 +147,15 @@ export async function updateDrink(request: IRequest, env: Env): Promise<Response
       return badRequestResponse('Invalid drink ID', request as Request, env);
     }
 
-    const body = await request.json() as any;
+    const body = await request.json();
+
+    // Validate input using Zod schema
+    const validation = safeValidate(updateDrinkRequestSchema, body);
+    if (!validation.success) {
+      return badRequestResponse(validation.error, request as Request, env);
+    }
+
+    const validatedData = validation.data;
     const db = getDb(env.DB);
 
     // Check if drink exists and get cafe ID
@@ -156,7 +173,7 @@ export async function updateDrink(request: IRequest, env: Env): Promise<Response
     const beforeState = drink;
 
     // If setting as default, unset other defaults for this cafe
-    if (body.isDefault && !drink.isDefault) {
+    if (validatedData.isDefault && !drink.isDefault) {
       await db
         .update(drinks)
         .set({ isDefault: false })
@@ -165,8 +182,8 @@ export async function updateDrink(request: IRequest, env: Env): Promise<Response
 
     // Default name to "Iced Matcha Latte" if explicitly set to null/empty
     const updateData = {
-      ...body,
-      ...(body.name === '' || body.name === null ? { name: 'Iced Matcha Latte' } : {}),
+      ...validatedData,
+      ...(validatedData.name === '' || validatedData.name === null ? { name: 'Iced Matcha Latte' } : {}),
       updatedAt: sql`CURRENT_TIMESTAMP`,
     };
 
@@ -354,36 +371,15 @@ export async function deleteDrink(request: IRequest, env: Env): Promise<Response
 export async function getDrinks(request: IRequest, env: Env): Promise<Response> {
   try {
     const url = new URL(request.url);
-    const cafeId = url.searchParams.get('cafeId');
-    const minScore = url.searchParams.get('minScore');
-    const maxPrice = url.searchParams.get('maxPrice');
-    const limit = parseInt(url.searchParams.get('limit') || '50');
-    const offset = parseInt(url.searchParams.get('offset') || '0');
-    const sort = url.searchParams.get('sort') || 'score';
-    const order = url.searchParams.get('order') || 'desc';
+    const queryParams = Object.fromEntries(url.searchParams.entries());
 
-    // Validate parameters
-    if (cafeId && isNaN(parseInt(cafeId))) {
-      return badRequestResponse('Invalid cafeId parameter', request as Request, env);
+    // Validate query parameters using Zod schema
+    const validation = safeValidate(getDrinksQuerySchema, queryParams);
+    if (!validation.success) {
+      return badRequestResponse(validation.error, request as Request, env);
     }
-    if (minScore && isNaN(parseFloat(minScore))) {
-      return badRequestResponse('Invalid minScore parameter', request as Request, env);
-    }
-    if (maxPrice && isNaN(parseFloat(maxPrice))) {
-      return badRequestResponse('Invalid maxPrice parameter', request as Request, env);
-    }
-    if (isNaN(limit) || limit < 1 || limit > 100) {
-      return badRequestResponse('Invalid limit parameter (1-100)', request as Request, env);
-    }
-    if (isNaN(offset) || offset < 0) {
-      return badRequestResponse('Invalid offset parameter', request as Request, env);
-    }
-    if (!['name', 'score', 'price', 'createdAt'].includes(sort)) {
-      return badRequestResponse('Invalid sort parameter', request as Request, env);
-    }
-    if (!['asc', 'desc'].includes(order)) {
-      return badRequestResponse('Invalid order parameter', request as Request, env);
-    }
+
+    const { cafeId, minScore, maxPrice, limit, offset, sort, order } = validation.data;
 
     const db = getDb(env.DB);
 
@@ -415,13 +411,13 @@ export async function getDrinks(request: IRequest, env: Env): Promise<Response> 
     // Apply filters
     const conditions = [];
     if (cafeId) {
-      conditions.push(eq(drinks.cafeId, parseInt(cafeId)));
+      conditions.push(eq(drinks.cafeId, cafeId));
     }
     if (minScore) {
-      conditions.push(sql`${drinks.score} >= ${parseFloat(minScore)}`);
+      conditions.push(sql`${drinks.score} >= ${minScore}`);
     }
     if (maxPrice) {
-      conditions.push(sql`${drinks.priceAmount} <= ${parseFloat(maxPrice)}`);
+      conditions.push(sql`${drinks.priceAmount} <= ${maxPrice}`);
     }
 
     if (conditions.length > 0) {
