@@ -606,6 +606,7 @@ export const EventManagementPage: React.FC = () => {
                         <button
                           onClick={() => setOpenMenuId(openMenuId === event.id ? null : event.id)}
                           className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
+                          aria-label={COPY.admin.eventManagement.moreOptionsAriaLabel}
                         >
                           <MoreVertical size={20} />
                         </button>
