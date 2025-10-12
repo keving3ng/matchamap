@@ -15,11 +15,16 @@ export const BottomNavigation: React.FC = () => {
   const hasAdminBanner = currentEnv === 'dev'
 
   // Determine current view from URL path
+  // Check for detail view: /:cityShortcode/:slug pattern (two segments, not a known single-segment route)
+  const pathSegments = location.pathname.split('/').filter(Boolean)
+  const isDetailView = pathSegments.length === 2 &&
+    !['list', 'feed', 'passport', 'events', 'about', 'contact', 'store', 'settings', 'admin', 'login'].includes(pathSegments[0])
+
   const currentView = location.pathname === '/list' ? 'list'
     : location.pathname === '/feed' ? 'feed'
     : location.pathname === '/passport' ? 'passport'
     : location.pathname === '/events' ? 'events'
-    : location.pathname.startsWith('/cafe/') ? 'detail'
+    : isDetailView ? 'detail'
     : 'map'
 
   return (

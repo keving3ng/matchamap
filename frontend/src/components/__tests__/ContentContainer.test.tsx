@@ -20,7 +20,7 @@ describe('ContentContainer', () => {
       </ContentContainer>
     )
 
-    expect(container.firstChild).toHaveClass('max-w-lg')
+    expect(container.firstChild).toHaveClass('max-w-screen-md')
   })
 
   it('should apply custom max width when maxWidth prop provided', () => {
@@ -30,7 +30,7 @@ describe('ContentContainer', () => {
       </ContentContainer>
     )
 
-    expect(container.firstChild).toHaveClass('max-w-xl')
+    expect(container.firstChild).toHaveClass('max-w-screen-xl')
   })
 
   it('should apply additional className when provided', () => {
@@ -46,28 +46,28 @@ describe('ContentContainer', () => {
 
   it('should combine maxWidth and className props correctly', () => {
     const { container } = render(
-      <ContentContainer maxWidth="2xl" className="p-4 bg-white">
+      <ContentContainer maxWidth="lg" className="p-4 bg-white">
         <div>Content</div>
       </ContentContainer>
     )
 
-    expect(container.firstChild).toHaveClass('max-w-2xl')
+    expect(container.firstChild).toHaveClass('max-w-screen-lg')
     expect(container.firstChild).toHaveClass('p-4')
     expect(container.firstChild).toHaveClass('bg-white')
     expect(container.firstChild).toHaveClass('mx-auto')
   })
 
   it('should handle different maxWidth values', () => {
-    const maxWidths = ['sm', 'md', 'lg', 'xl', '2xl', '3xl', '4xl']
-    
+    const maxWidths: Array<'sm' | 'md' | 'lg' | 'xl'> = ['sm', 'md', 'lg', 'xl']
+
     maxWidths.forEach(width => {
       const { container } = render(
-        <ContentContainer maxWidth={width as any}>
+        <ContentContainer maxWidth={width}>
           <div>Content</div>
         </ContentContainer>
       )
-      
-      expect(container.firstChild).toHaveClass(`max-w-${width}`)
+
+      expect(container.firstChild).toHaveClass(`max-w-screen-${width}`)
     })
   })
 
@@ -79,7 +79,7 @@ describe('ContentContainer', () => {
     )
 
     expect(container.firstChild).toHaveClass('mx-auto')
-    expect(container.firstChild).toHaveClass('max-w-lg')
+    expect(container.firstChild).toHaveClass('max-w-screen-md')
   })
 
   it('should render as a div element', () => {

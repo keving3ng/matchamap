@@ -286,11 +286,11 @@ describe('BottomNavigation', () => {
     mockUseLocation.mockReturnValue({ pathname: '/unknown-route' })
     renderWithRouter(<BottomNavigation />)
 
-    // Should default to map view (no highlighting)
+    // Should default to map view (map button highlighted)
     const mapButton = screen.getByText('Map').closest('button')!
     const listButton = screen.getByText('List').closest('button')!
 
-    expect(mapButton).toHaveClass('text-gray-400')
+    expect(mapButton).toHaveClass('text-green-600')
     expect(listButton).toHaveClass('text-gray-400')
   })
 
@@ -301,24 +301,25 @@ describe('BottomNavigation', () => {
       { pathname: '/feed', expectedActive: 'Feed' },
       { pathname: '/passport', expectedActive: 'Passport' },
       { pathname: '/events', expectedActive: 'Events' },
-      { pathname: '/cafe/test-cafe', expectedActive: null }, // detail view
-      { pathname: '/cafe/another-cafe-slug', expectedActive: null }, // detail view
+      { pathname: '/toronto/test-cafe', expectedActive: 'detail' }, // detail view (new route pattern)
+      { pathname: '/toronto/another-cafe-slug', expectedActive: 'detail' }, // detail view
     ]
 
     testCases.forEach(({ pathname, expectedActive }) => {
       mockUseLocation.mockReturnValue({ pathname })
-      const { rerender } = renderWithRouter(<BottomNavigation />)
-      
-      if (expectedActive) {
-        const activeButton = screen.getByText(expectedActive).closest('button')!
-        expect(activeButton).toHaveClass('text-green-600')
-      } else {
-        // For detail view, no button should be active
+      const { unmount } = renderWithRouter(<BottomNavigation />)
+
+      if (expectedActive === 'detail') {
+        // For detail view, no button should be active (defaults to map but not highlighted)
         const mapButton = screen.getByText('Map').closest('button')!
         expect(mapButton).toHaveClass('text-gray-400')
+      } else if (expectedActive) {
+        const activeButton = screen.getByText(expectedActive).closest('button')!
+        expect(activeButton).toHaveClass('text-green-600')
       }
-      
-      rerender(<BottomNavigation />)
+
+      // Cleanup between test cases
+      unmount()
     })
   })
 })

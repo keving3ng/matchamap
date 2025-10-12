@@ -68,6 +68,8 @@ export const PassportView: React.FC<PassportViewProps> = ({ cafes, visitedStamps
                   setLoadingStamps(prev => new Set(prev).add(cafe.id))
                   try {
                     await onToggleStamp(cafe.id)
+                  } catch (error) {
+                    console.error('Error toggling stamp:', error)
                   } finally {
                     setLoadingStamps(prev => {
                       const newSet = new Set(prev)

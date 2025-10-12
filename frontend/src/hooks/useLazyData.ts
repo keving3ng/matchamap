@@ -23,7 +23,18 @@ export function useLazyData(
 ): void {
   useEffect(() => {
     if (!isFetched) {
-      fetchFunction()
+      try {
+        const result = fetchFunction()
+        // Handle promise rejections to prevent unhandled errors
+        if (result && typeof result.then === 'function') {
+          result.catch((error) => {
+            console.error('Error in lazy data fetch:', error)
+          })
+        }
+      } catch (error) {
+        // Handle synchronous errors
+        console.error('Error in lazy data fetch:', error)
+      }
     }
   }, [isFetched, fetchFunction])
 }
