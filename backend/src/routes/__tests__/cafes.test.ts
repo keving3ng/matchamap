@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { env, createExecutionContext, waitOnExecutionContext } from 'cloudflare:test';
+import { env } from 'cloudflare:test';
 import worker from '../../index';
 import {
   createTestRequest,
@@ -26,13 +26,13 @@ describe('Cafe Routes', () => {
   describe('GET /api/cafes', () => {
     it('should return empty list when no cafes exist', async () => {
       const request = createTestRequest('/api/cafes');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data).toMatchObject({
         cafes: [],
         total: 0,
@@ -71,13 +71,13 @@ describe('Cafe Routes', () => {
       ).run();
 
       const request = createTestRequest('/api/cafes');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.cafes).toHaveLength(1);
       expect(data.cafes[0]).toMatchObject({
         name: mockCafe.name,
@@ -107,13 +107,13 @@ describe('Cafe Routes', () => {
       `).bind('Montreal Cafe', 'montreal-cafe', 'https://example.com', 'montreal', 45.5017, -73.5673).run();
 
       const request = createTestRequest('/api/cafes?city=toronto');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.cafes).toHaveLength(1);
       expect(data.cafes[0].name).toBe('Toronto Cafe');
       expect(data.cafes[0].city).toBe('toronto');
@@ -121,9 +121,9 @@ describe('Cafe Routes', () => {
 
     it('should return 400 for invalid city filter', async () => {
       const request = createTestRequest('/api/cafes?city=invalid');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400, 'Invalid city parameter');
     });
@@ -138,13 +138,13 @@ describe('Cafe Routes', () => {
       }
 
       const request = createTestRequest('/api/cafes?limit=3&offset=2');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.cafes).toHaveLength(3);
       expect(data.total).toBe(5);
       expect(data.hasMore).toBe(false);
@@ -152,9 +152,9 @@ describe('Cafe Routes', () => {
 
     it('should respect maximum limit', async () => {
       const request = createTestRequest('/api/cafes?limit=999999');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       // Should respect max limit defined in PAGINATION_CONSTANTS
@@ -162,9 +162,9 @@ describe('Cafe Routes', () => {
 
     it('should include proper cache headers', async () => {
       const request = createTestRequest('/api/cafes');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expect(response.headers.get('cache-control')).toContain('public');
       expect(response.headers.get('cache-control')).toContain('max-age=');
@@ -182,13 +182,13 @@ describe('Cafe Routes', () => {
       `).bind(cafeResult.lastInsertRowid).run();
 
       const request = createTestRequest('/api/cafes');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.cafes).toHaveLength(0);
     });
   });
@@ -206,13 +206,13 @@ describe('Cafe Routes', () => {
       `).bind(cafeResult.lastInsertRowid, mockDrink.name, mockDrink.score, mockDrink.price, true).run();
 
       const request = createTestRequest(`/api/cafes/${cafeResult.lastInsertRowid}`);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.cafe.name).toBe(mockCafe.name);
       expect(data.drinks).toHaveLength(1);
       expect(data.drinks[0].name).toBe(mockDrink.name);
@@ -220,18 +220,18 @@ describe('Cafe Routes', () => {
 
     it('should return 404 for non-existent cafe', async () => {
       const request = createTestRequest('/api/cafes/99999');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 404);
     });
 
     it('should return 400 for invalid cafe ID', async () => {
       const request = createTestRequest('/api/cafes/invalid');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400, 'Invalid cafe ID');
     });
@@ -243,9 +243,9 @@ describe('Cafe Routes', () => {
       `).bind('Deleted Cafe', 'deleted-cafe', 'https://example.com', 'toronto', 43.6532, -79.3832).run();
 
       const request = createTestRequest(`/api/cafes/${cafeResult.lastInsertRowid}`);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 404);
     });
@@ -269,13 +269,13 @@ describe('Cafe Routes', () => {
         method: 'POST',
         body: JSON.stringify(newCafe),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 201);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.cafe).toMatchObject(newCafe);
       expect(data.cafe.id).toBeDefined();
     });
@@ -285,9 +285,9 @@ describe('Cafe Routes', () => {
         method: 'POST',
         body: JSON.stringify({ name: 'Test' }),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 401);
     });
@@ -297,9 +297,9 @@ describe('Cafe Routes', () => {
         method: 'POST',
         body: JSON.stringify({ name: '' }), // Missing required fields
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400, 'Missing required fields');
     });
@@ -317,9 +317,9 @@ describe('Cafe Routes', () => {
         method: 'POST',
         body: JSON.stringify(newCafe),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400, 'Invalid city');
     });
@@ -344,9 +344,9 @@ describe('Cafe Routes', () => {
         method: 'POST',
         body: JSON.stringify(newCafe),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 409, 'already exists');
     });
@@ -371,13 +371,13 @@ describe('Cafe Routes', () => {
         method: 'POST',
         body: JSON.stringify(newCafe),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 201);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.cafe.name).toBe('Restored Cafe');
       expect(data.cafe.deletedAt).toBeNull();
     });
@@ -400,13 +400,13 @@ describe('Cafe Routes', () => {
         method: 'PUT',
         body: JSON.stringify(updates),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.cafe.name).toBe('Updated Cafe');
       expect(data.cafe.quickNote).toBe('Updated note');
       expect(data.cafe.ambianceScore).toBe(9.0);
@@ -417,9 +417,9 @@ describe('Cafe Routes', () => {
         method: 'PUT',
         body: JSON.stringify({ name: 'Updated' }),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 404);
     });
@@ -429,9 +429,9 @@ describe('Cafe Routes', () => {
         method: 'PUT',
         body: JSON.stringify({ name: 'Updated' }),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 401);
     });
@@ -447,13 +447,13 @@ describe('Cafe Routes', () => {
       const request = createAuthenticatedRequest(`/api/admin/cafes/${cafeResult.lastInsertRowid}`, adminToken, {
         method: 'DELETE',
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.message).toContain('deleted successfully');
 
       // Verify cafe is soft deleted
@@ -468,9 +468,9 @@ describe('Cafe Routes', () => {
       const request = createAuthenticatedRequest('/api/admin/cafes/99999', adminToken, {
         method: 'DELETE',
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 404);
     });
@@ -479,9 +479,9 @@ describe('Cafe Routes', () => {
       const request = createTestRequest('/api/admin/cafes/1', {
         method: 'DELETE',
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 401);
     });

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { env, createExecutionContext, waitOnExecutionContext } from 'cloudflare:test';
+import { env } from 'cloudflare:test';
 import worker from '../../index';
 import {
   createTestRequest,
@@ -19,13 +19,13 @@ describe('Feed Routes', () => {
   describe('GET /api/feed', () => {
     it('should return empty list when no feed items exist', async () => {
       const request = createTestRequest('/api/feed');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data).toMatchObject({
         feed: [],
         total: 0,
@@ -55,13 +55,13 @@ describe('Feed Routes', () => {
       }
 
       const request = createTestRequest('/api/feed');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.feed).toHaveLength(3);
       expect(data.total).toBe(3);
       
@@ -86,13 +86,13 @@ describe('Feed Routes', () => {
       }
 
       const request = createTestRequest('/api/feed?limit=3&offset=2');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.feed).toHaveLength(3);
       expect(data.total).toBe(5);
       expect(data.hasMore).toBe(false);
@@ -100,9 +100,9 @@ describe('Feed Routes', () => {
 
     it('should respect maximum limit', async () => {
       const request = createTestRequest('/api/feed?limit=999999');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       // Should respect max limit defined in PAGINATION_CONSTANTS
@@ -121,13 +121,13 @@ describe('Feed Routes', () => {
       `).bind('Priority Item', 'Priority content', 'https://example.com', true).run();
 
       const request = createTestRequest('/api/feed?priority=true');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.feed).toHaveLength(1);
       expect(data.feed[0].title).toBe('Priority Item');
       expect(data.feed[0].isPriority).toBe(true);
@@ -135,9 +135,9 @@ describe('Feed Routes', () => {
 
     it('should include proper cache headers', async () => {
       const request = createTestRequest('/api/feed');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expect(response.headers.get('cache-control')).toContain('public');
       expect(response.headers.get('cache-control')).toContain('max-age=');
@@ -148,9 +148,9 @@ describe('Feed Routes', () => {
       const invalidEnv = { ...env, DB: null };
 
       const request = createTestRequest('/api/feed');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, invalidEnv, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, invalidEnv);
+      
 
       expect(response.status).toBe(500);
     });
@@ -167,13 +167,13 @@ describe('Feed Routes', () => {
       ).run();
 
       const request = createTestRequest('/api/feed');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.feed[0]).toMatchObject({
         id: expect.any(Number),
         title: mockFeedItem.title,
@@ -192,13 +192,13 @@ describe('Feed Routes', () => {
       `).bind('Minimal Feed Item', 'Minimal content').run();
 
       const request = createTestRequest('/api/feed');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.feed[0]).toMatchObject({
         title: 'Minimal Feed Item',
         content: 'Minimal content',
@@ -220,13 +220,13 @@ describe('Feed Routes', () => {
       `).bind('Coffee Update', 'Information about coffee shops', 'https://example.com', false).run();
 
       const request = createTestRequest('/api/feed?search=matcha');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.feed).toHaveLength(1);
       expect(data.feed[0].title).toBe('Matcha News');
     });
@@ -238,13 +238,13 @@ describe('Feed Routes', () => {
       `).bind('Test Item', 'Test content', 'https://example.com', false).run();
 
       const request = createTestRequest('/api/feed?search=nonexistent');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.feed).toHaveLength(0);
       expect(data.total).toBe(0);
     });
@@ -262,22 +262,22 @@ describe('Feed Routes', () => {
       `).bind('Recent Item', 'Recent content', 'https://example.com', false, '2024-12-01T00:00:00Z').run();
 
       const request = createTestRequest('/api/feed?startDate=2024-11-01');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.feed).toHaveLength(1);
       expect(data.feed[0].title).toBe('Recent Item');
     });
 
     it('should handle invalid date parameters gracefully', async () => {
       const request = createTestRequest('/api/feed?startDate=invalid-date');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400, 'Invalid date');
     });
@@ -300,13 +300,13 @@ describe('Feed Routes', () => {
       `).bind('Priority Coffee News', 'Priority coffee content', 'https://example.com', true).run();
 
       const request = createTestRequest('/api/feed?priority=true&search=matcha');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.feed).toHaveLength(1);
       expect(data.feed[0].title).toBe('Priority Matcha News');
       expect(data.feed[0].isPriority).toBe(true);

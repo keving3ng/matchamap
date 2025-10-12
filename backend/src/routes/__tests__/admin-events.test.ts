@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { env, createExecutionContext, waitOnExecutionContext } from 'cloudflare:test';
+import { env } from 'cloudflare:test';
 import worker from '../../index';
 import {
   createTestRequest,
@@ -40,13 +40,13 @@ describe('Admin Events Routes', () => {
         method: 'POST',
         body: JSON.stringify(newEvent),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 201);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.event).toMatchObject(newEvent);
       expect(data.event.id).toBeDefined();
       expect(data.event.createdAt).toBeDefined();
@@ -57,9 +57,9 @@ describe('Admin Events Routes', () => {
         method: 'POST',
         body: JSON.stringify(mockEvent),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 401);
     });
@@ -69,9 +69,9 @@ describe('Admin Events Routes', () => {
         method: 'POST',
         body: JSON.stringify(mockEvent),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 403);
     });
@@ -86,9 +86,9 @@ describe('Admin Events Routes', () => {
         method: 'POST',
         body: JSON.stringify(incompleteEvent),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400);
     });
@@ -103,9 +103,9 @@ describe('Admin Events Routes', () => {
         method: 'POST',
         body: JSON.stringify(invalidEvent),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400, 'Invalid date');
     });
@@ -120,9 +120,9 @@ describe('Admin Events Routes', () => {
         method: 'POST',
         body: JSON.stringify(invalidEvent),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400, 'Invalid URL');
     });
@@ -138,13 +138,13 @@ describe('Admin Events Routes', () => {
         method: 'POST',
         body: JSON.stringify(minimalEvent),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 201);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.event.isPriority).toBe(false);
       expect(data.event.description).toBeNull();
       expect(data.event.location).toBeNull();
@@ -155,13 +155,13 @@ describe('Admin Events Routes', () => {
         method: 'POST',
         body: JSON.stringify(mockEvent),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 201);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       const eventId = data.event.id;
 
       // Verify audit log entry
@@ -205,13 +205,13 @@ describe('Admin Events Routes', () => {
         method: 'PUT',
         body: JSON.stringify(updates),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.event.title).toBe(updates.title);
       expect(data.event.description).toBe(updates.description);
       expect(data.event.isPriority).toBe(updates.isPriority);
@@ -222,9 +222,9 @@ describe('Admin Events Routes', () => {
         method: 'PUT',
         body: JSON.stringify({ title: 'Updated' }),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 404);
     });
@@ -234,9 +234,9 @@ describe('Admin Events Routes', () => {
         method: 'PUT',
         body: JSON.stringify({ title: 'Updated' }),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 401);
     });
@@ -246,9 +246,9 @@ describe('Admin Events Routes', () => {
         method: 'PUT',
         body: JSON.stringify({ title: 'Updated' }),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 403);
     });
@@ -266,9 +266,9 @@ describe('Admin Events Routes', () => {
           method: 'PUT',
           body: JSON.stringify(updates),
         });
-        const ctx = createExecutionContext();
-        const response = await worker.fetch(request, env, ctx);
-        await waitOnExecutionContext(ctx);
+        
+        const response = await worker.fetch(request, env);
+        
 
         await expectErrorResponse(response, 400);
       }
@@ -284,13 +284,13 @@ describe('Admin Events Routes', () => {
         method: 'PUT',
         body: JSON.stringify(partialUpdates),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.event.title).toBe(partialUpdates.title);
       expect(data.event.description).toBe(mockEvent.description); // Unchanged
     });
@@ -302,9 +302,9 @@ describe('Admin Events Routes', () => {
         method: 'PUT',
         body: JSON.stringify(updates),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
 
@@ -342,13 +342,13 @@ describe('Admin Events Routes', () => {
       const request = createAuthenticatedRequest(`/api/admin/events/${eventId}`, adminToken, {
         method: 'DELETE',
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.message).toContain('deleted successfully');
 
       // Verify event is deleted
@@ -362,9 +362,9 @@ describe('Admin Events Routes', () => {
       const request = createAuthenticatedRequest('/api/admin/events/99999', adminToken, {
         method: 'DELETE',
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 404);
     });
@@ -373,9 +373,9 @@ describe('Admin Events Routes', () => {
       const request = createTestRequest(`/api/admin/events/${eventId}`, {
         method: 'DELETE',
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 401);
     });
@@ -384,9 +384,9 @@ describe('Admin Events Routes', () => {
       const request = createAuthenticatedRequest(`/api/admin/events/${eventId}`, userToken, {
         method: 'DELETE',
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 403);
     });
@@ -395,9 +395,9 @@ describe('Admin Events Routes', () => {
       const request = createAuthenticatedRequest('/api/admin/events/invalid', adminToken, {
         method: 'DELETE',
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400, 'Invalid event ID');
     });
@@ -406,9 +406,9 @@ describe('Admin Events Routes', () => {
       const request = createAuthenticatedRequest(`/api/admin/events/${eventId}`, adminToken, {
         method: 'DELETE',
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
 
@@ -449,13 +449,13 @@ describe('Admin Events Routes', () => {
 
     it('should list all events when authenticated as admin', async () => {
       const request = createAuthenticatedRequest('/api/admin/events', adminToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.events).toHaveLength(3);
       expect(data.total).toBe(3);
       expect(data.events[0]).toMatchObject({
@@ -467,13 +467,13 @@ describe('Admin Events Routes', () => {
 
     it('should support pagination', async () => {
       const request = createAuthenticatedRequest('/api/admin/events?limit=2&offset=1', adminToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.events).toHaveLength(2);
       expect(data.total).toBe(3);
       expect(data.hasMore).toBe(false);
@@ -481,44 +481,44 @@ describe('Admin Events Routes', () => {
 
     it('should filter by priority', async () => {
       const request = createAuthenticatedRequest('/api/admin/events?priority=true', adminToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.events).toHaveLength(1);
       expect(data.events[0].isPriority).toBe(true);
     });
 
     it('should search events by title', async () => {
       const request = createAuthenticatedRequest('/api/admin/events?search=Event 2', adminToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.events).toHaveLength(1);
       expect(data.events[0].title).toBe('Event 2');
     });
 
     it('should return 401 when not authenticated', async () => {
       const request = createTestRequest('/api/admin/events');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 401);
     });
 
     it('should return 403 when authenticated as regular user', async () => {
       const request = createAuthenticatedRequest('/api/admin/events', userToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 403);
     });
@@ -538,13 +538,13 @@ describe('Admin Events Routes', () => {
         method: 'POST',
         body: JSON.stringify(maliciousEvent),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       // Should either reject malicious input or sanitize it
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json() as any;
         expect(data.event.title).not.toContain('<script>');
         expect(data.event.description).not.toContain('javascript:');
         expect(data.event.location).not.toContain('<img');
@@ -566,9 +566,9 @@ describe('Admin Events Routes', () => {
           method: endpoint.method,
           body: endpoint.body ? JSON.stringify(endpoint.body) : undefined,
         });
-        const ctx = createExecutionContext();
-        const response = await worker.fetch(request, env, ctx);
-        await waitOnExecutionContext(ctx);
+        
+        const response = await worker.fetch(request, env);
+        
 
         expect(response.status).toBe(403);
       }
@@ -579,9 +579,9 @@ describe('Admin Events Routes', () => {
         method: 'POST',
         body: 'invalid json{',
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expect(response.status).toBe(500);
     });
@@ -590,9 +590,9 @@ describe('Admin Events Routes', () => {
       const maliciousSearch = "'; DROP TABLE events; --";
       
       const request = createAuthenticatedRequest(`/api/admin/events?search=${encodeURIComponent(maliciousSearch)}`, adminToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       // Should not cause an error and events table should still exist
       expectJsonResponse(response, 200);

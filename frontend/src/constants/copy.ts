@@ -192,8 +192,13 @@ export const COPY = {
     location: 'Location',
     price: 'Price',
     description: 'Description',
-    hostedAt: 'Hosted at',
+    hostedAt: 'Hosted At',
     viewOnInstagram: 'View on Instagram',
+    getDirections: 'Get Directions',
+    showPastEvents: 'Show Past Events',
+    hidePastEvents: 'Hide Past Events',
+    failedToLoadPastEvents: 'Failed to load past events. Please try again.',
+    networkError: 'Network error. Please check your connection and try again.',
   },
 
   // Contact Page
@@ -522,6 +527,7 @@ export const COPY = {
       selectCafe: 'Link to Cafe (Optional)',
       selectCafePlaceholder: 'Choose a cafe...',
       noCafeLinked: 'No cafe linked',
+      moreOptionsAriaLabel: 'More options',
     },
   },
 } as const

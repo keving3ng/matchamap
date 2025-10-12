@@ -66,15 +66,15 @@ describe('useCafeSelection', () => {
   let mockUIStore: any
   let mockCafeStore: any
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks()
-    
+
     // Reset mock stores
     mockUIStore = {
       setShowPopover: vi.fn(),
       closePopover: vi.fn(),
     }
-    
+
     mockCafeStore = {
       selectedCafe: null,
       setSelectedCafe: vi.fn(),

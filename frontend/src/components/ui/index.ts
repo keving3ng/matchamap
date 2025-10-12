@@ -32,3 +32,5 @@ export {
   ListSkeleton,
   DetailPageSkeleton
 } from './Skeleton'
+
+export { ErrorAlert } from './ErrorAlert'

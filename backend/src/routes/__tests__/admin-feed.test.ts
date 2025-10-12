@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { env, createExecutionContext, waitOnExecutionContext } from 'cloudflare:test';
+import { env } from 'cloudflare:test';
 import worker from '../../index';
 import {
   createTestRequest,
@@ -38,13 +38,13 @@ describe('Admin Feed Routes', () => {
         method: 'POST',
         body: JSON.stringify(newFeedItem),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 201);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.feedItem).toMatchObject(newFeedItem);
       expect(data.feedItem.id).toBeDefined();
       expect(data.feedItem.createdAt).toBeDefined();
@@ -55,9 +55,9 @@ describe('Admin Feed Routes', () => {
         method: 'POST',
         body: JSON.stringify(mockFeedItem),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 401);
     });
@@ -67,9 +67,9 @@ describe('Admin Feed Routes', () => {
         method: 'POST',
         body: JSON.stringify(mockFeedItem),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 403);
     });
@@ -84,9 +84,9 @@ describe('Admin Feed Routes', () => {
         method: 'POST',
         body: JSON.stringify(incompleteFeedItem),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400);
     });
@@ -101,9 +101,9 @@ describe('Admin Feed Routes', () => {
         method: 'POST',
         body: JSON.stringify(invalidFeedItem),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400, 'Invalid URL');
     });
@@ -118,13 +118,13 @@ describe('Admin Feed Routes', () => {
         method: 'POST',
         body: JSON.stringify(minimalFeedItem),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 201);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.feedItem.isPriority).toBe(false);
       expect(data.feedItem.link).toBeNull();
     });
@@ -139,9 +139,9 @@ describe('Admin Feed Routes', () => {
         method: 'POST',
         body: JSON.stringify(longContentFeedItem),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400, 'too long');
     });
@@ -156,9 +156,9 @@ describe('Admin Feed Routes', () => {
         method: 'POST',
         body: JSON.stringify(longTitleFeedItem),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400, 'too long');
     });
@@ -168,13 +168,13 @@ describe('Admin Feed Routes', () => {
         method: 'POST',
         body: JSON.stringify(mockFeedItem),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 201);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       const feedItemId = data.feedItem.id;
 
       // Verify audit log entry
@@ -216,13 +216,13 @@ describe('Admin Feed Routes', () => {
         method: 'PUT',
         body: JSON.stringify(updates),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.feedItem.title).toBe(updates.title);
       expect(data.feedItem.content).toBe(updates.content);
       expect(data.feedItem.isPriority).toBe(updates.isPriority);
@@ -233,9 +233,9 @@ describe('Admin Feed Routes', () => {
         method: 'PUT',
         body: JSON.stringify({ title: 'Updated' }),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 404);
     });
@@ -245,9 +245,9 @@ describe('Admin Feed Routes', () => {
         method: 'PUT',
         body: JSON.stringify({ title: 'Updated' }),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 401);
     });
@@ -257,9 +257,9 @@ describe('Admin Feed Routes', () => {
         method: 'PUT',
         body: JSON.stringify({ title: 'Updated' }),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 403);
     });
@@ -277,9 +277,9 @@ describe('Admin Feed Routes', () => {
           method: 'PUT',
           body: JSON.stringify(updates),
         });
-        const ctx = createExecutionContext();
-        const response = await worker.fetch(request, env, ctx);
-        await waitOnExecutionContext(ctx);
+        
+        const response = await worker.fetch(request, env);
+        
 
         await expectErrorResponse(response, 400);
       }
@@ -295,13 +295,13 @@ describe('Admin Feed Routes', () => {
         method: 'PUT',
         body: JSON.stringify(partialUpdates),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.feedItem.title).toBe(partialUpdates.title);
       expect(data.feedItem.content).toBe(mockFeedItem.content); // Unchanged
     });
@@ -315,13 +315,13 @@ describe('Admin Feed Routes', () => {
         method: 'PUT',
         body: JSON.stringify(updates),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.feedItem.link).toBeNull();
     });
 
@@ -332,9 +332,9 @@ describe('Admin Feed Routes', () => {
         method: 'PUT',
         body: JSON.stringify(updates),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
 
@@ -370,13 +370,13 @@ describe('Admin Feed Routes', () => {
       const request = createAuthenticatedRequest(`/api/admin/feed/${feedItemId}`, adminToken, {
         method: 'DELETE',
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.message).toContain('deleted successfully');
 
       // Verify feed item is deleted
@@ -390,9 +390,9 @@ describe('Admin Feed Routes', () => {
       const request = createAuthenticatedRequest('/api/admin/feed/99999', adminToken, {
         method: 'DELETE',
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 404);
     });
@@ -401,9 +401,9 @@ describe('Admin Feed Routes', () => {
       const request = createTestRequest(`/api/admin/feed/${feedItemId}`, {
         method: 'DELETE',
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 401);
     });
@@ -412,9 +412,9 @@ describe('Admin Feed Routes', () => {
       const request = createAuthenticatedRequest(`/api/admin/feed/${feedItemId}`, userToken, {
         method: 'DELETE',
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 403);
     });
@@ -423,9 +423,9 @@ describe('Admin Feed Routes', () => {
       const request = createAuthenticatedRequest('/api/admin/feed/invalid', adminToken, {
         method: 'DELETE',
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400, 'Invalid feed item ID');
     });
@@ -434,9 +434,9 @@ describe('Admin Feed Routes', () => {
       const request = createAuthenticatedRequest(`/api/admin/feed/${feedItemId}`, adminToken, {
         method: 'DELETE',
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
 
@@ -475,13 +475,13 @@ describe('Admin Feed Routes', () => {
 
     it('should list all feed items when authenticated as admin', async () => {
       const request = createAuthenticatedRequest('/api/admin/feed', adminToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.feed).toHaveLength(3);
       expect(data.total).toBe(3);
       expect(data.feed[0]).toMatchObject({
@@ -493,13 +493,13 @@ describe('Admin Feed Routes', () => {
 
     it('should support pagination', async () => {
       const request = createAuthenticatedRequest('/api/admin/feed?limit=2&offset=1', adminToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.feed).toHaveLength(2);
       expect(data.total).toBe(3);
       expect(data.hasMore).toBe(false);
@@ -507,39 +507,39 @@ describe('Admin Feed Routes', () => {
 
     it('should filter by priority', async () => {
       const request = createAuthenticatedRequest('/api/admin/feed?priority=true', adminToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.feed).toHaveLength(1);
       expect(data.feed[0].isPriority).toBe(true);
     });
 
     it('should search feed items by title and content', async () => {
       const request = createAuthenticatedRequest('/api/admin/feed?search=Feed Item 2', adminToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.feed).toHaveLength(1);
       expect(data.feed[0].title).toBe('Feed Item 2');
     });
 
     it('should sort feed items by creation date (newest first)', async () => {
       const request = createAuthenticatedRequest('/api/admin/feed?sort=createdAt&order=desc', adminToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.feed).toHaveLength(3);
       // Most recent first
       expect(new Date(data.feed[0].createdAt).getTime())
@@ -548,18 +548,18 @@ describe('Admin Feed Routes', () => {
 
     it('should return 401 when not authenticated', async () => {
       const request = createTestRequest('/api/admin/feed');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 401);
     });
 
     it('should return 403 when authenticated as regular user', async () => {
       const request = createAuthenticatedRequest('/api/admin/feed', userToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 403);
     });
@@ -577,13 +577,13 @@ describe('Admin Feed Routes', () => {
         method: 'POST',
         body: JSON.stringify(maliciousFeedItem),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       // Should either reject malicious input or sanitize it
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json() as any;
         expect(data.feedItem.title).not.toContain('<script>');
         expect(data.feedItem.content).not.toContain('javascript:');
       } else {
@@ -604,9 +604,9 @@ describe('Admin Feed Routes', () => {
           method: endpoint.method,
           body: endpoint.body ? JSON.stringify(endpoint.body) : undefined,
         });
-        const ctx = createExecutionContext();
-        const response = await worker.fetch(request, env, ctx);
-        await waitOnExecutionContext(ctx);
+        
+        const response = await worker.fetch(request, env);
+        
 
         expect(response.status).toBe(403);
       }
@@ -617,9 +617,9 @@ describe('Admin Feed Routes', () => {
         method: 'POST',
         body: 'invalid json{',
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expect(response.status).toBe(500);
     });
@@ -628,9 +628,9 @@ describe('Admin Feed Routes', () => {
       const maliciousSearch = "'; DROP TABLE feed; --";
       
       const request = createAuthenticatedRequest(`/api/admin/feed?search=${encodeURIComponent(maliciousSearch)}`, adminToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       // Should not cause an error and feed table should still exist
       expectJsonResponse(response, 200);
@@ -650,9 +650,9 @@ describe('Admin Feed Routes', () => {
         method: 'POST',
         body: JSON.stringify(largeFeedItem),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       // Should reject oversized payloads
       await expectErrorResponse(response, 400);

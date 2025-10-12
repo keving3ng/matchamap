@@ -1,5 +1,5 @@
 import { IRequest } from 'itty-router';
-import { eq, and, gte, desc } from 'drizzle-orm';
+import { eq, and, gte, lt, desc } from 'drizzle-orm';
 import { Env } from '../types';
 import { getDb, events } from '../db';
 import { jsonResponse, errorResponse } from '../utils/response';
@@ -19,9 +19,13 @@ export async function listEvents(request: IRequest, env: Env): Promise<Response>
     // Build query conditions
     const conditions = [eq(events.published, true)];
 
+    const today = new Date().toISOString().split('T')[0];
     if (upcoming) {
-      const today = new Date().toISOString().split('T')[0];
+      // Upcoming events: date >= today
       conditions.push(gte(events.date, today));
+    } else {
+      // Past events: date < today
+      conditions.push(lt(events.date, today));
     }
 
     if (featured) {
@@ -41,7 +45,7 @@ export async function listEvents(request: IRequest, env: Env): Promise<Response>
       .select()
       .from(events)
       .where(and(...conditions))
-      .orderBy(events.date)
+      .orderBy(upcoming ? events.date : desc(events.date)) // Upcoming: asc, Past: desc (most recent first)
       .limit(limit);
 
     return jsonResponse(

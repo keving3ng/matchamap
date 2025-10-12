@@ -105,7 +105,7 @@ export async function createEvent(request: IRequest, env: Env): Promise<Response
       location: body.location,
       cafeId: body.cafeId || null,
       description: body.description,
-      image: body.image || null,
+      link: body.link || null,
       price: body.price || null,
       featured: body.featured ?? false,
       published: body.published ?? true,

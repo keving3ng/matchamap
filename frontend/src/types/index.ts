@@ -127,7 +127,7 @@ export interface EventItem {
   location: string
   venue: string
   description: string
-  image: string
+  link: string // Instagram handle or post link
   price: string
   featured: boolean
   published?: boolean

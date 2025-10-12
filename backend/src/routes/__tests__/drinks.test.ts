@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { env, createExecutionContext, waitOnExecutionContext } from 'cloudflare:test';
+import { env } from 'cloudflare:test';
 import worker from '../../index';
 import {
   createTestRequest,
@@ -36,13 +36,13 @@ describe('Drinks Routes', () => {
   describe('GET /api/drinks', () => {
     it('should return empty list when no drinks exist', async () => {
       const request = createTestRequest('/api/drinks');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data).toMatchObject({
         drinks: [],
         total: 0,
@@ -63,13 +63,13 @@ describe('Drinks Routes', () => {
       `).bind(cafeId, 'Iced Matcha', 'Refreshing iced matcha', 8.0, 6.49, false).run();
 
       const request = createTestRequest('/api/drinks');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.drinks).toHaveLength(2);
       expect(data.total).toBe(2);
       expect(data.drinks[0]).toMatchObject({
@@ -105,13 +105,13 @@ describe('Drinks Routes', () => {
       `).bind(cafe2Id, 'Drink 2', 7.5, 4.50).run();
 
       const request = createTestRequest(`/api/drinks?cafeId=${cafeId}`);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.drinks).toHaveLength(1);
       expect(data.drinks[0].cafeId).toBe(cafeId);
       expect(data.drinks[0].name).toBe('Drink 1');
@@ -130,13 +130,13 @@ describe('Drinks Routes', () => {
       `).bind(cafeId, 'Low Score Drink', 6.5, 4.00).run();
 
       const request = createTestRequest('/api/drinks?minScore=8.0');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.drinks).toHaveLength(1);
       expect(data.drinks[0].name).toBe('High Score Drink');
       expect(data.drinks[0].score).toBeGreaterThanOrEqual(8.0);
@@ -155,13 +155,13 @@ describe('Drinks Routes', () => {
       `).bind(cafeId, 'Affordable Drink', 7.5, 4.99).run();
 
       const request = createTestRequest('/api/drinks?maxPrice=6.00');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.drinks).toHaveLength(1);
       expect(data.drinks[0].name).toBe('Affordable Drink');
       expect(data.drinks[0].price).toBeLessThanOrEqual(6.00);
@@ -177,13 +177,13 @@ describe('Drinks Routes', () => {
       }
 
       const request = createTestRequest('/api/drinks?limit=3&offset=2');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.drinks).toHaveLength(3);
       expect(data.total).toBe(5);
       expect(data.hasMore).toBe(false);
@@ -205,13 +205,13 @@ describe('Drinks Routes', () => {
       }
 
       const request = createTestRequest('/api/drinks?sort=score&order=desc');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.drinks).toHaveLength(3);
       expect(data.drinks[0].name).toBe('Best Drink');
       expect(data.drinks[1].name).toBe('Good Drink');
@@ -220,9 +220,9 @@ describe('Drinks Routes', () => {
 
     it('should include proper cache headers', async () => {
       const request = createTestRequest('/api/drinks');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expect(response.headers.get('cache-control')).toContain('public');
       expect(response.headers.get('cache-control')).toContain('max-age=');
@@ -239,9 +239,9 @@ describe('Drinks Routes', () => {
 
       for (const url of invalidRequests) {
         const request = createTestRequest(url);
-        const ctx = createExecutionContext();
-        const response = await worker.fetch(request, env, ctx);
-        await waitOnExecutionContext(ctx);
+        
+        const response = await worker.fetch(request, env);
+        
 
         await expectErrorResponse(response, 400);
       }
@@ -255,13 +255,13 @@ describe('Drinks Routes', () => {
       `).bind(cafeId, 'Minimal Drink', 8.0, 5.00).run();
 
       const request = createTestRequest('/api/drinks');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.drinks[0]).toMatchObject({
         name: 'Minimal Drink',
         description: null,
@@ -291,13 +291,13 @@ describe('Drinks Routes', () => {
 
     it('should return single drink with cafe information', async () => {
       const request = createTestRequest(`/api/drinks/${drinkId}`);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.drink).toMatchObject({
         id: drinkId,
         name: mockDrink.name,
@@ -315,27 +315,27 @@ describe('Drinks Routes', () => {
 
     it('should return 404 for non-existent drink', async () => {
       const request = createTestRequest('/api/drinks/99999');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 404, 'Drink not found');
     });
 
     it('should return 400 for invalid drink ID', async () => {
       const request = createTestRequest('/api/drinks/invalid');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400, 'Invalid drink ID');
     });
 
     it('should include proper cache headers', async () => {
       const request = createTestRequest(`/api/drinks/${drinkId}`);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expect(response.headers.get('cache-control')).toContain('public');
       expect(response.headers.get('cache-control')).toContain('max-age=');
@@ -356,13 +356,13 @@ describe('Drinks Routes', () => {
       `).bind(cafeId, 'Special Drink', 9.0, 7.99, false).run();
 
       const request = createTestRequest(`/api/cafes/${cafeId}/drinks`);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.drinks).toHaveLength(2);
       expect(data.drinks.every((drink: any) => drink.cafeId === cafeId)).toBe(true);
       
@@ -373,30 +373,30 @@ describe('Drinks Routes', () => {
 
     it('should return empty array for cafe with no drinks', async () => {
       const request = createTestRequest(`/api/cafes/${cafeId}/drinks`);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.drinks).toEqual([]);
     });
 
     it('should return 404 for non-existent cafe', async () => {
       const request = createTestRequest('/api/cafes/99999/drinks');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 404, 'Cafe not found');
     });
 
     it('should return 400 for invalid cafe ID', async () => {
       const request = createTestRequest('/api/cafes/invalid/drinks');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400, 'Invalid cafe ID');
     });
@@ -419,13 +419,13 @@ describe('Drinks Routes', () => {
       `).bind(cafeId, 'Regular Drink 2', 8.0, 6.99, false).run();
 
       const request = createTestRequest(`/api/cafes/${cafeId}/drinks`);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.drinks).toHaveLength(3);
       expect(data.drinks[0].isDefault).toBe(true);
       expect(data.drinks[0].name).toBe('Default Drink');
@@ -438,9 +438,9 @@ describe('Drinks Routes', () => {
       const invalidEnv = { ...env, DB: null };
 
       const request = createTestRequest('/api/drinks');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, invalidEnv, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, invalidEnv);
+      
 
       expect(response.status).toBe(500);
     });
@@ -457,9 +457,9 @@ describe('Drinks Routes', () => {
 
       for (const testCase of testCases) {
         const request = createTestRequest(`/api/drinks?${testCase.param}=${testCase.value}`);
-        const ctx = createExecutionContext();
-        const response = await worker.fetch(request, env, ctx);
-        await waitOnExecutionContext(ctx);
+        
+        const response = await worker.fetch(request, env);
+        
 
         expect(response.status).toBeGreaterThanOrEqual(400);
       }
@@ -492,9 +492,9 @@ describe('Drinks Routes', () => {
 
       for (const url of edgeCases) {
         const request = createTestRequest(url);
-        const ctx = createExecutionContext();
-        const response = await worker.fetch(request, env, ctx);
-        await waitOnExecutionContext(ctx);
+        
+        const response = await worker.fetch(request, env);
+        
 
         expectJsonResponse(response, 200);
       }

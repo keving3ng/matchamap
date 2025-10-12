@@ -214,9 +214,9 @@ export async function lookupPlace(request: IRequest, env: Env): Promise<Response
     
     // Return specific error message if available, otherwise generic message
     const errorMessage = error instanceof Error ? error.message : 'Failed to lookup place from Google Maps';
-    
+
     // Determine appropriate HTTP status code
-    let statusCode = HTTP_STATUS.INTERNAL_SERVER_ERROR;
+    let statusCode: number = HTTP_STATUS.INTERNAL_SERVER_ERROR;
     if (error instanceof Error) {
       if (error.message.includes('not found') || error.message.includes('Invalid Google Maps URL')) {
         statusCode = HTTP_STATUS.NOT_FOUND;

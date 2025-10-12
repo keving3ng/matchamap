@@ -388,13 +388,13 @@ export async function getDrinks(request: IRequest, env: Env): Promise<Response> 
       .select({
         id: drinks.id,
         name: drinks.name,
-        description: drinks.description,
         score: drinks.score,
         priceAmount: drinks.priceAmount,
         price: drinks.priceAmount, // Alias for backward compatibility
         priceCurrency: drinks.priceCurrency,
         gramsUsed: drinks.gramsUsed,
         isDefault: drinks.isDefault,
+        notes: drinks.notes,
         createdAt: drinks.createdAt,
         updatedAt: drinks.updatedAt,
         cafeId: drinks.cafeId,
@@ -420,31 +420,31 @@ export async function getDrinks(request: IRequest, env: Env): Promise<Response> 
       conditions.push(sql`${drinks.priceAmount} <= ${maxPrice}`);
     }
 
-    if (conditions.length > 0) {
-      query = query.where(and(...conditions));
-    }
+    // Apply filtering and sorting
+    const sortColumn = sort === 'price' ? drinks.priceAmount : sort === 'score' ? drinks.score : drinks.id;
+    const orderByFn = order === 'desc' ? desc(sortColumn) : asc(sortColumn);
 
-    // Apply sorting
-    const sortColumn = sort === 'price' ? drinks.priceAmount : drinks[sort as keyof typeof drinks];
-    query = query.orderBy(order === 'desc' ? desc(sortColumn) : asc(sortColumn));
+    const finalQuery = conditions.length > 0
+      ? query.where(and(...conditions)).orderBy(orderByFn)
+      : query.orderBy(orderByFn);
 
     // Get total count for pagination
-    let countQuery = db
+    const baseCountQuery = db
       .select({ count: sql`COUNT(*)` })
       .from(drinks)
       .leftJoin(cafes, eq(drinks.cafeId, cafes.id));
 
-    if (conditions.length > 0) {
-      countQuery = countQuery.where(and(...conditions));
-    }
+    const countQuery = conditions.length > 0
+      ? baseCountQuery.where(and(...conditions))
+      : baseCountQuery;
 
     const [results, countResult] = await Promise.all([
-      query.limit(limit).offset(offset),
+      finalQuery.limit(limit ?? 20).offset(offset ?? 0),
       countQuery
     ]);
 
     const total = Number(countResult[0]?.count || 0);
-    const hasMore = offset + limit < total;
+    const hasMore = (offset ?? 0) + (limit ?? 20) < total;
 
     return jsonResponse(
       {
@@ -482,13 +482,13 @@ export async function getDrink(request: IRequest, env: Env): Promise<Response> {
       .select({
         id: drinks.id,
         name: drinks.name,
-        description: drinks.description,
         score: drinks.score,
         priceAmount: drinks.priceAmount,
         price: drinks.priceAmount, // Alias for backward compatibility
         priceCurrency: drinks.priceCurrency,
         gramsUsed: drinks.gramsUsed,
         isDefault: drinks.isDefault,
+        notes: drinks.notes,
         createdAt: drinks.createdAt,
         updatedAt: drinks.updatedAt,
         cafeId: drinks.cafeId,

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { env, createExecutionContext, waitOnExecutionContext } from 'cloudflare:test';
+import { env } from 'cloudflare:test';
 import worker from '../../index';
 import {
   createTestRequest,
@@ -37,13 +37,13 @@ describe('Profile Routes', () => {
       `).bind(mockUser.id, 'Test User', 'This is a test bio', true).run();
 
       const request = createTestRequest('/api/users/testuser/profile');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.user).toMatchObject({
         id: mockUser.id,
         username: 'testuser',
@@ -61,9 +61,9 @@ describe('Profile Routes', () => {
 
     it('should return 404 for non-existent user', async () => {
       const request = createTestRequest('/api/users/nonexistentuser/profile');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 404, 'User not found');
     });
@@ -79,9 +79,9 @@ describe('Profile Routes', () => {
       `).bind(mockUser.id, 'Private User', false).run();
 
       const request = createTestRequest('/api/users/privateuser/profile');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 403, 'This profile is private');
     });
@@ -97,13 +97,13 @@ describe('Profile Routes', () => {
       `).bind(mockUser.id, 'Own User', false).run();
 
       const request = createAuthenticatedRequest('/api/users/ownuser/profile', userToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.user.displayName).toBe('Own User');
     });
 
@@ -113,13 +113,13 @@ describe('Profile Routes', () => {
       `).bind('noprofile', mockUser.id).run();
 
       const request = createTestRequest('/api/users/noprofile/profile');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.user.username).toBe('noprofile');
       expect(data.user.displayName).toBeNull();
     });
@@ -152,13 +152,13 @@ describe('Profile Routes', () => {
       `).bind(mockUser.id, true).run();
 
       const request = createTestRequest('/api/users/testpassport/profile');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.user.stats.passportCompletion).toBe(50); // 1 out of 2 cafes = 50%
       expect(data.user.stats.totalCheckins).toBe(1);
     });
@@ -174,13 +174,13 @@ describe('Profile Routes', () => {
       `).bind(mockUser.id, true, 'testinsta', 'testtiktok', 'https://testwebsite.com').run();
 
       const request = createTestRequest('/api/users/socialuser/profile');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.user.social).toMatchObject({
         instagram: 'testinsta',
         tiktok: 'testtiktok',
@@ -197,13 +197,13 @@ describe('Profile Routes', () => {
       `).bind(mockUser.id, 'My Profile', 'My bio', '{"theme": "dark"}').run();
 
       const request = createAuthenticatedRequest('/api/users/me/profile', userToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.displayName).toBe('My Profile');
       expect(data.bio).toBe('My bio');
       expect(data.preferences).toEqual({ theme: 'dark' });
@@ -216,22 +216,22 @@ describe('Profile Routes', () => {
 
     it('should return 401 when not authenticated', async () => {
       const request = createTestRequest('/api/users/me/profile');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 401);
     });
 
     it('should create default profile if none exists', async () => {
       const request = createAuthenticatedRequest('/api/users/me/profile', userToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.userId).toBe(mockUser.id);
       expect(data.displayName).toBeNull();
     });
@@ -243,13 +243,13 @@ describe('Profile Routes', () => {
       `).bind(mockUser.id, 'invalid json{').run();
 
       const request = createAuthenticatedRequest('/api/users/me/profile', userToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.preferences).toBeNull();
     });
 
@@ -258,9 +258,9 @@ describe('Profile Routes', () => {
       await env.DB.prepare(`DELETE FROM users WHERE id = ?`).bind(mockUser.id).run();
 
       const request = createAuthenticatedRequest('/api/users/me/profile', userToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 404, 'User not found');
     });
@@ -287,13 +287,13 @@ describe('Profile Routes', () => {
         method: 'PUT',
         body: JSON.stringify(updates),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data).toMatchObject(updates);
     });
 
@@ -309,13 +309,13 @@ describe('Profile Routes', () => {
         method: 'PUT',
         body: JSON.stringify(updates),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.isPublic).toBe(false);
       expect(data.showActivity).toBe(false);
     });
@@ -333,13 +333,13 @@ describe('Profile Routes', () => {
         method: 'PUT',
         body: JSON.stringify(updates),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.preferences).toEqual(updates.preferences);
     });
 
@@ -348,9 +348,9 @@ describe('Profile Routes', () => {
         method: 'PUT',
         body: JSON.stringify({ displayName: 'Test' }),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 401);
     });
@@ -367,9 +367,9 @@ describe('Profile Routes', () => {
           method: 'PUT',
           body: JSON.stringify(updates),
         });
-        const ctx = createExecutionContext();
-        const response = await worker.fetch(request, env, ctx);
-        await waitOnExecutionContext(ctx);
+        
+        const response = await worker.fetch(request, env);
+        
 
         await expectErrorResponse(response, 400);
       }
@@ -384,9 +384,9 @@ describe('Profile Routes', () => {
         method: 'PUT',
         body: JSON.stringify(updates),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400);
     });
@@ -403,9 +403,9 @@ describe('Profile Routes', () => {
           method: 'PUT',
           body: JSON.stringify(updates),
         });
-        const ctx = createExecutionContext();
-        const response = await worker.fetch(request, env, ctx);
-        await waitOnExecutionContext(ctx);
+        
+        const response = await worker.fetch(request, env);
+        
 
         await expectErrorResponse(response, 400);
       }
@@ -423,9 +423,9 @@ describe('Profile Routes', () => {
           method: 'PUT',
           body: JSON.stringify(updates),
         });
-        const ctx = createExecutionContext();
-        const response = await worker.fetch(request, env, ctx);
-        await waitOnExecutionContext(ctx);
+        
+        const response = await worker.fetch(request, env);
+        
 
         await expectErrorResponse(response, 400);
       }
@@ -440,9 +440,9 @@ describe('Profile Routes', () => {
         method: 'PUT',
         body: JSON.stringify(updates),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400);
     });
@@ -457,13 +457,13 @@ describe('Profile Routes', () => {
         method: 'PUT',
         body: JSON.stringify(updates),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.displayName).toBe('Partial Update');
     });
 
@@ -485,13 +485,13 @@ describe('Profile Routes', () => {
         method: 'PUT',
         body: JSON.stringify(updates),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.displayName).toBeNull();
       expect(data.bio).toBe('');
       expect(data.location).toBeNull();
@@ -509,13 +509,13 @@ describe('Profile Routes', () => {
         method: 'PUT',
         body: JSON.stringify(updates),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.displayName).toBe('New Profile');
     });
   });
@@ -532,9 +532,9 @@ describe('Profile Routes', () => {
         },
         body: formData,
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 501, 'not yet implemented');
     });
@@ -547,9 +547,9 @@ describe('Profile Routes', () => {
         method: 'POST',
         body: formData,
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 401);
     });
@@ -567,13 +567,13 @@ describe('Profile Routes', () => {
       `).bind(mockUser.id, true).run();
 
       const request = createTestRequest('/api/users/publicuser/profile');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.user.email).toBeUndefined();
       expect(data.user.role).toBeUndefined();
       expect(data.user.passwordHash).toBeUndefined();
@@ -595,9 +595,9 @@ describe('Profile Routes', () => {
         method: 'PUT',
         body: JSON.stringify(maliciousUpdates),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       // Should either reject malicious input or sanitize it
       await expectErrorResponse(response, 400);
@@ -614,9 +614,9 @@ describe('Profile Routes', () => {
         method: 'PUT',
         body: JSON.stringify(largePayload),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       // Should reject oversized payloads
       expect(response.status).toBeGreaterThanOrEqual(400);

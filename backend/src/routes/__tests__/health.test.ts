@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { env, createExecutionContext, waitOnExecutionContext } from 'cloudflare:test';
+import { env } from 'cloudflare:test';
 import worker from '../../index';
 import { createTestRequest, cleanupTestData, expectJsonResponse } from '../../test/utils';
 
@@ -11,13 +11,13 @@ describe('Health Routes', () => {
   describe('GET /api/health', () => {
     it('should return 200 with healthy status when database is connected', async () => {
       const request = createTestRequest('/api/health');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data).toMatchObject({
         status: 'ok',
         database: 'connected',
@@ -31,9 +31,9 @@ describe('Health Routes', () => {
 
     it('should include proper cache headers', async () => {
       const request = createTestRequest('/api/health');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expect(response.headers.get('cache-control')).toBe('no-store');
     });
@@ -43,9 +43,9 @@ describe('Health Routes', () => {
       const invalidEnv = { ...env, DB: null };
       
       const request = createTestRequest('/api/health');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, invalidEnv, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, invalidEnv);
+      
 
       expect(response.status).toBe(500);
       expectJsonResponse(response, 500);
@@ -53,9 +53,9 @@ describe('Health Routes', () => {
 
     it('should return health status with correct content type', async () => {
       const request = createTestRequest('/api/health');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expect(response.headers.get('content-type')).toContain('application/json');
     });
@@ -66,9 +66,9 @@ describe('Health Routes', () => {
       
       for (const method of methods) {
         const request = createTestRequest('/api/health', { method });
-        const ctx = createExecutionContext();
-        const response = await worker.fetch(request, env, ctx);
-        await waitOnExecutionContext(ctx);
+        
+        const response = await worker.fetch(request, env);
+        
         
         // Should either return 405 Method Not Allowed or still work
         // Depending on how the router is configured

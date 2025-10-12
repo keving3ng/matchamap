@@ -7,6 +7,7 @@ import { api } from '../utils/api'
 import { useCafeStore } from '../stores/cafeStore'
 import { useCafeSelection } from '../hooks/useCafeSelection'
 import { getInstagramUrl } from '../utils/instagram'
+import { createSafeGoogleMapsUrl } from '../utils/urlSafety'
 import type { Event, Cafe } from '../../../shared/types'
 
 interface EventDetailViewProps {
@@ -26,7 +27,8 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({ event }) => {
     return null
   }, [event.cafeId, cafesWithDistance])
 
-  const instagramUrl = getInstagramUrl(event.image)
+  const instagramUrl = getInstagramUrl(event.link)
+  const googleMapsUrl = event.location ? createSafeGoogleMapsUrl(event.location) : null
 
   const handleViewCafe = () => {
     if (linkedCafe) {
@@ -116,6 +118,24 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({ event }) => {
               <Instagram size={20} />
               {COPY.events.viewOnInstagram}
             </a>
+          )}
+
+          {/* Get Directions Button */}
+          {googleMapsUrl ? (
+            <a
+              href={googleMapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3.5 rounded-xl font-semibold hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 mb-3"
+            >
+              <Navigation size={20} />
+              {COPY.events.getDirections}
+            </a>
+          ) : (
+            <div className="w-full bg-gray-300 text-gray-600 py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2 mb-3 cursor-not-allowed">
+              <Navigation size={20} />
+              {COPY.events.getDirections}
+            </div>
           )}
         </div>
 
