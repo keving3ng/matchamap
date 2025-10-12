@@ -2,7 +2,7 @@ import React from 'react'
 import { Calendar, Clock, MapPin, DollarSign, Star, Navigation, ChevronDown, ChevronUp } from 'lucide-react'
 import { useNavigate } from 'react-router'
 import { ContentContainer } from './ContentContainer'
-import { ListSkeleton } from './ui'
+import { ListSkeleton, ErrorAlert } from './ui'
 import { useDataStore } from '../stores/dataStore'
 import { useLazyData } from '../hooks/useLazyData'
 import { useCafeStore } from '../stores/cafeStore'
@@ -21,6 +21,7 @@ export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
   const [showPastEvents, setShowPastEvents] = React.useState(false)
   const [pastEvents, setPastEvents] = React.useState<Event[]>([])
   const [loadingPastEvents, setLoadingPastEvents] = React.useState(false)
+  const [pastEventsError, setPastEventsError] = React.useState<string | null>(null)
 
   // Lazy load event items when component mounts (only if not already fetched)
   useLazyData(fetchEvents, eventsFetched)
@@ -51,11 +52,13 @@ export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
     if (!showPastEvents) {
       // Fetch past events
       setLoadingPastEvents(true)
+      setPastEventsError(null)
       try {
         const response = await api.events.getAll({ upcoming: false })
         setPastEvents(response.events)
       } catch (error) {
         console.error('Failed to fetch past events:', error)
+        setPastEventsError(COPY.events.failedToLoadPastEvents)
       } finally {
         setLoadingPastEvents(false)
       }
@@ -181,7 +184,7 @@ export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
                 className="w-full flex items-center justify-center gap-2 bg-gray-50 border border-gray-200 text-gray-600 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors"
               >
                 {showPastEvents ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                {showPastEvents ? 'Hide Past Events' : 'Show Past Events'}
+                {showPastEvents ? COPY.events.hidePastEvents : COPY.events.showPastEvents}
               </button>
             </div>
           )}
@@ -189,7 +192,13 @@ export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
           {/* Past Events Section */}
           {showPastEvents && (
             <div className="mt-6">
-              {loadingPastEvents ? (
+              {pastEventsError ? (
+                <ErrorAlert 
+                  message={pastEventsError} 
+                  onDismiss={() => setPastEventsError(null)}
+                  className="mb-4"
+                />
+              ) : loadingPastEvents ? (
                 <ListSkeleton count={3} />
               ) : pastEvents.length === 0 ? (
                 <div className="bg-white rounded-2xl shadow-md border-2 border-gray-200 p-8 text-center">
@@ -261,7 +270,7 @@ export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
                               onClick={() => handleViewEventDetails(event)}
                               className="w-full flex items-center justify-center gap-2 bg-gray-200 text-gray-700 py-2.5 rounded-xl font-semibold hover:bg-gray-300 transition-all shadow-md"
                             >
-                              View Details
+                              {COPY.events.viewDetails}
                             </button>
                           </div>
                         </div>
