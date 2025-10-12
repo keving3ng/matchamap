@@ -71,7 +71,7 @@ export const mockEvent = {
   date: '2024-12-01',
   link: 'https://example.com/event',
   location: 'Test Location',
-  isPriority: false,
+  featured: false,
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T00:00:00Z',
 };
@@ -81,7 +81,7 @@ export const mockFeedItem = {
   title: 'Test Feed Item',
   content: 'Test content for feed',
   link: 'https://example.com/feed',
-  isPriority: false,
+  featured: false,
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T00:00:00Z',
 };

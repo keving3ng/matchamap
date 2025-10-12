@@ -10,6 +10,7 @@ import { useCafeSelection } from '../hooks/useCafeSelection'
 import { getInstagramUrl } from '../utils/instagram'
 import { COPY } from '../constants/copy'
 import { api } from '../utils/api'
+import { formatCount } from '../utils/pluralization'
 import type { EventsViewProps } from '../types'
 import type { Event } from '../../../shared/types'
 
@@ -26,16 +27,18 @@ export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
   // Lazy load event items when component mounts (only if not already fetched)
   useLazyData(fetchEvents, eventsFetched)
 
-  // Sort events: featured first, then by date
-  const sortedEvents = React.useMemo(() => {
-    return [...eventItems].sort((a, b) => {
-      // Featured events first
-      if (a.featured && !b.featured) return -1
-      if (!a.featured && b.featured) return 1
-      // Then sort by date
-      return new Date(a.date).getTime() - new Date(b.date).getTime()
-    })
-  }, [eventItems])
+  // Backend already sorts events properly, no need for client-side sorting
+  const sortedEvents = eventItems
+
+  // Cleanup function to prevent memory leaks
+  React.useEffect(() => {
+    return () => {
+      // Reset past events state when component unmounts
+      setPastEvents([])
+      setPastEventsError(null)
+      setLoadingPastEvents(false)
+    }
+  }, [])
 
   // Helper function to navigate to cafe on map
   const handleViewCafe = (cafeId: number) => {
@@ -58,7 +61,13 @@ export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
         setPastEvents(response.events)
       } catch (error) {
         console.error('Failed to fetch past events:', error)
-        setPastEventsError(COPY.events.failedToLoadPastEvents)
+        // Check if it's a network error for better user messaging
+        const isNetworkError = error instanceof TypeError && error.message.includes('fetch')
+        setPastEventsError(
+          isNetworkError 
+            ? COPY.events.networkError
+            : COPY.events.failedToLoadPastEvents
+        )
       } finally {
         setLoadingPastEvents(false)
       }
@@ -210,7 +219,7 @@ export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
                 <>
                   <div className="mb-4 px-2">
                     <h3 className="text-lg font-bold text-gray-600">Past Events</h3>
-                    <p className="text-sm text-gray-500">{pastEvents.length} event{pastEvents.length !== 1 ? 's' : ''}</p>
+                    <p className="text-sm text-gray-500">{formatCount(pastEvents.length, 'event')}</p>
                   </div>
                   <div className="space-y-4 opacity-75">
                     {pastEvents.map((event) => (

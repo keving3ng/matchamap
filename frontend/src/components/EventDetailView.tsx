@@ -28,7 +28,7 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({ event }) => {
   }, [event.cafeId, cafesWithDistance])
 
   const instagramUrl = getInstagramUrl(event.link)
-  const googleMapsUrl = createSafeGoogleMapsUrl(event.location)
+  const googleMapsUrl = event.location ? createSafeGoogleMapsUrl(event.location) : null
 
   const handleViewCafe = () => {
     if (linkedCafe) {

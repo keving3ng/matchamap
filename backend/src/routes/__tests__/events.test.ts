@@ -43,7 +43,7 @@ describe('Events Routes', () => {
 
       for (const event of events) {
         await env.DB.prepare(`
-          INSERT INTO events (title, description, date, link, location, isPriority) 
+          INSERT INTO events (title, description, date, link, location, featured) 
           VALUES (?, ?, ?, ?, ?, ?)
         `).bind(
           event.title,
@@ -51,7 +51,7 @@ describe('Events Routes', () => {
           event.date,
           event.link,
           event.location,
-          event.isPriority
+          event.featured
         ).run();
       }
 
@@ -76,7 +76,7 @@ describe('Events Routes', () => {
       // Insert multiple events
       for (let i = 1; i <= 5; i++) {
         await env.DB.prepare(`
-          INSERT INTO events (title, description, date, link, location, isPriority) 
+          INSERT INTO events (title, description, date, link, location, featured) 
           VALUES (?, ?, ?, ?, ?, ?)
         `).bind(
           `Event ${i}`,
@@ -111,19 +111,19 @@ describe('Events Routes', () => {
       // Should respect max limit defined in PAGINATION_CONSTANTS
     });
 
-    it('should filter by priority events only', async () => {
+    it('should filter by featured events only', async () => {
       // Insert regular and priority events
       await env.DB.prepare(`
-        INSERT INTO events (title, description, date, link, location, isPriority) 
+        INSERT INTO events (title, description, date, link, location, featured) 
         VALUES (?, ?, ?, ?, ?, ?)
       `).bind('Regular Event', 'Regular description', '2024-12-01', 'https://example.com', 'Location', false).run();
 
       await env.DB.prepare(`
-        INSERT INTO events (title, description, date, link, location, isPriority) 
+        INSERT INTO events (title, description, date, link, location, featured) 
         VALUES (?, ?, ?, ?, ?, ?)
-      `).bind('Priority Event', 'Priority description', '2024-12-02', 'https://example.com', 'Location', true).run();
+      `).bind('Featured Event', 'Featured description', '2024-12-02', 'https://example.com', 'Location', true).run();
 
-      const request = createTestRequest('/api/events?priority=true');
+      const request = createTestRequest('/api/events?featured=true');
       
       const response = await worker.fetch(request, env);
       
@@ -132,8 +132,8 @@ describe('Events Routes', () => {
       
       const data = await response.json() as any;
       expect(data.events).toHaveLength(1);
-      expect(data.events[0].title).toBe('Priority Event');
-      expect(data.events[0].isPriority).toBe(true);
+      expect(data.events[0].title).toBe('Featured Event');
+      expect(data.events[0].featured).toBe(true);
     });
 
     it('should filter by date range', async () => {
@@ -146,7 +146,7 @@ describe('Events Routes', () => {
 
       for (const event of events) {
         await env.DB.prepare(`
-          INSERT INTO events (title, description, date, link, location, isPriority) 
+          INSERT INTO events (title, description, date, link, location, featured) 
           VALUES (?, ?, ?, ?, ?, ?)
         `).bind(event.title, 'Description', event.date, 'https://example.com', 'Location', false).run();
       }
@@ -187,7 +187,7 @@ describe('Events Routes', () => {
 
     it('should return events with all required fields', async () => {
       await env.DB.prepare(`
-        INSERT INTO events (title, description, date, link, location, isPriority) 
+        INSERT INTO events (title, description, date, link, location, featured) 
         VALUES (?, ?, ?, ?, ?, ?)
       `).bind(
         mockEvent.title,
@@ -195,7 +195,7 @@ describe('Events Routes', () => {
         mockEvent.date,
         mockEvent.link,
         mockEvent.location,
-        mockEvent.isPriority
+        mockEvent.featured
       ).run();
 
       const request = createTestRequest('/api/events');
@@ -213,7 +213,7 @@ describe('Events Routes', () => {
         date: mockEvent.date,
         link: mockEvent.link,
         location: mockEvent.location,
-        isPriority: mockEvent.isPriority,
+        featured: mockEvent.featured,
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
       });
@@ -234,7 +234,7 @@ describe('Events Routes', () => {
       const futureDateStr = futureDate.toISOString().split('T')[0];
 
       await env.DB.prepare(`
-        INSERT INTO events (title, description, date, link, location, isPriority) 
+        INSERT INTO events (title, description, date, link, location, featured) 
         VALUES (?, ?, ?, ?, ?, ?)
       `).bind('Future Event', 'Future description', futureDateStr, 'https://example.com', 'Location', false).run();
 
@@ -270,7 +270,7 @@ describe('Events Routes', () => {
         link: 'https://example.com',
         description: null,
         location: null,
-        isPriority: false,
+        featured: false,
       });
     });
   });
