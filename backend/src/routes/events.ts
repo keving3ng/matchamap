@@ -11,6 +11,7 @@ export async function listEvents(request: IRequest, env: Env): Promise<Response>
     const url = new URL(request.url);
     const upcoming = url.searchParams.get('upcoming') !== 'false'; // default true
     const featured = url.searchParams.get('featured') === 'true';
+    const cafeId = url.searchParams.get('cafeId');
     const limit = Math.min(parseInt(url.searchParams.get('limit') || PAGINATION_CONSTANTS.EVENTS_DEFAULT_LIMIT.toString()), PAGINATION_CONSTANTS.EVENTS_MAX_LIMIT);
 
     const db = getDb(env.DB);
@@ -27,7 +28,15 @@ export async function listEvents(request: IRequest, env: Env): Promise<Response>
       conditions.push(eq(events.featured, true));
     }
 
+    if (cafeId) {
+      const cafeIdNum = parseInt(cafeId);
+      if (!isNaN(cafeIdNum)) {
+        conditions.push(eq(events.cafeId, cafeIdNum));
+      }
+    }
+
     // Fetch events
+    // Order by event date (ascending) to show soonest upcoming events first
     const results = await db
       .select()
       .from(events)

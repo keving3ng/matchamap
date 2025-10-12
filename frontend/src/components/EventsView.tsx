@@ -1,22 +1,44 @@
 import React from 'react'
-import { Calendar, Clock, MapPin, DollarSign, Star } from 'lucide-react'
+import { Calendar, Clock, MapPin, DollarSign, Star, Navigation } from 'lucide-react'
+import { useNavigate } from 'react-router'
 import { ContentContainer } from './ContentContainer'
 import { ListSkeleton } from './ui'
 import { useDataStore } from '../stores/dataStore'
 import { useLazyData } from '../hooks/useLazyData'
+import { useCafeStore } from '../stores/cafeStore'
+import { useCafeSelection } from '../hooks/useCafeSelection'
+import { getInstagramUrl } from '../utils/instagram'
+import { COPY } from '../constants/copy'
 import type { EventsViewProps } from '../types'
+import type { Event } from '../../../shared/types'
 
 export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
   const { fetchEvents, eventsFetched, isLoading } = useDataStore()
+  const { cafesWithDistance } = useCafeStore()
+  const { handlePinClick } = useCafeSelection(cafesWithDistance)
+  const navigate = useNavigate()
 
   // Lazy load event items when component mounts (only if not already fetched)
   useLazyData(fetchEvents, eventsFetched)
+
+  // Helper function to navigate to cafe on map
+  const handleViewCafe = (cafeId: number) => {
+    // Navigate to map view with state to select the cafe
+    // This avoids race conditions with setTimeout
+    navigate('/', { state: { selectedCafeId: cafeId } })
+  }
+
+  const handleViewEventDetails = (event: Event) => {
+    // Create slug from event title
+    const slug = event.title.toLowerCase().replace(/\s+/g, '-')
+    navigate(`/events/${slug}`)
+  }
   return (
     <div className="flex-1 overflow-y-auto pb-24">
       {/* Header */}
       <div className="bg-white border-b-2 border-green-200 px-4 py-4 shadow-sm">
-        <h2 className="text-2xl font-bold text-gray-800 font-caveat">Upcoming Events</h2>
-        <p className="text-sm text-gray-600 mt-1">Toronto matcha community gatherings & workshops</p>
+        <h2 className="text-2xl font-bold text-gray-800 font-caveat">{COPY.events.title}</h2>
+        <p className="text-sm text-gray-600 mt-1">{COPY.events.subtitle}</p>
       </div>
 
       {/* Event Items */}
@@ -41,17 +63,26 @@ export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
             {event.featured && (
               <div className="bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 flex items-center gap-2 text-sm font-semibold">
                 <Star size={16} fill="white" />
-                Featured Event
+                {COPY.events.featuredEvent}
               </div>
             )}
 
             <div className="p-4">
               <div className="flex items-start gap-4">
-                <div className={`w-16 h-16 bg-gradient-to-br ${
-                  event.featured ? 'from-green-500 to-green-700' : 'from-green-400 to-green-600'
-                } rounded-xl flex items-center justify-center text-4xl flex-shrink-0 shadow-md`}>
-                  {event.image}
-                </div>
+                {/* Instagram link icon or emoji */}
+                {event.image && getInstagramUrl(event.image) && (
+                  <a
+                    href={getInstagramUrl(event.image)!}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`w-16 h-16 bg-gradient-to-br ${
+                      event.featured ? 'from-green-500 to-green-700' : 'from-green-400 to-green-600'
+                    } rounded-xl flex items-center justify-center text-4xl flex-shrink-0 shadow-md hover:scale-105 transition-transform`}
+                    title={COPY.events.viewOnInstagram}
+                  >
+                    🍵
+                  </a>
+                )}
 
                 <div className="flex-1">
                   <h3 className="font-bold text-lg text-gray-800 mb-2 leading-tight">{event.title}</h3>
@@ -72,15 +103,39 @@ export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
                       <span>{event.venue}, {event.location}</span>
                     </div>
 
-                    <div className="flex items-center gap-1.5 text-sm font-semibold text-green-700">
-                      <DollarSign size={14} className="text-green-600" />
-                      <span>{event.price}</span>
-                    </div>
+                    {/* Only show price if it exists */}
+                    {event.price && (
+                      <div className="flex items-center gap-1.5 text-sm font-semibold text-green-700">
+                        <DollarSign size={14} className="text-green-600" />
+                        <span>{event.price}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
 
               <p className="text-gray-700 mt-3 leading-relaxed">{event.description}</p>
+
+              {/* Action buttons */}
+              <div className="mt-3 space-y-2">
+                <button
+                  onClick={() => handleViewEventDetails(event)}
+                  className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-green-600 text-white py-2.5 rounded-xl font-semibold hover:from-green-600 hover:to-green-700 transition-all shadow-md hover:shadow-lg"
+                >
+                  {COPY.events.viewDetails}
+                </button>
+
+                {/* Cafe link button */}
+                {event.cafeId && (
+                  <button
+                    onClick={() => handleViewCafe(event.cafeId!)}
+                    className="w-full flex items-center justify-center gap-2 bg-white border-2 border-green-500 text-green-700 py-2.5 rounded-xl font-semibold hover:bg-green-50 transition-all shadow-md hover:shadow-lg"
+                  >
+                    <Navigation size={16} />
+                    {COPY.events.viewCafe}
+                  </button>
+                )}
+              </div>
             </div>
           </article>
             ))

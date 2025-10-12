@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
-import { MapPin, Navigation, Heart, CheckCircle, Instagram, ChevronDown, ChevronUp, Star, Coffee, MessageSquare, Clock, Lightbulb } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { MapPin, Navigation, Heart, CheckCircle, Instagram, ChevronDown, ChevronUp, Star, Coffee, MessageSquare, Clock, Lightbulb, Calendar as CalendarIcon } from 'lucide-react'
+import { useNavigate } from 'react-router'
 import { TikTokIcon } from './TikTokIcon'
 import { useAppFeatures } from '../hooks/useAppFeatures'
 import { getMapsUrl } from '../utils/mapsUrl'
@@ -7,15 +8,42 @@ import { ContentContainer } from './ContentContainer'
 import { formatHoursCompact } from '../utils/formatHours'
 import { sanitizeText } from '../utils/sanitize'
 import { COPY } from '../constants/copy'
+import { api } from '../utils/api'
 import type { DetailViewProps } from '../types'
+import type { Event } from '../../../shared/types'
 
 export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, onToggleVisited }) => {
   const { isPassportEnabled, isUserAccountsEnabled } = useAppFeatures()
   const isVisited: boolean = visitedLocations.includes(cafe.id)
   const mapsUrl = getMapsUrl(cafe.address || '', cafe.link)
   const [showAllHours, setShowAllHours] = useState(false)
+  const [cafeEvents, setCafeEvents] = useState<Event[]>([])
+  const [loadingEvents, setLoadingEvents] = useState(false)
+  const navigate = useNavigate()
 
   const hoursData = cafe.hours ? formatHoursCompact(cafe.hours) : null
+
+  // Fetch events for this cafe
+  useEffect(() => {
+    const fetchCafeEvents = async () => {
+      try {
+        setLoadingEvents(true)
+        const response = await api.events.getAll({ cafeId: cafe.id, upcoming: true })
+        setCafeEvents(response.events)
+      } catch (error) {
+        console.error('Failed to fetch cafe events:', error)
+      } finally {
+        setLoadingEvents(false)
+      }
+    }
+
+    fetchCafeEvents()
+  }, [cafe.id])
+
+  const handleViewEvent = (event: Event) => {
+    // Navigate to events view
+    navigate('/events')
+  }
 
   return (
     <div className="flex-1 overflow-y-auto pb-24 pt-0 bg-gradient-to-b from-cream-100 to-white">
@@ -318,6 +346,56 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
                   <span>{COPY.detail.seeTikTokReview}</span>
                 </a>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Upcoming Events Section */}
+        {cafeEvents.length > 0 && (
+          <div className="mt-8 animate-fade-in">
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 p-2 rounded-xl shadow-md">
+                <CalendarIcon size={20} className="text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-charcoal-900">{COPY.events.title}</h3>
+            </div>
+            <div className="space-y-3">
+              {cafeEvents.map((event) => (
+                <div
+                  key={event.id}
+                  className="bg-white rounded-xl shadow-md border-2 border-matcha-100 p-4 hover:shadow-lg transition"
+                >
+                  <div className="flex items-start gap-3">
+                    {event.featured && (
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2 flex-shrink-0" title="Featured Event" />
+                    )}
+                    <div className="flex-1">
+                      <h4 className="font-bold text-gray-800 mb-1">{event.title}</h4>
+                      <div className="flex flex-wrap gap-2 text-xs text-gray-600 mb-2">
+                        <span className="flex items-center gap-1">
+                          <CalendarIcon size={12} className="text-matcha-600" />
+                          {event.date}
+                        </span>
+                        <span>•</span>
+                        <span>{event.time}</span>
+                        {event.price && (
+                          <>
+                            <span>•</span>
+                            <span className="font-semibold text-matcha-700">{event.price}</span>
+                          </>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-600 line-clamp-2">{event.description}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleViewEvent(event)}
+                    className="w-full mt-3 bg-gradient-to-r from-matcha-500 to-matcha-600 text-white py-2 rounded-lg font-semibold hover:from-matcha-600 hover:to-matcha-700 transition-all shadow-md hover:shadow-lg text-sm"
+                  >
+                    {COPY.events.viewDetails}
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         )}

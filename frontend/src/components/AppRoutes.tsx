@@ -1,8 +1,9 @@
 import React, { useEffect, Suspense } from 'react'
-import { Routes, Route, Navigate, useParams } from 'react-router'
+import { Routes, Route, Navigate, useParams, useLocation } from 'react-router'
 import MapView from './MapView'
 import ListView from './ListView'
 import DetailView from './DetailView'
+import EventDetailView from './EventDetailView'
 import FeedView from './FeedView'
 import PassportView from './PassportView'
 import EventsView from './EventsView'
@@ -77,6 +78,25 @@ const CafeDetailWrapper: React.FC = () => {
   )
 }
 
+// Wrapper component for event detail view with URL params
+const EventDetailWrapper: React.FC = () => {
+  const { slug } = useParams<{ slug: string }>()
+  const { eventItems } = useDataStore()
+
+  // Find event by slug
+  const event = eventItems.find(e => {
+    // Create slug from event title for comparison
+    const eventSlug = e.title.toLowerCase().replace(/\s+/g, '-')
+    return eventSlug === slug
+  })
+
+  if (!event) {
+    return <Navigate to="/events" replace />
+  }
+
+  return <EventDetailView event={event} />
+}
+
 export const AppRoutes: React.FC = () => {
   const { isFeedEnabled, isEventsEnabled, isPassportEnabled } = useAppFeatures()
   const isAdminEnabled = useFeatureToggle('ENABLE_ADMIN_PANEL')
@@ -90,11 +110,25 @@ export const AppRoutes: React.FC = () => {
   const { showPopover, expandedCard, setExpandedCard, closePopover } = useUIStore()
   const { stampedCafeIds, toggleStamp } = useVisitedCafesStore()
   const { handlePinClick, viewDetails } = useCafeSelection(cafesWithDistance)
+  const location = useLocation()
 
   // Fetch only cafes on mount - feed/events lazy load when navigated to
   useEffect(() => {
     fetchCafes() // Only fetch cafes (70% of users only use map)
   }, [])
+
+  // Handle navigation state for cafe selection (from event views)
+  useEffect(() => {
+    const state = location.state as { selectedCafeId?: number } | null
+    if (state?.selectedCafeId && cafesWithDistance.length > 0) {
+      const cafe = cafesWithDistance.find(c => c.id === state.selectedCafeId)
+      if (cafe) {
+        handlePinClick(cafe)
+        // Clear the state to prevent re-triggering on back navigation
+        window.history.replaceState({}, document.title)
+      }
+    }
+  }, [location.state, cafesWithDistance, handlePinClick])
 
   return (
     <Routes>
@@ -122,9 +156,12 @@ export const AppRoutes: React.FC = () => {
         } />
       )}
       {isEventsEnabled && (
-        <Route path="/events" element={
-          <EventsView eventItems={eventItems} />
-        } />
+        <>
+          <Route path="/events" element={
+            <EventsView eventItems={eventItems} />
+          } />
+          <Route path="/events/:slug" element={<EventDetailWrapper />} />
+        </>
       )}
       {isPassportEnabled && (
         <Route path="/passport" element={

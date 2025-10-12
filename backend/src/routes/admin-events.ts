@@ -1,5 +1,5 @@
 import { IRequest } from 'itty-router';
-import { eq, desc, and } from 'drizzle-orm';
+import { eq, desc, and, ne } from 'drizzle-orm';
 import { Env } from '../types';
 import { getDb, events, NewEvent } from '../db';
 import { jsonResponse, errorResponse } from '../utils/response';
@@ -27,6 +27,8 @@ export async function listAllEvents(request: IRequest, env: Env): Promise<Respon
       ? db.select().from(events).where(and(...conditions))
       : db.select().from(events);
 
+    // Order by event date (descending) to show most distant future events first
+    // This helps admins see what's scheduled furthest out
     const results = await query
       .orderBy(desc(events.date))
       .limit(limit + 1)
@@ -87,6 +89,14 @@ export async function createEvent(request: IRequest, env: Env): Promise<Response
 
     const db = getDb(env.DB);
 
+    // If creating a featured event, remove featured status from all other events
+    if (body.featured === true) {
+      await db
+        .update(events)
+        .set({ featured: false })
+        .where(eq(events.featured, true));
+    }
+
     const result = await db.insert(events).values({
       title: body.title,
       date: body.date,
@@ -135,6 +145,18 @@ export async function updateEvent(request: IRequest, env: Env): Promise<Response
     }
 
     const beforeState = existing;
+
+    // If setting this event as featured, remove featured status from all other events
+    if (body.featured === true) {
+      await db
+        .update(events)
+        .set({ featured: false })
+        .where(and(
+          eq(events.featured, true),
+          // Don't update the current event (we'll do that in the main update)
+          ne(events.id, id)
+        ));
+    }
 
     const result = await db
       .update(events)

@@ -3,10 +3,11 @@ import type { Cafe } from '../types'
 export interface MarkerState {
   isSelected: boolean
   isVisited: boolean
+  hasUpcomingEvent?: boolean
 }
 
 export const createMatchaMarker = (cafe: Cafe, state: MarkerState = { isSelected: false, isVisited: false }): string => {
-  const { isSelected, isVisited } = state
+  const { isSelected, isVisited, hasUpcomingEvent = false } = state
 
   // Determine marker colors based on state
   const getMarkerColors = () => {
@@ -81,6 +82,11 @@ export const createMatchaMarker = (cafe: Cafe, state: MarkerState = { isSelected
         <div class="absolute -bottom-2 -right-1 bg-green-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
           ✓
         </div>
+      ` : ''}
+
+      <!-- Upcoming Event Indicator -->
+      ${hasUpcomingEvent ? `
+        <div class="absolute -top-2 -left-1 bg-yellow-400 border-2 border-white rounded-full w-3 h-3 animate-pulse shadow-md" title="Upcoming Event"></div>
       ` : ''}
 
       <!-- Selection ring -->
