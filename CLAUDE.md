@@ -443,6 +443,7 @@ export const CafeCard: React.FC<CafeCardProps> = ({ cafe, onSelect }) => {
 
 | Task | Document |
 |------|----------|
+| **Testing guide** | `docs/TESTING.md` ⭐ **NEW!** |
 | **Database schema** | `docs/TECH_SPEC.md` → Database Schema section |
 | **API endpoints** | `docs/TECH_SPEC.md` → API Architecture section |
 | **Deployment** | `docs/DEPLOYMENT.md` |
@@ -480,11 +481,12 @@ npm run tail             # View live logs
 ```
 
 **Pre-commit checklist:**
-1. ✅ `npm run typecheck` passes
-2. ✅ `npm run build` succeeds
-3. ✅ No console errors in browser
-4. ✅ Test on mobile viewport (320px)
-5. ✅ Check bundle size didn't explode
+1. ✅ `npm test` passes (or at least doesn't introduce new failures)
+2. ✅ `npm run typecheck` passes
+3. ✅ `npm run build` succeeds
+4. ✅ No console errors in browser
+5. ✅ Test on mobile viewport (320px)
+6. ✅ Check bundle size didn't explode
 
 ---
 
@@ -526,6 +528,41 @@ const { hasUserAccounts, hasUserSocial } = useUserFeatures()
 ---
 
 ## Testing Approach
+
+**Automated Testing**: 762/920 tests passing (82.8%) | See `docs/TESTING.md` for comprehensive guide
+
+### Automated Tests (Vitest + Testing Library)
+
+**Test Structure:**
+```
+frontend/src/
+├── stores/__tests__/       # Store tests (256/260 passing - 98.5%)
+├── components/__tests__/   # Component tests
+├── hooks/__tests__/        # Hook tests
+└── test/
+    ├── setup.ts            # Global test setup
+    └── helpers.ts          # Test utilities
+```
+
+**Key Testing Patterns:**
+- **Store Tests**: Use `waitForPersistence()` for async Zustand persistence
+- **Component Tests**: Use `userEvent` for realistic user interactions
+- **API Mocking**: Use centralized API mock pattern with `vi.mocked()`
+- **Feature Flags**: Use `mockFeatureFlag()` utility
+
+**Running Tests:**
+```bash
+npm test                    # Run all tests
+npm test -- --watch         # Watch mode
+npm test -- path/to/test    # Run specific test
+npm test -- --coverage      # With coverage
+```
+
+**See `docs/TESTING.md` for:**
+- Complete testing patterns and examples
+- Store test refactoring guide
+- Troubleshooting common issues
+- Best practices and anti-patterns
 
 ### Manual Testing Checklist
 
@@ -645,7 +682,8 @@ Before marking any task complete, verify:
 
 ---
 
-_Last updated: 2025-10-10_
+_Last updated: 2025-10-12_
 _Project Phase: V2 Development (User Accounts + Social Features)_
 _React: 18.3+ | Zustand | Vite | TypeScript: Strict Mode_
 _UI Component Library: Available in `frontend/src/components/ui/`_
+_Test Suite: 762/920 passing (82.8%) - See docs/TESTING.md_
