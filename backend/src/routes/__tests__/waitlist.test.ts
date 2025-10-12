@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { env, createExecutionContext, waitOnExecutionContext } from 'cloudflare:test';
+import { env } from 'cloudflare:test';
 import worker from '../../index';
 import {
   createTestRequest,
@@ -25,13 +25,13 @@ describe('Waitlist Routes', () => {
         method: 'POST',
         body: JSON.stringify(waitlistData),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 201);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.message).toContain('successfully added');
       expect(data.email).toBe('test@example.com');
 
@@ -54,13 +54,13 @@ describe('Waitlist Routes', () => {
         method: 'POST',
         body: JSON.stringify(waitlistData),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 201);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.email).toBe('test@example.com');
 
       // Verify normalized email in database
@@ -85,9 +85,9 @@ describe('Waitlist Routes', () => {
         method: 'POST',
         body: JSON.stringify(waitlistData),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400, 'already registered');
     });
@@ -111,9 +111,9 @@ describe('Waitlist Routes', () => {
           method: 'POST',
           body: JSON.stringify(waitlistData),
         });
-        const ctx = createExecutionContext();
-        const response = await worker.fetch(request, env, ctx);
-        await waitOnExecutionContext(ctx);
+        
+        const response = await worker.fetch(request, env);
+        
 
         await expectErrorResponse(response, 400);
       }
@@ -126,9 +126,9 @@ describe('Waitlist Routes', () => {
         method: 'POST',
         body: JSON.stringify(waitlistData),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400, 'email is required');
     });
@@ -138,9 +138,9 @@ describe('Waitlist Routes', () => {
         method: 'POST',
         body: 'invalid json{',
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expect(response.status).toBe(500);
     });
@@ -154,9 +154,9 @@ describe('Waitlist Routes', () => {
         method: 'POST',
         body: JSON.stringify(waitlistData),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expect(response.headers.get('content-type')).toContain('application/json');
     });
@@ -170,13 +170,13 @@ describe('Waitlist Routes', () => {
         method: 'POST',
         body: JSON.stringify(waitlistData),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 201);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.email).toBe('user@mail.subdomain.example.com');
     });
 
@@ -189,13 +189,13 @@ describe('Waitlist Routes', () => {
         method: 'POST',
         body: JSON.stringify(waitlistData),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 201);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.email).toBe('test@example.org');
     });
 
@@ -215,9 +215,9 @@ describe('Waitlist Routes', () => {
           method: 'POST',
           body: JSON.stringify(waitlistData),
         });
-        const ctx = createExecutionContext();
-        const response = await worker.fetch(request, env, ctx);
-        await waitOnExecutionContext(ctx);
+        
+        const response = await worker.fetch(request, env);
+        
 
         expectJsonResponse(response, 201);
       }
@@ -234,9 +234,9 @@ describe('Waitlist Routes', () => {
         method: 'POST',
         body: JSON.stringify(waitlistData),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 201);
 
@@ -266,9 +266,9 @@ describe('Waitlist Routes', () => {
         method: 'POST',
         body: JSON.stringify(waitlistData),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       // Should reject invalid email format
       await expectErrorResponse(response, 400);
@@ -289,9 +289,9 @@ describe('Waitlist Routes', () => {
         method: 'POST',
         body: JSON.stringify(waitlistData),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       // Should reject overly long email
       await expectErrorResponse(response, 400);
@@ -313,9 +313,9 @@ describe('Waitlist Routes', () => {
           method: 'POST',
           body: JSON.stringify(waitlistData),
         });
-        const ctx = createExecutionContext();
-        const response = await worker.fetch(request, env, ctx);
-        await waitOnExecutionContext(ctx);
+        
+        const response = await worker.fetch(request, env);
+        
 
         expectJsonResponse(response, 201);
       }
@@ -330,7 +330,7 @@ describe('Waitlist Routes', () => {
         worker.fetch(createTestRequest('/api/waitlist', {
           method: 'POST',
           body: JSON.stringify(waitlistData),
-        }), env, createExecutionContext())
+        }), env)
       );
 
       const responses = await Promise.all(requests);
@@ -370,9 +370,9 @@ describe('Waitlist Routes', () => {
           method: 'POST',
           body: JSON.stringify(waitlistData),
         });
-        const ctx = createExecutionContext();
-        const response = await worker.fetch(request, env, ctx);
-        await waitOnExecutionContext(ctx);
+        
+        const response = await worker.fetch(request, env);
+        
 
         await expectErrorResponse(response, 400);
       }
@@ -390,9 +390,9 @@ describe('Waitlist Routes', () => {
         method: 'POST',
         body: JSON.stringify(waitlistData),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, invalidEnv, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, invalidEnv);
+      
 
       expect(response.status).toBe(500);
     });
@@ -402,9 +402,9 @@ describe('Waitlist Routes', () => {
         method: 'POST',
         body: '',
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expect(response.status).toBe(500);
     });
@@ -419,9 +419,9 @@ describe('Waitlist Routes', () => {
         body: JSON.stringify(waitlistData),
         // No content-type header
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       // Should still work or return appropriate error
       expect([201, 400, 500]).toContain(response.status);
@@ -445,9 +445,9 @@ describe('Waitlist Routes', () => {
           method: 'POST',
           body: JSON.stringify(waitlistData),
         });
-        const ctx = createExecutionContext();
-        const response = await worker.fetch(request, env, ctx);
-        await waitOnExecutionContext(ctx);
+        
+        const response = await worker.fetch(request, env);
+        
 
         expectJsonResponse(response, 201);
       }

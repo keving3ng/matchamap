@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { env, createExecutionContext, waitOnExecutionContext } from 'cloudflare:test';
+import { env } from 'cloudflare:test';
 import worker from '../../index';
 import {
   createTestRequest,
@@ -30,13 +30,13 @@ describe('Cities Routes', () => {
       `).bind('Vancouver', 'vancouver', 'Vancouver, BC', 49.2827, -123.1207, 11, false).run(); // Inactive
 
       const request = createTestRequest('/api/cities');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.cities).toHaveLength(2); // Only active cities
       expect(data.cities[0]).toMatchObject({
         id: expect.any(Number),
@@ -59,21 +59,21 @@ describe('Cities Routes', () => {
       await env.DB.exec('UPDATE cities SET isActive = false');
 
       const request = createTestRequest('/api/cities');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.cities).toEqual([]);
     });
 
     it('should include proper cache headers', async () => {
       const request = createTestRequest('/api/cities');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expect(response.headers.get('cache-control')).toContain('public');
       expect(response.headers.get('cache-control')).toContain('max-age=');
@@ -92,13 +92,13 @@ describe('Cities Routes', () => {
       `).bind('Alpha City', 'alpha', 'Alpha City', 0, 0, 10, true).run();
 
       const request = createTestRequest('/api/cities');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.cities).toHaveLength(3);
       expect(data.cities[0].name).toBe('Alpha City');
       expect(data.cities[1].name).toBe('Toronto'); // From seedTestData
@@ -110,22 +110,22 @@ describe('Cities Routes', () => {
       const invalidEnv = { ...env, DB: null };
 
       const request = createTestRequest('/api/cities');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, invalidEnv, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, invalidEnv);
+      
 
       expect(response.status).toBe(500);
     });
 
     it('should return all required city fields', async () => {
       const request = createTestRequest('/api/cities');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.cities).toHaveLength(1);
       
       const city = data.cities[0];
@@ -161,13 +161,13 @@ describe('Cities Routes', () => {
       `).bind('Date Line', 'date-line', 'Date Line', 0.0, 180.0, 5, true).run();
 
       const request = createTestRequest('/api/cities');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.cities).toHaveLength(4);
       
       // Verify edge case coordinates are preserved
@@ -188,13 +188,13 @@ describe('Cities Routes', () => {
   describe('GET /api/cities/:key', () => {
     it('should return single city by key', async () => {
       const request = createTestRequest('/api/cities/toronto');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.city).toMatchObject({
         id: mockCity.id,
         name: mockCity.name,
@@ -209,9 +209,9 @@ describe('Cities Routes', () => {
 
     it('should return 404 for non-existent city', async () => {
       const request = createTestRequest('/api/cities/nonexistent');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 404, 'City not found');
     });
@@ -223,9 +223,9 @@ describe('Cities Routes', () => {
       `).bind('toronto').run();
 
       const request = createTestRequest('/api/cities/toronto');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 404, 'City not found');
     });
@@ -233,14 +233,14 @@ describe('Cities Routes', () => {
     it('should handle case sensitivity in city keys', async () => {
       // Test uppercase key
       const request = createTestRequest('/api/cities/TORONTO');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       // Should either work (case insensitive) or return 404 (case sensitive)
       // Depending on implementation, adjust expectation accordingly
       if (response.status === 200) {
-        const data = await response.json();
+        const data = await response.json() as any;
         expect(data.city.key).toBe('toronto');
       } else {
         await expectErrorResponse(response, 404);
@@ -249,9 +249,9 @@ describe('Cities Routes', () => {
 
     it('should include proper cache headers', async () => {
       const request = createTestRequest('/api/cities/toronto');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expect(response.headers.get('cache-control')).toContain('public');
       expect(response.headers.get('cache-control')).toContain('max-age=');
@@ -267,9 +267,9 @@ describe('Cities Routes', () => {
 
       for (const key of invalidKeys) {
         const request = createTestRequest(`/api/cities/${encodeURIComponent(key)}`);
-        const ctx = createExecutionContext();
-        const response = await worker.fetch(request, env, ctx);
-        await waitOnExecutionContext(ctx);
+        
+        const response = await worker.fetch(request, env);
+        
 
         expect(response.status).toBeGreaterThanOrEqual(400);
       }
@@ -303,13 +303,13 @@ describe('Cities Routes', () => {
 
     it('should return cafes for specific city', async () => {
       const request = createTestRequest('/api/cities/toronto/cafes');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.cafes).toHaveLength(2);
       expect(data.cafes.every((cafe: any) => cafe.city === 'toronto')).toBe(true);
       expect(data.city).toMatchObject({
@@ -320,22 +320,22 @@ describe('Cities Routes', () => {
 
     it('should return empty array for city with no cafes', async () => {
       const request = createTestRequest('/api/cities/montreal/cafes');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.cafes).toHaveLength(1); // Montreal has 1 cafe
       expect(data.city.key).toBe('montreal');
     });
 
     it('should return 404 for non-existent city', async () => {
       const request = createTestRequest('/api/cities/nonexistent/cafes');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 404, 'City not found');
     });
@@ -348,13 +348,13 @@ describe('Cities Routes', () => {
       `).bind('toronto-cafe-1').run();
 
       const request = createTestRequest('/api/cities/toronto/cafes');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.cafes).toHaveLength(1);
       expect(data.cafes[0].slug).toBe('toronto-cafe-2');
     });
@@ -369,13 +369,13 @@ describe('Cities Routes', () => {
       }
 
       const request = createTestRequest('/api/cities/toronto/cafes?limit=5&offset=3');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.cafes).toHaveLength(5);
       expect(data.total).toBe(10);
       expect(data.hasMore).toBe(true);
@@ -393,13 +393,13 @@ describe('Cities Routes', () => {
       `).bind(cafeResult.id, 'Test Drink', 8.5, 5.99, true).run();
 
       const request = createTestRequest('/api/cities/toronto/cafes');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       const cafeWithDrink = data.cafes.find((cafe: any) => cafe.slug === 'toronto-cafe-1');
       expect(cafeWithDrink.displayScore).toBe(8.5);
       expect(cafeWithDrink.drinks).toHaveLength(1);
@@ -411,9 +411,9 @@ describe('Cities Routes', () => {
       const maliciousKey = "'; DROP TABLE cities; --";
       
       const request = createTestRequest(`/api/cities/${encodeURIComponent(maliciousKey)}`);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       // Should not cause an error and cities table should still exist
       expect(response.status).toBeGreaterThanOrEqual(400);
@@ -431,13 +431,13 @@ describe('Cities Routes', () => {
       `).bind('Special City', 'special-city', 'Special City', 0, 0, 10, true).run();
 
       const request = createTestRequest('/api/cities/special-city');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.city.key).toBe('special-city');
     });
 
@@ -453,13 +453,13 @@ describe('Cities Routes', () => {
       }
 
       const request = createTestRequest('/api/cities');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       // Should not include city with invalid coordinates
       const invalidCity = data.cities.find((city: any) => city.key === 'invalid-city');
       expect(invalidCity).toBeUndefined();

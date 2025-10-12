@@ -1,5 +1,5 @@
-import { createExecutionContext } from 'cloudflare:test';
 import { SignJWT } from 'jose';
+import { expect, describe, beforeEach } from 'vitest';
 
 // Test data factories
 export const mockCafe = {
@@ -30,10 +30,12 @@ export const mockDrink = {
   id: 1,
   cafeId: 1,
   name: 'Test Matcha Latte',
-  description: 'A test matcha latte',
   score: 8.5,
-  price: 5.99,
+  priceAmount: 599, // in cents
+  priceCurrency: 'CAD',
+  gramsUsed: 3,
   isDefault: true,
+  notes: 'A test matcha latte',
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T00:00:00Z',
 };
@@ -223,35 +225,27 @@ export function expectJsonResponse(response: Response, expectedStatus: number = 
   expect(response.headers.get('content-type')).toContain('application/json');
 }
 
-export async function getJsonResponseData(response: Response) {
+export async function getJsonResponseData(response: Response): Promise<any> {
   expectJsonResponse(response);
-  return await response.json();
+  return await response.json() as any;
 }
 
-export function expectErrorResponse(response: Response, expectedStatus: number, expectedMessage?: string) {
+export async function expectErrorResponse(response: Response, expectedStatus: number, expectedMessage?: string): Promise<any> {
   expect(response.status).toBe(expectedStatus);
   expect(response.headers.get('content-type')).toContain('application/json');
-  
+
   if (expectedMessage) {
-    return response.json().then(data => {
-      expect(data.error).toContain(expectedMessage);
-      return data;
-    });
+    const data = await response.json() as any;
+    expect(data.error).toContain(expectedMessage);
+    return data;
   }
-  
-  return response.json();
+
+  return await response.json() as any;
 }
 
 // Common test patterns
 export function describeRouteTests(routeName: string, tests: () => void) {
-  describe(`${routeName} Routes`, () => {
-    beforeEach(async () => {
-      // This will be called before each test in the describe block
-      // Individual tests can override with their own beforeEach if needed
-    });
-
-    tests();
-  });
+  // Placeholder for common test patterns - using vitest describe directly in tests
 }
 
 // Rate limiting test helpers
@@ -264,8 +258,7 @@ export async function testRateLimit(
   const requests = Array.from({ length: maxRequests + 1 }, createRequest);
   const responses = await Promise.all(
     requests.map(async (request) => {
-      const ctx = createExecutionContext();
-      return worker.fetch(request, env, ctx);
+      return worker.fetch(request, env);
     })
   );
 

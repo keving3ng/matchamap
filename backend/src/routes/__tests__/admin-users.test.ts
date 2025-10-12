@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { env, createExecutionContext, waitOnExecutionContext } from 'cloudflare:test';
+import { env } from 'cloudflare:test';
 import worker from '../../index';
 import {
   createTestRequest,
@@ -27,13 +27,13 @@ describe('Admin Users Routes', () => {
   describe('GET /api/admin/users', () => {
     it('should list all users when authenticated as admin', async () => {
       const request = createAuthenticatedRequest('/api/admin/users', adminToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.users).toHaveLength(2); // mockUser and mockAdminUser
       expect(data.total).toBe(2);
       expect(data.users[0]).toMatchObject({
@@ -46,18 +46,18 @@ describe('Admin Users Routes', () => {
 
     it('should return 401 when not authenticated', async () => {
       const request = createTestRequest('/api/admin/users');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 401);
     });
 
     it('should return 403 when authenticated as regular user', async () => {
       const request = createAuthenticatedRequest('/api/admin/users', userToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 403);
     });
@@ -72,13 +72,13 @@ describe('Admin Users Routes', () => {
       }
 
       const request = createAuthenticatedRequest('/api/admin/users?limit=5&offset=2', adminToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.users).toHaveLength(5);
       expect(data.total).toBe(10);
       expect(data.hasMore).toBe(true);
@@ -86,39 +86,39 @@ describe('Admin Users Routes', () => {
 
     it('should support search by email', async () => {
       const request = createAuthenticatedRequest('/api/admin/users?search=admin@example.com', adminToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.users).toHaveLength(1);
       expect(data.users[0].email).toBe(mockAdminUser.email);
     });
 
     it('should filter by role', async () => {
       const request = createAuthenticatedRequest('/api/admin/users?role=admin', adminToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.users).toHaveLength(1);
       expect(data.users[0].role).toBe('admin');
     });
 
     it('should sort users by creation date', async () => {
       const request = createAuthenticatedRequest('/api/admin/users?sort=createdAt&order=desc', adminToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.users).toHaveLength(2);
       // Most recent first
       expect(new Date(data.users[0].createdAt).getTime())
@@ -129,13 +129,13 @@ describe('Admin Users Routes', () => {
   describe('GET /api/admin/users/:id', () => {
     it('should get user details when authenticated as admin', async () => {
       const request = createAuthenticatedRequest(`/api/admin/users/${mockUser.id}`, adminToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.user).toMatchObject({
         id: mockUser.id,
         email: mockUser.email,
@@ -146,36 +146,36 @@ describe('Admin Users Routes', () => {
 
     it('should return 404 for non-existent user', async () => {
       const request = createAuthenticatedRequest('/api/admin/users/99999', adminToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 404);
     });
 
     it('should return 401 when not authenticated', async () => {
       const request = createTestRequest(`/api/admin/users/${mockUser.id}`);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 401);
     });
 
     it('should return 403 when authenticated as regular user', async () => {
       const request = createAuthenticatedRequest(`/api/admin/users/${mockUser.id}`, userToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 403);
     });
 
     it('should return 400 for invalid user ID', async () => {
       const request = createAuthenticatedRequest('/api/admin/users/invalid', adminToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400, 'Invalid user ID');
     });
@@ -188,13 +188,13 @@ describe('Admin Users Routes', () => {
       `).bind(mockUser.id, 'Test Display Name', 'Test bio').run();
 
       const request = createAuthenticatedRequest(`/api/admin/users/${mockUser.id}`, adminToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.profile).toMatchObject({
         displayName: 'Test Display Name',
         bio: 'Test bio',
@@ -210,13 +210,13 @@ describe('Admin Users Routes', () => {
         method: 'PUT',
         body: JSON.stringify(roleUpdate),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.user.role).toBe('admin');
 
       // Verify in database
@@ -233,9 +233,9 @@ describe('Admin Users Routes', () => {
         method: 'PUT',
         body: JSON.stringify(roleUpdate),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400, 'Invalid role');
     });
@@ -247,9 +247,9 @@ describe('Admin Users Routes', () => {
         method: 'PUT',
         body: JSON.stringify(roleUpdate),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400, 'cannot modify your own role');
     });
@@ -261,9 +261,9 @@ describe('Admin Users Routes', () => {
         method: 'PUT',
         body: JSON.stringify(roleUpdate),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 404);
     });
@@ -273,9 +273,9 @@ describe('Admin Users Routes', () => {
         method: 'PUT',
         body: JSON.stringify({ role: 'admin' }),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 401);
     });
@@ -285,9 +285,9 @@ describe('Admin Users Routes', () => {
         method: 'PUT',
         body: JSON.stringify({ role: 'admin' }),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 403);
     });
@@ -299,9 +299,9 @@ describe('Admin Users Routes', () => {
         method: 'PUT',
         body: JSON.stringify(roleUpdate),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
 
@@ -321,13 +321,13 @@ describe('Admin Users Routes', () => {
       const request = createAuthenticatedRequest(`/api/admin/users/${mockUser.id}`, adminToken, {
         method: 'DELETE',
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.message).toContain('deleted successfully');
 
       // Verify user is deleted from database
@@ -341,9 +341,9 @@ describe('Admin Users Routes', () => {
       const request = createAuthenticatedRequest(`/api/admin/users/${mockAdminUser.id}`, adminToken, {
         method: 'DELETE',
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400, 'cannot delete your own account');
     });
@@ -352,9 +352,9 @@ describe('Admin Users Routes', () => {
       const request = createAuthenticatedRequest('/api/admin/users/99999', adminToken, {
         method: 'DELETE',
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 404);
     });
@@ -363,9 +363,9 @@ describe('Admin Users Routes', () => {
       const request = createTestRequest(`/api/admin/users/${mockUser.id}`, {
         method: 'DELETE',
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 401);
     });
@@ -374,9 +374,9 @@ describe('Admin Users Routes', () => {
       const request = createAuthenticatedRequest(`/api/admin/users/${mockUser.id}`, userToken, {
         method: 'DELETE',
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 403);
     });
@@ -396,9 +396,9 @@ describe('Admin Users Routes', () => {
       const request = createAuthenticatedRequest(`/api/admin/users/${mockUser.id}`, adminToken, {
         method: 'DELETE',
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
 
@@ -418,9 +418,9 @@ describe('Admin Users Routes', () => {
       const request = createAuthenticatedRequest(`/api/admin/users/${mockUser.id}`, adminToken, {
         method: 'DELETE',
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
 
@@ -446,13 +446,13 @@ describe('Admin Users Routes', () => {
       }
 
       const request = createAuthenticatedRequest('/api/admin/users/stats', adminToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.stats).toMatchObject({
         totalUsers: 5,
         totalAdmins: 1,
@@ -464,18 +464,18 @@ describe('Admin Users Routes', () => {
 
     it('should return 401 when not authenticated', async () => {
       const request = createTestRequest('/api/admin/users/stats');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 401);
     });
 
     it('should return 403 when authenticated as regular user', async () => {
       const request = createAuthenticatedRequest('/api/admin/users/stats', userToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 403);
     });
@@ -485,13 +485,13 @@ describe('Admin Users Routes', () => {
       await env.DB.exec('DELETE FROM users');
 
       const request = createAuthenticatedRequest('/api/admin/users/stats', adminToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.stats.totalUsers).toBe(0);
     });
   });
@@ -505,12 +505,12 @@ describe('Admin Users Routes', () => {
 
       for (const route of routes) {
         const request = createAuthenticatedRequest(route, adminToken);
-        const ctx = createExecutionContext();
-        const response = await worker.fetch(request, env, ctx);
-        await waitOnExecutionContext(ctx);
+        
+        const response = await worker.fetch(request, env);
+        
 
         if (response.ok) {
-          const data = await response.json();
+          const data = await response.json() as any;
           if (data.user) {
             expect(data.user.passwordHash).toBeUndefined();
             expect(data.user.password).toBeUndefined();
@@ -539,9 +539,9 @@ describe('Admin Users Routes', () => {
           method: endpoint.method,
           body: endpoint.body ? JSON.stringify(endpoint.body) : undefined,
         });
-        const ctx = createExecutionContext();
-        const response = await worker.fetch(request, env, ctx);
-        await waitOnExecutionContext(ctx);
+        
+        const response = await worker.fetch(request, env);
+        
 
         expect(response.status).toBe(403);
       }
@@ -571,9 +571,9 @@ describe('Admin Users Routes', () => {
           method: req.method,
           body: req.body,
         });
-        const ctx = createExecutionContext();
-        const response = await worker.fetch(request, env, ctx);
-        await waitOnExecutionContext(ctx);
+        
+        const response = await worker.fetch(request, env);
+        
 
         expect(response.status).toBeGreaterThanOrEqual(400);
       }

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { env, createExecutionContext, waitOnExecutionContext } from 'cloudflare:test';
+import { env } from 'cloudflare:test';
 import worker from '../../index';
 import {
   createTestRequest,
@@ -36,13 +36,13 @@ describe('Auth Routes', () => {
         method: 'POST',
         body: JSON.stringify(newUser),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 201);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.message).toBe('User registered successfully');
       expect(data.user).toMatchObject({
         email: newUser.email,
@@ -64,9 +64,9 @@ describe('Auth Routes', () => {
         method: 'POST',
         body: JSON.stringify(duplicateUser),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400, 'already exists');
     });
@@ -87,9 +87,9 @@ describe('Auth Routes', () => {
         method: 'POST',
         body: JSON.stringify(duplicateUser),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400, 'Username already taken');
     });
@@ -105,9 +105,9 @@ describe('Auth Routes', () => {
         method: 'POST',
         body: JSON.stringify(invalidUser),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400);
     });
@@ -123,9 +123,9 @@ describe('Auth Routes', () => {
         method: 'POST',
         body: JSON.stringify(weakPasswordUser),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400);
     });
@@ -140,9 +140,9 @@ describe('Auth Routes', () => {
         method: 'POST',
         body: JSON.stringify(incompleteUser),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400);
     });
@@ -158,13 +158,13 @@ describe('Auth Routes', () => {
         method: 'POST',
         body: JSON.stringify(newUser),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 201);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.user.email).toBe('newuser@example.com');
     });
 
@@ -179,13 +179,13 @@ describe('Auth Routes', () => {
         method: 'POST',
         body: JSON.stringify(newUser),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 201);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       const userId = data.user.id;
 
       // Verify profile was created
@@ -209,13 +209,13 @@ describe('Auth Routes', () => {
         method: 'POST',
         body: JSON.stringify(loginData),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.accessToken).toBeDefined();
       expect(data.refreshToken).toBeDefined();
       expect(data.user).toMatchObject({
@@ -235,9 +235,9 @@ describe('Auth Routes', () => {
         method: 'POST',
         body: JSON.stringify(loginData),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 401, 'Invalid email or password');
     });
@@ -252,9 +252,9 @@ describe('Auth Routes', () => {
         method: 'POST',
         body: JSON.stringify(loginData),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 401, 'Invalid email or password');
     });
@@ -269,9 +269,9 @@ describe('Auth Routes', () => {
         method: 'POST',
         body: JSON.stringify(loginData),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400);
     });
@@ -286,13 +286,13 @@ describe('Auth Routes', () => {
         method: 'POST',
         body: JSON.stringify(loginData),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.user.email).toBe(mockUser.email.toLowerCase());
     });
 
@@ -306,9 +306,9 @@ describe('Auth Routes', () => {
         method: 'POST',
         body: JSON.stringify(loginData),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
 
@@ -333,13 +333,13 @@ describe('Auth Routes', () => {
         method: 'POST',
         body: JSON.stringify(loginData),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.accessToken).toBeDefined();
       expect(data.refreshToken).toBeDefined();
       expect(data.user.role).toBe('admin');
@@ -351,13 +351,13 @@ describe('Auth Routes', () => {
       const request = createAuthenticatedRequest('/api/auth/logout', userToken, {
         method: 'POST',
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.message).toBe('Logged out successfully');
     });
 
@@ -365,9 +365,9 @@ describe('Auth Routes', () => {
       const request = createTestRequest('/api/auth/logout', {
         method: 'POST',
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 401);
     });
@@ -385,9 +385,9 @@ describe('Auth Routes', () => {
       const request = createAuthenticatedRequest('/api/auth/logout', userToken, {
         method: 'POST',
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
 
@@ -403,13 +403,13 @@ describe('Auth Routes', () => {
   describe('GET /api/auth/me', () => {
     it('should return current user info when authenticated', async () => {
       const request = createAuthenticatedRequest('/api/auth/me', userToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.user).toMatchObject({
         id: mockUser.id,
         email: mockUser.email,
@@ -420,9 +420,9 @@ describe('Auth Routes', () => {
 
     it('should return 401 when not authenticated', async () => {
       const request = createTestRequest('/api/auth/me');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 401);
     });
@@ -432,9 +432,9 @@ describe('Auth Routes', () => {
       await env.DB.prepare(`DELETE FROM users WHERE id = ?`).bind(mockUser.id).run();
 
       const request = createAuthenticatedRequest('/api/auth/me', userToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 404, 'User not found');
     });
@@ -447,13 +447,13 @@ describe('Auth Routes', () => {
       `).bind(newDisplayName, mockUser.id).run();
 
       const request = createAuthenticatedRequest('/api/auth/me', userToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.user.displayName).toBe(newDisplayName);
     });
   });
@@ -472,7 +472,7 @@ describe('Auth Routes', () => {
       const loginResponse = await worker.fetch(loginRequest, env, loginCtx);
       await waitOnExecutionContext(loginCtx);
 
-      const loginData = await loginResponse.json();
+      const loginData = await loginResponse.json() as any;
       const refreshToken = loginData.refreshToken;
 
       // Use refresh token to get new access token
@@ -485,8 +485,8 @@ describe('Auth Routes', () => {
       await waitOnExecutionContext(refreshCtx);
 
       expectJsonResponse(refreshResponse, 200);
-      
-      const refreshData = await refreshResponse.json();
+
+      const refreshData = await refreshResponse.json() as any;
       expect(refreshData.accessToken).toBeDefined();
       expect(refreshData.accessToken).not.toBe(loginData.accessToken);
     });
@@ -496,9 +496,9 @@ describe('Auth Routes', () => {
         method: 'POST',
         body: JSON.stringify({ refreshToken: 'invalid-token' }),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 401, 'Invalid or expired');
     });
@@ -511,9 +511,9 @@ describe('Auth Routes', () => {
         method: 'POST',
         body: JSON.stringify({ refreshToken: expiredToken }),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 401, 'Invalid or expired');
     });
@@ -523,9 +523,9 @@ describe('Auth Routes', () => {
         method: 'POST',
         body: JSON.stringify({}),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400);
     });
@@ -543,7 +543,7 @@ describe('Auth Routes', () => {
       const loginResponse = await worker.fetch(loginRequest, env, loginCtx);
       await waitOnExecutionContext(loginCtx);
 
-      const loginData = await loginResponse.json();
+      const loginData = await loginResponse.json() as any;
       const refreshToken = loginData.refreshToken;
 
       // Use refresh token
@@ -556,8 +556,8 @@ describe('Auth Routes', () => {
       await waitOnExecutionContext(refreshCtx);
 
       expectJsonResponse(refreshResponse, 200);
-      
-      const refreshData = await refreshResponse.json();
+
+      const refreshData = await refreshResponse.json() as any;
       expect(refreshData.accessToken).toBeDefined();
     });
   });
@@ -574,9 +574,9 @@ describe('Auth Routes', () => {
         method: 'POST',
         body: JSON.stringify(newUser),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 201);
 
@@ -617,7 +617,7 @@ describe('Auth Routes', () => {
 
       for (const response of responses) {
         if (response.ok) {
-          const data = await response.json();
+          const data = await response.json() as any;
           if (data.user) {
             expect(data.user.passwordHash).toBeUndefined();
             expect(data.user.password).toBeUndefined();
@@ -631,9 +631,9 @@ describe('Auth Routes', () => {
         method: 'POST',
         body: 'invalid json{',
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expect(response.status).toBe(500);
     });
@@ -649,9 +649,9 @@ describe('Auth Routes', () => {
 
       for (const token of invalidTokens) {
         const request = createAuthenticatedRequest('/api/auth/me', token);
-        const ctx = createExecutionContext();
-        const response = await worker.fetch(request, env, ctx);
-        await waitOnExecutionContext(ctx);
+        
+        const response = await worker.fetch(request, env);
+        
 
         expect(response.status).toBe(401);
       }

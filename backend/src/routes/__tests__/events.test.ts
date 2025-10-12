@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { env, createExecutionContext, waitOnExecutionContext } from 'cloudflare:test';
+import { env } from 'cloudflare:test';
 import worker from '../../index';
 import {
   createTestRequest,
@@ -19,13 +19,13 @@ describe('Events Routes', () => {
   describe('GET /api/events', () => {
     it('should return empty list when no events exist', async () => {
       const request = createTestRequest('/api/events');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data).toMatchObject({
         events: [],
         total: 0,
@@ -56,13 +56,13 @@ describe('Events Routes', () => {
       }
 
       const request = createTestRequest('/api/events');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.events).toHaveLength(3);
       expect(data.total).toBe(3);
       
@@ -89,13 +89,13 @@ describe('Events Routes', () => {
       }
 
       const request = createTestRequest('/api/events?limit=3&offset=2');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.events).toHaveLength(3);
       expect(data.total).toBe(5);
       expect(data.hasMore).toBe(false);
@@ -103,9 +103,9 @@ describe('Events Routes', () => {
 
     it('should respect maximum limit', async () => {
       const request = createTestRequest('/api/events?limit=999999');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       // Should respect max limit defined in PAGINATION_CONSTANTS
@@ -124,13 +124,13 @@ describe('Events Routes', () => {
       `).bind('Priority Event', 'Priority description', '2024-12-02', 'https://example.com', 'Location', true).run();
 
       const request = createTestRequest('/api/events?priority=true');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.events).toHaveLength(1);
       expect(data.events[0].title).toBe('Priority Event');
       expect(data.events[0].isPriority).toBe(true);
@@ -152,22 +152,22 @@ describe('Events Routes', () => {
       }
 
       const request = createTestRequest('/api/events?startDate=2024-11-01&endDate=2024-12-15');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.events).toHaveLength(1);
       expect(data.events[0].title).toBe('Current Event');
     });
 
     it('should include proper cache headers', async () => {
       const request = createTestRequest('/api/events');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expect(response.headers.get('cache-control')).toContain('public');
       expect(response.headers.get('cache-control')).toContain('max-age=');
@@ -178,9 +178,9 @@ describe('Events Routes', () => {
       const invalidEnv = { ...env, DB: null };
 
       const request = createTestRequest('/api/events');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, invalidEnv, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, invalidEnv);
+      
 
       expect(response.status).toBe(500);
     });
@@ -199,13 +199,13 @@ describe('Events Routes', () => {
       ).run();
 
       const request = createTestRequest('/api/events');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.events[0]).toMatchObject({
         id: expect.any(Number),
         title: mockEvent.title,
@@ -221,9 +221,9 @@ describe('Events Routes', () => {
 
     it('should handle invalid date filter parameters', async () => {
       const request = createTestRequest('/api/events?startDate=invalid-date');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400, 'Invalid date');
     });
@@ -239,13 +239,13 @@ describe('Events Routes', () => {
       `).bind('Future Event', 'Future description', futureDateStr, 'https://example.com', 'Location', false).run();
 
       const request = createTestRequest('/api/events');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.events).toHaveLength(1);
       expect(data.events[0].title).toBe('Future Event');
     });
@@ -257,13 +257,13 @@ describe('Events Routes', () => {
       `).bind('Minimal Event', '2024-12-01', 'https://example.com').run();
 
       const request = createTestRequest('/api/events');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.events[0]).toMatchObject({
         title: 'Minimal Event',
         date: '2024-12-01',

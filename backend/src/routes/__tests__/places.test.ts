@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { env, createExecutionContext, waitOnExecutionContext } from 'cloudflare:test';
+import { env } from 'cloudflare:test';
 import worker from '../../index';
 import {
   createTestRequest,
@@ -39,13 +39,13 @@ describe('Places Routes', () => {
         method: 'POST',
         body: JSON.stringify(placeData),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.enrichedPlace).toMatchObject({
         name: placeData.name,
         address: placeData.address,
@@ -66,9 +66,9 @@ describe('Places Routes', () => {
         method: 'POST',
         body: JSON.stringify(placeData),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 401);
     });
@@ -83,9 +83,9 @@ describe('Places Routes', () => {
         method: 'POST',
         body: JSON.stringify(placeData),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 403);
     });
@@ -100,9 +100,9 @@ describe('Places Routes', () => {
         method: 'POST',
         body: JSON.stringify(incompletePlaceData),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400, 'required');
     });
@@ -128,9 +128,9 @@ describe('Places Routes', () => {
           method: 'POST',
           body: JSON.stringify(placeData),
         });
-        const ctx = createExecutionContext();
-        const response = await worker.fetch(request, env, ctx);
-        await waitOnExecutionContext(ctx);
+        
+        const response = await worker.fetch(request, env);
+        
 
         await expectErrorResponse(response, 400, 'Invalid coordinates');
       }
@@ -151,13 +151,13 @@ describe('Places Routes', () => {
         method: 'POST',
         body: JSON.stringify(problematicPlace),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       // Should handle API errors gracefully
       if (response.status === 200) {
-        const data = await response.json();
+        const data = await response.json() as any;
         expect(data.enrichedPlace).toBeDefined();
       } else {
         await expectErrorResponse(response, 404, 'Place not found');
@@ -178,13 +178,13 @@ describe('Places Routes', () => {
         method: 'POST',
         body: JSON.stringify(placeData),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.enrichedPlace).toMatchObject({
         name: expect.any(String),
         address: expect.any(String),
@@ -216,13 +216,13 @@ describe('Places Routes', () => {
         method: 'POST',
         body: JSON.stringify(internationalPlace),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.enrichedPlace.name).toBeDefined();
       expect(data.enrichedPlace.address).toBeDefined();
     });
@@ -241,9 +241,9 @@ describe('Places Routes', () => {
         method: 'POST',
         body: JSON.stringify(longDataPlace),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400, 'too long');
     });
@@ -253,9 +253,9 @@ describe('Places Routes', () => {
         method: 'POST',
         body: 'invalid json{',
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expect(response.status).toBe(500);
     });
@@ -266,13 +266,13 @@ describe('Places Routes', () => {
       const searchQuery = 'cafe toronto';
 
       const request = createAuthenticatedRequest(`/api/places/search?query=${encodeURIComponent(searchQuery)}`, adminToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.places).toBeInstanceOf(Array);
       expect(data.query).toBe(searchQuery);
       
@@ -291,36 +291,36 @@ describe('Places Routes', () => {
 
     it('should return 401 when not authenticated', async () => {
       const request = createTestRequest('/api/places/search?query=cafe');
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 401);
     });
 
     it('should return 403 when authenticated as regular user', async () => {
       const request = createAuthenticatedRequest('/api/places/search?query=cafe', userToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 403);
     });
 
     it('should return 400 for missing query parameter', async () => {
       const request = createAuthenticatedRequest('/api/places/search', adminToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400, 'query parameter is required');
     });
 
     it('should return 400 for empty query', async () => {
       const request = createAuthenticatedRequest('/api/places/search?query=', adminToken);
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       await expectErrorResponse(response, 400, 'query cannot be empty');
     });
@@ -333,13 +333,13 @@ describe('Places Routes', () => {
         `/api/places/search?query=${encodeURIComponent(searchQuery)}&location=${location}`,
         adminToken
       );
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.places).toBeInstanceOf(Array);
       expect(data.location).toBe(location);
     });
@@ -359,9 +359,9 @@ describe('Places Routes', () => {
           `/api/places/search?query=cafe&location=${encodeURIComponent(location)}`,
           adminToken
         );
-        const ctx = createExecutionContext();
-        const response = await worker.fetch(request, env, ctx);
-        await waitOnExecutionContext(ctx);
+        
+        const response = await worker.fetch(request, env);
+        
 
         await expectErrorResponse(response, 400, 'Invalid location format');
       }
@@ -376,13 +376,13 @@ describe('Places Routes', () => {
         `/api/places/search?query=${encodeURIComponent(searchQuery)}&location=${location}&radius=${radius}`,
         adminToken
       );
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.radius).toBe(parseInt(radius));
     });
 
@@ -399,9 +399,9 @@ describe('Places Routes', () => {
           `/api/places/search?query=cafe&radius=${radius}`,
           adminToken
         );
-        const ctx = createExecutionContext();
-        const response = await worker.fetch(request, env, ctx);
-        await waitOnExecutionContext(ctx);
+        
+        const response = await worker.fetch(request, env);
+        
 
         await expectErrorResponse(response, 400);
       }
@@ -415,13 +415,13 @@ describe('Places Routes', () => {
         `/api/places/search?query=${encodeURIComponent(searchQuery)}&type=${type}`,
         adminToken
       );
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.type).toBe(type);
     });
 
@@ -432,13 +432,13 @@ describe('Places Routes', () => {
         `/api/places/search?query=${encodeURIComponent(searchQuery)}`,
         adminToken
       );
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       expectJsonResponse(response, 200);
       
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.places.length).toBeLessThanOrEqual(20); // Assuming max 20 results
     });
   });
@@ -458,9 +458,9 @@ describe('Places Routes', () => {
         method: 'POST',
         body: JSON.stringify(placeData),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       const responseText = await response.text();
       expect(responseText).not.toContain('AIza'); // Google API key prefix
@@ -481,9 +481,9 @@ describe('Places Routes', () => {
           `/api/places/search?query=${encodeURIComponent(query)}`,
           adminToken
         );
-        const ctx = createExecutionContext();
-        const response = await worker.fetch(request, env, ctx);
-        await waitOnExecutionContext(ctx);
+        
+        const response = await worker.fetch(request, env);
+        
 
         expectJsonResponse(response, 200);
       }
@@ -503,12 +503,12 @@ describe('Places Routes', () => {
         method: 'POST',
         body: JSON.stringify(maliciousPlace),
       });
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json() as any;
         expect(data.enrichedPlace.name).not.toContain('<script>');
         expect(data.enrichedPlace.address).not.toContain('javascript:');
       } else {
@@ -523,9 +523,9 @@ describe('Places Routes', () => {
         `/api/places/search?query=${encodeURIComponent(longQuery)}`,
         adminToken
       );
-      const ctx = createExecutionContext();
-      const response = await worker.fetch(request, env, ctx);
-      await waitOnExecutionContext(ctx);
+      
+      const response = await worker.fetch(request, env);
+      
 
       // Should either handle gracefully or return appropriate error
       expect([200, 400]).toContain(response.status);
@@ -553,9 +553,9 @@ describe('Places Routes', () => {
           method: endpoint.method,
           body: endpoint.body ? JSON.stringify(endpoint.body) : undefined,
         });
-        const ctx = createExecutionContext();
-        const response = await worker.fetch(request, env, ctx);
-        await waitOnExecutionContext(ctx);
+        
+        const response = await worker.fetch(request, env);
+        
 
         expect(response.status).toBe(403);
       }
