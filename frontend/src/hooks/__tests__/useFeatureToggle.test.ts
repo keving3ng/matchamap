@@ -20,15 +20,15 @@ vi.mock('../../stores/adminStore', () => ({
 describe('useFeatureToggle', () => {
   let mockUseAdminStore: any
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks()
-    
+
     mockUseAdminStore = vi.fn(() => ({
       adminModeActive: false,
       featureOverrides: {},
       environment: null,
     }))
-    
+
     const { useAdminStore } = await import('../../stores/adminStore')
     vi.mocked(useAdminStore).mockImplementation(mockUseAdminStore)
 
@@ -279,7 +279,7 @@ describe('Feature toggle edge cases', () => {
     })
   })
 
-  it('should handle boolean admin overrides correctly', () => {
+  it('should handle boolean admin overrides correctly', async () => {
     mockUseAdminStore = vi.fn(() => ({
       adminModeActive: true,
       featureOverrides: {
@@ -299,7 +299,7 @@ describe('Feature toggle edge cases', () => {
     expect(eventsResult.current).toBe(true)
   })
 
-  it('should handle environment switching in admin mode', () => {
+  it('should handle environment switching in admin mode', async () => {
     mockUseAdminStore = vi.fn(() => ({
       adminModeActive: true,
       featureOverrides: {},

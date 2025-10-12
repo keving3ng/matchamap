@@ -1,4 +1,8 @@
 import '@testing-library/jest-dom'
+import { beforeEach, afterEach, vi } from 'vitest'
+import { setupLocalStorage, setupSessionStorage, resetFeatureFlags, mockApi } from './helpers'
+
+// ==================== Browser API Mocks ====================
 
 // Mock IntersectionObserver
 Object.defineProperty(window, 'IntersectionObserver', {
@@ -47,4 +51,43 @@ Object.defineProperty(window, 'matchMedia', {
 Object.defineProperty(window, 'scrollTo', {
   writable: true,
   value: () => {},
+})
+
+// ==================== Global Storage Setup ====================
+
+// Setup localStorage and sessionStorage with proper Zustand-compatible mocks
+setupLocalStorage()
+setupSessionStorage()
+
+// ==================== Global Feature Flag Mock ====================
+
+// Mock the features.yaml import
+vi.mock('../config/features.yaml', () => ({
+  default: () => {
+    return globalThis.__TEST_FEATURE_FLAGS__ || {}
+  },
+}))
+
+// ==================== Global Test Lifecycle ====================
+
+// Reset mocks before each test
+beforeEach(() => {
+  // Reset storages
+  localStorage.clear?.()
+  sessionStorage.clear?.()
+
+  // Reset feature flags
+  resetFeatureFlags()
+
+  // Reset API mocks
+  mockApi.reset()
+
+  // Clear all mocks
+  vi.clearAllMocks()
+})
+
+// Cleanup after each test
+afterEach(() => {
+  vi.clearAllTimers()
+  vi.restoreAllMocks()
 })
