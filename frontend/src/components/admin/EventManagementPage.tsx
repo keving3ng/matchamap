@@ -3,7 +3,7 @@ import { Calendar, Plus, Search, Edit, Trash2, Star, MoreVertical, Download, Upl
 import { api } from '../../utils/api'
 import { COPY } from '../../constants/copy'
 import { useCafeStore } from '../../stores/cafeStore'
-import type { Event, Cafe } from '../../../../shared/types'
+import type { Event } from '../../../../shared/types'
 
 export const EventManagementPage: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([])
@@ -356,7 +356,7 @@ export const EventManagementPage: React.FC = () => {
                       cafeId,
                       // Auto-fill venue and location if cafe is selected
                       venue: selectedCafe ? selectedCafe.name : formData.venue,
-                      location: selectedCafe ? selectedCafe.address : formData.location,
+                      location: selectedCafe ? (selectedCafe.address || '') : (formData.location || ''),
                     })
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"

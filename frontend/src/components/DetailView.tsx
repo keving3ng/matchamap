@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { MapPin, Navigation, Heart, CheckCircle, Instagram, ChevronDown, ChevronUp, Star, Coffee, MessageSquare, Clock, Lightbulb, Calendar as CalendarIcon } from 'lucide-react'
+import { MapPin, Navigation, Heart, CheckCircle, Instagram, Star, Coffee, MessageSquare, Clock, Calendar as CalendarIcon } from 'lucide-react'
 import { useNavigate } from 'react-router'
 import { TikTokIcon } from './TikTokIcon'
 import { useAppFeatures } from '../hooks/useAppFeatures'
@@ -16,9 +16,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
   const { isPassportEnabled, isUserAccountsEnabled } = useAppFeatures()
   const isVisited: boolean = visitedLocations.includes(cafe.id)
   const mapsUrl = getMapsUrl(cafe.address || '', cafe.link)
-  const [showAllHours, setShowAllHours] = useState(false)
   const [cafeEvents, setCafeEvents] = useState<Event[]>([])
-  const [loadingEvents, setLoadingEvents] = useState(false)
   const navigate = useNavigate()
 
   const hoursData = cafe.hours ? formatHoursCompact(cafe.hours) : null
@@ -27,20 +25,17 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
   useEffect(() => {
     const fetchCafeEvents = async () => {
       try {
-        setLoadingEvents(true)
         const response = await api.events.getAll({ cafeId: cafe.id, upcoming: true })
         setCafeEvents(response.events)
       } catch (error) {
         console.error('Failed to fetch cafe events:', error)
-      } finally {
-        setLoadingEvents(false)
       }
     }
 
     fetchCafeEvents()
   }, [cafe.id])
 
-  const handleViewEvent = (event: Event) => {
+  const handleViewEvent = () => {
     // Navigate to events view
     navigate('/events')
   }
@@ -389,7 +384,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
                     </div>
                   </div>
                   <button
-                    onClick={() => handleViewEvent(event)}
+                    onClick={handleViewEvent}
                     className="w-full mt-3 bg-gradient-to-r from-matcha-500 to-matcha-600 text-white py-2 rounded-lg font-semibold hover:from-matcha-600 hover:to-matcha-700 transition-all shadow-md hover:shadow-lg text-sm"
                   >
                     {COPY.events.viewDetails}

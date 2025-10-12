@@ -127,10 +127,13 @@ export interface EventItem {
   location: string
   venue: string
   description: string
-  link: string // Instagram handle or post link
-  price: string
+  link?: string | null // Instagram handle or post link
+  price?: string | null
   featured: boolean
-  published?: boolean
+  published: boolean
+  cafeId?: number | null // Optional reference to cafe
+  createdAt?: string
+  updatedAt?: string
 }
 
 export interface CafeData {

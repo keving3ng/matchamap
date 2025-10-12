@@ -7,7 +7,7 @@ import { getLocationRequestAdvice, getOptimalGeolocationOptions } from '../utils
 import { getMapsUrl } from '../utils/mapsUrl'
 import { isCurrentlyOpen, formatHoursCompact } from '../utils/hoursFormatter'
 import { ContentContainer } from './ContentContainer'
-import { useCityStore, CITIES, type CityKey } from '../stores/cityStore'
+import { useCityStore, type CityKey } from '../stores/cityStore'
 import { COPY } from '../constants/copy'
 import type { ListViewProps } from '../types'
 

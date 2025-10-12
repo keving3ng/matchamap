@@ -2,7 +2,6 @@ import React, { Component, ErrorInfo, ReactNode } from 'react'
 import { AlertTriangle, RefreshCw, ArrowLeft, Copy, ExternalLink, Bug } from 'lucide-react'
 import { COPY } from '../../constants/copy'
 import { PrimaryButton, SecondaryButton, TertiaryButton } from '../ui/Button'
-import { AlertDialog } from '../ui/AlertDialog'
 
 interface Props {
   children: ReactNode

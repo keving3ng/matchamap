@@ -1,4 +1,4 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react'
+import { Component, ErrorInfo, ReactNode } from 'react'
 import { AlertTriangle, RefreshCw, Copy } from 'lucide-react'
 import { SecondaryButton, TertiaryButton } from '../ui/Button'
 import { COPY } from '../../constants/copy'

@@ -5,8 +5,6 @@ import { ContentContainer } from './ContentContainer'
 import { ListSkeleton, ErrorAlert } from './ui'
 import { useDataStore } from '../stores/dataStore'
 import { useLazyData } from '../hooks/useLazyData'
-import { useCafeStore } from '../stores/cafeStore'
-import { useCafeSelection } from '../hooks/useCafeSelection'
 import { getInstagramUrl } from '../utils/instagram'
 import { COPY } from '../constants/copy'
 import { api } from '../utils/api'
@@ -16,8 +14,6 @@ import type { Event } from '../../../shared/types'
 
 export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
   const { fetchEvents, eventsFetched, isLoading } = useDataStore()
-  const { cafesWithDistance } = useCafeStore()
-  const { handlePinClick } = useCafeSelection(cafesWithDistance)
   const navigate = useNavigate()
   const [showPastEvents, setShowPastEvents] = React.useState(false)
   const [pastEvents, setPastEvents] = React.useState<Event[]>([])

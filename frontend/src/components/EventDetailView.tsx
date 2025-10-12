@@ -3,12 +3,10 @@ import { Calendar, Clock, MapPin, DollarSign, Navigation, Instagram, ArrowLeft }
 import { useNavigate } from 'react-router'
 import { ContentContainer } from './ContentContainer'
 import { COPY } from '../constants/copy'
-import { api } from '../utils/api'
 import { useCafeStore } from '../stores/cafeStore'
-import { useCafeSelection } from '../hooks/useCafeSelection'
 import { getInstagramUrl } from '../utils/instagram'
 import { createSafeGoogleMapsUrl } from '../utils/urlSafety'
-import type { Event, Cafe } from '../../../shared/types'
+import type { Event } from '../../../shared/types'
 
 interface EventDetailViewProps {
   event: Event
@@ -17,7 +15,6 @@ interface EventDetailViewProps {
 export const EventDetailView: React.FC<EventDetailViewProps> = ({ event }) => {
   const navigate = useNavigate()
   const { cafesWithDistance } = useCafeStore()
-  const { handlePinClick } = useCafeSelection(cafesWithDistance)
 
   // Memoize linked cafe lookup for better performance
   const linkedCafe = useMemo(() => {

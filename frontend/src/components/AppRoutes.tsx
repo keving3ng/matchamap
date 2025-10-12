@@ -17,7 +17,6 @@ import SettingsPage from './SettingsPage'
 // Lazy load admin components for better performance
 const AdminLayout = React.lazy(() => import('./admin/AdminLayout'))
 const AdminErrorBoundary = React.lazy(() => import('./admin/AdminErrorBoundary'))
-const FeatureTogglesPage = React.lazy(() => import('./admin/FeatureTogglesPage'))
 const AdminSettingsPage = React.lazy(() => import('./admin/AdminSettingsPage'))
 const CafeManagementPage = React.lazy(() => import('./admin/CafeManagementPage'))
 const NewsfeedManagementPage = React.lazy(() => import('./admin/NewsfeedManagementPage'))
@@ -115,7 +114,13 @@ const EventDetailWrapper: React.FC = () => {
     return <Navigate to="/events" replace />
   }
 
-  return <EventDetailView event={event} />
+  // Ensure published is a boolean (default to true if undefined)
+  const eventWithDefaults = {
+    ...event,
+    published: event.published ?? true
+  }
+
+  return <EventDetailView event={eventWithDefaults} />
 }
 
 export const AppRoutes: React.FC = () => {
