@@ -31,9 +31,9 @@ describe('useUserProfile', () => {
     },
   }
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks()
-    
+
     mockGetUserProfile = vi.fn()
     const { api } = await import('../../utils/api')
     vi.mocked(api.profile.getUserProfile).mockImplementation(mockGetUserProfile)
@@ -182,9 +182,9 @@ describe('useMyProfile', () => {
     },
   }
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks()
-    
+
     mockGetMyProfile = vi.fn()
     mockUpdateMyProfile = vi.fn()
     const { api } = await import('../../utils/api')

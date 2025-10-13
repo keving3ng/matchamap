@@ -10,9 +10,9 @@ vi.mock('../useFeatureToggle', () => ({
 describe('useAppFeatures', () => {
   let mockUseFeatureToggle: any
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks()
-    
+
     mockUseFeatureToggle = vi.fn()
     const { useFeatureToggle } = await import('../useFeatureToggle')
     vi.mocked(useFeatureToggle).mockImplementation(mockUseFeatureToggle)

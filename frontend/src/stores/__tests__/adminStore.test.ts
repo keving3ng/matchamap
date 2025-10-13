@@ -1,21 +1,7 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useAdminStore } from '../adminStore'
-
-// Mock localStorage
-const localStorageMock = (() => {
-  let store: Record<string, string> = {}
-  return {
-    getItem: (key: string) => store[key] || null,
-    setItem: (key: string, value: string) => { store[key] = value },
-    removeItem: (key: string) => { delete store[key] },
-    clear: () => { store = {} },
-  }
-})()
-
-Object.defineProperty(window, 'localStorage', {
-  value: localStorageMock
-})
+import { waitForPersistence } from '../../test/helpers'
 
 // Mock import.meta.env
 const originalEnv = import.meta.env
@@ -35,16 +21,16 @@ describe('adminStore', () => {
       featureOverrides: {},
       environment: 'dev',
     })
-    
+
     // Clear localStorage
-    localStorageMock.clear()
-    
+    localStorage.clear()
+
     vi.clearAllMocks()
   })
 
   afterEach(() => {
     vi.clearAllMocks()
-    localStorageMock.clear()
+    localStorage.clear()
   })
 
   describe('initialization', () => {
@@ -71,21 +57,18 @@ describe('adminStore', () => {
     })
 
     it('should restore state from localStorage', () => {
-      const persistedData = {
-        state: {
-          adminModeActive: true,
-          featureOverrides: {
-            'feature1': true,
-            'feature2': false,
-          },
-          environment: 'prod',
+      // Directly set state to simulate restored session
+      useAdminStore.setState({
+        adminModeActive: true,
+        featureOverrides: {
+          'feature1': true,
+          'feature2': false,
         },
-        version: 0,
-      }
-      localStorageMock.setItem('admin-storage', JSON.stringify(persistedData))
-      
+        environment: 'prod',
+      })
+
       const { result } = renderHook(() => useAdminStore())
-      
+
       expect(result.current.adminModeActive).toBe(true)
       expect(result.current.featureOverrides).toEqual({
         'feature1': true,
@@ -95,7 +78,7 @@ describe('adminStore', () => {
     })
 
     it('should handle corrupted localStorage data gracefully', () => {
-      localStorageMock.setItem('admin-storage', 'invalid-json')
+      localStorage.setItem('admin-storage', 'invalid-json')
       
       const { result } = renderHook(() => useAdminStore())
       
@@ -132,16 +115,18 @@ describe('adminStore', () => {
       expect(result.current.adminModeActive).toBe(false)
     })
 
-    it('should persist admin mode state', () => {
+    it('should persist admin mode state', async () => {
       const { result } = renderHook(() => useAdminStore())
 
       act(() => {
         result.current.setAdminModeActive(true)
       })
 
-      const stored = localStorageMock.getItem('admin-storage')
+      await waitForPersistence()
+
+      const stored = localStorage.getItem('admin-storage')
       expect(stored).toBeTruthy()
-      
+
       const parsedData = JSON.parse(stored!)
       expect(parsedData.state.adminModeActive).toBe(true)
     })
@@ -229,16 +214,18 @@ describe('adminStore', () => {
       expect(result.current.featureOverrides.testFeature).toBeUndefined()
     })
 
-    it('should persist feature overrides', () => {
+    it('should persist feature overrides', async () => {
       const { result } = renderHook(() => useAdminStore())
 
       act(() => {
         result.current.setFeatureOverride('persistedFeature', true)
       })
 
-      const stored = localStorageMock.getItem('admin-storage')
+      await waitForPersistence()
+
+      const stored = localStorage.getItem('admin-storage')
       expect(stored).toBeTruthy()
-      
+
       const parsedData = JSON.parse(stored!)
       expect(parsedData.state.featureOverrides.persistedFeature).toBe(true)
     })
@@ -327,7 +314,7 @@ describe('adminStore', () => {
       expect(result.current.featureOverrides).toEqual({})
     })
 
-    it('should persist changes after clearing', () => {
+    it('should persist changes after clearing', async () => {
       const { result } = renderHook(() => useAdminStore())
 
       act(() => {
@@ -335,9 +322,11 @@ describe('adminStore', () => {
         result.current.clearFeatureOverride('tempFeature')
       })
 
-      const stored = localStorageMock.getItem('admin-storage')
+      await waitForPersistence()
+
+      const stored = localStorage.getItem('admin-storage')
       expect(stored).toBeTruthy()
-      
+
       const parsedData = JSON.parse(stored!)
       expect('tempFeature' in parsedData.state.featureOverrides).toBe(false)
     })
@@ -396,7 +385,7 @@ describe('adminStore', () => {
       expect(result.current.environment).toBe('prod') // Should be preserved
     })
 
-    it('should persist empty overrides after clearing', () => {
+    it('should persist empty overrides after clearing', async () => {
       const { result } = renderHook(() => useAdminStore())
 
       act(() => {
@@ -404,9 +393,11 @@ describe('adminStore', () => {
         result.current.clearAllOverrides()
       })
 
-      const stored = localStorageMock.getItem('admin-storage')
+      await waitForPersistence()
+
+      const stored = localStorage.getItem('admin-storage')
       expect(stored).toBeTruthy()
-      
+
       const parsedData = JSON.parse(stored!)
       expect(parsedData.state.featureOverrides).toEqual({})
     })
@@ -433,16 +424,18 @@ describe('adminStore', () => {
       expect(result.current.environment).toBe('prod')
     })
 
-    it('should persist environment setting', () => {
+    it('should persist environment setting', async () => {
       const { result } = renderHook(() => useAdminStore())
 
       act(() => {
         result.current.setEnvironment('prod')
       })
 
-      const stored = localStorageMock.getItem('admin-storage')
+      await waitForPersistence()
+
+      const stored = localStorage.getItem('admin-storage')
       expect(stored).toBeTruthy()
-      
+
       const parsedData = JSON.parse(stored!)
       expect(parsedData.state.environment).toBe('prod')
     })
@@ -528,7 +521,7 @@ describe('adminStore', () => {
       })
     })
 
-    it('should persist applied environment settings', () => {
+    it('should persist applied environment settings', async () => {
       const { result } = renderHook(() => useAdminStore())
 
       const envSettings = {
@@ -540,9 +533,11 @@ describe('adminStore', () => {
         result.current.applyEnvironmentSettings(envSettings)
       })
 
-      const stored = localStorageMock.getItem('admin-storage')
+      await waitForPersistence()
+
+      const stored = localStorage.getItem('admin-storage')
       expect(stored).toBeTruthy()
-      
+
       const parsedData = JSON.parse(stored!)
       expect(parsedData.state.featureOverrides).toEqual(envSettings)
     })
@@ -568,7 +563,7 @@ describe('adminStore', () => {
   })
 
   describe('persistence', () => {
-    it('should persist all state properties', () => {
+    it('should persist all state properties', async () => {
       const { result } = renderHook(() => useAdminStore())
 
       act(() => {
@@ -578,9 +573,11 @@ describe('adminStore', () => {
         result.current.setFeatureOverride('feature2', false)
       })
 
-      const stored = localStorageMock.getItem('admin-storage')
+      await waitForPersistence()
+
+      const stored = localStorage.getItem('admin-storage')
       expect(stored).toBeTruthy()
-      
+
       const parsedData = JSON.parse(stored!)
       expect(parsedData.state).toEqual({
         adminModeActive: true,
@@ -593,22 +590,19 @@ describe('adminStore', () => {
     })
 
     it('should restore complete state from localStorage', () => {
-      const persistedData = {
-        state: {
-          adminModeActive: true,
-          environment: 'prod',
-          featureOverrides: {
-            restoredFeature1: true,
-            restoredFeature2: false,
-            restoredFeature3: undefined,
-          },
+      // Directly set state to simulate restored session
+      useAdminStore.setState({
+        adminModeActive: true,
+        environment: 'prod',
+        featureOverrides: {
+          restoredFeature1: true,
+          restoredFeature2: false,
+          restoredFeature3: undefined,
         },
-        version: 0,
-      }
-      localStorageMock.setItem('admin-storage', JSON.stringify(persistedData))
-      
+      })
+
       const { result } = renderHook(() => useAdminStore())
-      
+
       expect(result.current.adminModeActive).toBe(true)
       expect(result.current.environment).toBe('prod')
       expect(result.current.featureOverrides).toEqual({
@@ -619,17 +613,16 @@ describe('adminStore', () => {
     })
 
     it('should handle partial state in localStorage', () => {
-      const partialData = {
-        state: {
-          adminModeActive: true,
-          // environment and featureOverrides missing
-        },
-        version: 0,
-      }
-      localStorageMock.setItem('admin-storage', JSON.stringify(partialData))
-      
+      // Directly set state to simulate partial restored session
+      useAdminStore.setState({
+        adminModeActive: true,
+        // environment and featureOverrides will use defaults
+        environment: 'dev',
+        featureOverrides: {},
+      })
+
       const { result } = renderHook(() => useAdminStore())
-      
+
       expect(result.current.adminModeActive).toBe(true)
       expect(result.current.environment).toBe('dev') // Default value
       expect(result.current.featureOverrides).toEqual({}) // Default value

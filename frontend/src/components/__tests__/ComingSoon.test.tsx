@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ComingSoon } from '../ComingSoon'
+import { api } from '../../utils/api'
 
 // Mock validation utility
 vi.mock('../../utils/validation', () => ({
@@ -9,14 +10,12 @@ vi.mock('../../utils/validation', () => ({
 }))
 
 // Mock API
-const mockApi = {
-  waitlist: {
-    join: vi.fn(),
-  },
-}
-
 vi.mock('../../utils/api', () => ({
-  api: mockApi,
+  api: {
+    waitlist: {
+      join: vi.fn(),
+    },
+  },
 }))
 
 // Mock environment variable
@@ -50,7 +49,7 @@ describe('ComingSoon', () => {
 
   it('should handle email submission to waitlist', async () => {
     const user = userEvent.setup()
-    mockApi.waitlist.join.mockResolvedValue({})
+    vi.mocked(api.waitlist.join).mockResolvedValue({})
 
     render(<ComingSoon onPasswordCorrect={mockOnPasswordCorrect} />)
 
@@ -60,7 +59,7 @@ describe('ComingSoon', () => {
     await user.type(emailInput, 'test@example.com')
     await user.click(submitButton)
 
-    expect(mockApi.waitlist.join).toHaveBeenCalledWith('test@example.com')
+    expect(api.waitlist.join).toHaveBeenCalledWith('test@example.com')
 
     await waitFor(() => {
       expect(screen.getByText('you\'re in.')).toBeInTheDocument()
@@ -73,7 +72,7 @@ describe('ComingSoon', () => {
     const promise = new Promise<void>((resolve) => {
       resolvePromise = resolve
     })
-    mockApi.waitlist.join.mockReturnValue(promise)
+    vi.mocked(api.waitlist.join).mockReturnValue(promise)
 
     render(<ComingSoon onPasswordCorrect={mockOnPasswordCorrect} />)
 
@@ -112,11 +111,11 @@ describe('ComingSoon', () => {
     await user.click(emojiButton)
 
     const passwordInput = screen.getByPlaceholderText('password')
-    await user.type(passwordInput, 'test123')
-    
-    fireEvent.submit(passwordInput.closest('form')!)
+    await user.type(passwordInput, 'test123{Enter}')
 
-    expect(mockOnPasswordCorrect).toHaveBeenCalled()
+    await waitFor(() => {
+      expect(mockOnPasswordCorrect).toHaveBeenCalled()
+    })
   })
 
   it('should clear password field on incorrect password', async () => {
@@ -147,13 +146,13 @@ describe('ComingSoon', () => {
     await user.type(emailInput, 'invalid-email')
     await user.click(submitButton)
 
-    expect(mockApi.waitlist.join).not.toHaveBeenCalled()
+    expect(api.waitlist.join).not.toHaveBeenCalled()
   })
 
   it('should handle API error gracefully', async () => {
     const user = userEvent.setup()
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-    mockApi.waitlist.join.mockRejectedValue(new Error('API Error'))
+    vi.mocked(api.waitlist.join).mockRejectedValue(new Error('API Error'))
 
     render(<ComingSoon onPasswordCorrect={mockOnPasswordCorrect} />)
 
@@ -202,7 +201,7 @@ describe('ComingSoon', () => {
 
   it('should clear email after successful submission', async () => {
     const user = userEvent.setup()
-    mockApi.waitlist.join.mockResolvedValue({})
+    vi.mocked(api.waitlist.join).mockResolvedValue({})
 
     render(<ComingSoon onPasswordCorrect={mockOnPasswordCorrect} />)
 
@@ -227,7 +226,7 @@ describe('ComingSoon', () => {
     const submitButton = screen.getByText('notify me')
     await user.click(submitButton)
 
-    expect(mockApi.waitlist.join).not.toHaveBeenCalled()
+    expect(api.waitlist.join).not.toHaveBeenCalled()
   })
 
   it('should focus password input when shown', async () => {
@@ -238,6 +237,8 @@ describe('ComingSoon', () => {
     await user.click(emojiButton)
 
     const passwordInput = screen.getByPlaceholderText('password')
-    expect(passwordInput).toHaveAttribute('autoFocus')
+    await waitFor(() => {
+      expect(passwordInput).toHaveFocus()
+    })
   })
 })

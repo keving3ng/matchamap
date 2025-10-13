@@ -19,10 +19,10 @@ vi.mock('../../utils/routing', () => ({
 describe('useRouteVisualization', () => {
   let mockFetchWalkingRoute: any
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks()
     vi.useFakeTimers()
-    
+
     mockFetchWalkingRoute = vi.fn()
     const { fetchWalkingRoute } = await import('../../utils/routing')
     vi.mocked(fetchWalkingRoute).mockImplementation(mockFetchWalkingRoute)

@@ -3,29 +3,45 @@ import { render, screen } from '@testing-library/react'
 import { MapView } from '../MapView'
 import type { CafeWithDistance } from '../../types'
 
-// Mock Leaflet
-vi.mock('leaflet', () => ({
-  map: vi.fn(() => ({
-    setView: vi.fn(),
-    remove: vi.fn(),
-    zoomIn: vi.fn(),
-    zoomOut: vi.fn(),
-  })),
-  tileLayer: vi.fn(() => ({
-    addTo: vi.fn(),
-  })),
-  marker: vi.fn(() => ({
-    addTo: vi.fn(),
-    on: vi.fn(),
-  })),
-  divIcon: vi.fn(),
-  Icon: {
-    Default: {
-      prototype: {},
-      mergeOptions: vi.fn(),
+// Mock Leaflet - define inline to avoid hoisting issues
+vi.mock('leaflet', () => {
+  const mockLeaflet = {
+    map: vi.fn(() => ({
+      setView: vi.fn().mockReturnThis(),
+      remove: vi.fn(),
+      zoomIn: vi.fn(),
+      zoomOut: vi.fn(),
+      on: vi.fn().mockReturnThis(),
+      off: vi.fn().mockReturnThis(),
+    })),
+    tileLayer: vi.fn(() => ({
+      addTo: vi.fn(),
+    })),
+    marker: vi.fn(() => {
+      const markerInstance = {
+        addTo: vi.fn().mockReturnThis(),
+        on: vi.fn().mockReturnThis(),
+        setLatLng: vi.fn().mockReturnThis(),
+        setIcon: vi.fn().mockReturnThis(),
+      }
+      markerInstance.addTo.mockReturnValue(markerInstance)
+      markerInstance.on.mockReturnValue(markerInstance)
+      return markerInstance
+    }),
+    divIcon: vi.fn(),
+    Icon: {
+      Default: {
+        prototype: {},
+        mergeOptions: vi.fn(),
+      },
     },
-  },
-}))
+  }
+
+  return {
+    default: mockLeaflet,
+    ...mockLeaflet,
+  }
+})
 
 const mockCafes: CafeWithDistance[] = [
   {
@@ -79,13 +95,15 @@ describe('MapView', () => {
       showPopover: true,
       selectedCafe: mockCafes[0],
     }
-    
+
     render(<MapView {...propsWithPopover} />)
-    
-    // Should show content in both mobile and desktop versions
+
+    // Should show cafe name in both mobile and desktop versions
     expect(screen.getAllByText('Test Cafe')).toHaveLength(2)
-    expect(screen.getAllByText('Downtown')).toHaveLength(2)
-    
+
+    // Should show quick note
+    expect(screen.getAllByText('"Great matcha"')).toHaveLength(2)
+
     // Should have Details button on mobile and desktop
     const detailsButtons = screen.getAllByText('Details')
     expect(detailsButtons.length).toBeGreaterThanOrEqual(1)

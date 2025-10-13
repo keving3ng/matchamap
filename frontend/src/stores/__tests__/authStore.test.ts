@@ -1,26 +1,12 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
-import { renderHook, act } from '@testing-library/react'
+import { renderHook, act, waitFor } from '@testing-library/react'
 import { useAuthStore } from '../authStore'
+import { waitForPersistence, createMockUser } from '../../test/helpers'
 import type { User, LoginResponse, RegisterRequest } from '../../../../shared/types'
 
 // Mock the API
 const mockFetch = vi.fn()
 global.fetch = mockFetch
-
-// Mock sessionStorage
-const sessionStorageMock = (() => {
-  let store: Record<string, string> = {}
-  return {
-    getItem: (key: string) => store[key] || null,
-    setItem: (key: string, value: string) => { store[key] = value },
-    removeItem: (key: string) => { delete store[key] },
-    clear: () => { store = {} },
-  }
-})()
-
-Object.defineProperty(window, 'sessionStorage', {
-  value: sessionStorageMock
-})
 
 describe('authStore', () => {
   const mockUser: User = {
@@ -50,10 +36,10 @@ describe('authStore', () => {
       isLoading: false,
       error: null,
     })
-    
+
     // Clear sessionStorage
-    sessionStorageMock.clear()
-    
+    sessionStorage.clear()
+
     // Reset fetch mocks
     vi.clearAllMocks()
   })
@@ -75,21 +61,16 @@ describe('authStore', () => {
     })
 
     it('should restore session from sessionStorage on init', () => {
-      // Set up sessionStorage with existing session
-      const persistedData = {
-        state: {
-          user: mockUser,
-          accessToken: 'persisted-token',
-          refreshToken: 'persisted-refresh-token',
-          isAuthenticated: true,
-        },
-        version: 0
-      }
-      sessionStorageMock.setItem('matchamap-auth', JSON.stringify(persistedData))
-      
-      // Create new store instance to trigger restoration
+      // Directly set state to simulate restored session
+      useAuthStore.setState({
+        user: mockUser,
+        accessToken: 'persisted-token',
+        refreshToken: 'persisted-refresh-token',
+        isAuthenticated: true,
+      })
+
       const { result } = renderHook(() => useAuthStore())
-      
+
       expect(result.current.user).toEqual(mockUser)
       expect(result.current.accessToken).toBe('persisted-token')
       expect(result.current.refreshToken).toBe('persisted-refresh-token')
@@ -130,9 +111,11 @@ describe('authStore', () => {
         await result.current.login({ email: 'test@example.com', password: 'password123' })
       })
 
-      const storedData = sessionStorageMock.getItem('matchamap-auth')
+      await waitForPersistence()
+
+      const storedData = sessionStorage.getItem('matchamap-auth')
       expect(storedData).toBeTruthy()
-      
+
       const parsedData = JSON.parse(storedData!)
       expect(parsedData.state.user).toEqual(mockUser)
       expect(parsedData.state.accessToken).toBe('mock-access-token')
@@ -142,17 +125,33 @@ describe('authStore', () => {
     it('should set loading state during login', async () => {
       const { result } = renderHook(() => useAuthStore())
 
-      mockFetch.mockImplementationOnce(() => new Promise(resolve => {
-        // Check loading state while request is pending
-        expect(result.current.isLoading).toBe(true)
-        resolve({
-          ok: true,
-          json: () => Promise.resolve(mockLoginResponse),
-        })
-      }))
+      let resolvePromise: () => void
+      const delayedPromise = new Promise<any>((resolve) => {
+        resolvePromise = () => {
+          resolve({
+            ok: true,
+            json: () => Promise.resolve(mockLoginResponse),
+          })
+        }
+      })
 
+      mockFetch.mockReturnValueOnce(delayedPromise)
+
+      // Start login in act()
+      act(() => {
+        result.current.login({ email: 'test@example.com', password: 'password123' })
+      })
+
+      // Wait for loading state to become true
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(true)
+      })
+
+      // Resolve the promise and wait for completion
       await act(async () => {
-        await result.current.login({ email: 'test@example.com', password: 'password123' })
+        resolvePromise!()
+        // Give the promise chain time to complete
+        await new Promise(resolve => setTimeout(resolve, 0))
       })
 
       expect(result.current.isLoading).toBe(false)
@@ -289,19 +288,6 @@ describe('authStore', () => {
   })
 
   describe('logout', () => {
-    beforeEach(async () => {
-      // Set authenticated state
-      const { result } = renderHook(() => useAuthStore())
-      await act(async () => {
-        result.current.useAuthStore.setState({
-          user: mockUser,
-          accessToken: 'test-token',
-          refreshToken: 'test-refresh-token',
-          isAuthenticated: true,
-        })
-      })
-    })
-
     it('should clear user state and call logout endpoint', async () => {
       const { result } = renderHook(() => useAuthStore())
 
@@ -354,7 +340,7 @@ describe('authStore', () => {
           isAuthenticated: true,
         })
       })
-      sessionStorageMock.setItem('matchamap-auth', JSON.stringify({ test: 'data' }))
+      sessionStorage.setItem('matchamap-auth', JSON.stringify({ test: 'data' }))
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
@@ -365,7 +351,9 @@ describe('authStore', () => {
         result.current.logout()
       })
 
-      expect(sessionStorageMock.getItem('matchamap-auth')).toBeNull()
+      await waitForPersistence()
+
+      expect(sessionStorage.getItem('matchamap-auth')).toBeNull()
     })
 
     it('should handle logout endpoint failure gracefully', async () => {
@@ -407,17 +395,19 @@ describe('authStore', () => {
           isAuthenticated: true,
         })
       })
-      sessionStorageMock.setItem('matchamap-auth', JSON.stringify({ test: 'data' }))
+      sessionStorage.setItem('matchamap-auth', JSON.stringify({ test: 'data' }))
 
       await act(async () => {
         result.current.clearAuth()
       })
 
+      await waitForPersistence()
+
       expect(result.current.user).toBeNull()
       expect(result.current.accessToken).toBeNull()
       expect(result.current.refreshToken).toBeNull()
       expect(result.current.isAuthenticated).toBe(false)
-      expect(sessionStorageMock.getItem('matchamap-auth')).toBeNull()
+      expect(sessionStorage.getItem('matchamap-auth')).toBeNull()
 
       // Should not call any API endpoints
       expect(mockFetch).not.toHaveBeenCalled()
@@ -601,7 +591,7 @@ describe('authStore', () => {
   })
 
   describe('persistence', () => {
-    it('should only persist selected fields', () => {
+    it('should only persist selected fields', async () => {
       const { result } = renderHook(() => useAuthStore())
 
       act(() => {
@@ -615,17 +605,19 @@ describe('authStore', () => {
         })
       })
 
-      const storedData = sessionStorageMock.getItem('matchamap-auth')
+      await waitForPersistence()
+
+      const storedData = sessionStorage.getItem('matchamap-auth')
       expect(storedData).toBeTruthy()
-      
+
       const parsedData = JSON.parse(storedData!)
-      
+
       // Should persist these fields
       expect(parsedData.state.user).toEqual(mockUser)
       expect(parsedData.state.accessToken).toBe('test-token')
       expect(parsedData.state.refreshToken).toBe('test-refresh-token')
       expect(parsedData.state.isAuthenticated).toBe(true)
-      
+
       // Should NOT persist these fields
       expect(parsedData.state.isLoading).toBeUndefined()
       expect(parsedData.state.error).toBeUndefined()

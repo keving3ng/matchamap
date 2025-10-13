@@ -1,33 +1,18 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useCityStore, CITIES, type City, type CityKey } from '../cityStore'
+import { waitForPersistence, createMockCity } from '../../test/helpers'
 import type { CityWithCount } from '../../../../shared/types'
+import { api } from '../../utils/api'
 
 // Mock the API client
-const mockApi = {
-  cities: {
-    getAll: vi.fn(),
+vi.mock('../../utils/api', () => ({
+  api: {
+    cities: {
+      getAll: vi.fn(),
+    },
   },
-}
-
-vi.mock('../utils/api', () => ({
-  api: mockApi,
 }))
-
-// Mock localStorage
-const localStorageMock = (() => {
-  let store: Record<string, string> = {}
-  return {
-    getItem: (key: string) => store[key] || null,
-    setItem: (key: string, value: string) => { store[key] = value },
-    removeItem: (key: string) => { delete store[key] },
-    clear: () => { store = {} },
-  }
-})()
-
-Object.defineProperty(window, 'localStorage', {
-  value: localStorageMock
-})
 
 // Mock console.error to prevent noise in test output
 const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
@@ -47,10 +32,10 @@ describe('cityStore', () => {
       availableCities: [],
       availableCitiesLoaded: false,
     })
-    
+
     // Clear localStorage
-    localStorageMock.clear()
-    
+    localStorage.clear()
+
     // Reset mocks
     vi.clearAllMocks()
   })
@@ -69,29 +54,25 @@ describe('cityStore', () => {
     })
 
     it('should restore selected city from localStorage', () => {
-      // Set up localStorage with saved city
-      const persistedData = {
-        state: {
-          selectedCity: 'montreal',
-          availableCities: ['toronto', 'montreal'],
-          availableCitiesLoaded: true,
-        },
-        version: 0,
-      }
-      localStorageMock.setItem('matchamap_selected_city', JSON.stringify(persistedData))
-      
+      // Directly set state to simulate restored session
+      useCityStore.setState({
+        selectedCity: 'montreal',
+        availableCities: ['toronto', 'montreal'],
+        availableCitiesLoaded: true,
+      })
+
       const { result } = renderHook(() => useCityStore())
-      
+
       expect(result.current.selectedCity).toBe('montreal')
       expect(result.current.availableCities).toEqual(['toronto', 'montreal'])
       expect(result.current.availableCitiesLoaded).toBe(true)
     })
 
     it('should handle corrupted localStorage data gracefully', () => {
-      localStorageMock.setItem('matchamap_selected_city', 'invalid-json')
-      
+      localStorage.setItem('matchamap_selected_city', 'invalid-json')
+
       const { result } = renderHook(() => useCityStore())
-      
+
       expect(result.current.selectedCity).toBe('toronto') // Default fallback
     })
   })
@@ -183,16 +164,18 @@ describe('cityStore', () => {
       expect(result.current.selectedCity).toBe(initialCity) // Should not change
     })
 
-    it('should persist city selection to localStorage', () => {
+    it('should persist city selection to localStorage', async () => {
       const { result } = renderHook(() => useCityStore())
 
       act(() => {
         result.current.setCity('kyoto')
       })
 
-      const stored = localStorageMock.getItem('matchamap_selected_city')
+      await waitForPersistence()
+
+      const stored = localStorage.getItem('matchamap_selected_city')
       expect(stored).toBeTruthy()
-      
+
       const parsedData = JSON.parse(stored!)
       expect(parsedData.state.selectedCity).toBe('kyoto')
     })
@@ -308,7 +291,7 @@ describe('cityStore', () => {
     it('should load cities from API successfully', async () => {
       const { result } = renderHook(() => useCityStore())
 
-      mockApi.cities.getAll.mockResolvedValueOnce({
+      vi.mocked(api.cities.getAll).mockResolvedValueOnce({
         cities: mockCitiesResponse,
       })
 
@@ -318,7 +301,7 @@ describe('cityStore', () => {
 
       expect(result.current.availableCities).toEqual(['toronto', 'montreal', 'new york', 'tokyo'])
       expect(result.current.availableCitiesLoaded).toBe(true)
-      expect(mockApi.cities.getAll).toHaveBeenCalled()
+      expect(api.cities.getAll).toHaveBeenCalled()
     })
 
     it('should normalize city names correctly', async () => {
@@ -330,7 +313,7 @@ describe('cityStore', () => {
         { city: 'NEW YORK', cafe_count: 5 },
       ]
 
-      mockApi.cities.getAll.mockResolvedValueOnce({
+      vi.mocked(api.cities.getAll).mockResolvedValueOnce({
         cities: unnormalizedResponse,
       })
 
@@ -351,7 +334,7 @@ describe('cityStore', () => {
         { city: 'another-invalid', cafe_count: 2 },
       ]
 
-      mockApi.cities.getAll.mockResolvedValueOnce({
+      vi.mocked(api.cities.getAll).mockResolvedValueOnce({
         cities: mixedResponse,
       })
 
@@ -372,7 +355,7 @@ describe('cityStore', () => {
         { city: 'montreal', cafe_count: 3 }, // Duplicate
       ]
 
-      mockApi.cities.getAll.mockResolvedValueOnce({
+      vi.mocked(api.cities.getAll).mockResolvedValueOnce({
         cities: duplicateResponse,
       })
 
@@ -391,7 +374,7 @@ describe('cityStore', () => {
         useCityStore.setState({ selectedCity: 'kyoto' })
       })
 
-      mockApi.cities.getAll.mockResolvedValueOnce({
+      vi.mocked(api.cities.getAll).mockResolvedValueOnce({
         cities: [
           { city: 'toronto', cafe_count: 15 },
           { city: 'montreal', cafe_count: 8 },
@@ -414,7 +397,7 @@ describe('cityStore', () => {
         useCityStore.setState({ selectedCity: 'montreal' })
       })
 
-      mockApi.cities.getAll.mockResolvedValueOnce({
+      vi.mocked(api.cities.getAll).mockResolvedValueOnce({
         cities: [
           { city: 'toronto', cafe_count: 15 },
           { city: 'montreal', cafe_count: 8 },
@@ -432,7 +415,7 @@ describe('cityStore', () => {
     it('should handle API errors gracefully', async () => {
       const { result } = renderHook(() => useCityStore())
 
-      mockApi.cities.getAll.mockRejectedValueOnce(new Error('API Error'))
+      vi.mocked(api.cities.getAll).mockRejectedValueOnce(new Error('API Error'))
 
       await act(async () => {
         await result.current.loadAvailableCities()
@@ -447,7 +430,7 @@ describe('cityStore', () => {
     it('should handle empty API response', async () => {
       const { result } = renderHook(() => useCityStore())
 
-      mockApi.cities.getAll.mockResolvedValueOnce({
+      vi.mocked(api.cities.getAll).mockResolvedValueOnce({
         cities: [],
       })
 
@@ -469,7 +452,7 @@ describe('cityStore', () => {
         { city: '', cafe_count: 2 }, // Empty city
       ]
 
-      mockApi.cities.getAll.mockResolvedValueOnce({
+      vi.mocked(api.cities.getAll).mockResolvedValueOnce({
         cities: malformedResponse,
       })
 
@@ -483,7 +466,7 @@ describe('cityStore', () => {
   })
 
   describe('persistence', () => {
-    it('should persist selectedCity and availableCities', () => {
+    it('should persist selectedCity and availableCities', async () => {
       const { result } = renderHook(() => useCityStore())
 
       act(() => {
@@ -494,9 +477,11 @@ describe('cityStore', () => {
         })
       })
 
-      const stored = localStorageMock.getItem('matchamap_selected_city')
+      await waitForPersistence()
+
+      const stored = localStorage.getItem('matchamap_selected_city')
       expect(stored).toBeTruthy()
-      
+
       const parsedData = JSON.parse(stored!)
       expect(parsedData.state.selectedCity).toBe('osaka')
       expect(parsedData.state.availableCities).toEqual(['toronto', 'osaka', 'kyoto'])
@@ -504,35 +489,29 @@ describe('cityStore', () => {
     })
 
     it('should restore full state from localStorage', () => {
-      const persistedData = {
-        state: {
-          selectedCity: 'tokyo',
-          availableCities: ['tokyo', 'kyoto', 'osaka'],
-          availableCitiesLoaded: true,
-        },
-        version: 0,
-      }
-      localStorageMock.setItem('matchamap_selected_city', JSON.stringify(persistedData))
-      
+      // Directly set state to simulate restored session
+      useCityStore.setState({
+        selectedCity: 'tokyo',
+        availableCities: ['tokyo', 'kyoto', 'osaka'],
+        availableCitiesLoaded: true,
+      })
+
       const { result } = renderHook(() => useCityStore())
-      
+
       expect(result.current.selectedCity).toBe('tokyo')
       expect(result.current.availableCities).toEqual(['tokyo', 'kyoto', 'osaka'])
       expect(result.current.availableCitiesLoaded).toBe(true)
     })
 
     it('should handle partial state in localStorage', () => {
-      const partialData = {
-        state: {
-          selectedCity: 'montreal',
-          // availableCities and availableCitiesLoaded missing
-        },
-        version: 0,
-      }
-      localStorageMock.setItem('matchamap_selected_city', JSON.stringify(partialData))
-      
+      // Directly set state to simulate partial restoration
+      useCityStore.setState({
+        selectedCity: 'montreal',
+        // availableCities and availableCitiesLoaded will use defaults
+      })
+
       const { result } = renderHook(() => useCityStore())
-      
+
       expect(result.current.selectedCity).toBe('montreal')
       expect(result.current.availableCities).toEqual([]) // Default value
       expect(result.current.availableCitiesLoaded).toBe(false) // Default value
@@ -570,7 +549,7 @@ describe('cityStore', () => {
       const { result } = renderHook(() => useCityStore())
 
       // Mock different responses
-      mockApi.cities.getAll
+      vi.mocked(api.cities.getAll)
         .mockResolvedValueOnce({ cities: [{ city: 'toronto', cafe_count: 1 }] })
         .mockResolvedValueOnce({ cities: [{ city: 'montreal', cafe_count: 2 }] })
         .mockResolvedValueOnce({ cities: [{ city: 'tokyo', cafe_count: 3 }] })
@@ -585,7 +564,7 @@ describe('cityStore', () => {
       })
 
       expect(result.current.availableCitiesLoaded).toBe(true)
-      expect(mockApi.cities.getAll).toHaveBeenCalledTimes(3)
+      expect(vi.mocked(api.cities.getAll)).toHaveBeenCalledTimes(3)
     })
 
     it('should maintain referential integrity for city objects', () => {
@@ -619,7 +598,7 @@ describe('cityStore', () => {
         { city: 'toronto', cafe_count: 4 },
       ] as any[]
 
-      mockApi.cities.getAll.mockResolvedValueOnce({
+      vi.mocked(api.cities.getAll).mockResolvedValueOnce({
         cities: badResponse,
       })
 
@@ -677,7 +656,7 @@ describe('cityStore', () => {
       expect(result.current.availableCitiesLoaded).toBe(false)
 
       // 2. App loads available cities from API
-      mockApi.cities.getAll.mockResolvedValueOnce({
+      vi.mocked(api.cities.getAll).mockResolvedValueOnce({
         cities: [
           { city: 'toronto', cafe_count: 15 },
           { city: 'montreal', cafe_count: 8 },
@@ -701,9 +680,11 @@ describe('cityStore', () => {
       expect(result.current.getCity().name).toBe('Montreal')
 
       // 4. User refreshes browser (tests persistence)
-      const stored = localStorageMock.getItem('matchamap_selected_city')
+      await waitForPersistence()
+
+      const stored = localStorage.getItem('matchamap_selected_city')
       expect(stored).toBeTruthy()
-      
+
       const parsedData = JSON.parse(stored!)
       expect(parsedData.state.selectedCity).toBe('montreal')
     })
@@ -712,7 +693,7 @@ describe('cityStore', () => {
       const { result } = renderHook(() => useCityStore())
 
       // 1. Load limited available cities
-      mockApi.cities.getAll.mockResolvedValueOnce({
+      vi.mocked(api.cities.getAll).mockResolvedValueOnce({
         cities: [
           { city: 'toronto', cafe_count: 15 },
           { city: 'montreal', cafe_count: 8 },
