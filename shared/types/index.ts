@@ -295,6 +295,105 @@ export interface UserBadge {
 }
 
 // ============================================================================
+// USER REVIEW TYPES (Phase 2A)
+// ============================================================================
+
+// Review moderation status constants
+export const REVIEW_MODERATION_STATUS = {
+  PENDING: 'pending',
+  APPROVED: 'approved',
+  REJECTED: 'rejected',
+  FLAGGED: 'flagged'
+} as const
+
+export type ReviewModerationStatus = typeof REVIEW_MODERATION_STATUS[keyof typeof REVIEW_MODERATION_STATUS]
+
+// Photo moderation status constants (subset of review statuses)
+export const PHOTO_MODERATION_STATUS = {
+  PENDING: 'pending',
+  APPROVED: 'approved',
+  REJECTED: 'rejected'
+} as const
+
+export type PhotoModerationStatus = typeof PHOTO_MODERATION_STATUS[keyof typeof PHOTO_MODERATION_STATUS]
+
+export interface UserReview {
+  id: number
+  userId: number
+  cafeId: number
+  
+  // Ratings (0-10 scale, matching expert system)
+  overallRating: number
+  matchaQualityRating?: number
+  ambianceRating?: number
+  serviceRating?: number
+  valueRating?: number
+  
+  // Content
+  title?: string
+  content: string
+  tags?: string[] // Parsed from JSON
+  
+  // Metadata
+  visitDate?: string
+  isPublic: boolean
+  isFeatured: boolean
+  
+  // Moderation
+  moderationStatus: ReviewModerationStatus
+  moderationNotes?: string
+  moderatedBy?: number
+  moderatedAt?: string
+  
+  // Engagement
+  helpfulCount: number
+  flagCount: number
+  
+  // Timestamps
+  createdAt: string
+  updatedAt: string
+  
+  // Relations (populated by backend)
+  user?: PublicUserProfile
+  photos?: ReviewPhoto[]
+}
+
+export interface ReviewPhoto {
+  id: number
+  reviewId: number
+  userId: number
+  cafeId: number
+  
+  // R2 storage
+  imageKey: string
+  imageUrl: string
+  thumbnailUrl?: string
+  
+  // Metadata
+  caption?: string
+  drinkType?: string
+  width?: number
+  height?: number
+  fileSize?: number
+  
+  // Moderation
+  moderationStatus: PhotoModerationStatus
+  moderatedBy?: number
+  moderatedAt?: string
+  
+  // Timestamps
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ReviewHelpful {
+  id: number
+  reviewId: number
+  userId: number
+  createdAt: string
+}
+
+// ============================================================================
 // ANALYTICS TYPES
 // ============================================================================
 
