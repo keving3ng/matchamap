@@ -1,4 +1,4 @@
-import { Request } from 'itty-router';
+import { IRequest } from 'itty-router';
 import { Env } from '../types';
 import { jsonResponse } from '../utils/response';
 import { HTTP_STATUS } from '../constants';
@@ -18,40 +18,41 @@ import {
  * Upload photo to R2 bucket
  * POST /api/photos/upload
  */
-export async function uploadPhoto(request: Request, env: Env): Promise<Response> {
+export async function uploadPhoto(request: IRequest, env: Env): Promise<Response> {
   try {
     const userId = (request as any).userId;
     
     if (!userId) {
-      return jsonResponse({ error: 'Authentication required' }, HTTP_STATUS.UNAUTHORIZED);
+      return jsonResponse({ error: 'Authentication required' }, HTTP_STATUS.UNAUTHORIZED, request, env);
     }
 
     // Parse multipart form data
     const formData = await request.formData();
-    const file = formData.get('photo') as File;
-    const cafeId = formData.get('cafeId') as string;
-    const caption = formData.get('caption') as string;
+    const fileData = formData.get('photo');
+    const file = (fileData && typeof fileData === 'object' && 'arrayBuffer' in fileData) ? fileData as File : null;
+    const cafeId = formData.get('cafeId') as string | null;
+    const caption = formData.get('caption') as string | null;
 
     // Validate required fields
     if (!file) {
-      return jsonResponse({ error: 'No photo provided' }, HTTP_STATUS.BAD_REQUEST);
+      return jsonResponse({ error: 'No photo provided' }, HTTP_STATUS.BAD_REQUEST, request, env);
     }
 
     if (!cafeId) {
-      return jsonResponse({ error: 'cafeId is required' }, HTTP_STATUS.BAD_REQUEST);
+      return jsonResponse({ error: 'cafeId is required' }, HTTP_STATUS.BAD_REQUEST, request, env);
     }
 
     // Validate image
     const validation = validateImage(file);
     if (!validation.isValid) {
-      return jsonResponse({ error: validation.error }, HTTP_STATUS.BAD_REQUEST);
+      return jsonResponse({ error: validation.error }, HTTP_STATUS.BAD_REQUEST, request, env);
     }
 
     // Verify cafe exists
     const db = getDb(env.DB);
     const cafe = await db.select().from(cafes).where(eq(cafes.id, parseInt(cafeId))).get();
     if (!cafe) {
-      return jsonResponse({ error: 'Cafe not found' }, HTTP_STATUS.NOT_FOUND);
+      return jsonResponse({ error: 'Cafe not found' }, HTTP_STATUS.NOT_FOUND, request, env);
     }
 
     // Generate unique keys for R2 storage
@@ -88,8 +89,8 @@ export async function uploadPhoto(request: Request, env: Env): Promise<Response>
       }
     });
 
-    // Generate public URLs (placeholder - needs actual R2 custom domain)
-    const baseUrl = 'https://photos.matchamap.app'; // TODO: Configure actual R2 custom domain
+    // Generate public URLs using environment variable or default
+    const baseUrl = env.PHOTOS_BASE_URL || 'https://photos.matchamap.app';
     const imageUrl = `${baseUrl}/${imageKey}`;
     const thumbnailUrl = `${baseUrl}/${thumbnailKey}`;
 
@@ -99,6 +100,7 @@ export async function uploadPhoto(request: Request, env: Env): Promise<Response>
       cafeId: parseInt(cafeId),
       imageKey: imageKey,
       imageUrl: imageUrl,
+      thumbnailKey: thumbnailKey,
       thumbnailUrl: thumbnailUrl,
       caption: caption || null,
       width: dimensions?.width || null,
@@ -108,14 +110,14 @@ export async function uploadPhoto(request: Request, env: Env): Promise<Response>
       moderationStatus: 'pending',
     }).returning().get();
 
-    return jsonResponse({ 
+    return jsonResponse({
       photo: newPhoto,
       message: 'Photo uploaded successfully. It will be reviewed before appearing publicly.'
-    }, HTTP_STATUS.CREATED);
+    }, HTTP_STATUS.CREATED, request, env);
 
   } catch (error) {
     console.error('Photo upload error:', error);
-    return jsonResponse({ error: 'Failed to upload photo' }, HTTP_STATUS.INTERNAL_SERVER_ERROR);
+    return jsonResponse({ error: 'Failed to upload photo' }, HTTP_STATUS.INTERNAL_SERVER_ERROR, request, env);
   }
 }
 
@@ -123,12 +125,12 @@ export async function uploadPhoto(request: Request, env: Env): Promise<Response>
  * Get approved photos for a specific cafe
  * GET /api/cafes/:id/photos
  */
-export async function getCafePhotos(request: Request, env: Env): Promise<Response> {
+export async function getCafePhotos(request: IRequest, env: Env): Promise<Response> {
   try {
     const { id: cafeId } = request.params;
 
     if (!cafeId) {
-      return jsonResponse({ error: 'Cafe ID is required' }, HTTP_STATUS.BAD_REQUEST);
+      return jsonResponse({ error: 'Cafe ID is required' }, HTTP_STATUS.BAD_REQUEST, request, env);
     }
 
     const db = getDb(env.DB);
@@ -159,11 +161,11 @@ export async function getCafePhotos(request: Request, env: Env): Promise<Respons
       .limit(50)
       .all();
 
-    return jsonResponse({ photos }, HTTP_STATUS.OK);
+    return jsonResponse({ photos }, HTTP_STATUS.OK, request, env);
 
   } catch (error) {
     console.error('Get cafe photos error:', error);
-    return jsonResponse({ error: 'Failed to retrieve photos' }, HTTP_STATUS.INTERNAL_SERVER_ERROR);
+    return jsonResponse({ error: 'Failed to retrieve photos' }, HTTP_STATUS.INTERNAL_SERVER_ERROR, request, env);
   }
 }
 
@@ -171,17 +173,17 @@ export async function getCafePhotos(request: Request, env: Env): Promise<Respons
  * Delete a photo (only by the owner)
  * DELETE /api/photos/:id
  */
-export async function deletePhoto(request: Request, env: Env): Promise<Response> {
+export async function deletePhoto(request: IRequest, env: Env): Promise<Response> {
   try {
     const userId = (request as any).userId;
     const { id: photoId } = request.params;
 
     if (!userId) {
-      return jsonResponse({ error: 'Authentication required' }, HTTP_STATUS.UNAUTHORIZED);
+      return jsonResponse({ error: 'Authentication required' }, HTTP_STATUS.UNAUTHORIZED, request, env);
     }
 
     if (!photoId) {
-      return jsonResponse({ error: 'Photo ID is required' }, HTTP_STATUS.BAD_REQUEST);
+      return jsonResponse({ error: 'Photo ID is required' }, HTTP_STATUS.BAD_REQUEST, request, env);
     }
 
     const db = getDb(env.DB);
@@ -199,25 +201,23 @@ export async function deletePhoto(request: Request, env: Env): Promise<Response>
       .get();
 
     if (!photo) {
-      return jsonResponse({ error: 'Photo not found or access denied' }, HTTP_STATUS.NOT_FOUND);
+      return jsonResponse({ error: 'Photo not found or access denied' }, HTTP_STATUS.NOT_FOUND, request, env);
     }
 
     // Delete files from R2
     await env.PHOTOS_BUCKET.delete(photo.imageKey);
-    if (photo.thumbnailUrl) {
-      // Extract thumbnail key from URL (assumes URL format: baseUrl/thumbnailKey)
-      const thumbnailKey = photo.thumbnailUrl.split('/').slice(-4).join('/'); // Extract last 4 path segments
-      await env.PHOTOS_BUCKET.delete(thumbnailKey);
+    if (photo.thumbnailKey) {
+      await env.PHOTOS_BUCKET.delete(photo.thumbnailKey);
     }
 
     // Delete from database
     await db.delete(reviewPhotos).where(eq(reviewPhotos.id, parseInt(photoId)));
 
-    return jsonResponse({ message: 'Photo deleted successfully' }, HTTP_STATUS.OK);
+    return jsonResponse({ message: 'Photo deleted successfully' }, HTTP_STATUS.OK, request, env);
 
   } catch (error) {
     console.error('Delete photo error:', error);
-    return jsonResponse({ error: 'Failed to delete photo' }, HTTP_STATUS.INTERNAL_SERVER_ERROR);
+    return jsonResponse({ error: 'Failed to delete photo' }, HTTP_STATUS.INTERNAL_SERVER_ERROR, request, env);
   }
 }
 
@@ -225,12 +225,12 @@ export async function deletePhoto(request: Request, env: Env): Promise<Response>
  * Get photos uploaded by the current user
  * GET /api/users/me/photos
  */
-export async function getMyPhotos(request: Request, env: Env): Promise<Response> {
+export async function getMyPhotos(request: IRequest, env: Env): Promise<Response> {
   try {
     const userId = (request as any).userId;
 
     if (!userId) {
-      return jsonResponse({ error: 'Authentication required' }, HTTP_STATUS.UNAUTHORIZED);
+      return jsonResponse({ error: 'Authentication required' }, HTTP_STATUS.UNAUTHORIZED, request, env);
     }
 
     const db = getDb(env.DB);
@@ -257,11 +257,11 @@ export async function getMyPhotos(request: Request, env: Env): Promise<Response>
       .limit(100)
       .all();
 
-    return jsonResponse({ photos }, HTTP_STATUS.OK);
+    return jsonResponse({ photos }, HTTP_STATUS.OK, request, env);
 
   } catch (error) {
     console.error('Get user photos error:', error);
-    return jsonResponse({ error: 'Failed to retrieve photos' }, HTTP_STATUS.INTERNAL_SERVER_ERROR);
+    return jsonResponse({ error: 'Failed to retrieve photos' }, HTTP_STATUS.INTERNAL_SERVER_ERROR, request, env);
   }
 }
 
@@ -269,7 +269,7 @@ export async function getMyPhotos(request: Request, env: Env): Promise<Response>
  * Admin: Get all photos for moderation
  * GET /api/admin/photos
  */
-export async function getPhotosForModeration(request: Request, env: Env): Promise<Response> {
+export async function getPhotosForModeration(request: IRequest, env: Env): Promise<Response> {
   try {
     const db = getDb(env.DB);
     
@@ -298,11 +298,11 @@ export async function getPhotosForModeration(request: Request, env: Env): Promis
       .limit(50)
       .all();
 
-    return jsonResponse({ photos }, HTTP_STATUS.OK);
+    return jsonResponse({ photos }, HTTP_STATUS.OK, request, env);
 
   } catch (error) {
     console.error('Get photos for moderation error:', error);
-    return jsonResponse({ error: 'Failed to retrieve photos' }, HTTP_STATUS.INTERNAL_SERVER_ERROR);
+    return jsonResponse({ error: 'Failed to retrieve photos' }, HTTP_STATUS.INTERNAL_SERVER_ERROR, request, env);
   }
 }
 
@@ -310,22 +310,22 @@ export async function getPhotosForModeration(request: Request, env: Env): Promis
  * Admin: Approve or reject a photo
  * PUT /api/admin/photos/:id/moderate
  */
-export async function moderatePhoto(request: Request, env: Env): Promise<Response> {
+export async function moderatePhoto(request: IRequest, env: Env): Promise<Response> {
   try {
     const adminUserId = (request as any).userId;
     const { id: photoId } = request.params;
-    const { status, notes } = await request.json();
+    const body = await request.json() as { status?: string; notes?: string };
 
     if (!adminUserId) {
-      return jsonResponse({ error: 'Authentication required' }, HTTP_STATUS.UNAUTHORIZED);
+      return jsonResponse({ error: 'Authentication required' }, HTTP_STATUS.UNAUTHORIZED, request, env);
     }
 
     if (!photoId) {
-      return jsonResponse({ error: 'Photo ID is required' }, HTTP_STATUS.BAD_REQUEST);
+      return jsonResponse({ error: 'Photo ID is required' }, HTTP_STATUS.BAD_REQUEST, request, env);
     }
 
-    if (!status || !['approved', 'rejected'].includes(status)) {
-      return jsonResponse({ error: 'Valid status is required (approved or rejected)' }, HTTP_STATUS.BAD_REQUEST);
+    if (!body.status || !['approved', 'rejected'].includes(body.status)) {
+      return jsonResponse({ error: 'Valid status is required (approved or rejected)' }, HTTP_STATUS.BAD_REQUEST, request, env);
     }
 
     const db = getDb(env.DB);
@@ -334,10 +334,10 @@ export async function moderatePhoto(request: Request, env: Env): Promise<Respons
     const updatedPhoto = await db
       .update(reviewPhotos)
       .set({
-        moderationStatus: status,
+        moderationStatus: body.status as 'approved' | 'rejected',
         moderatedAt: new Date().toISOString(),
         moderatedBy: adminUserId,
-        moderationNotes: notes || null,
+        moderationNotes: body.notes || null,
         updatedAt: new Date().toISOString(),
       })
       .where(eq(reviewPhotos.id, parseInt(photoId)))
@@ -345,21 +345,21 @@ export async function moderatePhoto(request: Request, env: Env): Promise<Respons
       .get();
 
     if (!updatedPhoto) {
-      return jsonResponse({ error: 'Photo not found' }, HTTP_STATUS.NOT_FOUND);
+      return jsonResponse({ error: 'Photo not found' }, HTTP_STATUS.NOT_FOUND, request, env);
     }
 
     // If rejected, optionally delete from R2 (keeping for audit trail for now)
-    // if (status === 'rejected') {
+    // if (body.status === 'rejected') {
     //   await env.PHOTOS_BUCKET.delete(updatedPhoto.imageKey);
     // }
 
-    return jsonResponse({ 
+    return jsonResponse({
       photo: updatedPhoto,
-      message: `Photo ${status} successfully`
-    }, HTTP_STATUS.OK);
+      message: `Photo ${body.status} successfully`
+    }, HTTP_STATUS.OK, request, env);
 
   } catch (error) {
     console.error('Moderate photo error:', error);
-    return jsonResponse({ error: 'Failed to moderate photo' }, HTTP_STATUS.INTERNAL_SERVER_ERROR);
+    return jsonResponse({ error: 'Failed to moderate photo' }, HTTP_STATUS.INTERNAL_SERVER_ERROR, request, env);
   }
 }

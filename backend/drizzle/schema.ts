@@ -224,6 +224,7 @@ export const reviewPhotos = sqliteTable('review_photos', {
   // R2 Storage keys and URLs
   imageKey: text('image_key').notNull().unique(), // R2 object key (unique identifier)
   imageUrl: text('image_url').notNull(), // Public URL for full-size image
+  thumbnailKey: text('thumbnail_key').notNull(), // R2 object key for thumbnail
   thumbnailUrl: text('thumbnail_url'), // Public URL for thumbnail (200px)
   
   // Photo metadata
