@@ -149,7 +149,7 @@ export async function trackEventClick(request: IRequest, env: Env): Promise<Resp
 export async function handleCheckIn(request: AuthenticatedRequest, env: Env): Promise<Response> {
   try {
     // Extract userId from JWT (set by requireAuth middleware)
-    const userId = request.user?.id;
+    const userId = request.user?.userId;
     
     if (!userId) {
       return errorResponse('Unauthorized', HTTP_STATUS.UNAUTHORIZED, request as Request, env);
@@ -168,43 +168,53 @@ export async function handleCheckIn(request: AuthenticatedRequest, env: Env): Pr
       return errorResponse('Invalid cafeId', HTTP_STATUS.BAD_REQUEST, request as Request, env);
     }
     
-    // Insert check-in (or update if exists)
-    await env.DB.prepare(`
-      INSERT INTO user_checkins (user_id, cafe_id, visited_at, notes)
-      VALUES (?, ?, CURRENT_TIMESTAMP, ?)
-      ON CONFLICT(user_id, cafe_id)
-      DO UPDATE SET
-        visited_at = CURRENT_TIMESTAMP,
-        notes = ?
-    `)
-      .bind(userId, parsedCafeId, notes || null, notes || null)
-      .run();
+    // Verify cafe exists
+    const cafe = await env.DB.prepare('SELECT id FROM cafes WHERE id = ? AND deleted_at IS NULL')
+      .bind(parsedCafeId)
+      .first();
+      
+    if (!cafe) {
+      return errorResponse('Cafe not found', HTTP_STATUS.NOT_FOUND, request as Request, env);
+    }
     
-    // Increment user_activity_stats.total_checkins
-    await env.DB.prepare(`
-      INSERT INTO user_activity_stats (user_id, total_checkins, last_active_at, updated_at)
-      VALUES (?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-      ON CONFLICT(user_id)
-      DO UPDATE SET
-        total_checkins = (
+    // Execute all database operations in a transaction
+    const results = await env.DB.batch([
+      // Insert check-in (or update if exists)
+      env.DB.prepare(`
+        INSERT INTO user_checkins (user_id, cafe_id, visited_at, notes)
+        VALUES (?, ?, CURRENT_TIMESTAMP, ?)
+        ON CONFLICT(user_id, cafe_id)
+        DO UPDATE SET
+          visited_at = CURRENT_TIMESTAMP,
+          notes = ?
+      `).bind(userId, parsedCafeId, notes || null, notes || null),
+      
+      // Increment user_activity_stats.total_checkins (avoid race condition)
+      env.DB.prepare(`
+        INSERT INTO user_activity_stats (user_id, total_checkins, last_active_at, updated_at)
+        VALUES (?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        ON CONFLICT(user_id)
+        DO UPDATE SET
+          total_checkins = total_checkins + 1,
+          last_active_at = CURRENT_TIMESTAMP,
+          updated_at = CURRENT_TIMESTAMP
+      `).bind(userId),
+      
+      // Sync userProfiles.totalCheckins (denormalized for quick access)
+      env.DB.prepare(`
+        UPDATE user_profiles
+        SET total_checkins = (
           SELECT COUNT(*) FROM user_checkins WHERE user_id = ?
-        ),
-        last_active_at = CURRENT_TIMESTAMP,
-        updated_at = CURRENT_TIMESTAMP
-    `)
-      .bind(userId, userId)
-      .run();
+        )
+        WHERE user_id = ?
+      `).bind(userId, userId)
+    ]);
     
-    // Sync userProfiles.totalCheckins (denormalized for quick access)
-    await env.DB.prepare(`
-      UPDATE user_profiles
-      SET total_checkins = (
-        SELECT COUNT(*) FROM user_checkins WHERE user_id = ?
-      )
-      WHERE user_id = ?
-    `)
-      .bind(userId, userId)
-      .run();
+    // Check if any operations failed
+    const failed = results.find(result => !result.success);
+    if (failed) {
+      throw new Error(`Database operation failed: ${failed.error}`);
+    }
     
     return jsonResponse({ success: true }, HTTP_STATUS.OK, request as Request, env);
   } catch (error) {
