@@ -298,6 +298,25 @@ export interface UserBadge {
 // USER REVIEW TYPES (Phase 2A)
 // ============================================================================
 
+// Review moderation status constants
+export const REVIEW_MODERATION_STATUS = {
+  PENDING: 'pending',
+  APPROVED: 'approved',
+  REJECTED: 'rejected',
+  FLAGGED: 'flagged'
+} as const
+
+export type ReviewModerationStatus = typeof REVIEW_MODERATION_STATUS[keyof typeof REVIEW_MODERATION_STATUS]
+
+// Photo moderation status constants (subset of review statuses)
+export const PHOTO_MODERATION_STATUS = {
+  PENDING: 'pending',
+  APPROVED: 'approved',
+  REJECTED: 'rejected'
+} as const
+
+export type PhotoModerationStatus = typeof PHOTO_MODERATION_STATUS[keyof typeof PHOTO_MODERATION_STATUS]
+
 export interface UserReview {
   id: number
   userId: number
@@ -321,7 +340,7 @@ export interface UserReview {
   isFeatured: boolean
   
   // Moderation
-  moderationStatus: 'pending' | 'approved' | 'rejected' | 'flagged'
+  moderationStatus: ReviewModerationStatus
   moderationNotes?: string
   moderatedBy?: number
   moderatedAt?: string
@@ -358,7 +377,7 @@ export interface ReviewPhoto {
   fileSize?: number
   
   // Moderation
-  moderationStatus: 'pending' | 'approved' | 'rejected'
+  moderationStatus: PhotoModerationStatus
   moderatedBy?: number
   moderatedAt?: string
   

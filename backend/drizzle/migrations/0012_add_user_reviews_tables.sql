@@ -16,10 +16,10 @@ CREATE TABLE `user_reviews` (
 	`title` text,
 	`content` text NOT NULL CHECK(LENGTH(`content`) >= 50 AND LENGTH(`content`) <= 2000),
 	`tags` text,
-	`visit_date` text,
+	`visit_date` text CHECK(`visit_date` IS NULL OR date(`visit_date`) <= date('now')),
 	`is_public` integer DEFAULT 1,
 	`is_featured` integer DEFAULT 0,
-	`moderation_status` text DEFAULT 'approved' CHECK(`moderation_status` IN ('pending', 'approved', 'rejected', 'flagged')),
+	`moderation_status` text DEFAULT 'pending' CHECK(`moderation_status` IN ('pending', 'approved', 'rejected', 'flagged')),
 	`moderation_notes` text,
 	`moderated_by` integer,
 	`moderated_at` text,
@@ -45,9 +45,9 @@ CREATE TABLE `review_photos` (
 	`thumbnail_url` text,
 	`caption` text,
 	`drink_type` text,
-	`width` integer,
-	`height` integer,
-	`file_size` integer,
+	`width` integer CHECK(`width` IS NULL OR (`width` > 0 AND `width` <= 4096)),
+	`height` integer CHECK(`height` IS NULL OR (`height` > 0 AND `height` <= 4096)),
+	`file_size` integer CHECK(`file_size` IS NULL OR (`file_size` > 0 AND `file_size` <= 10485760)),
 	`moderation_status` text DEFAULT 'pending' CHECK(`moderation_status` IN ('pending', 'approved', 'rejected')),
 	`moderated_by` integer,
 	`moderated_at` text,
@@ -78,6 +78,8 @@ CREATE INDEX `idx_user_reviews_cafe` ON `user_reviews` (`cafe_id`);--> statement
 CREATE INDEX `idx_user_reviews_rating` ON `user_reviews` (`overall_rating` DESC);--> statement-breakpoint
 CREATE INDEX `idx_user_reviews_created` ON `user_reviews` (`created_at` DESC);--> statement-breakpoint
 CREATE INDEX `idx_user_reviews_status` ON `user_reviews` (`moderation_status`);--> statement-breakpoint
+CREATE INDEX `idx_user_reviews_cafe_rating` ON `user_reviews` (`cafe_id`, `overall_rating` DESC);--> statement-breakpoint
+CREATE INDEX `idx_user_reviews_status_created` ON `user_reviews` (`moderation_status`, `created_at` DESC);--> statement-breakpoint
 
 CREATE INDEX `idx_review_photos_review` ON `review_photos` (`review_id`);--> statement-breakpoint
 CREATE INDEX `idx_review_photos_cafe` ON `review_photos` (`cafe_id`);--> statement-breakpoint
