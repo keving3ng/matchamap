@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { useAuthStore } from '../authStore'
 import { waitForPersistence, createMockUser } from '../../test/helpers'
-import type { User, LoginResponse, RegisterRequest } from '../../../../shared/types'
+import type { User, RegisterRequest } from '../../../../shared/types'
 
 // Mock the API
 const mockFetch = vi.fn()
@@ -20,25 +20,18 @@ describe('authStore', () => {
     updatedAt: '2023-01-01T00:00:00Z',
   }
 
-  const mockLoginResponse: LoginResponse = {
+  const mockLoginResponse = {
     user: mockUser,
-    accessToken: 'mock-access-token',
-    refreshToken: 'mock-refresh-token',
   }
 
   beforeEach(() => {
     // Reset store before each test
     useAuthStore.setState({
       user: null,
-      accessToken: null,
-      refreshToken: null,
       isAuthenticated: false,
       isLoading: false,
       error: null,
     })
-
-    // Clear sessionStorage
-    sessionStorage.clear()
 
     // Reset fetch mocks
     vi.clearAllMocks()
@@ -53,33 +46,27 @@ describe('authStore', () => {
       const { result } = renderHook(() => useAuthStore())
       
       expect(result.current.user).toBeNull()
-      expect(result.current.accessToken).toBeNull()
-      expect(result.current.refreshToken).toBeNull()
       expect(result.current.isAuthenticated).toBe(false)
       expect(result.current.isLoading).toBe(false)
       expect(result.current.error).toBeNull()
     })
 
-    it('should restore session from sessionStorage on init', () => {
-      // Directly set state to simulate restored session
+    it('should handle auth state without persistence', () => {
+      // Directly set state to simulate authenticated session
       useAuthStore.setState({
         user: mockUser,
-        accessToken: 'persisted-token',
-        refreshToken: 'persisted-refresh-token',
         isAuthenticated: true,
       })
 
       const { result } = renderHook(() => useAuthStore())
 
       expect(result.current.user).toEqual(mockUser)
-      expect(result.current.accessToken).toBe('persisted-token')
-      expect(result.current.refreshToken).toBe('persisted-refresh-token')
       expect(result.current.isAuthenticated).toBe(true)
     })
   })
 
   describe('login', () => {
-    it('should set user and tokens on successful login', async () => {
+    it('should set user on successful login', async () => {
       const { result } = renderHook(() => useAuthStore())
 
       mockFetch.mockResolvedValueOnce({
@@ -92,34 +79,39 @@ describe('authStore', () => {
       })
 
       expect(result.current.user).toEqual(mockUser)
-      expect(result.current.accessToken).toBe('mock-access-token')
-      expect(result.current.refreshToken).toBe('mock-refresh-token')
       expect(result.current.isAuthenticated).toBe(true)
       expect(result.current.isLoading).toBe(false)
       expect(result.current.error).toBeNull()
+      
+      // Verify credentials: 'include' is used
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('/api/auth/login'),
+        expect.objectContaining({
+          credentials: 'include',
+        })
+      )
     })
 
-    it('should persist session to sessionStorage', async () => {
+    it('should handle login errors properly', async () => {
       const { result } = renderHook(() => useAuthStore())
 
       mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockLoginResponse),
+        ok: false,
+        json: () => Promise.resolve({ error: 'Invalid credentials' }),
       })
 
       await act(async () => {
-        await result.current.login({ email: 'test@example.com', password: 'password123' })
+        try {
+          await result.current.login({ email: 'test@example.com', password: 'wrongpassword' })
+        } catch (error) {
+          // Expected error
+        }
       })
 
-      await waitForPersistence()
-
-      const storedData = sessionStorage.getItem('matchamap-auth')
-      expect(storedData).toBeTruthy()
-
-      const parsedData = JSON.parse(storedData!)
-      expect(parsedData.state.user).toEqual(mockUser)
-      expect(parsedData.state.accessToken).toBe('mock-access-token')
-      expect(parsedData.state.isAuthenticated).toBe(true)
+      expect(result.current.user).toBeNull()
+      expect(result.current.isAuthenticated).toBe(false)
+      expect(result.current.isLoading).toBe(false)
+      expect(result.current.error).toBe('Invalid credentials')
     })
 
     it('should set loading state during login', async () => {
