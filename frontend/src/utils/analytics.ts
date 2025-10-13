@@ -4,15 +4,6 @@
  */
 
 import { api } from './api'
-import { useAuthStore } from '../stores/authStore'
-
-/**
- * Get current user ID if authenticated, otherwise null
- */
-function getUserId(): number | null {
-  const { user } = useAuthStore.getState()
-  return user?.id ?? null
-}
 
 /**
  * Track cafe statistic (views, directions, marks, social clicks)
@@ -20,9 +11,9 @@ function getUserId(): number | null {
  */
 export async function trackCafeStat(
   cafeId: number,
-  stat: 'view' | 'directions' | 'passport' | 'instagram' | 'tiktok'
+  stat: 'view' | 'directions' | 'passport' | 'instagram' | 'tiktok',
+  userId?: number | null
 ): Promise<void> {
-  const userId = getUserId()
   await api.stats.trackCafeStat(cafeId, stat, userId)
 }
 
@@ -30,8 +21,7 @@ export async function trackCafeStat(
  * Track feed article click
  * Fire-and-forget - errors are silently ignored
  */
-export async function trackFeedClick(feedItemId: number): Promise<void> {
-  const userId = getUserId()
+export async function trackFeedClick(feedItemId: number, userId?: number | null): Promise<void> {
   await api.stats.trackFeedClick(feedItemId, userId)
 }
 
@@ -39,7 +29,6 @@ export async function trackFeedClick(feedItemId: number): Promise<void> {
  * Track event click
  * Fire-and-forget - errors are silently ignored
  */
-export async function trackEventClick(eventId: number): Promise<void> {
-  const userId = getUserId()
+export async function trackEventClick(eventId: number, userId?: number | null): Promise<void> {
   await api.stats.trackEventClick(eventId, userId)
 }
