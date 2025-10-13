@@ -9,7 +9,7 @@ import { formatHoursCompact } from '../utils/formatHours'
 import { sanitizeText } from '../utils/sanitize'
 import { COPY } from '../constants/copy'
 import { api } from '../utils/api'
-import { trackCafeStat } from '../utils/analytics'
+import { trackCafeStat, trackCheckIn } from '../utils/analytics'
 import { useAuthStore } from '../stores/authStore'
 import type { DetailViewProps } from '../types'
 import type { Event } from '../../../shared/types'
@@ -128,9 +128,16 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
               onClick={() => {
                 const wasVisited = isVisited
                 onToggleVisited(cafe.id)
-                // Track anonymous passport mark (only for logged-out users marking as visited)
-                if (!user && !wasVisited) {
-                  trackCafeStat(cafe.id, 'passport')
+                
+                // Track differently for authenticated vs anonymous users
+                if (!wasVisited) { // Only track when marking as visited (not unvisiting)
+                  if (user) {
+                    // Authenticated: Track check-in via API
+                    trackCheckIn(cafe.id)
+                  } else {
+                    // Anonymous: Track passport mark
+                    trackCafeStat(cafe.id, 'passport')
+                  }
                 }
               }}
               className="flex items-center gap-3 w-full group"
