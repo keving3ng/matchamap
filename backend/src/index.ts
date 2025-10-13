@@ -16,7 +16,7 @@ import { register, login, logout, getCurrentUser, refreshToken } from './routes/
 import { joinWaitlist, getWaitlistAdmin } from './routes/waitlist';
 import { getUserProfile, getMyProfile, updateMyProfile, uploadAvatar } from './routes/profile';
 import { listUsers, getUserStats, getUser, updateUserRole, deleteUser } from './routes/admin-users';
-import { trackCafeStat, trackFeedClick, trackEventClick } from './routes/stats';
+import { trackCafeStat, trackFeedClick, trackEventClick, handleCheckIn } from './routes/stats';
 import { requireAuth, requireAdminAuth } from './middleware/auth';
 import { authRateLimit, publicRateLimit, writeRateLimit } from './middleware/rateLimit';
 import { requireHTTPS } from './middleware/httpsOnly';
@@ -69,6 +69,9 @@ router.post('/api/waitlist', authRateLimit(), joinWaitlist);
 router.post('/api/stats/cafe/:cafeId/:stat', publicRateLimit(), trackCafeStat);
 router.post('/api/stats/feed/:feedItemId', publicRateLimit(), trackFeedClick);
 router.post('/api/stats/event/:eventId', publicRateLimit(), trackEventClick);
+
+// Check-in endpoint (authenticated users only)
+router.post('/api/checkins', writeRateLimit(), requireAuth(), handleCheckIn);
 
 // Auth endpoints (with stricter rate limiting)
 router.post('/api/auth/register', authRateLimit(), register);

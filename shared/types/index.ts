@@ -310,6 +310,15 @@ export interface CafeStats {
   updatedAt: string
 }
 
+export interface CheckInRequest {
+  cafeId: number
+  notes?: string
+}
+
+export interface CheckInResponse {
+  success: boolean
+}
+
 // ============================================================================
 // API RESPONSE TYPES
 // ============================================================================
