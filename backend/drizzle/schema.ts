@@ -17,6 +17,10 @@ export const cafes = sqliteTable('cafes', {
   // Ratings
   ambianceScore: real('ambiance_score'), // Cafe ambiance rating (0-10)
 
+  // User-generated ratings (aggregated)
+  userRatingAvg: real('user_rating_avg'), // Average user rating (0-10)
+  userRatingCount: integer('user_rating_count').default(0), // Number of user reviews
+
   // Pricing
   chargeForAltMilk: real('charge_for_alt_milk'), // Price charged for alt milk (null if free)
 
@@ -286,6 +290,61 @@ export const adminAuditLog = sqliteTable('admin_audit_log', {
   createdAtIdx: index('audit_created_at_idx').on(table.createdAt),
 }));
 
+// User reviews table
+export const userReviews = sqliteTable('user_reviews', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  cafeId: integer('cafe_id').notNull().references(() => cafes.id, { onDelete: 'cascade' }),
+
+  // Ratings (0-10 scale to match expert system)
+  overallRating: real('overall_rating').notNull(),
+  matchaQualityRating: real('matcha_quality_rating'),
+  ambianceRating: real('ambiance_rating'),
+  serviceRating: real('service_rating'),
+  valueRating: real('value_rating'),
+
+  // Review content
+  title: text('title'),
+  content: text('content').notNull(),
+  tags: text('tags'), // JSON array of strings
+
+  // Visit information
+  visitDate: text('visit_date'),
+
+  // Moderation
+  moderationStatus: text('moderation_status', { 
+    enum: ['approved', 'pending', 'rejected'] 
+  }).notNull().default('approved'),
+  
+  // Settings
+  isPublic: integer('is_public', { mode: 'boolean' }).default(true),
+
+  // Engagement metrics
+  helpfulCount: integer('helpful_count').default(0),
+
+  // Timestamps
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+  userIdIdx: index('user_reviews_user_id_idx').on(table.userId),
+  cafeIdIdx: index('user_reviews_cafe_id_idx').on(table.cafeId),
+  moderationIdx: index('user_reviews_moderation_idx').on(table.moderationStatus),
+  helpfulIdx: index('user_reviews_helpful_idx').on(table.helpfulCount),
+  uniqueUserCafe: unique().on(table.userId, table.cafeId),
+}));
+
+// Review helpful votes table
+export const reviewHelpful = sqliteTable('review_helpful', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  reviewId: integer('review_id').notNull().references(() => userReviews.id, { onDelete: 'cascade' }),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+  reviewIdIdx: index('review_helpful_review_id_idx').on(table.reviewId),
+  userIdIdx: index('review_helpful_user_id_idx').on(table.userId),
+  uniqueReviewUser: unique().on(table.reviewId, table.userId),
+}));
+
 // Type exports for use in the application
 export type Cafe = typeof cafes.$inferSelect;
 export type NewCafe = typeof cafes.$inferInsert;
@@ -309,3 +368,7 @@ export type ReviewPhoto = typeof reviewPhotos.$inferSelect;
 export type NewReviewPhoto = typeof reviewPhotos.$inferInsert;
 export type AdminAuditLog = typeof adminAuditLog.$inferSelect;
 export type NewAdminAuditLog = typeof adminAuditLog.$inferInsert;
+export type UserReview = typeof userReviews.$inferSelect;
+export type NewUserReview = typeof userReviews.$inferInsert;
+export type ReviewHelpful = typeof reviewHelpful.$inferSelect;
+export type NewReviewHelpful = typeof reviewHelpful.$inferInsert;

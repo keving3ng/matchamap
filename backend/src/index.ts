@@ -18,6 +18,7 @@ import { getUserProfile, getMyProfile, updateMyProfile, uploadAvatar } from './r
 import { listUsers, getUserStats, getUser, updateUserRole, deleteUser } from './routes/admin-users';
 import { trackCafeStat, trackFeedClick, trackEventClick, handleCheckIn } from './routes/stats';
 import { uploadPhoto, getCafePhotos, deletePhoto, getMyPhotos, getPhotosForModeration, moderatePhoto } from './routes/photos';
+import { createReview, getCafeReviews, updateReview, deleteReview, markHelpful, removeHelpful, getUserReviews } from './routes/reviews';
 import { requireAuth, requireAdminAuth } from './middleware/auth';
 import { authRateLimit, publicRateLimit, writeRateLimit } from './middleware/rateLimit';
 import { requireHTTPS } from './middleware/httpsOnly';
@@ -92,6 +93,15 @@ router.get('/api/users/me/profile', authRateLimit(), requireAuth(), getMyProfile
 router.put('/api/users/me/profile', writeRateLimit(), requireAuth(), updateMyProfile);
 router.post('/api/users/me/avatar', writeRateLimit(), requireAuth(), uploadAvatar);
 router.get('/api/users/:username/profile', publicRateLimit(), getUserProfile);
+
+// Review endpoints
+router.post('/api/cafes/:id/reviews', writeRateLimit(), requireAuth(), createReview);
+router.get('/api/cafes/:id/reviews', publicRateLimit(), getCafeReviews);
+router.put('/api/reviews/:id', writeRateLimit(), requireAuth(), updateReview);
+router.delete('/api/reviews/:id', writeRateLimit(), requireAuth(), deleteReview);
+router.post('/api/reviews/:id/helpful', writeRateLimit(), requireAuth(), markHelpful);
+router.delete('/api/reviews/:id/helpful', writeRateLimit(), requireAuth(), removeHelpful);
+router.get('/api/users/:username/reviews', publicRateLimit(), getUserReviews);
 
 // Admin API endpoints (protected by JWT authentication + rate limiting)
 router.post('/api/admin/cafes', writeRateLimit(), requireAdminAuth(), createCafe);
