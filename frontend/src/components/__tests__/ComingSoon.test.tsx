@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ComingSoon } from '../ComingSoon'
@@ -18,19 +18,17 @@ vi.mock('../../utils/api', () => ({
   },
 }))
 
-// Mock environment variable
-Object.defineProperty(import.meta, 'env', {
-  value: {
-    VITE_ACCESS_PASSWORD: 'test123',
-  },
-  writable: true,
-})
-
 describe('ComingSoon', () => {
   const mockOnPasswordCorrect = vi.fn()
 
   beforeEach(() => {
     vi.clearAllMocks()
+    // Mock environment variable before each test
+    vi.stubEnv('VITE_ACCESS_PASSWORD', 'test123')
+  })
+
+  afterEach(() => {
+    vi.unstubAllEnvs()
   })
 
   it('should render MatchaMap title and emoji', () => {
@@ -111,7 +109,11 @@ describe('ComingSoon', () => {
     await user.click(emojiButton)
 
     const passwordInput = screen.getByPlaceholderText('password')
-    await user.type(passwordInput, 'test123{Enter}')
+    await user.type(passwordInput, 'test123')
+
+    // Submit the form explicitly
+    const form = passwordInput.closest('form')!
+    fireEvent.submit(form)
 
     await waitFor(() => {
       expect(mockOnPasswordCorrect).toHaveBeenCalled()

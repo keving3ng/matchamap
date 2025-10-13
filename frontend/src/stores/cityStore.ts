@@ -116,6 +116,7 @@ export const useCityStore = create<CityState>()(
           // City keys are already normalized in the database
           // Just need to lowercase and filter to valid CITIES
           const availableCityKeys = cities
+            .filter(cityData => cityData?.city && typeof cityData.city === 'string')
             .map(cityData => cityData.city.toLowerCase().trim() as CityKey)
             .filter(cityKey => cityKey in CITIES)
             // Remove duplicates

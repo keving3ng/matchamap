@@ -112,20 +112,25 @@ describe('useLazyData', () => {
   })
 
   it('should handle fetchFunction that throws an error', () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
     const mockFetchFunction = vi.fn().mockImplementation(() => {
       throw new Error('Fetch failed')
     })
     const isFetched = false
 
-    // Should not throw error, just call the function
+    // Should not throw error, just call the function and log error
     expect(() => {
       renderHook(() => useLazyData(mockFetchFunction, isFetched))
     }).not.toThrow()
 
     expect(mockFetchFunction).toHaveBeenCalledTimes(1)
+    expect(consoleSpy).toHaveBeenCalledWith('Error in lazy data fetch:', expect.any(Error))
+
+    consoleSpy.mockRestore()
   })
 
   it('should handle async fetchFunction that rejects', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
     const mockAsyncFetchFunction = vi.fn().mockRejectedValue(new Error('Async fetch failed'))
     const isFetched = false
 
@@ -134,6 +139,13 @@ describe('useLazyData', () => {
     }).not.toThrow()
 
     expect(mockAsyncFetchFunction).toHaveBeenCalledTimes(1)
+
+    // Wait for promise to reject and be caught
+    await vi.waitFor(() => {
+      expect(consoleSpy).toHaveBeenCalledWith('Error in lazy data fetch:', expect.any(Error))
+    })
+
+    consoleSpy.mockRestore()
   })
 
   it('should work with multiple instances of the hook', () => {

@@ -155,11 +155,15 @@ describe('FeedView', () => {
     expect(screen.getByText('(was 7.8)')).toBeInTheDocument()
   })
 
-  it('should display neighborhood information when available', () => {
+  it('should display neighborhood information when available with score', () => {
     render(<FeedView feedItems={mockFeedItems} />)
 
-    expect(screen.getByText('Queen West')).toBeInTheDocument()
+    // Neighborhood is only displayed if item also has a score
+    // Item 1 (NEW_LOCATION) has neighborhood but no score, so it won't show
+    // Item 2 (SCORE_UPDATE) has both score and neighborhood "Downtown"
     expect(screen.getByText('Downtown')).toBeInTheDocument()
+    // "Queen West" won't be displayed because that item has no score
+    expect(screen.queryByText('Queen West')).not.toBeInTheDocument()
   })
 
   it('should not display score section for non-score-update items', () => {
@@ -226,7 +230,7 @@ describe('FeedView', () => {
     expect(screen.queryByText(/was/)).not.toBeInTheDocument()
   })
 
-  it('should handle feed items with neighborhood but no score', () => {
+  it('should not display neighborhood without score', () => {
     const neighborhoodOnlyItem: FeedItem = {
       id: 6,
       type: FeedItemType.NEW_LOCATION,
@@ -239,7 +243,8 @@ describe('FeedView', () => {
 
     render(<FeedView feedItems={[neighborhoodOnlyItem]} />)
 
-    expect(screen.getByText('Kensington Market')).toBeInTheDocument()
+    // Neighborhood is only displayed alongside a score, so it won't show here
+    expect(screen.queryByText('Kensington Market')).not.toBeInTheDocument()
     expect(screen.queryByText(/bg-green-500/)).not.toBeInTheDocument() // No score badge
   })
 
@@ -298,9 +303,11 @@ describe('FeedView', () => {
     render(<FeedView feedItems={allTypesItems} />)
 
     // Should render correct type labels
-    expect(screen.getByText('New Location')).toBeInTheDocument()
+    // Multiple "New Location" texts exist (type label + title)
+    expect(screen.getAllByText('New Location')).toHaveLength(2) // Type label and title
     expect(screen.getByText('Updated Review')).toBeInTheDocument()
-    expect(screen.getAllByText('Announcement')).toHaveLength(3) // 3 non-specific types default to announcement
+    // 3 items default to announcement type label, plus 1 has "Announcement" as title = 4 total
+    expect(screen.getAllByText('Announcement')).toHaveLength(4)
   })
 
   it('should be accessible with proper heading structure', () => {

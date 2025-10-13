@@ -333,6 +333,7 @@ describe('PassportView', () => {
 
   it('should handle toggle stamp error gracefully', async () => {
     const user = userEvent.setup()
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
     mockOnToggleStamp.mockRejectedValue(new Error('Network error'))
 
     render(
@@ -350,7 +351,11 @@ describe('PassportView', () => {
       // Should remove loading state even after error
       expect(cafeCard).not.toHaveClass('animate-pulse')
       expect(cafeCard).not.toBeDisabled()
+      // Should log the error
+      expect(consoleSpy).toHaveBeenCalledWith('Error toggling stamp:', expect.any(Error))
     })
+
+    consoleSpy.mockRestore()
   })
 
   it('should maintain loading state isolation between cards', async () => {
