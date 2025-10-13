@@ -1,4 +1,4 @@
-import { Request } from 'itty-router';
+import { IRequest } from 'itty-router';
 import { Env } from '../types';
 import { HTTP_STATUS } from '../constants';
 import { jsonResponse, errorResponse } from '../utils/response';
@@ -7,7 +7,7 @@ import { jsonResponse, errorResponse } from '../utils/response';
  * Track cafe statistics (views, directions, passport marks, social clicks)
  * Handles both anonymous and authenticated users using fire-and-forget pattern
  */
-export async function trackCafeStat(request: Request, env: Env): Promise<Response> {
+export async function trackCafeStat(request: IRequest, env: Env): Promise<Response> {
   try {
     const { cafeId, stat } = request.params;
     
@@ -77,7 +77,7 @@ export async function trackCafeStat(request: Request, env: Env): Promise<Respons
  * Track feed item clicks
  * Handles both anonymous and authenticated users using fire-and-forget pattern
  */
-export async function trackFeedClick(request: Request, env: Env): Promise<Response> {
+export async function trackFeedClick(request: IRequest, env: Env): Promise<Response> {
   try {
     const { feedItemId } = request.params;
     
@@ -111,7 +111,7 @@ export async function trackFeedClick(request: Request, env: Env): Promise<Respon
  * Track event clicks
  * Handles both anonymous and authenticated users using fire-and-forget pattern
  */
-export async function trackEventClick(request: Request, env: Env): Promise<Response> {
+export async function trackEventClick(request: IRequest, env: Env): Promise<Response> {
   try {
     const { eventId } = request.params;
     
