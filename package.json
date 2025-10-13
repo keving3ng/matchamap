@@ -21,6 +21,8 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspace=frontend",
     "test:ci": "npm run test:ci --workspace=frontend",
+    "test:all": "npm run test:ci --workspaces --if-present",
+    "test:coverage": "npm run test:coverage --workspaces --if-present",
     "lint": "npm run lint --workspace=frontend",
     "db:generate": "drizzle-kit generate",
     "db:migrate:local": "wrangler d1 migrations apply matchamap-db --local",
