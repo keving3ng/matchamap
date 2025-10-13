@@ -597,6 +597,46 @@ export const userAdminAPI = {
 }
 
 /**
+ * Stats/Analytics API endpoints
+ */
+export const statsAPI = {
+  /**
+   * Track cafe statistic (view, directions, passport mark, social click)
+   */
+  async trackCafeStat(
+    cafeId: number,
+    stat: 'view' | 'directions' | 'passport' | 'instagram' | 'tiktok',
+    userId?: number | null
+  ): Promise<void> {
+    // Use fetchAPI but ignore response (fire-and-forget)
+    await fetchAPI(`/stats/cafe/${cafeId}/${stat}`, {
+      method: 'POST',
+      body: JSON.stringify({ userId: userId ?? null }),
+    }).catch(() => {}) // Ignore errors silently
+  },
+
+  /**
+   * Track feed item click
+   */
+  async trackFeedClick(feedItemId: number, userId?: number | null): Promise<void> {
+    await fetchAPI(`/stats/feed/${feedItemId}`, {
+      method: 'POST',
+      body: JSON.stringify({ userId: userId ?? null }),
+    }).catch(() => {})
+  },
+
+  /**
+   * Track event click
+   */
+  async trackEventClick(eventId: number, userId?: number | null): Promise<void> {
+    await fetchAPI(`/stats/event/${eventId}`, {
+      method: 'POST',
+      body: JSON.stringify({ userId: userId ?? null }),
+    }).catch(() => {})
+  },
+}
+
+/**
  * Export all APIs
  */
 export const api = {
@@ -611,6 +651,7 @@ export const api = {
   waitlist: waitlistAPI,
   profile: profileAPI,
   userAdmin: userAdminAPI,
+  stats: statsAPI,
 }
 
 export default api
