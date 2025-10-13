@@ -10,9 +10,9 @@ import { jsonResponse, errorResponse } from '../utils/response';
 export async function trackCafeStat(request: IRequest, env: Env): Promise<Response> {
   try {
     const { cafeId, stat } = request.params;
-    
+
     // Parse userId from request body (null if anonymous)
-    const body = await request.json().catch(() => ({}));
+    const body = await request.json().catch(() => ({})) as { userId?: string };
     const userId = body.userId ?? null;
     
     // Map stat names to column names (prevents SQL injection)
