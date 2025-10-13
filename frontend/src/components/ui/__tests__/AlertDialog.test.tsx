@@ -18,67 +18,67 @@ describe('AlertDialog', () => {
   })
 
   it('should render with default info variant', () => {
-    render(
+    const { container } = render(
       <AlertDialog
         title="Default Alert"
         message="Default message"
       />
     )
-    
-    const container = screen.getByText('Default Alert').closest('div')
-    expect(container).toHaveClass('border-matcha-200')
+
+    const alertContainer = container.querySelector('.absolute.inset-x-4')
+    expect(alertContainer).toHaveClass('border-matcha-200')
   })
 
   it('should render success variant with correct styling', () => {
-    render(
+    const { container } = render(
       <AlertDialog
         variant="success"
         title="Success Alert"
         message="Operation completed successfully"
       />
     )
-    
-    const container = screen.getByText('Success Alert').closest('div')
-    expect(container).toHaveClass('border-green-200')
+
+    const alertContainer = container.querySelector('.absolute.inset-x-4')
+    expect(alertContainer).toHaveClass('border-green-200')
   })
 
   it('should render error variant with correct styling', () => {
-    render(
+    const { container } = render(
       <AlertDialog
         variant="error"
         title="Error Alert"
         message="Something went wrong"
       />
     )
-    
-    const container = screen.getByText('Error Alert').closest('div')
-    expect(container).toHaveClass('border-red-200')
+
+    const alertContainer = container.querySelector('.absolute.inset-x-4')
+    expect(alertContainer).toHaveClass('border-red-200')
   })
 
   it('should render warning variant with correct styling', () => {
-    render(
+    const { container } = render(
       <AlertDialog
         variant="warning"
         title="Warning Alert"
         message="Please be careful"
       />
     )
-    
-    const container = screen.getByText('Warning Alert').closest('div')
-    expect(container).toHaveClass('border-yellow-200')
+
+    const alertContainer = container.querySelector('.absolute.inset-x-4')
+    expect(alertContainer).toHaveClass('border-yellow-200')
   })
 
   it('should render info variant with correct styling', () => {
-    render(
+    const { container } = render(
       <AlertDialog
         variant="info"
         title="Info Alert"
         message="Here's some information"
       />
     )
-    
-    const container = screen.getByText('Info Alert').closest('div')
-    expect(container).toHaveClass('border-matcha-200')
+
+    const alertContainer = container.querySelector('.absolute.inset-x-4')
+    expect(alertContainer).toHaveClass('border-matcha-200')
   })
 
   it('should use default icon for each variant', () => {
@@ -222,28 +222,28 @@ describe('AlertDialog', () => {
   })
 
   it('should apply custom className', () => {
-    render(
+    const { container } = render(
       <AlertDialog
         title="Custom Class"
         message="Testing custom styles"
         className="custom-alert-class"
       />
     )
-    
-    const container = screen.getByText('Custom Class').closest('div')
-    expect(container).toHaveClass('custom-alert-class')
+
+    const alertContainer = container.querySelector('.absolute.inset-x-4')
+    expect(alertContainer).toHaveClass('custom-alert-class')
   })
 
   it('should have proper positioning and styling', () => {
-    render(
+    const { container } = render(
       <AlertDialog
         title="Positioning Test"
         message="Check positioning"
       />
     )
-    
-    const container = screen.getByText('Positioning Test').closest('div')
-    expect(container).toHaveClass(
+
+    const alertContainer = container.querySelector('.absolute.inset-x-4')
+    expect(alertContainer).toHaveClass(
       'absolute',
       'inset-x-4',
       'top-4',
@@ -324,39 +324,39 @@ describe('InfoCard', () => {
   })
 
   it('should render with default variant styling', () => {
-    render(
+    const { container } = render(
       <InfoCard>Default card</InfoCard>
     )
-    
-    const container = screen.getByText('Default card').closest('div')
-    expect(container).toHaveClass('bg-gray-50', 'border-gray-200')
+
+    const infoCardContainer = container.querySelector('.rounded-xl.p-3.border')
+    expect(infoCardContainer).toHaveClass('bg-gray-50', 'border-gray-200')
   })
 
   it('should render success variant styling', () => {
-    render(
+    const { container } = render(
       <InfoCard variant="success">Success card</InfoCard>
     )
-    
-    const container = screen.getByText('Success card').closest('div')
-    expect(container).toHaveClass('bg-green-50', 'border-green-200')
+
+    const infoCardContainer = container.querySelector('.rounded-xl.p-3.border')
+    expect(infoCardContainer).toHaveClass('bg-green-50', 'border-green-200')
   })
 
   it('should render warning variant styling', () => {
-    render(
+    const { container } = render(
       <InfoCard variant="warning">Warning card</InfoCard>
     )
-    
-    const container = screen.getByText('Warning card').closest('div')
-    expect(container).toHaveClass('bg-yellow-50', 'border-yellow-200')
+
+    const infoCardContainer = container.querySelector('.rounded-xl.p-3.border')
+    expect(infoCardContainer).toHaveClass('bg-yellow-50', 'border-yellow-200')
   })
 
   it('should render info variant styling', () => {
-    render(
+    const { container } = render(
       <InfoCard variant="info">Info card</InfoCard>
     )
-    
-    const container = screen.getByText('Info card').closest('div')
-    expect(container).toHaveClass('bg-blue-50', 'border-blue-200')
+
+    const infoCardContainer = container.querySelector('.rounded-xl.p-3.border')
+    expect(infoCardContainer).toHaveClass('bg-blue-50', 'border-blue-200')
   })
 
   it('should render icon in title when provided', () => {
@@ -373,23 +373,23 @@ describe('InfoCard', () => {
   })
 
   it('should apply custom className', () => {
-    render(
+    const { container } = render(
       <InfoCard className="custom-info-class">
         Custom styled card
       </InfoCard>
     )
-    
-    const container = screen.getByText('Custom styled card').closest('div')
-    expect(container).toHaveClass('custom-info-class')
+
+    const infoCardContainer = container.querySelector('.rounded-xl.p-3.border')
+    expect(infoCardContainer).toHaveClass('custom-info-class')
   })
 
   it('should have proper base styling', () => {
-    render(
+    const { container } = render(
       <InfoCard>Base styling test</InfoCard>
     )
-    
-    const container = screen.getByText('Base styling test').closest('div')
-    expect(container).toHaveClass('rounded-xl', 'p-3', 'border')
+
+    const infoCardContainer = container.querySelector('.rounded-xl.p-3.border')
+    expect(infoCardContainer).toHaveClass('rounded-xl', 'p-3', 'border')
   })
 
   it('should have proper title styling', () => {

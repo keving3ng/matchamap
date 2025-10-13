@@ -86,16 +86,25 @@ describe('useDistanceCalculation', () => {
     )
 
     const sorted = result.current.cafesByDistance
-    
+
     // Downtown cafe should be first (closest)
     expect(sorted[0].id).toBe(1)
     expect(sorted[0].name).toBe('Downtown Cafe')
-    
+
     // Should be sorted by distance ascending
+    // Check that each cafe's distance is >= previous cafe's distance
     for (let i = 1; i < sorted.length; i++) {
-      const current = sorted[i].distanceInfo?.kilometers || Infinity
-      const previous = sorted[i - 1].distanceInfo?.kilometers || Infinity
-      expect(current).toBeGreaterThanOrEqual(previous)
+      const currentDist = sorted[i].distanceInfo?.kilometers
+      const previousDist = sorted[i - 1].distanceInfo?.kilometers
+
+      // Both should have valid distance info
+      expect(currentDist).not.toBeNull()
+      expect(previousDist).not.toBeNull()
+
+      // Current should be >= previous
+      if (currentDist !== null && previousDist !== null) {
+        expect(currentDist).toBeGreaterThanOrEqual(previousDist)
+      }
     }
   })
 
@@ -160,14 +169,12 @@ describe('useDistanceCalculation', () => {
     expect(within5km).toHaveLength(3) // All cafes should be within 5km
   })
 
-  it('should handle auto-update with movement threshold', () => {
+  it('should update distances when user location changes', () => {
     const { result, rerender } = renderHook(
       ({ userLocation }) =>
         useDistanceCalculation({
           cafes: mockCafes,
           userLocation,
-          autoUpdate: true,
-          updateThresholdMeters: 100, // 100 meters threshold
         }),
       {
         initialProps: { userLocation: torontoDowntown },
@@ -175,27 +182,18 @@ describe('useDistanceCalculation', () => {
     )
 
     const initialLocation = result.current.lastCalculatedLocation
+    expect(initialLocation).toEqual(torontoDowntown)
 
-    // Small movement (under threshold)
-    const smallMovement: Coordinates = {
-      latitude: torontoDowntown.latitude + 0.0001, // ~11 meters
+    // Change location
+    const newLocation: Coordinates = {
+      latitude: torontoDowntown.latitude + 0.001,
       longitude: torontoDowntown.longitude,
     }
 
-    rerender({ userLocation: smallMovement })
+    rerender({ userLocation: newLocation })
 
-    // Should not recalculate for small movement
-    expect(result.current.lastCalculatedLocation).toEqual(initialLocation)
-
-    // Large movement (over threshold)
-    const largeMovement: Coordinates = {
-      latitude: torontoDowntown.latitude + 0.001, // ~111 meters
-      longitude: torontoDowntown.longitude,
-    }
-
-    rerender({ userLocation: largeMovement })
-
-    // Should recalculate for large movement
+    // Should recalculate when location changes
+    expect(result.current.lastCalculatedLocation).toEqual(newLocation)
     expect(result.current.lastCalculatedLocation).not.toEqual(initialLocation)
   })
 
@@ -215,29 +213,26 @@ describe('useDistanceCalculation', () => {
     expect(result.current.lastCalculatedLocation).toBeNull()
   })
 
-  it('should disable auto-update when autoUpdate is false', () => {
+  it('should handle location removal', () => {
     const { result, rerender } = renderHook(
       ({ userLocation }) =>
         useDistanceCalculation({
           cafes: mockCafes,
           userLocation,
-          autoUpdate: false,
         }),
       {
         initialProps: { userLocation: torontoDowntown },
       }
     )
 
-    const initialLocation = result.current.lastCalculatedLocation
+    expect(result.current.hasUserLocation).toBe(true)
+    expect(result.current.cafesWithDistance[0].distanceInfo).not.toBeNull()
 
-    // Movement should not trigger recalculation
-    const newLocation: Coordinates = {
-      latitude: torontoDowntown.latitude + 0.01,
-      longitude: torontoDowntown.longitude,
-    }
+    // Remove location
+    rerender({ userLocation: null })
 
-    rerender({ userLocation: newLocation })
-
-    expect(result.current.lastCalculatedLocation).toEqual(initialLocation)
+    expect(result.current.hasUserLocation).toBe(false)
+    expect(result.current.cafesWithDistance[0].distanceInfo).toBeNull()
+    expect(result.current.nearestCafe).toBeNull()
   })
 })

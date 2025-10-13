@@ -3,23 +3,24 @@ import { renderHook } from '@testing-library/react'
 import { useFeatureToggle, isFeatureEnabled, getEnabledFeatures, getCurrentEnvironment } from '../useFeatureToggle'
 
 // Mock the feature config
-const mockFeatureConfig = {
-  ENABLE_PASSPORT: { dev: true, prod: false },
-  ENABLE_EVENTS: { dev: false, prod: true },
-  ENABLE_MENU: { dev: true, prod: true },
-  ENABLE_USER_ACCOUNTS: { dev: false, prod: false },
-}
-
-vi.mock('../../config/features.yaml', () => mockFeatureConfig)
+vi.mock('../../config/features.yaml', () => ({
+  default: {
+    ENABLE_PASSPORT: { dev: true, prod: false },
+    ENABLE_EVENTS: { dev: false, prod: true },
+    ENABLE_MENU: { dev: true, prod: true },
+    ENABLE_USER_ACCOUNTS: { dev: false, prod: false },
+  }
+}))
 
 // Mock the admin store
 vi.mock('../../stores/adminStore', () => ({
   useAdminStore: vi.fn(),
 }))
 
-describe('useFeatureToggle', () => {
-  let mockUseAdminStore: any
+// Declare mockUseAdminStore at top level for all describe blocks
+let mockUseAdminStore: any
 
+describe('useFeatureToggle', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
 
@@ -33,9 +34,7 @@ describe('useFeatureToggle', () => {
     vi.mocked(useAdminStore).mockImplementation(mockUseAdminStore)
 
     // Reset import.meta.env.MODE
-    vi.stubGlobal('import.meta', {
-      env: { MODE: 'development' }
-    })
+    vi.stubEnv('MODE', 'development')
   })
 
   it('should return feature value based on development environment', () => {
@@ -45,9 +44,7 @@ describe('useFeatureToggle', () => {
   })
 
   it('should return feature value based on production environment', () => {
-    vi.stubGlobal('import.meta', {
-      env: { MODE: 'production' }
-    })
+    vi.stubEnv('MODE', 'production')
 
     const { result } = renderHook(() => useFeatureToggle('ENABLE_EVENTS'))
 
@@ -112,9 +109,7 @@ describe('useFeatureToggle', () => {
   })
 
   it('should use actual environment when admin mode is inactive', () => {
-    vi.stubGlobal('import.meta', {
-      env: { MODE: 'production' }
-    })
+    vi.stubEnv('MODE', 'production')
 
     mockUseAdminStore.mockReturnValue({
       adminModeActive: false,
@@ -165,9 +160,7 @@ describe('useFeatureToggle', () => {
 
 describe('isFeatureEnabled', () => {
   beforeEach(() => {
-    vi.stubGlobal('import.meta', {
-      env: { MODE: 'development' }
-    })
+    vi.stubEnv('MODE', 'development')
   })
 
   it('should return correct value for development environment', () => {
@@ -176,9 +169,7 @@ describe('isFeatureEnabled', () => {
   })
 
   it('should return correct value for production environment', () => {
-    vi.stubGlobal('import.meta', {
-      env: { MODE: 'production' }
-    })
+    vi.stubEnv('MODE', 'production')
 
     expect(isFeatureEnabled('ENABLE_PASSPORT')).toBe(false)
     expect(isFeatureEnabled('ENABLE_EVENTS')).toBe(true)
@@ -201,14 +192,12 @@ describe('isFeatureEnabled', () => {
 
 describe('getEnabledFeatures', () => {
   beforeEach(() => {
-    vi.stubGlobal('import.meta', {
-      env: { MODE: 'development' }
-    })
+    vi.stubEnv('MODE', 'development')
   })
 
   it('should return enabled features for development environment', () => {
     const enabledFeatures = getEnabledFeatures()
-    
+
     expect(enabledFeatures).toContain('ENABLE_PASSPORT')
     expect(enabledFeatures).toContain('ENABLE_MENU')
     expect(enabledFeatures).not.toContain('ENABLE_EVENTS')
@@ -216,12 +205,10 @@ describe('getEnabledFeatures', () => {
   })
 
   it('should return enabled features for production environment', () => {
-    vi.stubGlobal('import.meta', {
-      env: { MODE: 'production' }
-    })
+    vi.stubEnv('MODE', 'production')
 
     const enabledFeatures = getEnabledFeatures()
-    
+
     expect(enabledFeatures).toContain('ENABLE_EVENTS')
     expect(enabledFeatures).toContain('ENABLE_MENU')
     expect(enabledFeatures).not.toContain('ENABLE_PASSPORT')
@@ -240,43 +227,42 @@ describe('getEnabledFeatures', () => {
 
 describe('getCurrentEnvironment', () => {
   it('should return dev for development mode', () => {
-    vi.stubGlobal('import.meta', {
-      env: { MODE: 'development' }
-    })
+    vi.stubEnv('MODE', 'development')
 
     expect(getCurrentEnvironment()).toBe('dev')
   })
 
   it('should return prod for production mode', () => {
-    vi.stubGlobal('import.meta', {
-      env: { MODE: 'production' }
-    })
+    vi.stubEnv('MODE', 'production')
 
     expect(getCurrentEnvironment()).toBe('prod')
   })
 
   it('should return dev for unknown modes', () => {
-    vi.stubGlobal('import.meta', {
-      env: { MODE: 'test' }
-    })
+    vi.stubEnv('MODE', 'test')
 
     expect(getCurrentEnvironment()).toBe('dev')
   })
 
   it('should handle missing MODE', () => {
-    vi.stubGlobal('import.meta', {
-      env: {}
-    })
+    vi.stubEnv('MODE', '')
 
     expect(getCurrentEnvironment()).toBe('dev')
   })
 })
 
 describe('Feature toggle edge cases', () => {
-  beforeEach(() => {
-    vi.stubGlobal('import.meta', {
-      env: { MODE: 'development' }
-    })
+  beforeEach(async () => {
+    vi.stubEnv('MODE', 'development')
+
+    mockUseAdminStore = vi.fn(() => ({
+      adminModeActive: false,
+      featureOverrides: {},
+      environment: null,
+    }))
+
+    const { useAdminStore } = await import('../../stores/adminStore')
+    vi.mocked(useAdminStore).mockImplementation(mockUseAdminStore)
   })
 
   it('should handle boolean admin overrides correctly', async () => {

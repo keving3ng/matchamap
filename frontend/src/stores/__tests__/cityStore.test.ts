@@ -14,10 +14,9 @@ vi.mock('../../utils/api', () => ({
   },
 }))
 
-// Mock console.error to prevent noise in test output
-const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-
 describe('cityStore', () => {
+  let consoleSpy: ReturnType<typeof vi.spyOn>
+
   const mockCitiesResponse: CityWithCount[] = [
     { city: 'toronto', cafe_count: 15 },
     { city: 'montreal', cafe_count: 8 },
@@ -38,10 +37,14 @@ describe('cityStore', () => {
 
     // Reset mocks
     vi.clearAllMocks()
+
+    // Set up console.error spy
+    consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
   })
 
   afterEach(() => {
     vi.clearAllMocks()
+    consoleSpy.mockRestore()
   })
 
   describe('initialization', () => {

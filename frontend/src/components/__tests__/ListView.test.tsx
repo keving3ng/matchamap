@@ -76,7 +76,7 @@ describe('ListView', () => {
     expect(screen.getByText('Matcha Cafe C')).toBeInTheDocument()
   })
 
-  it('renders all three sort buttons', () => {
+  it('renders sort dropdown with rating and distance options', () => {
     render(
       <ListView
         cafes={mockCafes}
@@ -86,9 +86,10 @@ describe('ListView', () => {
       />
     )
 
-    expect(screen.getByRole('button', { name: 'Rating' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Distance' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Area' })).toBeInTheDocument()
+    const sortDropdown = screen.getByRole('combobox')
+    expect(sortDropdown).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'Sort: Rating' })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'Sort: Distance' })).toBeInTheDocument()
   })
 
   it('defaults to rating sort (highest first)', () => {
@@ -107,7 +108,7 @@ describe('ListView', () => {
     expect(cafeCards[0]).toHaveTextContent('9.2')
   })
 
-  it('sorts by distance when distance button is clicked', () => {
+  it('sorts by distance when distance option is selected', () => {
     render(
       <ListView
         cafes={mockCafes}
@@ -117,8 +118,8 @@ describe('ListView', () => {
       />
     )
 
-    const distanceButton = screen.getByRole('button', { name: 'Distance' })
-    fireEvent.click(distanceButton)
+    const sortDropdown = screen.getByRole('combobox')
+    fireEvent.change(sortDropdown, { target: { value: 'distance' } })
 
     const cafeCards = screen.getAllByRole('button').filter(btn => btn.className.includes('w-full'))
     // First card should be Cafe B (1.2 km)
@@ -126,7 +127,7 @@ describe('ListView', () => {
     expect(cafeCards[0]).toHaveTextContent('1.2 km')
   })
 
-  it('sorts by area alphabetically when area button is clicked', () => {
+  it('sort dropdown shows selected value', () => {
     render(
       <ListView
         cafes={mockCafes}
@@ -136,32 +137,11 @@ describe('ListView', () => {
       />
     )
 
-    const areaButton = screen.getByRole('button', { name: 'Area' })
-    fireEvent.click(areaButton)
+    const sortDropdown = screen.getByRole('combobox') as HTMLSelectElement
+    expect(sortDropdown.value).toBe('rating')
 
-    const cafeCards = screen.getAllByRole('button').filter(btn => btn.className.includes('w-full'))
-    // First card should be Cafe B (Annex comes first alphabetically)
-    expect(cafeCards[0]).toHaveTextContent('Annex')
-  })
-
-  it('highlights the active sort button', () => {
-    render(
-      <ListView
-        cafes={mockCafes}
-        expandedCard={null}
-        onToggleExpand={mockOnToggleExpand}
-        onViewDetails={mockOnViewDetails}
-      />
-    )
-
-    const ratingButton = screen.getByRole('button', { name: 'Rating' })
-    expect(ratingButton).toHaveClass('bg-green-600')
-
-    const distanceButton = screen.getByRole('button', { name: 'Distance' })
-    fireEvent.click(distanceButton)
-
-    expect(distanceButton).toHaveClass('bg-green-600')
-    expect(ratingButton).not.toHaveClass('bg-green-600')
+    fireEvent.change(sortDropdown, { target: { value: 'distance' } })
+    expect(sortDropdown.value).toBe('distance')
   })
 
   it('expands a cafe card when clicked', () => {
@@ -190,8 +170,9 @@ describe('ListView', () => {
       />
     )
 
-    expect(screen.getByText('2.5 km')).toBeInTheDocument()
-    expect(screen.getByText('1.2 km')).toBeInTheDocument()
+    // Distance is shown as "2.5 km • 30 min" for cafes under 5km
+    expect(screen.getByText(/2\.5 km/)).toBeInTheDocument()
+    expect(screen.getByText(/1\.2 km/)).toBeInTheDocument()
   })
 
   it('shows message for cafes without distance info', () => {
@@ -204,7 +185,7 @@ describe('ListView', () => {
       />
     )
 
-    expect(screen.getByText('Tap location button for distance')).toBeInTheDocument()
+    expect(screen.getByText('Tap location for distance')).toBeInTheDocument()
   })
 
   it('places cafes without distance at the end when sorting by distance', () => {
@@ -217,8 +198,8 @@ describe('ListView', () => {
       />
     )
 
-    const distanceButton = screen.getByRole('button', { name: 'Distance' })
-    fireEvent.click(distanceButton)
+    const sortDropdown = screen.getByRole('combobox')
+    fireEvent.change(sortDropdown, { target: { value: 'distance' } })
 
     const cafeCards = screen.getAllByRole('button').filter(btn => btn.className.includes('w-full'))
     // Last card should be Cafe C (no distance info)
@@ -236,7 +217,7 @@ describe('ListView', () => {
         />
       )
 
-      expect(screen.getByRole('button', { name: /filter/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Filter' })).toBeInTheDocument()
     })
 
     it('toggles filter panel when filter button is clicked', () => {
@@ -249,39 +230,16 @@ describe('ListView', () => {
         />
       )
 
-      const filterButton = screen.getByRole('button', { name: /filter/i })
+      const filterButton = screen.getByRole('button', { name: 'Filter' })
 
       // Filter panel should not be visible initially
-      expect(screen.queryByText('Price Range')).not.toBeInTheDocument()
+      expect(screen.queryByText('Minimum Rating')).not.toBeInTheDocument()
 
       // Click to show filters
       fireEvent.click(filterButton)
-      expect(screen.getByText('Price Range')).toBeInTheDocument()
       expect(screen.getByText('Minimum Rating')).toBeInTheDocument()
-      expect(screen.getByText('Neighborhood')).toBeInTheDocument()
-    })
-
-    it('filters cafes by price range', () => {
-      render(
-        <ListView
-          cafes={mockCafes}
-          expandedCard={null}
-          onToggleExpand={mockOnToggleExpand}
-          onViewDetails={mockOnViewDetails}
-        />
-      )
-
-      const filterButton = screen.getByRole('button', { name: /filter/i })
-      fireEvent.click(filterButton)
-
-      // Click on $ price filter
-      const dollarButton = screen.getByRole('button', { name: '$' })
-      fireEvent.click(dollarButton)
-
-      // Should only show cafes with $ price (A and C)
-      expect(screen.getByText('Matcha Cafe A')).toBeInTheDocument()
-      expect(screen.queryByText('Matcha Cafe B')).not.toBeInTheDocument()
-      expect(screen.getByText('Matcha Cafe C')).toBeInTheDocument()
+      expect(screen.getByText('Max Distance (Enable location first)')).toBeInTheDocument()
+      expect(screen.getByText('Availability')).toBeInTheDocument()
     })
 
     it('filters cafes by minimum rating', () => {
@@ -294,20 +252,20 @@ describe('ListView', () => {
         />
       )
 
-      const filterButton = screen.getByRole('button', { name: /filter/i })
+      const filterButton = screen.getByRole('button', { name: 'Filter' })
       fireEvent.click(filterButton)
 
       // Click on 9+ rating filter
       const ratingButton = screen.getByRole('button', { name: '9+' })
       fireEvent.click(ratingButton)
 
-      // Should only show cafe with rating >= 9 (B)
+      // Should only show cafe with rating >= 9 (B with 9.2)
       expect(screen.queryByText('Matcha Cafe A')).not.toBeInTheDocument()
       expect(screen.getByText('Matcha Cafe B')).toBeInTheDocument()
       expect(screen.queryByText('Matcha Cafe C')).not.toBeInTheDocument()
     })
 
-    it('filters cafes by neighborhood', () => {
+    it('filters cafes by 8+ rating', () => {
       render(
         <ListView
           cafes={mockCafes}
@@ -317,46 +275,20 @@ describe('ListView', () => {
         />
       )
 
-      const filterButton = screen.getByRole('button', { name: /filter/i })
+      const filterButton = screen.getByRole('button', { name: 'Filter' })
       fireEvent.click(filterButton)
 
-      // Click on Downtown neighborhood filter
-      const downtownButton = screen.getByRole('button', { name: 'Downtown' })
-      fireEvent.click(downtownButton)
-
-      // Should only show Downtown cafe (A)
-      expect(screen.getByText('Matcha Cafe A')).toBeInTheDocument()
-      expect(screen.queryByText('Matcha Cafe B')).not.toBeInTheDocument()
-      expect(screen.queryByText('Matcha Cafe C')).not.toBeInTheDocument()
-    })
-
-    it('combines multiple filters', () => {
-      render(
-        <ListView
-          cafes={mockCafes}
-          expandedCard={null}
-          onToggleExpand={mockOnToggleExpand}
-          onViewDetails={mockOnViewDetails}
-        />
-      )
-
-      const filterButton = screen.getByRole('button', { name: /filter/i })
-      fireEvent.click(filterButton)
-
-      // Apply both price and rating filters
-      const dollarButton = screen.getByRole('button', { name: '$' })
-      fireEvent.click(dollarButton)
-
+      // Click on 8+ rating filter
       const rating8Button = screen.getByRole('button', { name: '8+' })
       fireEvent.click(rating8Button)
 
-      // Should only show cafe A ($ and >= 8 rating)
+      // Should show cafes A (8.5) and B (9.2), but not C (7.8)
       expect(screen.getByText('Matcha Cafe A')).toBeInTheDocument()
-      expect(screen.queryByText('Matcha Cafe B')).not.toBeInTheDocument()
+      expect(screen.getByText('Matcha Cafe B')).toBeInTheDocument()
       expect(screen.queryByText('Matcha Cafe C')).not.toBeInTheDocument()
     })
 
-    it('shows "no cafes" message when filters match nothing', () => {
+    it('shows all cafes with 7+ rating filter', () => {
       render(
         <ListView
           cafes={mockCafes}
@@ -366,18 +298,17 @@ describe('ListView', () => {
         />
       )
 
-      const filterButton = screen.getByRole('button', { name: /filter/i })
+      const filterButton = screen.getByRole('button', { name: 'Filter' })
       fireEvent.click(filterButton)
 
-      // Apply conflicting filters ($ price and 9+ rating)
-      const dollarButton = screen.getByRole('button', { name: '$' })
-      fireEvent.click(dollarButton)
+      // Click on 7+ rating filter
+      const rating7Button = screen.getByRole('button', { name: '7+' })
+      fireEvent.click(rating7Button)
 
-      const rating9Button = screen.getByRole('button', { name: '9+' })
-      fireEvent.click(rating9Button)
-
-      // Should show empty state
-      expect(screen.getByText('No cafes match your filters')).toBeInTheDocument()
+      // All cafes should be visible (all are >= 7)
+      expect(screen.getByText('Matcha Cafe A')).toBeInTheDocument()
+      expect(screen.getByText('Matcha Cafe B')).toBeInTheDocument()
+      expect(screen.getByText('Matcha Cafe C')).toBeInTheDocument()
     })
 
     it('clears all filters when clear button is clicked', () => {
@@ -390,12 +321,16 @@ describe('ListView', () => {
         />
       )
 
-      const filterButton = screen.getByRole('button', { name: /filter/i })
+      const filterButton = screen.getByRole('button', { name: 'Filter' })
       fireEvent.click(filterButton)
 
-      // Apply a filter
-      const dollarButton = screen.getByRole('button', { name: '$' })
-      fireEvent.click(dollarButton)
+      // Apply a rating filter
+      const rating9Button = screen.getByRole('button', { name: '9+' })
+      fireEvent.click(rating9Button)
+
+      // Verify filter is working (only Cafe B visible)
+      expect(screen.queryByText('Matcha Cafe A')).not.toBeInTheDocument()
+      expect(screen.getByText('Matcha Cafe B')).toBeInTheDocument()
 
       // Clear filters
       const clearButton = screen.getByRole('button', { name: /clear all filters/i })
@@ -407,7 +342,7 @@ describe('ListView', () => {
       expect(screen.getByText('Matcha Cafe C')).toBeInTheDocument()
     })
 
-    it('shows red indicator badge when filters are active but panel is closed', () => {
+    it('shows indicator when filters are active but panel is closed', () => {
       render(
         <ListView
           cafes={mockCafes}
@@ -417,18 +352,19 @@ describe('ListView', () => {
         />
       )
 
-      const filterButton = screen.getByRole('button', { name: /filter/i })
+      const filterButton = screen.getByRole('button', { name: 'Filter' })
       fireEvent.click(filterButton)
 
-      // Apply a filter
-      const dollarButton = screen.getByRole('button', { name: '$' })
-      fireEvent.click(dollarButton)
+      // Apply a rating filter
+      const rating8Button = screen.getByRole('button', { name: '8+' })
+      fireEvent.click(rating8Button)
 
       // Close filter panel
       fireEvent.click(filterButton)
 
-      // Filter button should be highlighted since filters are active
-      expect(filterButton).toHaveClass('bg-green-600')
+      // Filter button should have gradient background since filters are active
+      expect(filterButton).toHaveClass('from-matcha-600')
+      expect(filterButton).toHaveClass('to-matcha-500')
     })
   })
 
@@ -493,7 +429,7 @@ describe('ListView', () => {
       expect(screen.queryByText('Matcha Cafe C')).not.toBeInTheDocument()
     })
 
-    it('filters cafes by neighborhood search', () => {
+    it('filters cafes by address search', () => {
       render(
         <ListView
           cafes={mockCafes}
@@ -507,9 +443,9 @@ describe('ListView', () => {
       fireEvent.click(screen.getByRole('button', { name: /search/i }))
 
       const searchInput = screen.getByPlaceholderText(/search cafes/i)
-      fireEvent.change(searchInput, { target: { value: 'Downtown' } })
+      fireEvent.change(searchInput, { target: { value: 'Main St' } })
 
-      // Should only show Downtown cafe
+      // Should only show cafe with "Main St" in address (Cafe A)
       expect(screen.getByText('Matcha Cafe A')).toBeInTheDocument()
       expect(screen.queryByText('Matcha Cafe B')).not.toBeInTheDocument()
       expect(screen.queryByText('Matcha Cafe C')).not.toBeInTheDocument()
@@ -551,10 +487,11 @@ describe('ListView', () => {
       fireEvent.click(screen.getByRole('button', { name: /search/i }))
 
       const searchInput = screen.getByPlaceholderText(/search cafes/i)
-      fireEvent.change(searchInput, { target: { value: 'DOWNTOWN' } })
+      fireEvent.change(searchInput, { target: { value: 'AMAZING' } })
 
-      // Should still find cafe with lowercase neighborhood
-      expect(screen.getByText('Matcha Cafe A')).toBeInTheDocument()
+      // Should still find cafe with lowercase quick note
+      expect(screen.getByText('Matcha Cafe B')).toBeInTheDocument()
+      expect(screen.queryByText('Matcha Cafe A')).not.toBeInTheDocument()
     })
 
     it('shows clear button when search is active', () => {
@@ -596,9 +533,9 @@ describe('ListView', () => {
       fireEvent.click(screen.getByRole('button', { name: /search/i }))
 
       const searchInput = screen.getByPlaceholderText(/search cafes/i) as HTMLInputElement
-      fireEvent.change(searchInput, { target: { value: 'Downtown' } })
+      fireEvent.change(searchInput, { target: { value: 'Main St' } })
 
-      // Only one cafe shown
+      // Only one cafe shown (Cafe A has "Main St" in address)
       expect(screen.getByText('Matcha Cafe A')).toBeInTheDocument()
       expect(screen.queryByText('Matcha Cafe B')).not.toBeInTheDocument()
 
@@ -637,17 +574,17 @@ describe('ListView', () => {
       expect(screen.getByText('Matcha Cafe B')).toBeInTheDocument()
       expect(screen.getByText('Matcha Cafe C')).toBeInTheDocument()
 
-      // Now apply price filter
-      const filterButton = screen.getByRole('button', { name: /filter/i })
+      // Now apply rating filter
+      const filterButton = screen.getByRole('button', { name: 'Filter' })
       fireEvent.click(filterButton)
 
-      const dollarButton = screen.getByRole('button', { name: '$' })
-      fireEvent.click(dollarButton)
+      const rating8Button = screen.getByRole('button', { name: '8+' })
+      fireEvent.click(rating8Button)
 
-      // Should show only $ cafes that match search (A and C)
+      // Should show only cafes with rating >= 8 that match search (A and B)
       expect(screen.getByText('Matcha Cafe A')).toBeInTheDocument()
-      expect(screen.queryByText('Matcha Cafe B')).not.toBeInTheDocument()
-      expect(screen.getByText('Matcha Cafe C')).toBeInTheDocument()
+      expect(screen.getByText('Matcha Cafe B')).toBeInTheDocument()
+      expect(screen.queryByText('Matcha Cafe C')).not.toBeInTheDocument()
     })
 
     it('shows no results message when search matches nothing', () => {
@@ -684,17 +621,18 @@ describe('ListView', () => {
 
       const searchInput = screen.getByPlaceholderText(/search cafes/i)
 
-      // Type 'A'
-      fireEvent.change(searchInput, { target: { value: 'A' } })
+      // Type 'Cafe' - should show all
+      fireEvent.change(searchInput, { target: { value: 'Cafe' } })
       expect(screen.getByText('Matcha Cafe A')).toBeInTheDocument()
+      expect(screen.getByText('Matcha Cafe B')).toBeInTheDocument()
 
-      // Type more to narrow down
-      fireEvent.change(searchInput, { target: { value: 'Annex' } })
+      // Type more to narrow down to specific cafe
+      fireEvent.change(searchInput, { target: { value: 'Cafe B' } })
       expect(screen.queryByText('Matcha Cafe A')).not.toBeInTheDocument()
       expect(screen.getByText('Matcha Cafe B')).toBeInTheDocument()
     })
 
-    it('shows indicator badge when search is active but collapsed', () => {
+    it('shows indicator when search is active but collapsed', () => {
       render(
         <ListView
           cafes={mockCafes}
@@ -716,8 +654,9 @@ describe('ListView', () => {
       // Close search
       fireEvent.click(searchButton)
 
-      // Search button should be highlighted since search is active
-      expect(searchButton).toHaveClass('bg-green-600')
+      // Search button should have gradient background since search is active
+      expect(searchButton).toHaveClass('from-matcha-600')
+      expect(searchButton).toHaveClass('to-matcha-500')
     })
   })
 })

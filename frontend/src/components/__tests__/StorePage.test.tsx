@@ -1,137 +1,96 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { StorePage } from '../StorePage'
 
-// Mock data store
-const mockDataStore = {
-  fetchProducts: vi.fn(),
-  productsFetched: false,
-  isLoading: false,
-  products: [
-    {
-      id: 1,
-      name: 'Matcha Starter Kit',
-      price: 29.99,
-      currency: 'CAD',
-      description: 'Everything you need to make perfect matcha at home',
-      image: '🍵',
-      inStock: true,
-    },
-    {
-      id: 2,
-      name: 'Premium Matcha Powder',
-      price: 45.00,
-      currency: 'CAD',
-      description: 'Ceremonial grade matcha from Japan',
-      image: '🌿',
-      inStock: false,
-    },
-  ],
-}
-
-vi.mock('../../stores/dataStore', () => ({
-  useDataStore: () => mockDataStore,
-}))
-
-vi.mock('../../hooks/useLazyData', () => ({
-  useLazyData: vi.fn(),
-}))
+// StorePage has hardcoded products, no dataStore mock needed
 
 describe('StorePage', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-    mockDataStore.isLoading = false
-  })
 
   it('should render store header', () => {
     render(<StorePage />)
 
-    expect(screen.getByText(/Store/i)).toBeInTheDocument()
-    expect(screen.getByText(/Matcha essentials and accessories/i)).toBeInTheDocument()
+    expect(screen.getByText('Shop')).toBeInTheDocument()
+    expect(screen.getByText(/Matcha essentials and MatchaMap merch/i)).toBeInTheDocument()
   })
 
   it('should display products when available', () => {
     render(<StorePage />)
 
-    expect(screen.getByText('Matcha Starter Kit')).toBeInTheDocument()
-    expect(screen.getByText('Premium Matcha Powder')).toBeInTheDocument()
-    expect(screen.getByText('$29.99')).toBeInTheDocument()
-    expect(screen.getByText('$45.00')).toBeInTheDocument()
+    // Check for actual products from the component
+    expect(screen.getByText('MatchaMap T-Shirt')).toBeInTheDocument()
+    expect(screen.getByText('Matcha Whisk Set')).toBeInTheDocument()
+    expect(screen.getByText('$28')).toBeInTheDocument()
+    expect(screen.getByText('$35')).toBeInTheDocument()
   })
 
-  it('should show product availability status', () => {
+  it('should show featured product badge', () => {
     render(<StorePage />)
 
-    expect(screen.getByText(/In Stock/i)).toBeInTheDocument()
-    expect(screen.getByText(/Out of Stock/i)).toBeInTheDocument()
-  })
-
-  it('should display loading state', () => {
-    mockDataStore.isLoading = true
-    render(<StorePage />)
-
-    expect(screen.getByText(/Loading/i)).toBeInTheDocument()
-  })
-
-  it('should show empty state when no products', () => {
-    mockDataStore.products = []
-    render(<StorePage />)
-
-    expect(screen.getByText(/No products available/i)).toBeInTheDocument()
-    expect(screen.getByText(/Check back soon/i)).toBeInTheDocument()
-  })
-
-  it('should handle product click interactions', async () => {
-    const user = userEvent.setup()
-    render(<StorePage />)
-
-    const product = screen.getByText('Matcha Starter Kit')
-    await user.click(product)
-
-    // Should show product details or navigate to product page
-    expect(product).toBeInTheDocument()
+    // MatchaMap T-Shirt is featured
+    expect(screen.getByText('Featured')).toBeInTheDocument()
   })
 
   it('should display product descriptions', () => {
     render(<StorePage />)
 
-    expect(screen.getByText(/Everything you need to make perfect matcha/)).toBeInTheDocument()
-    expect(screen.getByText(/Ceremonial grade matcha from Japan/)).toBeInTheDocument()
+    expect(screen.getByText(/Premium cotton tee with our iconic matcha leaf logo/)).toBeInTheDocument()
+    expect(screen.getByText(/Traditional bamboo whisk and scoop/)).toBeInTheDocument()
   })
 
   it('should render product images', () => {
     render(<StorePage />)
 
+    // Check for emoji images
+    expect(screen.getByText('👕')).toBeInTheDocument()
+    expect(screen.getByText('🎋')).toBeInTheDocument()
+    expect(screen.getByText('🥤')).toBeInTheDocument()
     expect(screen.getByText('🍵')).toBeInTheDocument()
-    expect(screen.getByText('🌿')).toBeInTheDocument()
   })
 
-  it('should handle different currencies', () => {
-    const productsWithUSD = [{
-      ...mockDataStore.products[0],
-      currency: 'USD',
-      price: 24.99,
-    }]
-    
-    mockDataStore.products = productsWithUSD
+  it('should display all 6 products', () => {
     render(<StorePage />)
 
-    expect(screen.getByText('$24.99')).toBeInTheDocument()
+    expect(screen.getByText('MatchaMap T-Shirt')).toBeInTheDocument()
+    expect(screen.getByText('Matcha Whisk Set')).toBeInTheDocument()
+    expect(screen.getByText('Travel Mug')).toBeInTheDocument()
+    expect(screen.getByText('Matcha Bowl (Chawan)')).toBeInTheDocument()
+    expect(screen.getByText('Toronto Matcha Guide')).toBeInTheDocument()
+    expect(screen.getByText('MatchaMap Sticker Pack')).toBeInTheDocument()
   })
 
-  it('should be accessible with proper structure', () => {
+  it('should display coming soon notice', () => {
     render(<StorePage />)
 
-    expect(screen.getByRole('heading', { level: 2 })).toBeInTheDocument()
-    expect(screen.getAllByRole('article')).toHaveLength(2)
+    expect(screen.getByText(/Store Coming Soon/)).toBeInTheDocument()
+    expect(screen.getByText(/We're currently setting up our shop/)).toBeInTheDocument()
   })
 
-  it('should filter out-of-stock items if needed', () => {
+  it('should display free shipping info', () => {
     render(<StorePage />)
 
-    // Both items should be shown regardless of stock status
-    expect(screen.getByText('Matcha Starter Kit')).toBeInTheDocument()
-    expect(screen.getByText('Premium Matcha Powder')).toBeInTheDocument()
+    expect(screen.getByText('Free Shipping')).toBeInTheDocument()
+    expect(screen.getByText(/On orders over \$50/)).toBeInTheDocument()
+  })
+
+  it('should display promotional banner', () => {
+    render(<StorePage />)
+
+    expect(screen.getByText('New Spring Collection')).toBeInTheDocument()
+    expect(screen.getByText(/Fresh designs and essentials for matcha lovers/)).toBeInTheDocument()
+  })
+
+  it('should have add to cart buttons', () => {
+    render(<StorePage />)
+
+    // Should have 6 "Add" buttons (one for each product)
+    const addButtons = screen.getAllByText('Add')
+    expect(addButtons).toHaveLength(6)
+  })
+
+  it('should display return policy info', () => {
+    render(<StorePage />)
+
+    expect(screen.getByText('Easy Returns')).toBeInTheDocument()
+    expect(screen.getByText(/30-day return policy/)).toBeInTheDocument()
   })
 })

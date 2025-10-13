@@ -98,16 +98,16 @@ export const CafeManagementPage: React.FC = () => {
         onMouseLeave={() => setOpenTooltip(null)}
         onClick={handleToggleTooltip}
       >
-        <span 
+        <span
           className="inline-flex items-center justify-center bg-amber-100 text-amber-600 border border-amber-300 cursor-help hover:bg-amber-200 transition-colors"
-          style={{ 
-            width: '20px', 
-            height: '20px', 
-            borderRadius: borderRadius.full 
+          style={{
+            width: '20px',
+            height: '20px',
+            borderRadius: borderRadius.full
           }}
           title={COPY.admin.cafeManagement.missingFieldsList(missingFields)}
         >
-          <Info size={16} />
+          <Info size={16} data-testid="lucide-info" />
         </span>
         
         {isTooltipOpen && (
@@ -251,7 +251,7 @@ export const CafeManagementPage: React.FC = () => {
         {/* Loading State */}
         {isLoading && (
           <div className="flex items-center justify-center py-12">
-            <Loader className="animate-spin text-green-500" size={48} />
+            <Loader className="animate-spin text-green-500" size={48} data-testid="lucide-loader" />
           </div>
         )}
 

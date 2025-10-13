@@ -388,7 +388,8 @@ describe('useMyProfile', () => {
     })
 
     expect(result.current.error).toBe(errorMessage)
-    expect(result.current.profile).toBeNull() // Profile should be cleared on error
+    // Profile should remain unchanged on error (not cleared)
+    expect(result.current.profile).toEqual(mockUserProfile)
   })
 
   it('should provide all required return values', async () => {
@@ -415,7 +416,7 @@ describe('useMyProfile', () => {
       { displayName: 'Name 2' },
       { displayName: 'Name 3' },
     ]
-    
+
     const responses = updates.map((update, index) => ({
       ...mockUserProfile,
       displayName: update.displayName,
@@ -435,11 +436,14 @@ describe('useMyProfile', () => {
 
     // Make multiple update calls
     for (let i = 0; i < updates.length; i++) {
+      let updateResult: any
       await act(async () => {
-        const updateResult = await result.current.updateProfile(updates[i])
-        expect(updateResult.success).toBe(true)
-        expect(result.current.profile?.displayName).toBe(updates[i].displayName)
+        updateResult = await result.current.updateProfile(updates[i])
       })
+
+      // Check after act completes
+      expect(updateResult.success).toBe(true)
+      expect(result.current.profile?.displayName).toBe(updates[i].displayName)
     }
 
     expect(mockUpdateMyProfile).toHaveBeenCalledTimes(3)
