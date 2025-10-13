@@ -418,9 +418,16 @@ describe('authStore', () => {
     it('should return false and logout if refresh fails', async () => {
       const { result } = renderHook(() => useAuthStore())
 
+      // Mock failed refresh response
       mockFetch.mockResolvedValueOnce({
         ok: false,
         json: () => Promise.resolve({ error: 'Invalid refresh token' }),
+      })
+
+      // Mock logout endpoint (called when refresh fails)
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({}),
       })
 
       let refreshResult: boolean | undefined
@@ -442,9 +449,16 @@ describe('authStore', () => {
         })
       })
 
+      // Mock failed refresh response
       mockFetch.mockResolvedValueOnce({
         ok: false,
         json: () => Promise.resolve({ error: 'Invalid refresh token' }),
+      })
+
+      // Mock logout endpoint (called when refresh fails)
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({}),
       })
 
       let refreshResult: boolean | undefined
@@ -485,6 +499,7 @@ describe('authStore', () => {
     it('should handle failed getCurrentUser request', async () => {
       const { result } = renderHook(() => useAuthStore())
 
+      // Mock failed getCurrentUser (401)
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 401,
@@ -496,18 +511,24 @@ describe('authStore', () => {
         json: () => Promise.resolve({ success: true }),
       })
 
+      // Mock successful retry of getCurrentUser
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ user: mockUser }),
+      })
+
       await act(async () => {
         await result.current.getCurrentUser()
       })
 
-      // Should have tried to refresh token
-      expect(mockFetch).toHaveBeenCalledTimes(2)
+      // Should have: 1) failed getCurrentUser, 2) refresh, 3) retry getCurrentUser
+      expect(mockFetch).toHaveBeenCalledTimes(3)
     })
 
     it('should retry getCurrentUser after successful token refresh', async () => {
       const { result } = renderHook(() => useAuthStore())
 
-      // Mock failed user request
+      // Mock failed user request (401)
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 401,
@@ -519,11 +540,20 @@ describe('authStore', () => {
         json: () => Promise.resolve({ success: true }),
       })
 
+      // Mock successful retry of getCurrentUser
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ user: mockUser }),
+      })
+
       await act(async () => {
         await result.current.getCurrentUser()
       })
 
-      expect(mockFetch).toHaveBeenCalledTimes(2)
+      // Should have: 1) failed getCurrentUser, 2) refresh, 3) retry getCurrentUser
+      expect(mockFetch).toHaveBeenCalledTimes(3)
+      expect(result.current.user).toEqual(mockUser)
+      expect(result.current.isAuthenticated).toBe(true)
     })
   })
 

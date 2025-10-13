@@ -13,7 +13,7 @@ import {
 } from '../utils/auth';
 import { AuthenticatedRequest } from '../middleware/auth';
 import { safeValidate, registerSchema, loginSchema, refreshTokenSchema } from '../validators';
-import { AUTH_CONSTANTS, HTTP_STATUS, JWT_EXPIRY } from '../constants';
+import { AUTH_CONSTANTS, HTTP_STATUS, JWT_EXPIRY, JWT_EXPIRY_SECONDS } from '../constants';
 
 /**
  * POST /api/auth/register
@@ -180,8 +180,10 @@ export async function login(request: IRequest, env: Env): Promise<Response> {
     );
 
     // Set httpOnly cookies with security flags
-    response.headers.append('Set-Cookie', `access_token=${accessToken}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${Math.floor(accessTokenExpiry / 1000)}`);
-    response.headers.append('Set-Cookie', `refresh_token=${refreshToken}; HttpOnly; Secure; SameSite=Strict; Path=/api/auth/refresh; Max-Age=${Math.floor(refreshTokenExpiry / 1000)}`);
+    const accessMaxAge = user.role === 'admin' ? JWT_EXPIRY_SECONDS.ACCESS_TOKEN_ADMIN : JWT_EXPIRY_SECONDS.ACCESS_TOKEN;
+    const refreshMaxAge = user.role === 'admin' ? JWT_EXPIRY_SECONDS.REFRESH_TOKEN_ADMIN : JWT_EXPIRY_SECONDS.REFRESH_TOKEN;
+    response.headers.append('Set-Cookie', `access_token=${accessToken}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${accessMaxAge}`);
+    response.headers.append('Set-Cookie', `refresh_token=${refreshToken}; HttpOnly; Secure; SameSite=Strict; Path=/api/auth/refresh; Max-Age=${refreshMaxAge}`);
 
     return response;
   } catch (error) {
@@ -322,9 +324,10 @@ export async function refreshToken(request: IRequest, env: Env): Promise<Respons
     console.log(`Token refreshed - User ID: ${payload.userId}, Role: ${payload.role}, Access Token Expiry: ${accessTokenExpiry}`);
 
     const response = jsonResponse({ success: true }, HTTP_STATUS.OK, request as Request, env);
-    
+
     // Set new access token in httpOnly cookie
-    response.headers.append('Set-Cookie', `access_token=${accessToken}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${Math.floor(accessTokenExpiry / 1000)}`);
+    const accessMaxAge = payload.role === 'admin' ? JWT_EXPIRY_SECONDS.ACCESS_TOKEN_ADMIN : JWT_EXPIRY_SECONDS.ACCESS_TOKEN;
+    response.headers.append('Set-Cookie', `access_token=${accessToken}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${accessMaxAge}`);
     
     return response;
   } catch (error) {

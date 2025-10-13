@@ -179,13 +179,31 @@ export const APP_CONSTANTS = {
 export const JWT_EXPIRY = {
   /** Access token expiry (1 hour) for regular users - matches AUTH_CONSTANTS.ACCESS_TOKEN_EXPIRY */
   ACCESS_TOKEN: '1h',
-  
+
   /** Access token expiry (24 hours) for admin users */
   ACCESS_TOKEN_ADMIN: '24h',
-  
+
   /** Refresh token expiry (7 days) for regular users - matches AUTH_CONSTANTS.REFRESH_TOKEN_EXPIRY */
   REFRESH_TOKEN: '7d',
-  
+
   /** Refresh token expiry (30 days) for admin users - matches AUTH_CONSTANTS.SESSION_EXPIRY_MS_ADMIN duration */
   REFRESH_TOKEN_ADMIN: '30d',
+} as const;
+
+/**
+ * JWT Token Expiry in Seconds (for cookie Max-Age calculations)
+ * These numeric values correspond to the JWT_EXPIRY string values above
+ */
+export const JWT_EXPIRY_SECONDS = {
+  /** Access token expiry in seconds (1 hour) */
+  ACCESS_TOKEN: 3600, // 1 hour
+
+  /** Access token expiry in seconds (24 hours) for admin users */
+  ACCESS_TOKEN_ADMIN: 86400, // 24 hours
+
+  /** Refresh token expiry in seconds (7 days) */
+  REFRESH_TOKEN: 604800, // 7 days
+
+  /** Refresh token expiry in seconds (30 days) for admin users */
+  REFRESH_TOKEN_ADMIN: 2592000, // 30 days
 } as const;
