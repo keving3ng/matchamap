@@ -634,6 +634,16 @@ export const statsAPI = {
       body: JSON.stringify({ userId: userId ?? null }),
     }).catch(() => {})
   },
+
+  /**
+   * Check in to a cafe (authenticated users only)
+   */
+  async checkIn(cafeId: number, notes?: string): Promise<void> {
+    await fetchAPI('/checkins', {
+      method: 'POST',
+      body: JSON.stringify({ cafeId, notes }),
+    })
+  },
 }
 
 /**
