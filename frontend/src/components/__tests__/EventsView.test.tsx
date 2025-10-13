@@ -24,6 +24,50 @@ vi.mock('../../hooks/useLazyData', () => ({
   useLazyData: vi.fn(),
 }))
 
+// Mock analytics
+vi.mock('../../utils/analytics', () => ({
+  trackEventClick: vi.fn(),
+}))
+
+// Mock API
+vi.mock('../../utils/api', () => ({
+  api: {
+    events: {
+      getAll: vi.fn().mockResolvedValue({ events: [] }),
+    },
+  },
+}))
+
+// Mock utility functions
+vi.mock('../../utils/instagram', () => ({
+  getInstagramUrl: (url: string) => url,
+}))
+
+vi.mock('../../utils/pluralization', () => ({
+  formatCount: (count: number, singular: string) => `${count} ${singular}${count !== 1 ? 's' : ''}`,
+}))
+
+// Mock copy constants
+vi.mock('../../constants/copy', () => ({
+  COPY: {
+    events: {
+      title: 'Events',
+      subtitle: 'Toronto matcha community gatherings & workshops',
+      noUpcomingEvents: 'No upcoming events',
+      checkBackSoon: 'Check back soon for matcha community gatherings!',
+      featuredEvent: 'Featured Event',
+      viewOnInstagram: 'View on Instagram',
+      viewDetails: 'View Details',
+      viewCafe: 'View Cafe',
+      showPastEvents: 'Show Past Events',
+      hidePastEvents: 'Hide Past Events',
+      pastEvents: 'Past Events',
+      networkError: 'Network error occurred',
+      failedToLoadPastEvents: 'Failed to load past events',
+    },
+  },
+}))
+
 // Mock UI components
 vi.mock('../ui', () => ({
   ListSkeleton: ({ count }: { count: number }) => (
@@ -31,6 +75,12 @@ vi.mock('../ui', () => ({
       {Array.from({ length: count }, (_, i) => (
         <div key={i} data-testid={`skeleton-item-${i}`}>Loading...</div>
       ))}
+    </div>
+  ),
+  ErrorAlert: ({ message, onDismiss }: { message: string; onDismiss: () => void }) => (
+    <div data-testid="error-alert">
+      {message}
+      <button onClick={onDismiss}>Dismiss</button>
     </div>
   ),
 }))
