@@ -2,6 +2,7 @@ import { IRequest } from 'itty-router';
 import { Env } from '../types';
 import { HTTP_STATUS } from '../constants';
 import { jsonResponse, errorResponse } from '../utils/response';
+import { AuthenticatedRequest } from '../middleware/auth';
 
 /**
  * Track cafe statistics (views, directions, passport marks, social clicks)
@@ -138,5 +139,76 @@ export async function trackEventClick(request: IRequest, env: Env): Promise<Resp
     console.error('Error tracking event click:', error);
     // Return OK even on error (fire-and-forget pattern)
     return jsonResponse({ success: true }, HTTP_STATUS.OK, request, env);
+  }
+}
+
+/**
+ * Handle authenticated user check-in
+ * Requires JWT authentication
+ */
+export async function handleCheckIn(request: AuthenticatedRequest, env: Env): Promise<Response> {
+  try {
+    // Extract userId from JWT (set by requireAuth middleware)
+    const userId = request.user?.id;
+    
+    if (!userId) {
+      return errorResponse('Unauthorized', HTTP_STATUS.UNAUTHORIZED, request as Request, env);
+    }
+    
+    const body = await request.json().catch(() => ({})) as { cafeId?: string | number; notes?: string };
+    const { cafeId, notes } = body;
+    
+    if (!cafeId) {
+      return errorResponse('cafeId required', HTTP_STATUS.BAD_REQUEST, request as Request, env);
+    }
+    
+    // Parse and validate cafeId
+    const parsedCafeId = typeof cafeId === 'string' ? parseInt(cafeId) : cafeId;
+    if (typeof parsedCafeId !== 'number' || isNaN(parsedCafeId)) {
+      return errorResponse('Invalid cafeId', HTTP_STATUS.BAD_REQUEST, request as Request, env);
+    }
+    
+    // Insert check-in (or update if exists)
+    await env.DB.prepare(`
+      INSERT INTO user_checkins (user_id, cafe_id, visited_at, notes)
+      VALUES (?, ?, CURRENT_TIMESTAMP, ?)
+      ON CONFLICT(user_id, cafe_id)
+      DO UPDATE SET
+        visited_at = CURRENT_TIMESTAMP,
+        notes = ?
+    `)
+      .bind(userId, parsedCafeId, notes || null, notes || null)
+      .run();
+    
+    // Increment user_activity_stats.total_checkins
+    await env.DB.prepare(`
+      INSERT INTO user_activity_stats (user_id, total_checkins, last_active_at, updated_at)
+      VALUES (?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      ON CONFLICT(user_id)
+      DO UPDATE SET
+        total_checkins = (
+          SELECT COUNT(*) FROM user_checkins WHERE user_id = ?
+        ),
+        last_active_at = CURRENT_TIMESTAMP,
+        updated_at = CURRENT_TIMESTAMP
+    `)
+      .bind(userId, userId)
+      .run();
+    
+    // Sync userProfiles.totalCheckins (denormalized for quick access)
+    await env.DB.prepare(`
+      UPDATE user_profiles
+      SET total_checkins = (
+        SELECT COUNT(*) FROM user_checkins WHERE user_id = ?
+      )
+      WHERE user_id = ?
+    `)
+      .bind(userId, userId)
+      .run();
+    
+    return jsonResponse({ success: true }, HTTP_STATUS.OK, request as Request, env);
+  } catch (error) {
+    console.error('Error handling check-in:', error);
+    return errorResponse('Failed to check in', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
   }
 }
