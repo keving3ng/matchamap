@@ -8,6 +8,7 @@ import { useLazyData } from '../hooks/useLazyData'
 import { getInstagramUrl } from '../utils/instagram'
 import { COPY } from '../constants/copy'
 import { api } from '../utils/api'
+import { trackEventClick } from '../utils/analytics'
 import { formatCount } from '../utils/pluralization'
 import type { EventsViewProps } from '../types'
 import type { Event } from '../../../shared/types'
@@ -115,6 +116,7 @@ export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
                     href={getInstagramUrl(event.link)!}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={() => trackEventClick(event.id)}
                     className={`w-16 h-16 bg-gradient-to-br ${
                       event.featured ? 'from-green-500 to-green-700' : 'from-green-400 to-green-600'
                     } rounded-xl flex items-center justify-center text-4xl flex-shrink-0 shadow-md hover:scale-105 transition-transform`}
@@ -159,7 +161,10 @@ export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
               {/* Action buttons */}
               <div className="mt-3 space-y-2">
                 <button
-                  onClick={() => handleViewEventDetails(event)}
+                  onClick={() => {
+                    trackEventClick(event.id)
+                    handleViewEventDetails(event)
+                  }}
                   className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-green-600 text-white py-2.5 rounded-xl font-semibold hover:from-green-600 hover:to-green-700 transition-all shadow-md hover:shadow-lg"
                 >
                   {COPY.events.viewDetails}
@@ -231,6 +236,7 @@ export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
                                 href={getInstagramUrl(event.link)!}
                                 target="_blank"
                                 rel="noopener noreferrer"
+                                onClick={() => trackEventClick(event.id)}
                                 className="w-16 h-16 bg-gradient-to-br from-gray-400 to-gray-500 rounded-xl flex items-center justify-center text-4xl flex-shrink-0 shadow-md hover:scale-105 transition-transform"
                                 title={COPY.events.viewOnInstagram}
                               >
@@ -272,7 +278,10 @@ export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
                           {/* Action button */}
                           <div className="mt-3">
                             <button
-                              onClick={() => handleViewEventDetails(event)}
+                              onClick={() => {
+                                trackEventClick(event.id)
+                                handleViewEventDetails(event)
+                              }}
                               className="w-full flex items-center justify-center gap-2 bg-gray-200 text-gray-700 py-2.5 rounded-xl font-semibold hover:bg-gray-300 transition-all shadow-md"
                             >
                               {COPY.events.viewDetails}

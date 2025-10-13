@@ -4,6 +4,7 @@ import { ContentContainer } from './ContentContainer'
 import { ListSkeleton } from './ui'
 import { useDataStore } from '../stores/dataStore'
 import { useLazyData } from '../hooks/useLazyData'
+import { trackFeedClick } from '../utils/analytics'
 import type { FeedViewProps } from '../types'
 
 export const FeedView: React.FC<FeedViewProps> = ({ feedItems }) => {
@@ -32,7 +33,11 @@ export const FeedView: React.FC<FeedViewProps> = ({ feedItems }) => {
             </div>
           ) : (
             feedItems.map((item) => (
-            <article key={item.id} className="bg-white rounded-2xl shadow-md border-2 border-green-100 overflow-hidden">
+            <article 
+              key={item.id} 
+              onClick={() => trackFeedClick(item.id)}
+              className="bg-white rounded-2xl shadow-md border-2 border-green-100 overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+            >
             <div className={`${
               item.type === 'new_location' ? 'bg-green-500' :
               item.type === 'score_update' ? 'bg-blue-500' :

@@ -6,6 +6,7 @@ import { COPY } from '../constants/copy'
 import { useCafeStore } from '../stores/cafeStore'
 import { getInstagramUrl } from '../utils/instagram'
 import { createSafeGoogleMapsUrl } from '../utils/urlSafety'
+import { trackEventClick } from '../utils/analytics'
 import type { Event } from '../../../shared/types'
 
 interface EventDetailViewProps {
@@ -110,6 +111,7 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({ event }) => {
               href={instagramUrl}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => trackEventClick(event.id)}
               className="w-full bg-gradient-to-br from-purple-500 via-pink-500 to-pink-600 text-white py-3.5 rounded-xl font-semibold hover:from-purple-600 hover:to-pink-700 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 mb-3"
             >
               <Instagram size={20} />
@@ -123,6 +125,7 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({ event }) => {
               href={googleMapsUrl}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => trackEventClick(event.id)}
               className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3.5 rounded-xl font-semibold hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 mb-3"
             >
               <Navigation size={20} />
@@ -175,7 +178,10 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({ event }) => {
                   <p className="text-sm text-gray-600 italic mb-3">"{linkedCafe.quickNote}"</p>
                 )}
                 <button
-                  onClick={handleViewCafe}
+                  onClick={() => {
+                    trackEventClick(event.id)
+                    handleViewCafe()
+                  }}
                   className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3 rounded-xl font-semibold hover:from-green-600 hover:to-green-700 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
                 >
                   <Navigation size={18} />
