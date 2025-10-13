@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Test & Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run type checking
+        run: npm run typecheck
+
+      - name: Run tests
+        run: npm test -- --run --reporter=verbose
+
+      - name: Run build
+        run: npm run build
+
+      - name: Test Summary
+        if: always()
+        run: |
+          if [ $? -eq 0 ]; then
+            echo "✅ All checks passed!"
+          else
+            echo "❌ Some checks failed. Please review the logs above."
+            exit 1
+          fi
