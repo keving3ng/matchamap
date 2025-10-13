@@ -9,17 +9,25 @@ import { formatHoursCompact } from '../utils/formatHours'
 import { sanitizeText } from '../utils/sanitize'
 import { COPY } from '../constants/copy'
 import { api } from '../utils/api'
+import { trackCafeStat } from '../utils/analytics'
+import { useAuthStore } from '../stores/authStore'
 import type { DetailViewProps } from '../types'
 import type { Event } from '../../../shared/types'
 
 export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, onToggleVisited }) => {
   const { isPassportEnabled, isUserAccountsEnabled } = useAppFeatures()
+  const { user } = useAuthStore()
   const isVisited: boolean = visitedLocations.includes(cafe.id)
   const mapsUrl = getMapsUrl(cafe.address || '', cafe.link)
   const [cafeEvents, setCafeEvents] = useState<Event[]>([])
   const navigate = useNavigate()
 
   const hoursData = cafe.hours ? formatHoursCompact(cafe.hours) : null
+
+  // Track cafe view when component mounts
+  useEffect(() => {
+    trackCafeStat(cafe.id, 'view')
+  }, [cafe.id])
 
   // Fetch events for this cafe
   useEffect(() => {
@@ -101,6 +109,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
             href={mapsUrl}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => trackCafeStat(cafe.id, 'directions')}
             className="w-full bg-gradient-to-r from-matcha-600 via-matcha-500 to-matcha-600 text-white py-3.5 rounded-xl font-semibold hover:from-matcha-700 hover:to-matcha-700 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
           >
             <Navigation size={20} />
@@ -116,7 +125,14 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
               : 'bg-cream-100 border-matcha-200 hover:border-matcha-300'
           }`}>
             <button
-              onClick={() => onToggleVisited(cafe.id)}
+              onClick={() => {
+                const wasVisited = isVisited
+                onToggleVisited(cafe.id)
+                // Track anonymous passport mark (only for logged-out users marking as visited)
+                if (!user && !wasVisited) {
+                  trackCafeStat(cafe.id, 'passport')
+                }
+              }}
               className="flex items-center gap-3 w-full group"
             >
               <div className={`w-7 h-7 rounded-lg border-2 flex items-center justify-center transition-all duration-200 ${
@@ -301,6 +317,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
               href={`https://instagram.com/${cafe.instagram.replace('@', '')}`}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => trackCafeStat(cafe.id, 'instagram')}
               className="w-full bg-gradient-to-br from-purple-500 via-pink-500 to-pink-600 text-white py-4 rounded-2xl font-bold shadow-lg flex items-center justify-center gap-2.5 hover:from-purple-600 hover:to-pink-700 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
             >
               <Instagram size={22} />
@@ -324,6 +341,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
                   href={cafe.instagramPostLink}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => trackCafeStat(cafe.id, 'instagram')}
                   className="flex-1 bg-white border-2 border-purple-300 text-purple-600 py-3.5 px-4 rounded-xl font-semibold hover:bg-purple-50 active:scale-[0.98] transition-all duration-200 ease-out flex items-center justify-center gap-2 min-h-[44px] shadow-md hover:shadow-lg"
                 >
                   <Instagram size={18} />
@@ -335,6 +353,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
                   href={cafe.tiktokPostLink}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => trackCafeStat(cafe.id, 'tiktok')}
                   className="flex-1 bg-white border-2 border-gray-300 text-gray-700 py-3.5 px-4 rounded-xl font-semibold hover:bg-gray-50 active:scale-[0.98] transition-all duration-200 ease-out flex items-center justify-center gap-2 min-h-[44px] shadow-md hover:shadow-lg"
                 >
                   <TikTokIcon size={18} />

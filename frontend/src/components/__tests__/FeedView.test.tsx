@@ -18,6 +18,11 @@ vi.mock('../../hooks/useLazyData', () => ({
   useLazyData: vi.fn(),
 }))
 
+// Mock analytics
+vi.mock('../../utils/analytics', () => ({
+  trackFeedClick: vi.fn(),
+}))
+
 // Mock UI components
 vi.mock('../ui', () => ({
   ListSkeleton: ({ count }: { count: number }) => (

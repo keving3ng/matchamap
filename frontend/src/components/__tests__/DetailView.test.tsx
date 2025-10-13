@@ -51,8 +51,28 @@ vi.mock('../../utils/api', () => ({
     events: {
       getAll: vi.fn(),
     },
+    stats: {
+      trackCafeStat: vi.fn(),
+      trackFeedClick: vi.fn(),
+      trackEventClick: vi.fn(),
+    },
   },
 }))
+
+// Mock authStore (both the hook and getState for analytics)
+vi.mock('../../stores/authStore', () => {
+  const mockStore = {
+    user: null,
+  }
+  return {
+    useAuthStore: Object.assign(
+      () => mockStore,
+      {
+        getState: () => mockStore,
+      }
+    ),
+  }
+})
 
 // Mock window.open
 Object.defineProperty(window, 'open', {
