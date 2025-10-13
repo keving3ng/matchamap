@@ -105,11 +105,12 @@ export function getFileExtension(mimeType: string): string {
  * or implement proper server-side thumbnail generation in a follow-up task.
  */
 export async function generateThumbnail(buffer: ArrayBuffer, targetSize: number): Promise<ArrayBuffer> {
-  // TODO: Implement actual thumbnail generation
-  // This is a placeholder that returns the original buffer
-  // In production, this should resize the image to targetSize pixels
+  // PLACEHOLDER: Returns original image as "thumbnail"
+  // This causes performance issues but maintains functionality during Phase 2A
+  console.warn(`[PLACEHOLDER] Thumbnail generation not implemented - serving full image (${buffer.byteLength} bytes) as ${targetSize}px thumbnail`);
   
-  console.log(`Thumbnail generation requested for ${targetSize}px (not implemented - returning original)`);
+  // TODO: Implement actual thumbnail generation before production
+  // Recommended: Use Cloudflare Images Transform API or Sharp via WASM
   return buffer;
 }
 
