@@ -215,6 +215,43 @@ export const userCheckins = sqliteTable('user_checkins', {
   uniqueUserCafe: unique().on(table.userId, table.cafeId),
 }));
 
+// Review photos table (user-generated content)
+export const reviewPhotos = sqliteTable('review_photos', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  cafeId: integer('cafe_id').notNull().references(() => cafes.id, { onDelete: 'cascade' }),
+  
+  // R2 Storage keys and URLs
+  imageKey: text('image_key').notNull().unique(), // R2 object key (unique identifier)
+  imageUrl: text('image_url').notNull(), // Public URL for full-size image
+  thumbnailUrl: text('thumbnail_url'), // Public URL for thumbnail (200px)
+  
+  // Photo metadata
+  caption: text('caption'),
+  width: integer('width'), // Original image width in pixels
+  height: integer('height'), // Original image height in pixels
+  fileSize: integer('file_size'), // File size in bytes
+  mimeType: text('mime_type').notNull(), // image/jpeg, image/png, etc.
+  
+  // Moderation
+  moderationStatus: text('moderation_status', { 
+    enum: ['pending', 'approved', 'rejected'] 
+  }).notNull().default('pending'),
+  moderatedAt: text('moderated_at'),
+  moderatedBy: integer('moderated_by').references(() => users.id),
+  moderationNotes: text('moderation_notes'),
+  
+  // Timestamps
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+  userIdx: index('review_photos_user_idx').on(table.userId),
+  cafeIdx: index('review_photos_cafe_idx').on(table.cafeId),
+  imageKeyIdx: index('review_photos_image_key_idx').on(table.imageKey),
+  moderationStatusIdx: index('review_photos_moderation_status_idx').on(table.moderationStatus),
+  createdAtIdx: index('review_photos_created_at_idx').on(table.createdAt),
+}));
+
 // Admin audit log table
 export const adminAuditLog = sqliteTable('admin_audit_log', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -267,5 +304,7 @@ export type Waitlist = typeof waitlist.$inferSelect;
 export type NewWaitlist = typeof waitlist.$inferInsert;
 export type UserCheckin = typeof userCheckins.$inferSelect;
 export type NewUserCheckin = typeof userCheckins.$inferInsert;
+export type ReviewPhoto = typeof reviewPhotos.$inferSelect;
+export type NewReviewPhoto = typeof reviewPhotos.$inferInsert;
 export type AdminAuditLog = typeof adminAuditLog.$inferSelect;
 export type NewAdminAuditLog = typeof adminAuditLog.$inferInsert;

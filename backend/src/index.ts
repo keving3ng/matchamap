@@ -17,6 +17,7 @@ import { joinWaitlist, getWaitlistAdmin } from './routes/waitlist';
 import { getUserProfile, getMyProfile, updateMyProfile, uploadAvatar } from './routes/profile';
 import { listUsers, getUserStats, getUser, updateUserRole, deleteUser } from './routes/admin-users';
 import { trackCafeStat, trackFeedClick, trackEventClick, handleCheckIn } from './routes/stats';
+import { uploadPhoto, getCafePhotos, deletePhoto, getMyPhotos, getPhotosForModeration, moderatePhoto } from './routes/photos';
 import { requireAuth, requireAdminAuth } from './middleware/auth';
 import { authRateLimit, publicRateLimit, writeRateLimit } from './middleware/rateLimit';
 import { requireHTTPS } from './middleware/httpsOnly';
@@ -73,6 +74,12 @@ router.post('/api/stats/event/:eventId', publicRateLimit(), trackEventClick);
 // Check-in endpoint (authenticated users only)
 router.post('/api/checkins', writeRateLimit(), requireAuth(), handleCheckIn);
 
+// Photo upload endpoints
+router.post('/api/photos/upload', writeRateLimit(), requireAuth(), uploadPhoto);
+router.get('/api/cafes/:id/photos', publicRateLimit(), getCafePhotos);
+router.delete('/api/photos/:id', writeRateLimit(), requireAuth(), deletePhoto);
+router.get('/api/users/me/photos', authRateLimit(), requireAuth(), getMyPhotos);
+
 // Auth endpoints (with stricter rate limiting)
 router.post('/api/auth/register', authRateLimit(), register);
 router.post('/api/auth/login', authRateLimit(), login);
@@ -126,6 +133,10 @@ router.get('/api/admin/users/:id', publicRateLimit(), requireAdminAuth(), getUse
 router.get('/api/admin/users', publicRateLimit(), requireAdminAuth(), listUsers);
 router.put('/api/admin/users/:id/role', writeRateLimit(), requireAdminAuth(), updateUserRole);
 router.delete('/api/admin/users/:id', writeRateLimit(), requireAdminAuth(), deleteUser);
+
+// Photo moderation admin endpoints
+router.get('/api/admin/photos', publicRateLimit(), requireAdminAuth(), getPhotosForModeration);
+router.put('/api/admin/photos/:id/moderate', writeRateLimit(), requireAdminAuth(), moderatePhoto);
 
 // Handle OPTIONS for CORS preflight
 router.options('*', (request, env: Env) => handleCorsPreflightRequest(request, env));
