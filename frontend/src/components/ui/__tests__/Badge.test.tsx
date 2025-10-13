@@ -346,8 +346,9 @@ describe('Badge Edge Cases', () => {
   })
 
   it('should handle empty children in status badge', () => {
-    render(<StatusBadge>{''}</StatusBadge>)
-    const badge = screen.getByRole('generic')
+    const { container } = render(<StatusBadge>{''}</StatusBadge>)
+    const badge = container.querySelector('.inline-flex.items-center')
+    expect(badge).toBeInTheDocument()
     expect(badge).toHaveClass('inline-flex')
   })
 

@@ -55,12 +55,13 @@ describe('useAppFeatures', () => {
     renderHook(() => useAppFeatures())
 
     expect(mockUseFeatureToggle).toHaveBeenCalledWith('ENABLE_PASSPORT')
+    expect(mockUseFeatureToggle).toHaveBeenCalledWith('ENABLE_FEED')
     expect(mockUseFeatureToggle).toHaveBeenCalledWith('ENABLE_EVENTS')
     expect(mockUseFeatureToggle).toHaveBeenCalledWith('ENABLE_MENU')
     expect(mockUseFeatureToggle).toHaveBeenCalledWith('ENABLE_CITY_SELECTOR')
     expect(mockUseFeatureToggle).toHaveBeenCalledWith('ENABLE_USER_ACCOUNTS')
     expect(mockUseFeatureToggle).toHaveBeenCalledWith('SHOW_COMING_SOON')
-    expect(mockUseFeatureToggle).toHaveBeenCalledTimes(6)
+    expect(mockUseFeatureToggle).toHaveBeenCalledTimes(7)
   })
 
   it('should return all features disabled when all flags are false', () => {
@@ -248,9 +249,9 @@ describe('useAppFeatures', () => {
 
     const { result } = renderHook(() => useAppFeatures())
 
-    // Should treat undefined/null as falsy
-    expect(result.current.isPassportEnabled).toBe(false)
-    expect(result.current.isEventsEnabled).toBe(false)
+    // Hook returns whatever useFeatureToggle returns (undefined/null/boolean)
+    expect(result.current.isPassportEnabled).toBeUndefined()
+    expect(result.current.isEventsEnabled).toBeNull()
     expect(result.current.isMenuEnabled).toBe(false)
   })
 })

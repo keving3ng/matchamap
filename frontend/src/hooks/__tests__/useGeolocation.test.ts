@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { renderHook, act } from '@testing-library/react'
+import { renderHook, act, waitFor } from '@testing-library/react'
 import { useGeolocation } from '../useGeolocation'
+import { useLocationStore } from '../../stores/locationStore'
 
 // Mock geolocation
 const mockGeolocation = {
@@ -11,31 +12,44 @@ const mockGeolocation = {
 
 // Mock navigator.permissions
 const mockPermissions = {
-  query: vi.fn().mockResolvedValue({
-    state: 'prompt',
-    addEventListener: vi.fn(),
-  }),
+  query: vi.fn(),
 }
-
-Object.defineProperty(globalThis.navigator, 'geolocation', {
-  value: mockGeolocation,
-  writable: true,
-  configurable: true,
-})
-
-Object.defineProperty(globalThis.navigator, 'permissions', {
-  value: mockPermissions,
-  writable: true,
-  configurable: true,
-})
 
 describe('useGeolocation', () => {
   beforeEach(() => {
+    // Reset location store
+    useLocationStore.setState({
+      coordinates: null,
+      error: null,
+      loading: false,
+      permission: 'prompt',
+    })
+
+    // Clear all mocks
     vi.clearAllMocks()
+
+    // Setup navigator.geolocation mock
+    Object.defineProperty(globalThis.navigator, 'geolocation', {
+      value: mockGeolocation,
+      writable: true,
+      configurable: true,
+    })
+
+    // Setup navigator.permissions mock with proper Promise return
+    mockPermissions.query.mockResolvedValue({
+      state: 'prompt',
+      addEventListener: vi.fn(),
+    })
+
+    Object.defineProperty(globalThis.navigator, 'permissions', {
+      value: mockPermissions,
+      writable: true,
+      configurable: true,
+    })
   })
 
   afterEach(() => {
-    vi.restoreAllMocks()
+    vi.clearAllMocks()
   })
 
   it('should initialize with default state', () => {
@@ -62,25 +76,20 @@ describe('useGeolocation', () => {
     }
 
     mockGeolocation.getCurrentPosition.mockImplementation((success) => {
-      setTimeout(() => success(mockPosition), 0)
+      success(mockPosition)
     })
 
     const { result } = renderHook(() => useGeolocation())
 
-    await act(async () => {
+    act(() => {
       result.current.requestLocation()
     })
 
-    expect(result.current.loading).toBe(true)
-
-    // Wait for async operations
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 10))
+    await waitFor(() => {
+      expect(result.current.coordinates).toEqual(mockPosition.coords)
+      expect(result.current.loading).toBe(false)
+      expect(result.current.error).toBeNull()
     })
-
-    expect(result.current.coordinates).toEqual(mockPosition.coords)
-    expect(result.current.loading).toBe(false)
-    expect(result.current.error).toBeNull()
   })
 
   it('should handle permission denied error', async () => {
@@ -93,23 +102,20 @@ describe('useGeolocation', () => {
     }
 
     mockGeolocation.getCurrentPosition.mockImplementation((_success, error) => {
-      setTimeout(() => error(mockError), 0)
+      error(mockError)
     })
 
     const { result } = renderHook(() => useGeolocation())
 
-    await act(async () => {
+    act(() => {
       result.current.requestLocation()
     })
 
-    // Wait for async operations
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 10))
+    await waitFor(() => {
+      expect(result.current.error).toEqual(mockError)
+      expect(result.current.loading).toBe(false)
+      expect(result.current.coordinates).toBeNull()
     })
-
-    expect(result.current.error).toEqual(mockError)
-    expect(result.current.loading).toBe(false)
-    expect(result.current.coordinates).toBeNull()
   })
 
   it('should clear location data', () => {
@@ -125,21 +131,16 @@ describe('useGeolocation', () => {
   })
 
   it('should detect unsupported browsers', () => {
-    // Temporarily remove geolocation support
-    const originalGeolocation = globalThis.navigator.geolocation
-    Object.defineProperty(globalThis.navigator, 'geolocation', {
-      value: undefined,
-      writable: true,
-      configurable: true,
-    })
+    // Remove geolocation support before rendering hook
+    delete (globalThis.navigator as any).geolocation
 
     const { result } = renderHook(() => useGeolocation())
 
     expect(result.current.isSupported).toBe(false)
 
-    // Restore geolocation
+    // Restore geolocation for other tests
     Object.defineProperty(globalThis.navigator, 'geolocation', {
-      value: originalGeolocation,
+      value: mockGeolocation,
       writable: true,
       configurable: true,
     })

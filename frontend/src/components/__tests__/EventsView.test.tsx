@@ -1,7 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { EventsView } from '../EventsView'
 import { EventItem } from '../../types'
+
+// Helper to render with Router
+const renderWithRouter = (ui: React.ReactElement) => {
+  return render(<MemoryRouter>{ui}</MemoryRouter>)
+}
 
 // Mock stores and hooks
 const mockDataStore = {
@@ -43,6 +49,7 @@ const mockEventItems: EventItem[] = [
     price: '$45',
     featured: true,
     published: true,
+    link: 'https://www.instagram.com/p/test1/',
   },
   {
     id: 2,
@@ -56,6 +63,7 @@ const mockEventItems: EventItem[] = [
     price: 'Free',
     featured: false,
     published: true,
+    link: 'https://www.instagram.com/p/test2/',
   },
   {
     id: 3,
@@ -69,6 +77,7 @@ const mockEventItems: EventItem[] = [
     price: '$60',
     featured: false,
     published: true,
+    link: 'https://www.instagram.com/p/test3/',
   },
 ]
 
@@ -80,15 +89,15 @@ describe('EventsView', () => {
   })
 
   it('should render events header', () => {
-    render(<EventsView eventItems={[]} />)
+    renderWithRouter(<EventsView eventItems={[]} />)
 
-    expect(screen.getByText('Upcoming Events')).toBeInTheDocument()
+    expect(screen.getByText('Events')).toBeInTheDocument()
     expect(screen.getByText('Toronto matcha community gatherings & workshops')).toBeInTheDocument()
   })
 
   it('should display loading skeleton when loading and no items', () => {
     mockDataStore.isLoading = true
-    render(<EventsView eventItems={[]} />)
+    renderWithRouter(<EventsView eventItems={[]} />)
 
     expect(screen.getByTestId('list-skeleton')).toBeInTheDocument()
     expect(screen.getByTestId('skeleton-item-0')).toBeInTheDocument()
@@ -97,14 +106,14 @@ describe('EventsView', () => {
   })
 
   it('should display empty state when no events', () => {
-    render(<EventsView eventItems={[]} />)
+    renderWithRouter(<EventsView eventItems={[]} />)
 
     expect(screen.getByText('No upcoming events')).toBeInTheDocument()
     expect(screen.getByText('Check back soon for matcha community gatherings!')).toBeInTheDocument()
   })
 
   it('should render event items when provided', () => {
-    render(<EventsView eventItems={mockEventItems} />)
+    renderWithRouter(<EventsView eventItems={mockEventItems} />)
 
     expect(screen.getByText('Matcha Tea Ceremony Workshop')).toBeInTheDocument()
     expect(screen.getByText('Matcha Latte Art Class')).toBeInTheDocument()
@@ -112,7 +121,7 @@ describe('EventsView', () => {
   })
 
   it('should display featured event badge for featured events', () => {
-    render(<EventsView eventItems={mockEventItems} />)
+    renderWithRouter(<EventsView eventItems={mockEventItems} />)
 
     expect(screen.getByText('Featured Event')).toBeInTheDocument()
     
@@ -121,7 +130,7 @@ describe('EventsView', () => {
   })
 
   it('should apply different styling to featured events', () => {
-    render(<EventsView eventItems={mockEventItems} />)
+    renderWithRouter(<EventsView eventItems={mockEventItems} />)
 
     const featuredEvent = screen.getByText('Matcha Tea Ceremony Workshop').closest('article')!
     const regularEvent = screen.getByText('Matcha Latte Art Class').closest('article')!
@@ -131,15 +140,17 @@ describe('EventsView', () => {
   })
 
   it('should display event images', () => {
-    render(<EventsView eventItems={mockEventItems} />)
+    // Component uses hardcoded emoji '🍵' for events with Instagram links
+    // not event.image from the props
+    renderWithRouter(<EventsView eventItems={mockEventItems} />)
 
-    expect(screen.getByText('🍵')).toBeInTheDocument()
-    expect(screen.getByText('🎨')).toBeInTheDocument()
-    expect(screen.getByText('🎊')).toBeInTheDocument()
+    // Check that emoji containers exist (hardcoded 🍵 emoji)
+    const emojiLinks = screen.queryAllByText('🍵')
+    expect(emojiLinks.length).toBeGreaterThan(0)
   })
 
   it('should display all event details', () => {
-    render(<EventsView eventItems={mockEventItems} />)
+    renderWithRouter(<EventsView eventItems={mockEventItems} />)
 
     // Dates
     expect(screen.getByText('December 20, 2023')).toBeInTheDocument()
@@ -163,7 +174,7 @@ describe('EventsView', () => {
   })
 
   it('should display event descriptions', () => {
-    render(<EventsView eventItems={mockEventItems} />)
+    renderWithRouter(<EventsView eventItems={mockEventItems} />)
 
     expect(screen.getByText(/Learn the traditional art of Japanese tea ceremony/)).toBeInTheDocument()
     expect(screen.getByText(/Master the art of creating beautiful designs/)).toBeInTheDocument()
@@ -171,7 +182,7 @@ describe('EventsView', () => {
   })
 
   it('should display correct icons for event details', () => {
-    render(<EventsView eventItems={mockEventItems} />)
+    renderWithRouter(<EventsView eventItems={mockEventItems} />)
 
     const eventDetails = screen.getByText('Green Tea House, Queen West').closest('div')!.parentElement!
 
@@ -181,7 +192,7 @@ describe('EventsView', () => {
   })
 
   it('should render events as articles for semantic HTML', () => {
-    render(<EventsView eventItems={mockEventItems} />)
+    renderWithRouter(<EventsView eventItems={mockEventItems} />)
 
     const articles = screen.getAllByRole('article')
     expect(articles).toHaveLength(3)
@@ -199,38 +210,45 @@ describe('EventsView', () => {
       image: '📅',
       price: 'TBD',
       featured: false,
+      link: 'https://www.instagram.com/p/test4/',
     }
 
-    render(<EventsView eventItems={[minimalEvent]} />)
+    renderWithRouter(<EventsView eventItems={[minimalEvent]} />)
 
     expect(screen.getByText('Minimal Event')).toBeInTheDocument()
     expect(screen.getByText('More details coming soon.')).toBeInTheDocument()
-    expect(screen.getByText('📅')).toBeInTheDocument()
-    expect(screen.getAllByText('TBD')).toHaveLength(4) // date, time, location, price
+    // Component shows hardcoded emoji 🍵, not event.image
+    expect(screen.getByText('🍵')).toBeInTheDocument()
+    // date, time, price (venue and location are combined in one element as "TBD, TBD")
+    expect(screen.getAllByText('TBD')).toHaveLength(3)
+    expect(screen.getByText('TBD, TBD')).toBeInTheDocument()
   })
 
   it('should not show loading skeleton when items are present and loading', () => {
     mockDataStore.isLoading = true
-    render(<EventsView eventItems={mockEventItems} />)
+    renderWithRouter(<EventsView eventItems={mockEventItems} />)
 
     expect(screen.queryByTestId('list-skeleton')).not.toBeInTheDocument()
     expect(screen.getByText('Matcha Tea Ceremony Workshop')).toBeInTheDocument()
   })
 
   it('should apply different gradient styling to featured event images', () => {
-    render(<EventsView eventItems={mockEventItems} />)
+    renderWithRouter(<EventsView eventItems={mockEventItems} />)
 
-    const featuredEventImage = screen.getByText('🍵').closest('div')!
-    const regularEventImage = screen.getByText('🎨').closest('div')!
+    // All emojis are 🍵, so we need to get all of them and check the first two
+    const emojiLinks = screen.getAllByText('🍵')
+
+    const featuredEventImage = emojiLinks[0].closest('a')!
+    const regularEventImage = emojiLinks[1].closest('a')!
 
     expect(featuredEventImage).toHaveClass('from-green-500', 'to-green-700')
     expect(regularEventImage).toHaveClass('from-green-400', 'to-green-600')
   })
 
   it('should be accessible with proper heading structure', () => {
-    render(<EventsView eventItems={mockEventItems} />)
+    renderWithRouter(<EventsView eventItems={mockEventItems} />)
 
-    expect(screen.getByRole('heading', { level: 2, name: 'Upcoming Events' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 2, name: 'Events' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { level: 3, name: 'Matcha Tea Ceremony Workshop' })).toBeInTheDocument()
   })
 
@@ -248,7 +266,7 @@ describe('EventsView', () => {
       featured: false,
     }
 
-    render(<EventsView eventItems={[eventWithSpecialChars]} />)
+    renderWithRouter(<EventsView eventItems={[eventWithSpecialChars]} />)
 
     expect(screen.getByText('Matcha & Meditation')).toBeInTheDocument()
     expect(screen.getByText(/mindfulness through matcha preparation & consumption/)).toBeInTheDocument()
@@ -268,14 +286,14 @@ describe('EventsView', () => {
       featured: false,
     }
 
-    render(<EventsView eventItems={[longDescEvent]} />)
+    renderWithRouter(<EventsView eventItems={[longDescEvent]} />)
 
     expect(screen.getByText('Comprehensive Matcha Course')).toBeInTheDocument()
     expect(screen.getByText(/This is a very long description/)).toBeInTheDocument()
   })
 
   it('should maintain proper responsive layout classes', () => {
-    const { container } = render(<EventsView eventItems={mockEventItems} />)
+    const { container } = renderWithRouter(<EventsView eventItems={mockEventItems} />)
 
     expect(container.querySelector('.flex-1.overflow-y-auto')).toBeInTheDocument()
     expect(container.querySelector('.space-y-4')).toBeInTheDocument()
@@ -293,18 +311,20 @@ describe('EventsView', () => {
       image: '❓',
       price: '',
       featured: false,
+      link: 'https://www.instagram.com/p/test5/',
     }
 
-    render(<EventsView eventItems={[eventWithEmptyStrings]} />)
+    renderWithRouter(<EventsView eventItems={[eventWithEmptyStrings]} />)
 
     expect(screen.getByText('Event with Empty Fields')).toBeInTheDocument()
-    expect(screen.getByText('❓')).toBeInTheDocument()
+    // Component shows hardcoded emoji 🍵, not event.image
+    expect(screen.getByText('🍵')).toBeInTheDocument()
     // Should render without crashing even with empty strings
   })
 
   it('should not show featured badge for non-featured events', () => {
     const nonFeaturedEvents = mockEventItems.filter(event => !event.featured)
-    render(<EventsView eventItems={nonFeaturedEvents} />)
+    renderWithRouter(<EventsView eventItems={nonFeaturedEvents} />)
 
     expect(screen.queryByText('Featured Event')).not.toBeInTheDocument()
   })

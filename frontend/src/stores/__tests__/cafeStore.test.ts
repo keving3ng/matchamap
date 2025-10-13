@@ -5,8 +5,8 @@ import { useDataStore } from '../dataStore'
 import { useLocationStore } from '../locationStore'
 import type { Cafe, CafeWithDistance } from '../../../shared/types'
 
-// Mock the distance utility
-vi.mock('../utils/distance', () => ({
+// Mock the distance utility (correct path: ../../utils/distance from test file location)
+vi.mock('../../utils/distance', () => ({
   calculateCafeDistances: vi.fn((userLocation, cafes) => {
     if (!userLocation) {
       return cafes.map(cafe => ({
@@ -14,7 +14,7 @@ vi.mock('../utils/distance', () => ({
         distanceInfo: null,
       }))
     }
-    
+
     // Mock distance calculation for testing
     return cafes.map((cafe, index) => ({
       ...cafe,
