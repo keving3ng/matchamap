@@ -8,11 +8,12 @@ import {
   verifyPassword,
   signToken,
   generateSessionToken,
+  verifyToken,
   JWTPayload,
 } from '../utils/auth';
 import { AuthenticatedRequest } from '../middleware/auth';
 import { safeValidate, registerSchema, loginSchema, refreshTokenSchema } from '../validators';
-import { AUTH_CONSTANTS, HTTP_STATUS, JWT_EXPIRY } from '../constants';
+import { AUTH_CONSTANTS, HTTP_STATUS, JWT_EXPIRY, JWT_EXPIRY_SECONDS } from '../constants';
 
 /**
  * POST /api/auth/register
@@ -166,19 +167,25 @@ export async function login(request: IRequest, env: Env): Promise<Response> {
       expiresAt,
     });
 
-    // Return tokens and user info
+    // Set httpOnly cookies instead of returning tokens in response
     const { passwordHash: _, ...userWithoutPassword } = user;
 
-    return jsonResponse(
+    const response = jsonResponse(
       {
-        accessToken,
-        refreshToken,
         user: userWithoutPassword,
       },
       HTTP_STATUS.OK,
       request as Request,
       env
     );
+
+    // Set httpOnly cookies with security flags
+    const accessMaxAge = user.role === 'admin' ? JWT_EXPIRY_SECONDS.ACCESS_TOKEN_ADMIN : JWT_EXPIRY_SECONDS.ACCESS_TOKEN;
+    const refreshMaxAge = user.role === 'admin' ? JWT_EXPIRY_SECONDS.REFRESH_TOKEN_ADMIN : JWT_EXPIRY_SECONDS.REFRESH_TOKEN;
+    response.headers.append('Set-Cookie', `access_token=${accessToken}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${accessMaxAge}`);
+    response.headers.append('Set-Cookie', `refresh_token=${refreshToken}; HttpOnly; Secure; SameSite=Strict; Path=/api/auth/refresh; Max-Age=${refreshMaxAge}`);
+
+    return response;
   } catch (error) {
     console.error('Login error:', error);
     return errorResponse('Login failed', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
@@ -189,30 +196,54 @@ export async function login(request: IRequest, env: Env): Promise<Response> {
  * POST /api/auth/logout
  * Invalidate user session and delete from database
  */
-export async function logout(request: AuthenticatedRequest, env: Env): Promise<Response> {
+export async function logout(request: IRequest, env: Env): Promise<Response> {
+  // Try to extract auth info from cookie for cleanup, but don't require it
+  const cookieHeader = request.headers.get('Cookie');
+  let userFromToken: JWTPayload | null = null;
+  
+  if (cookieHeader) {
+    const cookies = cookieHeader.split(';').map(c => c.trim());
+    const tokenCookie = cookies.find(c => c.startsWith('access_token='));
+    
+    if (tokenCookie) {
+      const token = tokenCookie.split('=')[1];
+      if (token) {
+        try {
+          userFromToken = await verifyToken(token, env.JWT_SECRET);
+        } catch {
+          // Ignore token verification errors during logout
+        }
+      }
+    }
+  }
   try {
-    if (!request.user) {
-      return badRequestResponse('Not authenticated', request as Request, env);
+    // If user is authenticated, clean up sessions
+    if (userFromToken) {
+      const db = getDb(env.DB);
+
+      // Delete all sessions for this user to ensure complete logout
+      // This provides additional security by invalidating all user sessions
+      await db
+        .delete(sessions)
+        .where(eq(sessions.userId, userFromToken.userId))
+        .run();
+
+      // Log security event for audit purposes
+      console.log(`User logout - User ID: ${userFromToken.userId}, Username: ${userFromToken.username}`);
     }
 
-    const db = getDb(env.DB);
-
-    // Delete all sessions for this user to ensure complete logout
-    // This provides additional security by invalidating all user sessions
-    await db
-      .delete(sessions)
-      .where(eq(sessions.userId, request.user.userId))
-      .run();
-
-    // Log security event for audit purposes
-    console.log(`User logout - User ID: ${request.user.userId}, Username: ${request.user.username}`);
-
-    return jsonResponse(
+    const response = jsonResponse(
       { message: 'Logged out successfully' },
       HTTP_STATUS.OK,
       request as Request,
       env
     );
+
+    // Clear httpOnly cookies by setting them to expire immediately
+    response.headers.append('Set-Cookie', 'access_token=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0');
+    response.headers.append('Set-Cookie', 'refresh_token=; HttpOnly; Secure; SameSite=Strict; Path=/api/auth/refresh; Max-Age=0');
+
+    return response;
   } catch (error) {
     console.error('Logout error:', error);
     return errorResponse('Logout failed', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
@@ -258,17 +289,26 @@ export async function getCurrentUser(request: AuthenticatedRequest, env: Env): P
  */
 export async function refreshToken(request: IRequest, env: Env): Promise<Response> {
   try {
-    const body = await request.json();
+    // Extract refresh token from cookie instead of request body
+    const cookieHeader = request.headers.get('Cookie');
+    if (!cookieHeader) {
+      return errorResponse('Missing refresh token cookie', HTTP_STATUS.UNAUTHORIZED, request as Request, env);
+    }
 
-    // Validate input using Zod schema
-    const validation = safeValidate(refreshTokenSchema, body);
-    if (!validation.success) {
-      return badRequestResponse(validation.error, request as Request, env);
+    const cookies = cookieHeader.split(';').map(c => c.trim());
+    const refreshTokenCookie = cookies.find(c => c.startsWith('refresh_token='));
+    if (!refreshTokenCookie) {
+      return errorResponse('Missing refresh token cookie', HTTP_STATUS.UNAUTHORIZED, request as Request, env);
+    }
+
+    const refreshTokenValue = refreshTokenCookie.split('=')[1];
+    if (!refreshTokenValue) {
+      return errorResponse('Invalid refresh token cookie', HTTP_STATUS.UNAUTHORIZED, request as Request, env);
     }
 
     // Verify refresh token
     const { verifyToken } = await import('../utils/auth');
-    const payload = await verifyToken(validation.data.refreshToken, env.JWT_SECRET);
+    const payload = await verifyToken(refreshTokenValue, env.JWT_SECRET);
 
     if (!payload) {
       return errorResponse('Invalid or expired refresh token', HTTP_STATUS.UNAUTHORIZED, request as Request, env);
@@ -283,7 +323,13 @@ export async function refreshToken(request: IRequest, env: Env): Promise<Respons
     // Log token refresh for security auditing (sanitized for privacy)
     console.log(`Token refreshed - User ID: ${payload.userId}, Role: ${payload.role}, Access Token Expiry: ${accessTokenExpiry}`);
 
-    return jsonResponse({ accessToken }, HTTP_STATUS.OK, request as Request, env);
+    const response = jsonResponse({ success: true }, HTTP_STATUS.OK, request as Request, env);
+
+    // Set new access token in httpOnly cookie
+    const accessMaxAge = payload.role === 'admin' ? JWT_EXPIRY_SECONDS.ACCESS_TOKEN_ADMIN : JWT_EXPIRY_SECONDS.ACCESS_TOKEN;
+    response.headers.append('Set-Cookie', `access_token=${accessToken}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${accessMaxAge}`);
+    
+    return response;
   } catch (error) {
     console.error('Refresh token error:', error);
     return errorResponse('Token refresh failed', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);

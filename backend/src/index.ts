@@ -67,7 +67,7 @@ router.post('/api/waitlist', authRateLimit(), joinWaitlist);
 // Auth endpoints (with stricter rate limiting)
 router.post('/api/auth/register', authRateLimit(), register);
 router.post('/api/auth/login', authRateLimit(), login);
-router.post('/api/auth/logout', authRateLimit(), requireAuth(), logout);
+router.post('/api/auth/logout', authRateLimit(), logout);
 router.get('/api/auth/me', authRateLimit(), requireAuth(), getCurrentUser);
 router.post('/api/auth/refresh', authRateLimit(), refreshToken);
 

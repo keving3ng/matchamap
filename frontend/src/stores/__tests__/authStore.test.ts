@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { useAuthStore } from '../authStore'
 import { waitForPersistence, createMockUser } from '../../test/helpers'
-import type { User, LoginResponse, RegisterRequest } from '../../../../shared/types'
+import type { User, RegisterRequest } from '../../../../shared/types'
 
 // Mock the API
 const mockFetch = vi.fn()
@@ -20,25 +20,18 @@ describe('authStore', () => {
     updatedAt: '2023-01-01T00:00:00Z',
   }
 
-  const mockLoginResponse: LoginResponse = {
+  const mockLoginResponse = {
     user: mockUser,
-    accessToken: 'mock-access-token',
-    refreshToken: 'mock-refresh-token',
   }
 
   beforeEach(() => {
     // Reset store before each test
     useAuthStore.setState({
       user: null,
-      accessToken: null,
-      refreshToken: null,
       isAuthenticated: false,
       isLoading: false,
       error: null,
     })
-
-    // Clear sessionStorage
-    sessionStorage.clear()
 
     // Reset fetch mocks
     vi.clearAllMocks()
@@ -53,33 +46,27 @@ describe('authStore', () => {
       const { result } = renderHook(() => useAuthStore())
       
       expect(result.current.user).toBeNull()
-      expect(result.current.accessToken).toBeNull()
-      expect(result.current.refreshToken).toBeNull()
       expect(result.current.isAuthenticated).toBe(false)
       expect(result.current.isLoading).toBe(false)
       expect(result.current.error).toBeNull()
     })
 
-    it('should restore session from sessionStorage on init', () => {
-      // Directly set state to simulate restored session
+    it('should handle auth state without persistence', () => {
+      // Directly set state to simulate authenticated session
       useAuthStore.setState({
         user: mockUser,
-        accessToken: 'persisted-token',
-        refreshToken: 'persisted-refresh-token',
         isAuthenticated: true,
       })
 
       const { result } = renderHook(() => useAuthStore())
 
       expect(result.current.user).toEqual(mockUser)
-      expect(result.current.accessToken).toBe('persisted-token')
-      expect(result.current.refreshToken).toBe('persisted-refresh-token')
       expect(result.current.isAuthenticated).toBe(true)
     })
   })
 
   describe('login', () => {
-    it('should set user and tokens on successful login', async () => {
+    it('should set user on successful login', async () => {
       const { result } = renderHook(() => useAuthStore())
 
       mockFetch.mockResolvedValueOnce({
@@ -92,34 +79,39 @@ describe('authStore', () => {
       })
 
       expect(result.current.user).toEqual(mockUser)
-      expect(result.current.accessToken).toBe('mock-access-token')
-      expect(result.current.refreshToken).toBe('mock-refresh-token')
       expect(result.current.isAuthenticated).toBe(true)
       expect(result.current.isLoading).toBe(false)
       expect(result.current.error).toBeNull()
+      
+      // Verify credentials: 'include' is used
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('/api/auth/login'),
+        expect.objectContaining({
+          credentials: 'include',
+        })
+      )
     })
 
-    it('should persist session to sessionStorage', async () => {
+    it('should handle login errors properly', async () => {
       const { result } = renderHook(() => useAuthStore())
 
       mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockLoginResponse),
+        ok: false,
+        json: () => Promise.resolve({ error: 'Invalid credentials' }),
       })
 
       await act(async () => {
-        await result.current.login({ email: 'test@example.com', password: 'password123' })
+        try {
+          await result.current.login({ email: 'test@example.com', password: 'wrongpassword' })
+        } catch (error) {
+          // Expected error
+        }
       })
 
-      await waitForPersistence()
-
-      const storedData = sessionStorage.getItem('matchamap-auth')
-      expect(storedData).toBeTruthy()
-
-      const parsedData = JSON.parse(storedData!)
-      expect(parsedData.state.user).toEqual(mockUser)
-      expect(parsedData.state.accessToken).toBe('mock-access-token')
-      expect(parsedData.state.isAuthenticated).toBe(true)
+      expect(result.current.user).toBeNull()
+      expect(result.current.isAuthenticated).toBe(false)
+      expect(result.current.isLoading).toBe(false)
+      expect(result.current.error).toBe('Invalid credentials')
     })
 
     it('should set loading state during login', async () => {
@@ -172,7 +164,6 @@ describe('authStore', () => {
       }).rejects.toThrow('Invalid credentials')
 
       expect(result.current.user).toBeNull()
-      expect(result.current.accessToken).toBeNull()
       expect(result.current.isAuthenticated).toBe(false)
       expect(result.current.isLoading).toBe(false)
       expect(result.current.error).toBe('Invalid credentials')
@@ -209,6 +200,7 @@ describe('authStore', () => {
         expect.stringContaining('/api/auth/login'),
         {
           method: 'POST',
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
           },
@@ -253,6 +245,7 @@ describe('authStore', () => {
         expect.stringContaining('/api/auth/register'),
         expect.objectContaining({
           method: 'POST',
+          credentials: 'include',
           body: JSON.stringify(registerData),
         })
       )
@@ -262,6 +255,7 @@ describe('authStore', () => {
         expect.stringContaining('/api/auth/login'),
         expect.objectContaining({
           method: 'POST',
+          credentials: 'include',
           body: JSON.stringify({ email: registerData.email, password: registerData.password }),
         })
       )
@@ -295,8 +289,6 @@ describe('authStore', () => {
       act(() => {
         useAuthStore.setState({
           user: mockUser,
-          accessToken: 'test-token',
-          refreshToken: 'test-refresh-token',
           isAuthenticated: true,
         })
       })
@@ -311,8 +303,6 @@ describe('authStore', () => {
       })
 
       expect(result.current.user).toBeNull()
-      expect(result.current.accessToken).toBeNull()
-      expect(result.current.refreshToken).toBeNull()
       expect(result.current.isAuthenticated).toBe(false)
       expect(result.current.error).toBeNull()
       expect(result.current.isLoading).toBe(false)
@@ -321,26 +311,21 @@ describe('authStore', () => {
         expect.stringContaining('/api/auth/logout'),
         {
           method: 'POST',
-          headers: {
-            Authorization: 'Bearer test-token',
-          },
+          credentials: 'include',
         }
       )
     })
 
-    it('should clear sessionStorage', async () => {
+    it('should clear auth state on logout', async () => {
       const { result } = renderHook(() => useAuthStore())
 
-      // Set initial authenticated state and sessionStorage
+      // Set initial authenticated state
       act(() => {
         useAuthStore.setState({
           user: mockUser,
-          accessToken: 'test-token',
-          refreshToken: 'test-refresh-token',
           isAuthenticated: true,
         })
       })
-      sessionStorage.setItem('matchamap-auth', JSON.stringify({ test: 'data' }))
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
@@ -351,9 +336,8 @@ describe('authStore', () => {
         result.current.logout()
       })
 
-      await waitForPersistence()
-
-      expect(sessionStorage.getItem('matchamap-auth')).toBeNull()
+      expect(result.current.user).toBeNull()
+      expect(result.current.isAuthenticated).toBe(false)
     })
 
     it('should handle logout endpoint failure gracefully', async () => {
@@ -363,8 +347,6 @@ describe('authStore', () => {
       act(() => {
         useAuthStore.setState({
           user: mockUser,
-          accessToken: 'test-token',
-          refreshToken: 'test-refresh-token',
           isAuthenticated: true,
         })
       })
@@ -377,7 +359,6 @@ describe('authStore', () => {
 
       // Should still clear state even if endpoint fails
       expect(result.current.user).toBeNull()
-      expect(result.current.accessToken).toBeNull()
       expect(result.current.isAuthenticated).toBe(false)
     })
   })
@@ -390,24 +371,16 @@ describe('authStore', () => {
       act(() => {
         useAuthStore.setState({
           user: mockUser,
-          accessToken: 'test-token',
-          refreshToken: 'test-refresh-token',
           isAuthenticated: true,
         })
       })
-      sessionStorage.setItem('matchamap-auth', JSON.stringify({ test: 'data' }))
 
       await act(async () => {
         result.current.clearAuth()
       })
 
-      await waitForPersistence()
-
       expect(result.current.user).toBeNull()
-      expect(result.current.accessToken).toBeNull()
-      expect(result.current.refreshToken).toBeNull()
       expect(result.current.isAuthenticated).toBe(false)
-      expect(sessionStorage.getItem('matchamap-auth')).toBeNull()
 
       // Should not call any API endpoints
       expect(mockFetch).not.toHaveBeenCalled()
@@ -418,16 +391,9 @@ describe('authStore', () => {
     it('should refresh token successfully', async () => {
       const { result } = renderHook(() => useAuthStore())
 
-      // Set initial state with refresh token
-      act(() => {
-        useAuthStore.setState({
-          refreshToken: 'test-refresh-token',
-        })
-      })
-
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({ accessToken: 'new-access-token' }),
+        json: () => Promise.resolve({ success: true }),
       })
 
       let refreshResult: boolean | undefined
@@ -436,22 +402,33 @@ describe('authStore', () => {
       })
 
       expect(refreshResult).toBe(true)
-      expect(result.current.accessToken).toBe('new-access-token')
 
       expect(mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('/api/auth/refresh'),
         {
           method: 'POST',
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ refreshToken: 'test-refresh-token' }),
         }
       )
     })
 
-    it('should return false and logout if no refresh token', async () => {
+    it('should return false and logout if refresh fails', async () => {
       const { result } = renderHook(() => useAuthStore())
+
+      // Mock failed refresh response
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        json: () => Promise.resolve({ error: 'Invalid refresh token' }),
+      })
+
+      // Mock logout endpoint (called when refresh fails)
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({}),
+      })
 
       let refreshResult: boolean | undefined
       await act(async () => {
@@ -459,24 +436,29 @@ describe('authStore', () => {
       })
 
       expect(refreshResult).toBe(false)
-      expect(mockFetch).not.toHaveBeenCalled()
     })
 
     it('should logout if refresh fails', async () => {
       const { result } = renderHook(() => useAuthStore())
 
-      // Set initial state with refresh token and user
+      // Set initial state with user
       act(() => {
         useAuthStore.setState({
           user: mockUser,
-          refreshToken: 'test-refresh-token',
           isAuthenticated: true,
         })
       })
 
+      // Mock failed refresh response
       mockFetch.mockResolvedValueOnce({
         ok: false,
         json: () => Promise.resolve({ error: 'Invalid refresh token' }),
+      })
+
+      // Mock logout endpoint (called when refresh fails)
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({}),
       })
 
       let refreshResult: boolean | undefined
@@ -491,15 +473,8 @@ describe('authStore', () => {
   })
 
   describe('getCurrentUser', () => {
-    it('should fetch current user with valid token', async () => {
+    it('should fetch current user with cookies', async () => {
       const { result } = renderHook(() => useAuthStore())
-
-      // Set initial state with access token
-      act(() => {
-        useAuthStore.setState({
-          accessToken: 'valid-token',
-        })
-      })
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
@@ -511,39 +486,20 @@ describe('authStore', () => {
       })
 
       expect(result.current.user).toEqual(mockUser)
+      expect(result.current.isAuthenticated).toBe(true)
 
       expect(mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('/api/auth/me'),
         {
-          headers: {
-            Authorization: 'Bearer valid-token',
-          },
+          credentials: 'include',
         }
       )
     })
 
-    it('should not make request if no access token', async () => {
+    it('should handle failed getCurrentUser request', async () => {
       const { result } = renderHook(() => useAuthStore())
 
-      await act(async () => {
-        await result.current.getCurrentUser()
-      })
-
-      expect(mockFetch).not.toHaveBeenCalled()
-    })
-
-    it('should try to refresh token if request fails', async () => {
-      const { result } = renderHook(() => useAuthStore())
-
-      // Set initial state
-      act(() => {
-        useAuthStore.setState({
-          accessToken: 'expired-token',
-          refreshToken: 'valid-refresh-token',
-        })
-      })
-
-      // Mock failed user request
+      // Mock failed getCurrentUser (401)
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 401,
@@ -552,10 +508,10 @@ describe('authStore', () => {
       // Mock successful refresh
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({ accessToken: 'new-token' }),
+        json: () => Promise.resolve({ success: true }),
       })
 
-      // Mock successful user request with new token
+      // Mock successful retry of getCurrentUser
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({ user: mockUser }),
@@ -565,9 +521,39 @@ describe('authStore', () => {
         await result.current.getCurrentUser()
       })
 
+      // Should have: 1) failed getCurrentUser, 2) refresh, 3) retry getCurrentUser
+      expect(mockFetch).toHaveBeenCalledTimes(3)
+    })
+
+    it('should retry getCurrentUser after successful token refresh', async () => {
+      const { result } = renderHook(() => useAuthStore())
+
+      // Mock failed user request (401)
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+      })
+
+      // Mock successful refresh
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ success: true }),
+      })
+
+      // Mock successful retry of getCurrentUser
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ user: mockUser }),
+      })
+
+      await act(async () => {
+        await result.current.getCurrentUser()
+      })
+
+      // Should have: 1) failed getCurrentUser, 2) refresh, 3) retry getCurrentUser
       expect(mockFetch).toHaveBeenCalledTimes(3)
       expect(result.current.user).toEqual(mockUser)
-      expect(result.current.accessToken).toBe('new-token')
+      expect(result.current.isAuthenticated).toBe(true)
     })
   })
 
@@ -591,36 +577,22 @@ describe('authStore', () => {
   })
 
   describe('persistence', () => {
-    it('should only persist selected fields', async () => {
+    it('should handle state changes correctly', async () => {
       const { result } = renderHook(() => useAuthStore())
 
       act(() => {
         useAuthStore.setState({
           user: mockUser,
-          accessToken: 'test-token',
-          refreshToken: 'test-refresh-token',
           isAuthenticated: true,
           isLoading: true,
           error: 'some error',
         })
       })
 
-      await waitForPersistence()
-
-      const storedData = sessionStorage.getItem('matchamap-auth')
-      expect(storedData).toBeTruthy()
-
-      const parsedData = JSON.parse(storedData!)
-
-      // Should persist these fields
-      expect(parsedData.state.user).toEqual(mockUser)
-      expect(parsedData.state.accessToken).toBe('test-token')
-      expect(parsedData.state.refreshToken).toBe('test-refresh-token')
-      expect(parsedData.state.isAuthenticated).toBe(true)
-
-      // Should NOT persist these fields
-      expect(parsedData.state.isLoading).toBeUndefined()
-      expect(parsedData.state.error).toBeUndefined()
+      expect(result.current.user).toEqual(mockUser)
+      expect(result.current.isAuthenticated).toBe(true)
+      expect(result.current.isLoading).toBe(true)
+      expect(result.current.error).toBe('some error')
     })
   })
 })

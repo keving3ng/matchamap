@@ -1,0 +1,17 @@
+echo "🔍 Running pre-commit checks..."
+
+# Run typecheck on all workspaces
+echo "\n📝 TypeScript type checking..."
+npm run typecheck || {
+  echo "❌ TypeScript errors found. Fix them before committing."
+  exit 1
+}
+
+# Run tests in CI mode (non-watch)
+echo "\n🧪 Running tests..."
+npm run test:ci || {
+  echo "❌ Tests failed. Fix them before committing."
+  exit 1
+}
+
+echo "\n✅ All pre-commit checks passed!"

@@ -1,0 +1,16 @@
+# Fast pre-commit hook (typecheck only, no tests)
+# To use this instead of the full hook:
+#   mv .husky/pre-commit .husky/pre-commit-full
+#   mv .husky/pre-commit-fast .husky/pre-commit
+#   chmod +x .husky/pre-commit
+
+echo "🔍 Running fast pre-commit checks (typecheck only)..."
+
+# Run typecheck on all workspaces
+echo "\n📝 TypeScript type checking..."
+npm run typecheck || {
+  echo "❌ TypeScript errors found. Fix them before committing."
+  exit 1
+}
+
+echo "\n✅ Pre-commit checks passed! (Run 'npm run test:ci' manually before pushing)"

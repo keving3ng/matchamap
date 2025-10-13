@@ -152,7 +152,6 @@ export function setupSessionStorage() {
 
 // ==================== API Mocking ====================
 
-type ApiMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
 type MockApiResponse = {
   ok?: boolean
   status?: number
@@ -239,7 +238,7 @@ export const mockApi = {
    * Call this in beforeEach or test setup
    */
   setup: () => {
-    global.fetch = vi.fn((url: string, options?: RequestInit) => {
+    global.fetch = vi.fn((url: string | URL | Request, options?: RequestInit) => {
       const method = (options?.method || 'GET').toUpperCase()
       const urlStr = typeof url === 'string' ? url : url.toString()
 

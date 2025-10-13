@@ -1,13 +1,10 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
-import type { User, LoginRequest, LoginResponse, RegisterRequest } from '../../../shared/types'
+import type { User, LoginRequest, RegisterRequest } from '../../../shared/types'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8787'
 
 interface AuthState {
   user: User | null
-  accessToken: string | null
-  refreshToken: string | null
   isAuthenticated: boolean
   isLoading: boolean
   error: string | null
@@ -22,21 +19,18 @@ interface AuthState {
   clearError: () => void
 }
 
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set, get) => ({
-      user: null,
-      accessToken: null,
-      refreshToken: null,
-      isAuthenticated: false,
-      isLoading: false,
-      error: null,
+export const useAuthStore = create<AuthState>()((set, get) => ({
+  user: null,
+  isAuthenticated: false,
+  isLoading: false,
+  error: null,
 
       login: async (credentials: LoginRequest) => {
         set({ isLoading: true, error: null })
         try {
           const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
             method: 'POST',
+            credentials: 'include', // Include cookies in request
             headers: {
               'Content-Type': 'application/json',
             },
@@ -48,12 +42,10 @@ export const useAuthStore = create<AuthState>()(
             throw new Error(error.error || 'Login failed')
           }
 
-          const data: LoginResponse = await response.json()
+          const data = await response.json()
 
           set({
             user: data.user,
-            accessToken: data.accessToken,
-            refreshToken: data.refreshToken,
             isAuthenticated: true,
             isLoading: false,
             error: null,
@@ -72,6 +64,7 @@ export const useAuthStore = create<AuthState>()(
         try {
           const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
             method: 'POST',
+            credentials: 'include', // Include cookies in request
             headers: {
               'Content-Type': 'application/json',
             },
@@ -98,31 +91,21 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: () => {
-        // Optionally call logout endpoint
-        const { accessToken } = get()
-        if (accessToken) {
-          fetch(`${API_BASE_URL}/api/auth/logout`, {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }).catch(() => {
-            // Ignore errors on logout
-          })
-        }
+        // Call logout endpoint to clear cookies on server
+        fetch(`${API_BASE_URL}/api/auth/logout`, {
+          method: 'POST',
+          credentials: 'include', // Include cookies in request
+        }).catch(() => {
+          // Ignore errors on logout
+        })
 
         // Clear auth state
         set({
           user: null,
-          accessToken: null,
-          refreshToken: null,
           isAuthenticated: false,
           error: null,
           isLoading: false,
         })
-
-        // Explicitly clear sessionStorage to ensure tokens are removed
-        sessionStorage.removeItem('matchamap-auth')
       },
 
       clearAuth: () => {
@@ -130,28 +113,20 @@ export const useAuthStore = create<AuthState>()(
         // Used when token is already invalid (401/403 responses)
         set({
           user: null,
-          accessToken: null,
-          refreshToken: null,
           isAuthenticated: false,
           error: null,
           isLoading: false,
         })
-
-        // Explicitly clear sessionStorage to ensure tokens are removed
-        sessionStorage.removeItem('matchamap-auth')
       },
 
       refreshAccessToken: async () => {
-        const { refreshToken } = get()
-        if (!refreshToken) return false
-
         try {
           const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
             method: 'POST',
+            credentials: 'include', // Include cookies (refresh token) in request
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ refreshToken }),
           })
 
           if (!response.ok) {
@@ -160,8 +135,7 @@ export const useAuthStore = create<AuthState>()(
             return false
           }
 
-          const data = await response.json()
-          set({ accessToken: data.accessToken })
+          // Server sets new access token cookie automatically
           return true
         } catch (error) {
           get().logout()
@@ -170,14 +144,9 @@ export const useAuthStore = create<AuthState>()(
       },
 
       getCurrentUser: async () => {
-        const { accessToken } = get()
-        if (!accessToken) return
-
         try {
           const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
+            credentials: 'include', // Include cookies (access token) in request
           })
 
           if (!response.ok) {
@@ -191,36 +160,11 @@ export const useAuthStore = create<AuthState>()(
           }
 
           const data = await response.json()
-          set({ user: data.user })
+          set({ user: data.user, isAuthenticated: true })
         } catch (error) {
           console.error('Failed to get current user:', error)
         }
       },
 
-      clearError: () => set({ error: null }),
-    }),
-    {
-      name: 'matchamap-auth',
-      // Use sessionStorage instead of localStorage for better security
-      // Tokens will be cleared when browser tab closes
-      storage: {
-        getItem: (name) => {
-          const str = sessionStorage.getItem(name);
-          return str ? JSON.parse(str) : null;
-        },
-        setItem: (name, value) => {
-          sessionStorage.setItem(name, JSON.stringify(value));
-        },
-        removeItem: (name) => {
-          sessionStorage.removeItem(name);
-        },
-      },
-      partialize: (state) => ({
-        user: state.user,
-        accessToken: state.accessToken,
-        refreshToken: state.refreshToken,
-        isAuthenticated: state.isAuthenticated,
-      }) as AuthState,
-    }
-  )
-)
+  clearError: () => set({ error: null }),
+}))

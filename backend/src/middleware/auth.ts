@@ -17,13 +17,25 @@ export interface AuthenticatedRequest extends IRequest {
  */
 export function requireAuth() {
   return async (request: AuthenticatedRequest, env: Env): Promise<Response | void> => {
-    const authHeader = request.headers.get('Authorization');
-
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return errorResponse('Unauthorized: Missing or invalid token', HTTP_STATUS.UNAUTHORIZED, request as Request, env);
+    // Extract token from httpOnly cookie instead of Authorization header
+    const cookieHeader = request.headers.get('Cookie');
+    
+    if (!cookieHeader) {
+      return errorResponse('Unauthorized: Missing access token cookie', HTTP_STATUS.UNAUTHORIZED, request as Request, env);
     }
 
-    const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+    const cookies = cookieHeader.split(';').map(c => c.trim());
+    const tokenCookie = cookies.find(c => c.startsWith('access_token='));
+    
+    if (!tokenCookie) {
+      return errorResponse('Unauthorized: Missing access token cookie', HTTP_STATUS.UNAUTHORIZED, request as Request, env);
+    }
+
+    const token = tokenCookie.split('=')[1];
+    
+    if (!token) {
+      return errorResponse('Unauthorized: Invalid access token cookie', HTTP_STATUS.UNAUTHORIZED, request as Request, env);
+    }
 
     if (!env.JWT_SECRET) {
       console.error('JWT_SECRET is not configured');
