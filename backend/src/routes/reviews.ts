@@ -83,15 +83,15 @@ export async function createReview(request: AuthenticatedRequest, env: Env): Pro
         tags: validatedData.tags ? JSON.stringify(validatedData.tags) : null,
         visitDate: validatedData.visitDate || null,
         isPublic: validatedData.isPublic,
-        moderationStatus: 'approved', // Auto-approve for now
+        moderationStatus: shouldAutoApprove(validatedData.content, validatedData.title) ? 'approved' : 'pending',
       })
       .returning()
       .get();
 
-    // Update cafe aggregated rating asynchronously with error logging
-    updateCafeRating(env, cafeId).catch(error => {
-      console.error(`Failed to update cafe rating for cafe ${cafeId} after review creation:`, error);
-      // TODO: Consider queueing for retry or alerting on repeated failures
+    // Update cafe aggregated rating asynchronously with retry logic
+    updateCafeRatingWithRetry(env, cafeId, 'review creation').catch(error => {
+      console.error(`Failed to update cafe rating for cafe ${cafeId} after review creation (all retries exhausted):`, error);
+      // In production: consider alerting or queueing for manual review
     });
 
     return jsonResponse({ review: newReview }, HTTP_STATUS.CREATED, request as Request, env);
@@ -285,9 +285,9 @@ export async function updateReview(request: AuthenticatedRequest, env: Env): Pro
 
     // Update cafe aggregated rating if overall rating changed
     if (validatedData.overallRating !== undefined) {
-      updateCafeRating(env, existingReview.cafeId).catch(error => {
-        console.error(`Failed to update cafe rating for cafe ${existingReview.cafeId} after review update:`, error);
-        // TODO: Consider queueing for retry or alerting on repeated failures
+      updateCafeRatingWithRetry(env, existingReview.cafeId, 'review update').catch(error => {
+        console.error(`Failed to update cafe rating for cafe ${existingReview.cafeId} after review update (all retries exhausted):`, error);
+        // In production: consider alerting or queueing for manual review
       });
     }
 
@@ -333,9 +333,9 @@ export async function deleteReview(request: AuthenticatedRequest, env: Env): Pro
     await db.delete(userReviews).where(eq(userReviews.id, reviewId));
 
     // Update cafe aggregated rating
-    updateCafeRating(env, existingReview.cafeId).catch(error => {
-      console.error(`Failed to update cafe rating for cafe ${existingReview.cafeId} after review deletion:`, error);
-      // TODO: Consider queueing for retry or alerting on repeated failures
+    updateCafeRatingWithRetry(env, existingReview.cafeId, 'review deletion').catch(error => {
+      console.error(`Failed to update cafe rating for cafe ${existingReview.cafeId} after review deletion (all retries exhausted):`, error);
+      // In production: consider alerting or queueing for manual review
     });
 
     return jsonResponse({ success: true }, HTTP_STATUS.OK, request as Request, env);
@@ -367,27 +367,36 @@ export async function markHelpful(request: AuthenticatedRequest, env: Env): Prom
       return notFoundResponse(request as Request, env);
     }
 
-    // Insert helpful vote (ignore if already exists due to unique constraint)
-    let voteAdded = false;
-    try {
-      await db.insert(reviewHelpful).values({
-        reviewId: reviewId,
-        userId: request.user.userId,
-      });
-      voteAdded = true;
-    } catch (error: any) {
-      // Ignore duplicate key errors (user already marked as helpful)
-      if (!error.message?.includes('UNIQUE constraint failed')) {
-        throw error;
-      }
-    }
+    // Check if vote already exists before inserting
+    const existingVote = await db
+      .select()
+      .from(reviewHelpful)
+      .where(and(eq(reviewHelpful.reviewId, reviewId), eq(reviewHelpful.userId, request.user.userId)))
+      .get();
 
-    // Atomically increment helpful count only if vote was added
-    if (voteAdded) {
-      await db
-        .update(userReviews)
-        .set({ helpfulCount: sql`${userReviews.helpfulCount} + 1` })
-        .where(eq(userReviews.id, reviewId));
+    // Only proceed if vote doesn't exist
+    if (!existingVote) {
+      try {
+        // Insert vote and increment count atomically in a transaction-like pattern
+        await db.insert(reviewHelpful).values({
+          reviewId: reviewId,
+          userId: request.user.userId,
+        });
+
+        // Increment helpful count only after successful insert
+        await db
+          .update(userReviews)
+          .set({ helpfulCount: sql`${userReviews.helpfulCount} + 1` })
+          .where(eq(userReviews.id, reviewId));
+      } catch (error: any) {
+        // Handle race condition - if unique constraint fails, another user voted
+        if (error.message?.includes('UNIQUE constraint failed') || error.message?.includes('SQLITE_CONSTRAINT')) {
+          // Vote already exists due to race condition - this is acceptable
+          console.log(`Duplicate helpful vote prevented for review ${reviewId} by user ${request.user.userId}`);
+        } else {
+          throw error; // Re-throw unexpected errors
+        }
+      }
     }
 
     return jsonResponse({ success: true }, HTTP_STATUS.OK, request as Request, env);
@@ -554,34 +563,98 @@ export async function getUserReviews(request: IRequest, env: Env): Promise<Respo
  * Called asynchronously after review changes
  */
 async function updateCafeRating(env: Env, cafeId: number): Promise<void> {
-  try {
-    const db = getDb(env.DB);
+  const db = getDb(env.DB);
 
-    // Calculate average rating and count
-    const result = await db
-      .select({
-        avg: sql<number>`AVG(${userReviews.overallRating})`,
-        count: sql<number>`COUNT(*)`,
-      })
-      .from(userReviews)
-      .where(
-        and(
-          eq(userReviews.cafeId, cafeId),
-          eq(userReviews.moderationStatus, 'approved')
-        )
+  // Calculate average rating and count
+  const result = await db
+    .select({
+      avg: sql<number>`AVG(${userReviews.overallRating})`,
+      count: sql<number>`COUNT(*)`,
+    })
+    .from(userReviews)
+    .where(
+      and(
+        eq(userReviews.cafeId, cafeId),
+        eq(userReviews.moderationStatus, 'approved')
       )
-      .get();
+    )
+    .get();
 
-    // Update cafe with aggregated ratings
-    await db
-      .update(cafes)
-      .set({
-        userRatingAvg: result?.avg || null,
-        userRatingCount: result?.count || 0,
-      })
-      .where(eq(cafes.id, cafeId));
-  } catch (error) {
-    console.error('Error updating cafe rating:', error);
-    // Don't throw - this is async background operation
+  // Update cafe with aggregated ratings
+  await db
+    .update(cafes)
+    .set({
+      userRatingAvg: result?.avg || null,
+      userRatingCount: result?.count || 0,
+    })
+    .where(eq(cafes.id, cafeId));
+}
+
+/**
+ * Helper function to update cafe rating with retry logic
+ * Implements exponential backoff for reliability
+ */
+async function updateCafeRatingWithRetry(
+  env: Env, 
+  cafeId: number, 
+  operation: string, 
+  maxRetries: number = 3
+): Promise<void> {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      await updateCafeRating(env, cafeId);
+      return; // Success - exit retry loop
+    } catch (error) {
+      console.error(`Failed to update cafe rating for cafe ${cafeId} during ${operation} (attempt ${attempt}/${maxRetries}):`, error);
+      
+      if (attempt === maxRetries) {
+        throw error; // Re-throw on final attempt
+      }
+      
+      // Exponential backoff: wait 2^attempt seconds
+      const delay = Math.pow(2, attempt) * 1000;
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
   }
+}
+
+/**
+ * Content moderation helper - determines if review should be auto-approved
+ * Implements basic content filtering for security
+ */
+function shouldAutoApprove(content: string, title?: string | null): boolean {
+  // Combine all text to check
+  const textToCheck = `${title || ''} ${content}`.toLowerCase();
+  
+  // Basic spam/inappropriate content detection
+  const suspiciousPatterns = [
+    // Spam indicators
+    /\b(free\s*(money|cash|gift)|win\s*(money|cash|prize)|click\s*here)\b/,
+    /\b(viagra|cialis|casino|gambling|poker)\b/,
+    /\bhttps?:\/\/[^\s]+/gi, // URLs (might be spam)
+    
+    // Inappropriate content
+    /\b(fuck|shit|damn|hell|asshole|bitch)\b/,
+    /\b(hate|racist|sexist|homophobic)\b/,
+    
+    // Fake review indicators
+    /\b(best\s*(cafe|restaurant|place)\s*(ever|in\s*(the\s*)?world))\b/,
+    /\b(amazing|incredible|perfect|flawless)\s*(experience|service|everything)\b/,
+    /\b(worst\s*(cafe|restaurant|place)\s*(ever|in\s*(the\s*)?world))\b/,
+  ];
+
+  // Check for suspicious patterns
+  const hasSuspiciousContent = suspiciousPatterns.some(pattern => pattern.test(textToCheck));
+  
+  // Check for excessive caps (possible spam)
+  const capsPercentage = (textToCheck.match(/[A-Z]/g) || []).length / textToCheck.length;
+  const excessiveCaps = capsPercentage > 0.5 && textToCheck.length > 20;
+  
+  // Check for repetitive content
+  const words = textToCheck.split(/\s+/);
+  const uniqueWords = new Set(words);
+  const repetitive = words.length > 10 && uniqueWords.size / words.length < 0.5;
+  
+  // Auto-approve if content passes all checks
+  return !hasSuspiciousContent && !excessiveCaps && !repetitive;
 }
