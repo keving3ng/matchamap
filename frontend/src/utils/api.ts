@@ -5,7 +5,7 @@
 
 import { useAuthStore } from '../stores/authStore'
 import { useSessionExpiry } from '../hooks/useSessionExpiry'
-import type { Cafe, Drink, FeedItem, Event, PublicUserProfile, UpdateProfileRequest, UserProfile, CityWithCount, User, UserFavorite, FavoritesResponse, AddFavoriteRequest, UpdateFavoriteNotesRequest } from '../../../shared/types'
+import type { Cafe, Drink, FeedItem, Event, PublicUserProfile, UpdateProfileRequest, UserProfile, CityWithCount, User, UserFavorite, FavoritesResponse, AddFavoriteRequest, UpdateFavoriteNotesRequest, UserReview, ReviewPhoto } from '../../../shared/types'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -688,6 +688,142 @@ export const favoritesAPI = {
 }
 
 /**
+ * Reviews API endpoints (Phase 2B)
+ */
+export interface CreateReviewRequest {
+  overallRating: number
+  matchaQualityRating?: number | null
+  ambianceRating?: number | null
+  serviceRating?: number | null
+  valueRating?: number | null
+  title?: string
+  content: string
+  tags?: string[]
+  visitDate?: string
+  isPublic: boolean
+  photoIds?: number[]
+}
+
+export const reviewsAPI = {
+  /**
+   * Create a new review for a cafe
+   */
+  async create(cafeId: number, data: CreateReviewRequest): Promise<{ review: UserReview }> {
+    return fetchAPI(`/cafes/${cafeId}/reviews`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  },
+
+  /**
+   * Get reviews for a cafe
+   */
+  async getByCafe(cafeId: number, filters?: {
+    limit?: number
+    offset?: number
+    sortBy?: 'newest' | 'oldest' | 'rating_high' | 'rating_low'
+  }): Promise<{ reviews: UserReview[]; total: number; hasMore: boolean }> {
+    const params = new URLSearchParams()
+    if (filters?.limit) params.append('limit', filters.limit.toString())
+    if (filters?.offset) params.append('offset', filters.offset.toString())
+    if (filters?.sortBy) params.append('sortBy', filters.sortBy)
+
+    const query = params.toString() ? `?${params.toString()}` : ''
+    return fetchAPI(`/cafes/${cafeId}/reviews${query}`)
+  },
+
+  /**
+   * Get my reviews (authenticated)
+   */
+  async getMyReviews(filters?: {
+    limit?: number
+    offset?: number
+  }): Promise<{ reviews: UserReview[]; total: number; hasMore: boolean }> {
+    const params = new URLSearchParams()
+    if (filters?.limit) params.append('limit', filters.limit.toString())
+    if (filters?.offset) params.append('offset', filters.offset.toString())
+
+    const query = params.toString() ? `?${params.toString()}` : ''
+    return fetchAPI(`/users/me/reviews${query}`)
+  },
+
+  /**
+   * Update my review
+   */
+  async update(reviewId: number, data: Partial<CreateReviewRequest>): Promise<{ review: UserReview }> {
+    return fetchAPI(`/reviews/${reviewId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+  },
+
+  /**
+   * Delete my review
+   */
+  async delete(reviewId: number): Promise<{ success: boolean; message: string }> {
+    return fetchAPI(`/reviews/${reviewId}`, {
+      method: 'DELETE',
+    })
+  },
+}
+
+/**
+ * Photos API endpoints (Phase 2C)
+ */
+export const photosAPI = {
+  /**
+   * Upload a photo with associated metadata
+   */
+  async upload(formData: FormData): Promise<{ photo: ReviewPhoto }> {
+    // Don't use fetchAPI for file uploads - need special handling
+    const response = await fetch(`${API_BASE_URL}/api/photos/upload`, {
+      method: 'POST',
+      credentials: 'include', // Include auth cookies
+      body: formData, // Don't set Content-Type for FormData
+    })
+
+    if (!response.ok) {
+      // Handle authentication errors
+      if (response.status === 401 || response.status === 403) {
+        useAuthStore.getState().clearAuth()
+        const currentPath = window.location.pathname + window.location.search
+        useSessionExpiry.getState().showSessionExpiredDialog(currentPath)
+        throw new Error('Authentication required')
+      }
+
+      const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+      throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`)
+    }
+
+    return response.json()
+  },
+
+  /**
+   * Get photos for a cafe
+   */
+  async getByCafe(cafeId: number, filters?: {
+    limit?: number
+    offset?: number
+  }): Promise<{ photos: ReviewPhoto[]; total: number; hasMore: boolean }> {
+    const params = new URLSearchParams()
+    if (filters?.limit) params.append('limit', filters.limit.toString())
+    if (filters?.offset) params.append('offset', filters.offset.toString())
+
+    const query = params.toString() ? `?${params.toString()}` : ''
+    return fetchAPI(`/cafes/${cafeId}/photos${query}`)
+  },
+
+  /**
+   * Delete my photo
+   */
+  async delete(photoId: number): Promise<{ success: boolean; message: string }> {
+    return fetchAPI(`/photos/${photoId}`, {
+      method: 'DELETE',
+    })
+  },
+}
+
+/**
  * Export all APIs
  */
 export const api = {
@@ -704,6 +840,8 @@ export const api = {
   userAdmin: userAdminAPI,
   stats: statsAPI,
   favorites: favoritesAPI,
+  reviews: reviewsAPI,
+  photos: photosAPI,
 }
 
 export default api
