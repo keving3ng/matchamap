@@ -19,19 +19,28 @@ export function requireAuth() {
   return async (request: AuthenticatedRequest, env: Env): Promise<Response | void> => {
     // Extract token from httpOnly cookie instead of Authorization header
     const cookieHeader = request.headers.get('Cookie');
-    
+
+    console.log('🔐 [AUTH] Cookie header received:', cookieHeader ? 'YES' : 'NO');
+    console.log('🔐 [AUTH] Full cookie header:', cookieHeader);
+
     if (!cookieHeader) {
+      console.log('❌ [AUTH] No cookie header found');
       return errorResponse('Unauthorized: Missing access token cookie', HTTP_STATUS.UNAUTHORIZED, request as Request, env);
     }
 
     const cookies = cookieHeader.split(';').map(c => c.trim());
     const tokenCookie = cookies.find(c => c.startsWith('access_token='));
-    
+
+    console.log('🔐 [AUTH] All cookies:', cookies);
+    console.log('🔐 [AUTH] Access token cookie found:', tokenCookie ? 'YES' : 'NO');
+
     if (!tokenCookie) {
+      console.log('❌ [AUTH] No access_token cookie in header');
       return errorResponse('Unauthorized: Missing access token cookie', HTTP_STATUS.UNAUTHORIZED, request as Request, env);
     }
 
     const token = tokenCookie.split('=')[1];
+    console.log('🔐 [AUTH] Token extracted:', token ? token.substring(0, 20) + '...' : 'EMPTY');
     
     if (!token) {
       return errorResponse('Unauthorized: Invalid access token cookie', HTTP_STATUS.UNAUTHORIZED, request as Request, env);

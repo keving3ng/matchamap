@@ -107,17 +107,19 @@ cd workers && npm run dev
 
 ### Automatic Deployment
 
-```bash
-# Any push to main triggers deployment
-git add .
-git commit -m "feat: add new feature"
-git push origin main
+**Using GitHub MCP Server (Recommended):**
 
-# Cloudflare Pages automatically:
-# 1. Detects push
-# 2. Runs npm run build
-# 3. Deploys to edge CDN (~1 min)
-```
+Use the GitHub MCP server tools to push changes:
+1. Use `mcp__github__create_or_update_file` to update individual files
+2. Use `mcp__github__push_files` to push multiple files in a single commit
+3. Cloudflare Pages automatically detects the push and deploys
+
+**Example commit message format:** `feat: add new feature`
+
+Cloudflare Pages automatically:
+1. Detects push to main
+2. Runs npm run build
+3. Deploys to edge CDN (~1 min)
 
 ### Manual Deployment
 
@@ -521,26 +523,23 @@ D1 Free → Paid:
 
 ### Frontend Rollback
 
-```bash
-# Via Cloudflare Pages Dashboard
+**Via Cloudflare Pages Dashboard:**
 Pages → Deployments → [previous deployment] → Rollback
 
-# Or redeploy previous commit
-git revert HEAD
-git push origin main
-```
+**Or use GitHub MCP Server to revert:**
+1. Use `mcp__github__list_commits` to find the commit to revert
+2. Use `mcp__github__create_or_update_file` to revert changes
+3. Use `mcp__github__push_files` to push the reverted changes to main
 
 ### Workers Rollback
 
-```bash
-# Deploy previous version
-git checkout <previous-commit>
-cd workers && npx wrangler deploy
-git checkout main
+**Deploy previous version using GitHub MCP Server:**
+1. Use `mcp__github__list_commits` to find the previous working commit
+2. Use `mcp__github__get_file_contents` to retrieve previous worker files
+3. Deploy the previous version: `cd workers && npx wrangler deploy`
 
-# Or use Cloudflare Dashboard
+**Or use Cloudflare Dashboard:**
 Workers → Deployments → Rollback
-```
 
 ### Database Rollback
 
@@ -636,13 +635,12 @@ wrangler d1 migrations apply matchamap-db --remote
 
 #### 4. Deploy Frontend to Production
 
-```bash
-# Frontend auto-deploys on push to main via Cloudflare Pages
-git add .
-git commit -m "Your commit message"
-git push origin main
+**Using GitHub MCP Server (Recommended):**
+- Use `mcp__github__push_files` to push changes to main branch
+- Cloudflare Pages will automatically detect and deploy
 
-# Manual build (if needed):
+**Manual build (if needed):**
+```bash
 cd frontend
 npm run build
 ```
@@ -841,7 +839,7 @@ curl -H "Origin: https://matchamap.pages.dev" \
 2. ✅ Deploy backend: `wrangler deploy --env production`
 3. ✅ Run migrations: `npm run db:migrate:prod`
 4. ✅ Test health: `curl https://matchamap-api-production.kevingeng33.workers.dev/api/health`
-5. ✅ Deploy frontend: `git push origin main`
+5. ✅ Deploy frontend: Use `mcp__github__push_files` to push to main branch
 6. ✅ Verify app: Visit https://matchamap.pages.dev
 
 ---

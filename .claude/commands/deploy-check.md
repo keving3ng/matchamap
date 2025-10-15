@@ -108,11 +108,11 @@ If BLOCKED, list issues that must be fixed before deployment.
 ## Quick Deploy Commands
 
 **Frontend (auto-deploys on push):**
-```bash
-git add .
-git commit -m "type(scope): description"
-git push origin main
-```
+- Use GitHub MCP server tools to commit and push changes
+- Example workflow:
+  1. Stage files using `mcp__github__create_or_update_file` or local git commands for staging
+  2. Create commit with message: "type(scope): description"
+  3. Push to main branch (triggers Cloudflare Pages deployment)
 
 **Backend (manual deploy):**
 ```bash
@@ -121,8 +121,10 @@ npm run deploy
 ```
 
 **Rollback if needed:**
-- Frontend: Cloudflare Pages Dashboard → Rollback
-- Backend: `git checkout <previous-commit> && cd workers && npm run deploy`
+- Frontend: Use `mcp__github__list_commits` to find previous commit, then use Cloudflare Pages Dashboard → Rollback
+- Backend: Use GitHub MCP server to checkout previous commit, then `cd workers && npm run deploy`
+
+**Note:** For git operations, prefer using the GitHub MCP server tools (`mcp__github__*`) over direct `git` or `gh` CLI commands.
 
 ---
 

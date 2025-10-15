@@ -85,11 +85,12 @@ After making the updates:
 
 ### 4. Deploy
 
-```bash
-git add shared/types/index.ts frontend/src/stores/cityStore.ts
-git commit -m "feat(cities): add {{city_name}}"
-git push
-```
+**Using GitHub MCP Server:**
+
+Use `mcp__github__push_files` to push the changes:
+- Files to push: `shared/types/index.ts`, `frontend/src/stores/cityStore.ts`
+- Commit message: `feat(cities): add {{city_name}}`
+- Branch: `main`
 
 Cloudflare Pages will auto-deploy in 1-2 minutes.
 

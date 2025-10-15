@@ -582,17 +582,16 @@ _Social networking features are not fully scoped. This phase will be defined onc
 
 ### Backups
 
-```bash
-# Daily GitHub Action (or cron job):
-npm run db:export > backups/cafes-$(date +%Y-%m-%d).json
-git add backups/
-git commit -m "Daily backup"
-git push
+**Using GitHub MCP Server for automated backups:**
 
-# If disaster strikes:
-git checkout backups/cafes-2025-09-30.json
-npm run db:import backups/cafes-2025-09-30.json
-```
+Daily GitHub Action (or cron job):
+1. Export database: `npm run db:export > backups/cafes-$(date +%Y-%m-%d).json`
+2. Use `mcp__github__push_files` to commit and push backup file
+   - Commit message: `"Daily backup"`
+
+**If disaster strikes:**
+1. Use `mcp__github__get_file_contents` to retrieve previous backup
+2. Import: `npm run db:import backups/cafes-2025-09-30.json`
 
 **That's it.** You'll notice if backups break because the GitHub Action will fail.
 
@@ -618,15 +617,15 @@ npm run db:import backups/cafes-2025-09-30.json
 
 ### Deployment
 
-```bash
-# Your actual workflow:
-git commit -am "Add feature"
-git push origin main
+**Using GitHub MCP Server (Recommended):**
 
-# Cloudflare auto-deploys via GitHub integration
-# Check site in browser
-# If broken: wrangler rollback
-```
+Your actual workflow:
+1. Use `mcp__github__push_files` to commit and push changes
+   - Commit message format: `"Add feature"`
+   - Branch: `main`
+2. Cloudflare auto-deploys via GitHub integration
+3. Check site in browser
+4. If broken: use `wrangler rollback` or Cloudflare Dashboard
 
 **Pre-deploy checklist:**
 

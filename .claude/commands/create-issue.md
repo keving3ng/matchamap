@@ -140,12 +140,17 @@ Check if this should be part of the "V1 Launch" milestone or left unassigned.
 
 ## Step 6: Create the Issue
 
-Once you have all the information, create the issue using the GitHub MCP server.
+Once you have all the information, create the issue using the GitHub MCP server:
 
-First, get the repository information:
-```bash
-git remote get-url origin
-```
+Use the `mcp__github__create_issue` tool with the following parameters:
+- `owner`: Repository owner (username or organization)
+- `repo`: Repository name
+- `title`: Clear, actionable title (imperative mood)
+- `body`: Full issue body from template above
+- `labels`: Array of label strings (e.g., ["bug", "frontend", "high-priority"])
+- `milestone`: Milestone number (optional - use `mcp__github__list_milestones` to find milestone numbers first)
+
+**Note:** To find the milestone number for "V1 Launch", first use the GitHub MCP server to list milestones, then use that number in the `milestone` parameter.
 
 Parse the owner and repo from the URL (e.g., `keving3ng/matchamap`).
 
