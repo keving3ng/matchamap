@@ -30,11 +30,44 @@ jobs:
       - name: Run type checking
         run: npm run typecheck
 
-      - name: Run tests
+      - name: Run linter
+        run: npm run lint:ci
+        continue-on-error: true
+
+      - name: Run security audit
+        run: npm audit --audit-level=high --production
+        continue-on-error: true
+
+      - name: Run frontend tests
         run: npm test -- --run --reporter=verbose
+
+      - name: Run backend tests
+        run: npm run test:ci --workspace=backend
+        continue-on-error: true
+
+      - name: Generate test coverage
+        run: npm run test:coverage --workspace=frontend
+        continue-on-error: true
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          files: ./frontend/coverage/coverage-final.json
+          flags: frontend
+          token: ${{ secrets.CODECOV_TOKEN }}
+        continue-on-error: true
 
       - name: Run build
         run: npm run build
+
+      - name: Check bundle size
+        run: |
+          echo "📦 Frontend bundle sizes:"
+          du -sh frontend/dist/* | sort -h
+          echo ""
+          echo "📊 Total frontend bundle size:"
+          du -sh frontend/dist
 
       - name: Test Summary
         if: always()

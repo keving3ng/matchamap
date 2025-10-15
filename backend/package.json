@@ -23,6 +23,7 @@
     "create-admin": "tsx scripts/create-admin.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest",
+    "test:ci": "vitest run",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage"
   },

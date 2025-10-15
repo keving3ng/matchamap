@@ -3,7 +3,7 @@ module.exports = {
   env: { browser: true, es2020: true },
   extends: [
     'eslint:recommended',
-    '@typescript-eslint/recommended',
+    'plugin:@typescript-eslint/recommended',
     'plugin:react/recommended',
     'plugin:react/jsx-runtime',
     'plugin:react-hooks/recommended',
@@ -29,6 +29,9 @@ module.exports = {
         unnamedComponents: 'arrow-function',
       },
     ],
+    'react/no-unescaped-entities': 'warn', // Allow apostrophes in JSX text
+    'react-hooks/rules-of-hooks': 'error',
+    'react-hooks/exhaustive-deps': 'warn',
     'prefer-const': 'error',
     'no-var': 'error',
   },

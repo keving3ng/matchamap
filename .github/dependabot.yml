@@ -1,0 +1,65 @@
+version: 2
+updates:
+  # Enable version updates for npm (frontend)
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    groups:
+      # Group React ecosystem updates together
+      react:
+        patterns:
+          - "react*"
+          - "@types/react*"
+      # Group testing libraries together
+      testing:
+        patterns:
+          - "@testing-library/*"
+          - "vitest"
+          - "@vitest/*"
+          - "jsdom"
+      # Group dev dependencies together
+      development-dependencies:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Enable version updates for npm (backend)
+  - package-ecosystem: "npm"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    groups:
+      # Group Cloudflare Workers dependencies together
+      cloudflare:
+        patterns:
+          - "wrangler"
+          - "@cloudflare/*"
+      # Group database dependencies together
+      database:
+        patterns:
+          - "drizzle*"
+      # Group testing libraries together
+      testing:
+        patterns:
+          - "vitest"
+          - "@vitest/*"
+      # Group dev dependencies together
+      development-dependencies:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 3
