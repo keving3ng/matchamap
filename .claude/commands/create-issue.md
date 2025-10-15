@@ -140,18 +140,25 @@ Check if this should be part of the "V1 Launch" milestone or left unassigned.
 
 ## Step 6: Create the Issue
 
-Once you have all the information, create the issue using the GitHub CLI:
+Once you have all the information, create the issue using the GitHub MCP server.
 
+First, get the repository information:
 ```bash
-gh issue create \
-  --title "Clear, actionable title (imperative mood)" \
-  --body "$(cat <<'EOF'
-[Full issue body from template above]
-EOF
-)" \
-  --label "label1,label2,label3" \
-  --milestone "V1 Launch"  # Optional, omit if not applicable
+git remote get-url origin
 ```
+
+Parse the owner and repo from the URL (e.g., `keving3ng/matchamap`).
+
+Then create the issue using `mcp__github__create_issue`:
+- `owner`: Repository owner (e.g., "keving3ng")
+- `repo`: Repository name (e.g., "matchamap")
+- `title`: Clear, actionable title (imperative mood, under 60 chars if possible)
+- `body`: Full issue body from template above
+- `labels`: Array of labels like `["bug", "frontend", "high-priority"]`
+
+**Note on milestones:** The MCP `create_issue` tool supports a `milestone` parameter (number), but you need to know the milestone number. If you want to assign to "V1 Launch" milestone:
+1. First use `mcp__github__search_issues` with query `"repo:owner/repo milestone:\"V1 Launch\""` to find an existing issue with that milestone
+2. Or skip milestone assignment and let user add it manually via GitHub UI
 
 ## Step 7: Confirm and Provide Context
 
@@ -189,6 +196,20 @@ After creating the issue:
 - Include all relevant scope labels (can have multiple)
 - Add priority label if high priority
 - Add specialized labels when relevant (security, performance, etc.)
+
+## MCP Tools Reference
+
+**Issue Operations:**
+- `mcp__github__create_issue` - Create new issue with title, body, labels, assignees
+- `mcp__github__list_issues` - List issues with filters (state, labels, assignees, etc.)
+- `mcp__github__search_issues` - Search issues across repositories with advanced queries
+- `mcp__github__get_issue` - Get details of a specific issue by number
+- `mcp__github__update_issue` - Update existing issue (title, body, state, labels, etc.)
+- `mcp__github__add_issue_comment` - Add comment to an issue
+
+**Repository Info:**
+- Use `git remote get-url origin` to get repo URL
+- Parse owner/repo from URL (e.g., `git@github.com:owner/repo.git` → `owner/repo`)
 
 ---
 
