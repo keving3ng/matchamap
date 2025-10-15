@@ -9,10 +9,11 @@ on:
       - main
 
 jobs:
-  test:
-    name: Test & Build
+  # Static analysis jobs that can run in parallel
+  static-analysis:
+    name: Static Analysis
     runs-on: self-hosted
-    timeout-minutes: 15
+    timeout-minutes: 5
 
     steps:
       - name: Checkout code
@@ -38,16 +39,27 @@ jobs:
         run: npm audit --audit-level=high --production
         continue-on-error: true
 
-      - name: Run frontend tests
-        run: npm test -- --run --reporter=verbose
+  # Frontend tests with coverage
+  frontend-tests:
+    name: Frontend Tests
+    runs-on: self-hosted
+    timeout-minutes: 10
 
-      - name: Run backend tests
-        run: npm run test:ci --workspace=backend
-        continue-on-error: true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Generate test coverage
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Run frontend tests with coverage
         run: npm run test:coverage --workspace=frontend
-        continue-on-error: true
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
@@ -57,6 +69,49 @@ jobs:
           flags: frontend
           token: ${{ secrets.CODECOV_TOKEN }}
         continue-on-error: true
+
+  # Backend tests
+  backend-tests:
+    name: Backend Tests
+    runs-on: self-hosted
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Run backend tests
+        run: npm run test:ci --workspace=backend
+        continue-on-error: true
+
+  # Build job (depends on static-analysis passing)
+  build:
+    name: Build
+    runs-on: self-hosted
+    needs: [static-analysis]
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
 
       - name: Run build
         run: npm run build
@@ -69,12 +124,26 @@ jobs:
           echo "📊 Total frontend bundle size:"
           du -sh frontend/dist
 
-      - name: Test Summary
-        if: always()
+  # Summary job to ensure all required jobs passed
+  ci-success:
+    name: CI Success
+    runs-on: self-hosted
+    needs: [static-analysis, frontend-tests, build]
+    if: always()
+
+    steps:
+      - name: Check all jobs status
         run: |
-          if [ $? -eq 0 ]; then
-            echo "✅ All checks passed!"
-          else
-            echo "❌ Some checks failed. Please review the logs above."
+          if [ "${{ needs.static-analysis.result }}" != "success" ]; then
+            echo "❌ Static analysis failed"
             exit 1
           fi
+          if [ "${{ needs.frontend-tests.result }}" != "success" ]; then
+            echo "❌ Frontend tests failed"
+            exit 1
+          fi
+          if [ "${{ needs.build.result }}" != "success" ]; then
+            echo "❌ Build failed"
+            exit 1
+          fi
+          echo "✅ All required checks passed!"
