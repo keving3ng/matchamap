@@ -782,3 +782,4 @@ _React: 18.3+ | Zustand | Vite | TypeScript: Strict Mode_
 _UI Component Library: Available in `frontend/src/components/ui/`_
 _Test Suite: 762/920 passing (82.8%) - See docs/TESTING.md_
 _GitHub Operations: GitHub MCP Server (mcp__github__*) - See Git Workflow section_
+- The owner of this repo's username is keving3ng (NOT kevingeng)
