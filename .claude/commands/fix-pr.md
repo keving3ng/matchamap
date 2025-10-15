@@ -28,7 +28,7 @@ First, determine the repository owner and name from the git remote:
 git remote get-url origin
 ```
 
-Parse the owner/repo from the URL (e.g., `kevingeng/matchamap`).
+Parse the owner/repo from the URL (e.g., `keving3ng/matchamap`).
 
 1. Use `mcp__github__get_pull_request` to get PR details including:
 
