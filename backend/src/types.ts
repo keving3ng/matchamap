@@ -1,10 +1,12 @@
 // Cloudflare Workers environment bindings
 export interface Env {
   DB: D1Database;
+  PHOTOS_BUCKET: R2Bucket;
   ENVIRONMENT: string;
   ALLOWED_ORIGINS: string;
   GOOGLE_PLACES_API_KEY: string;
   JWT_SECRET: string;
+  PHOTOS_BASE_URL?: string; // Optional: Base URL for photo serving (e.g., https://photos.matchamap.app)
 }
 
 // API Response types

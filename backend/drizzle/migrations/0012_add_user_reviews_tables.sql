@@ -37,23 +37,23 @@ CREATE TABLE `user_reviews` (
 -- Review photos (links to R2 storage)
 CREATE TABLE `review_photos` (
 	`id` integer PRIMARY KEY AUTOINCREMENT,
-	`review_id` integer NOT NULL,
 	`user_id` integer NOT NULL,
 	`cafe_id` integer NOT NULL,
-	`image_key` text NOT NULL,
+	`image_key` text NOT NULL UNIQUE,
 	`image_url` text NOT NULL,
+	`thumbnail_key` text NOT NULL,
 	`thumbnail_url` text,
 	`caption` text,
-	`drink_type` text,
-	`width` integer CHECK(`width` IS NULL OR (`width` > 0 AND `width` <= 4096)),
-	`height` integer CHECK(`height` IS NULL OR (`height` > 0 AND `height` <= 4096)),
-	`file_size` integer CHECK(`file_size` IS NULL OR (`file_size` > 0 AND `file_size` <= 10485760)),
+	`width` integer,
+	`height` integer,
+	`file_size` integer,
+	`mime_type` text NOT NULL,
 	`moderation_status` text DEFAULT 'pending' CHECK(`moderation_status` IN ('pending', 'approved', 'rejected')),
 	`moderated_by` integer,
 	`moderated_at` text,
+	`moderation_notes` text,
 	`created_at` text DEFAULT (datetime('now')),
 	`updated_at` text DEFAULT (datetime('now')),
-	FOREIGN KEY (`review_id`) REFERENCES `user_reviews`(`id`) ON DELETE CASCADE,
 	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
 	FOREIGN KEY (`cafe_id`) REFERENCES `cafes`(`id`) ON DELETE CASCADE,
 	FOREIGN KEY (`moderated_by`) REFERENCES `users`(`id`)
@@ -81,9 +81,11 @@ CREATE INDEX `idx_user_reviews_status` ON `user_reviews` (`moderation_status`);-
 CREATE INDEX `idx_user_reviews_cafe_rating` ON `user_reviews` (`cafe_id`, `overall_rating` DESC);--> statement-breakpoint
 CREATE INDEX `idx_user_reviews_status_created` ON `user_reviews` (`moderation_status`, `created_at` DESC);--> statement-breakpoint
 
-CREATE INDEX `idx_review_photos_review` ON `review_photos` (`review_id`);--> statement-breakpoint
+CREATE INDEX `idx_review_photos_user` ON `review_photos` (`user_id`);--> statement-breakpoint
 CREATE INDEX `idx_review_photos_cafe` ON `review_photos` (`cafe_id`);--> statement-breakpoint
+CREATE INDEX `idx_review_photos_image_key` ON `review_photos` (`image_key`);--> statement-breakpoint
 CREATE INDEX `idx_review_photos_status` ON `review_photos` (`moderation_status`);--> statement-breakpoint
+CREATE INDEX `idx_review_photos_created_at` ON `review_photos` (`created_at`);--> statement-breakpoint
 
 CREATE INDEX `idx_review_helpful_review` ON `review_helpful` (`review_id`);--> statement-breakpoint
 CREATE INDEX `idx_review_helpful_user` ON `review_helpful` (`user_id`);

@@ -14,6 +14,12 @@ database_name = "matchamap-db"
 database_id = "69667043-3d25-4fe2-9bac-1a8d42a7c25c"
 migrations_dir = "drizzle/migrations"
 
+# R2 bucket for photo storage
+[[r2_buckets]]
+binding = "PHOTOS_BUCKET"
+bucket_name = "matchamap-photos"
+preview_bucket_name = "matchamap-photos-dev"
+
 # Production environment variables (default)
 [vars]
 ENVIRONMENT = "production"
@@ -47,3 +53,9 @@ vars = { ENVIRONMENT = "development", ALLOWED_ORIGINS = "http://localhost:3000" 
 binding = "DB"
 database_name = "matchamap-db"
 database_id = "69667043-3d25-4fe2-9bac-1a8d42a7c25c"
+
+# R2 bucket for dev environment
+[[env.dev.r2_buckets]]
+binding = "PHOTOS_BUCKET"
+bucket_name = "matchamap-photos-dev"
+preview_bucket_name = "matchamap-photos-dev"
