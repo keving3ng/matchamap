@@ -1,0 +1,200 @@
+name: Auto Merge
+
+on:
+  # Trigger when PR is labeled
+  pull_request:
+    types: [labeled]
+
+  # Trigger when checks complete
+  check_suite:
+    types: [completed]
+
+  # Trigger when PR is approved
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  auto-merge:
+    name: Auto Merge PR
+    runs-on: ubuntu-latest
+
+    # Only run on PRs with auto-merge label
+    if: |
+      github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'auto-merge') ||
+      github.event_name == 'pull_request_review' && contains(github.event.pull_request.labels.*.name, 'auto-merge') ||
+      github.event_name == 'check_suite' && github.event.check_suite.conclusion == 'success'
+
+    steps:
+      - name: Get PR details
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Find the PR associated with this event
+            let pr;
+
+            if (context.eventName === 'pull_request' || context.eventName === 'pull_request_review') {
+              pr = context.payload.pull_request;
+            } else if (context.eventName === 'check_suite') {
+              // Find PRs associated with this check suite
+              const { data: prs } = await github.rest.pulls.list({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'open',
+                head: `${context.repo.owner}:${context.payload.check_suite.head_branch}`
+              });
+
+              if (prs.length === 0) {
+                core.info('No open PRs found for this check suite');
+                return;
+              }
+
+              pr = prs[0];
+            }
+
+            if (!pr) {
+              core.info('No PR found');
+              return;
+            }
+
+            // Check if PR has auto-merge label
+            const hasAutoMergeLabel = pr.labels.some(label => label.name === 'auto-merge');
+
+            if (!hasAutoMergeLabel) {
+              core.info(`PR #${pr.number} does not have auto-merge label`);
+              return;
+            }
+
+            core.setOutput('number', pr.number);
+            core.setOutput('sha', pr.head.sha);
+            return pr.number;
+
+      - name: Check PR approval status
+        id: approval
+        if: steps.pr.outputs.number
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = ${{ steps.pr.outputs.number }};
+
+            // Get reviews for the PR
+            const { data: reviews } = await github.rest.pulls.listReviews({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+
+            // Check if PR has at least one approval
+            const hasApproval = reviews.some(review => review.state === 'APPROVED');
+
+            if (!hasApproval) {
+              core.info(`PR #${prNumber} is not approved yet`);
+              core.setOutput('approved', 'false');
+              return false;
+            }
+
+            // Check for any pending change requests
+            const latestReviews = {};
+            for (const review of reviews) {
+              if (!latestReviews[review.user.id] || new Date(review.submitted_at) > new Date(latestReviews[review.user.id].submitted_at)) {
+                latestReviews[review.user.id] = review;
+              }
+            }
+
+            const hasChangeRequest = Object.values(latestReviews).some(review => review.state === 'CHANGES_REQUESTED');
+
+            if (hasChangeRequest) {
+              core.info(`PR #${prNumber} has pending change requests`);
+              core.setOutput('approved', 'false');
+              return false;
+            }
+
+            core.info(`PR #${prNumber} is approved and has no change requests`);
+            core.setOutput('approved', 'true');
+            return true;
+
+      - name: Check CI status
+        id: ci
+        if: steps.pr.outputs.number && steps.approval.outputs.approved == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = ${{ steps.pr.outputs.number }};
+            const sha = '${{ steps.pr.outputs.sha }}';
+
+            // Get check runs for the PR
+            const { data: checkRuns } = await github.rest.checks.listForRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: sha
+            });
+
+            // Get status checks for the PR
+            const { data: statuses } = await github.rest.repos.getCombinedStatusForRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: sha
+            });
+
+            // Required check names (based on your ci.yml workflow)
+            const requiredChecks = [
+              'Static Analysis',
+              'Frontend Tests',
+              'Build',
+              'CI Success'
+            ];
+
+            // Check if all required checks passed
+            const allChecksPassed = requiredChecks.every(checkName => {
+              const checkRun = checkRuns.check_runs.find(run => run.name === checkName);
+              return checkRun && checkRun.conclusion === 'success';
+            });
+
+            if (!allChecksPassed) {
+              core.info(`PR #${prNumber} has pending or failing CI checks`);
+              core.setOutput('passed', 'false');
+              return false;
+            }
+
+            // Also check combined status (for other integrations)
+            if (statuses.state !== 'success' && statuses.total_count > 0) {
+              core.info(`PR #${prNumber} has failing status checks`);
+              core.setOutput('passed', 'false');
+              return false;
+            }
+
+            core.info(`PR #${prNumber} has all required checks passing`);
+            core.setOutput('passed', 'true');
+            return true;
+
+      - name: Merge PR
+        if: |
+          steps.pr.outputs.number &&
+          steps.approval.outputs.approved == 'true' &&
+          steps.ci.outputs.passed == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = ${{ steps.pr.outputs.number }};
+
+            try {
+              await github.rest.pulls.merge({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+                merge_method: 'squash', // Options: 'merge', 'squash', 'rebase'
+                commit_title: `Auto-merge PR #${prNumber}`,
+              });
+
+              core.info(`✅ Successfully merged PR #${prNumber}`);
+
+              // Add a comment to the PR
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: '✅ Auto-merged after all checks passed and approval was received.'
+              });
+            } catch (error) {
+              core.setFailed(`Failed to merge PR: ${error.message}`);
+            }
