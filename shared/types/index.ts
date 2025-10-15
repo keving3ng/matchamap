@@ -394,6 +394,36 @@ export interface ReviewHelpful {
 }
 
 // ============================================================================
+// USER FAVORITES TYPES (Phase 2A - Foundation)
+// ============================================================================
+
+export interface UserFavorite {
+  id: number
+  userId: number
+  cafeId: number
+  notes?: string | null
+  sortOrder: number
+  createdAt: string
+  updatedAt: string
+  
+  // Populated by JOIN in API responses
+  cafe?: Cafe
+}
+
+export interface AddFavoriteRequest {
+  cafeId: number
+  notes?: string
+}
+
+export interface UpdateFavoriteNotesRequest {
+  notes?: string
+}
+
+export interface FavoritesResponse {
+  favorites: UserFavorite[]
+}
+
+// ============================================================================
 // ANALYTICS TYPES
 // ============================================================================
 

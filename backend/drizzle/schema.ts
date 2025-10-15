@@ -345,6 +345,28 @@ export const reviewHelpful = sqliteTable('review_helpful', {
   uniqueReviewUser: unique().on(table.reviewId, table.userId),
 }));
 
+// User favorites table (Phase 2A - Foundation)
+export const userFavorites = sqliteTable('user_favorites', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  cafeId: integer('cafe_id').notNull().references(() => cafes.id, { onDelete: 'cascade' }),
+  
+  // Optional private notes
+  notes: text('notes'),
+  
+  // Priority/ordering
+  sortOrder: integer('sort_order').default(0),
+  
+  // Timestamps
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+  userIdIdx: index('user_favorites_user_idx').on(table.userId),
+  cafeIdIdx: index('user_favorites_cafe_idx').on(table.cafeId),
+  sortOrderIdx: index('user_favorites_sort_idx').on(table.userId, table.sortOrder),
+  uniqueUserCafe: unique().on(table.userId, table.cafeId),
+}));
+
 // Type exports for use in the application
 export type Cafe = typeof cafes.$inferSelect;
 export type NewCafe = typeof cafes.$inferInsert;
@@ -372,3 +394,5 @@ export type UserReview = typeof userReviews.$inferSelect;
 export type NewUserReview = typeof userReviews.$inferInsert;
 export type ReviewHelpful = typeof reviewHelpful.$inferSelect;
 export type NewReviewHelpful = typeof reviewHelpful.$inferInsert;
+export type UserFavorite = typeof userFavorites.$inferSelect;
+export type NewUserFavorite = typeof userFavorites.$inferInsert;

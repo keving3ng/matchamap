@@ -19,6 +19,7 @@ import { listUsers, getUserStats, getUser, updateUserRole, deleteUser } from './
 import { trackCafeStat, trackFeedClick, trackEventClick, handleCheckIn } from './routes/stats';
 import { uploadPhoto, getCafePhotos, deletePhoto, getMyPhotos, getPhotosForModeration, moderatePhoto } from './routes/photos';
 import { createReview, getCafeReviews, updateReview, deleteReview, markHelpful, removeHelpful, getUserReviews } from './routes/reviews';
+import { getMyFavorites, addFavorite, removeFavorite, updateFavoriteNotes } from './routes/favorites';
 import { requireAuth, requireAdminAuth } from './middleware/auth';
 import { authRateLimit, publicRateLimit, writeRateLimit } from './middleware/rateLimit';
 import { requireHTTPS } from './middleware/httpsOnly';
@@ -93,6 +94,12 @@ router.get('/api/users/me/profile', authRateLimit(), requireAuth(), getMyProfile
 router.put('/api/users/me/profile', writeRateLimit(), requireAuth(), updateMyProfile);
 router.post('/api/users/me/avatar', writeRateLimit(), requireAuth(), uploadAvatar);
 router.get('/api/users/:username/profile', publicRateLimit(), getUserProfile);
+
+// User favorites endpoints
+router.get('/api/users/me/favorites', authRateLimit(), requireAuth(), getMyFavorites);
+router.post('/api/users/me/favorites', writeRateLimit(), requireAuth(), addFavorite);
+router.delete('/api/users/me/favorites/:cafeId', writeRateLimit(), requireAuth(), removeFavorite);
+router.put('/api/users/me/favorites/:cafeId/notes', writeRateLimit(), requireAuth(), updateFavoriteNotes);
 
 // Review endpoints
 router.post('/api/cafes/:id/reviews', writeRateLimit(), requireAuth(), createReview);
