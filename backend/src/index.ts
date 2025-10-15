@@ -96,7 +96,7 @@ router.post('/api/users/me/avatar', writeRateLimit(), requireAuth(), uploadAvata
 router.get('/api/users/:username/profile', publicRateLimit(), getUserProfile);
 
 // User favorites endpoints
-router.get('/api/users/me/favorites', publicRateLimit(), requireAuth(), getMyFavorites);
+router.get('/api/users/me/favorites', authRateLimit(), requireAuth(), getMyFavorites);
 router.post('/api/users/me/favorites', writeRateLimit(), requireAuth(), addFavorite);
 router.delete('/api/users/me/favorites/:cafeId', writeRateLimit(), requireAuth(), removeFavorite);
 router.put('/api/users/me/favorites/:cafeId/notes', writeRateLimit(), requireAuth(), updateFavoriteNotes);

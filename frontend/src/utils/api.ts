@@ -5,7 +5,7 @@
 
 import { useAuthStore } from '../stores/authStore'
 import { useSessionExpiry } from '../hooks/useSessionExpiry'
-import type { Cafe, Drink, FeedItem, Event, PublicUserProfile, UpdateProfileRequest, UserProfile, CityWithCount, User } from '../../../shared/types'
+import type { Cafe, Drink, FeedItem, Event, PublicUserProfile, UpdateProfileRequest, UserProfile, CityWithCount, User, UserFavorite, FavoritesResponse, AddFavoriteRequest, UpdateFavoriteNotesRequest } from '../../../shared/types'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -647,6 +647,47 @@ export const statsAPI = {
 }
 
 /**
+ * User Favorites API endpoints
+ */
+export const favoritesAPI = {
+  /**
+   * Get my favorites with cafe data
+   */
+  async getMyFavorites(): Promise<FavoritesResponse> {
+    return fetchAPI('/users/me/favorites')
+  },
+
+  /**
+   * Add cafe to favorites
+   */
+  async addFavorite(data: AddFavoriteRequest): Promise<{ success: boolean; favorite: UserFavorite }> {
+    return fetchAPI('/users/me/favorites', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  },
+
+  /**
+   * Remove cafe from favorites
+   */
+  async removeFavorite(cafeId: number): Promise<{ success: boolean; removed: boolean }> {
+    return fetchAPI(`/users/me/favorites/${cafeId}`, {
+      method: 'DELETE',
+    })
+  },
+
+  /**
+   * Update favorite notes
+   */
+  async updateFavoriteNotes(cafeId: number, data: UpdateFavoriteNotesRequest): Promise<{ success: boolean; favorite: UserFavorite }> {
+    return fetchAPI(`/users/me/favorites/${cafeId}/notes`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+  },
+}
+
+/**
  * Export all APIs
  */
 export const api = {
@@ -662,6 +703,7 @@ export const api = {
   profile: profileAPI,
   userAdmin: userAdminAPI,
   stats: statsAPI,
+  favorites: favoritesAPI,
 }
 
 export default api
