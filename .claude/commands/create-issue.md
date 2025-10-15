@@ -152,6 +152,19 @@ Use the `mcp__github__create_issue` tool with the following parameters:
 
 **Note:** To find the milestone number for "V1 Launch", first use the GitHub MCP server to list milestones, then use that number in the `milestone` parameter.
 
+Parse the owner and repo from the URL (e.g., `keving3ng/matchamap`).
+
+Then create the issue using `mcp__github__create_issue`:
+- `owner`: Repository owner (e.g., "keving3ng")
+- `repo`: Repository name (e.g., "matchamap")
+- `title`: Clear, actionable title (imperative mood, under 60 chars if possible)
+- `body`: Full issue body from template above
+- `labels`: Array of labels like `["bug", "frontend", "high-priority"]`
+
+**Note on milestones:** The MCP `create_issue` tool supports a `milestone` parameter (number), but you need to know the milestone number. If you want to assign to "V1 Launch" milestone:
+1. First use `mcp__github__search_issues` with query `"repo:owner/repo milestone:\"V1 Launch\""` to find an existing issue with that milestone
+2. Or skip milestone assignment and let user add it manually via GitHub UI
+
 ## Step 7: Confirm and Provide Context
 
 After creating the issue:
@@ -188,6 +201,20 @@ After creating the issue:
 - Include all relevant scope labels (can have multiple)
 - Add priority label if high priority
 - Add specialized labels when relevant (security, performance, etc.)
+
+## MCP Tools Reference
+
+**Issue Operations:**
+- `mcp__github__create_issue` - Create new issue with title, body, labels, assignees
+- `mcp__github__list_issues` - List issues with filters (state, labels, assignees, etc.)
+- `mcp__github__search_issues` - Search issues across repositories with advanced queries
+- `mcp__github__get_issue` - Get details of a specific issue by number
+- `mcp__github__update_issue` - Update existing issue (title, body, state, labels, etc.)
+- `mcp__github__add_issue_comment` - Add comment to an issue
+
+**Repository Info:**
+- Use `git remote get-url origin` to get repo URL
+- Parse owner/repo from URL (e.g., `git@github.com:owner/repo.git` → `owner/repo`)
 
 ---
 
