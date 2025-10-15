@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { MapPin, Navigation, Heart, CheckCircle, Instagram, Star, Coffee, MessageSquare, Clock, Calendar as CalendarIcon } from 'lucide-react'
+import { MapPin, Navigation, Heart, CheckCircle, Instagram, Star, Coffee, MessageSquare, Clock, Calendar as CalendarIcon, Edit3 } from 'lucide-react'
 import { useNavigate } from 'react-router'
 import { TikTokIcon } from './TikTokIcon'
 import { useAppFeatures } from '../hooks/useAppFeatures'
@@ -11,6 +11,7 @@ import { COPY } from '../constants/copy'
 import { api } from '../utils/api'
 import { trackCafeStat, trackCheckIn } from '../utils/analytics'
 import { useAuthStore } from '../stores/authStore'
+import { ReviewForm } from './reviews/ReviewForm'
 import type { DetailViewProps } from '../types'
 import type { Event } from '../../../shared/types'
 
@@ -20,6 +21,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
   const isVisited: boolean = visitedLocations.includes(cafe.id)
   const mapsUrl = getMapsUrl(cafe.address || '', cafe.link)
   const [cafeEvents, setCafeEvents] = useState<Event[]>([])
+  const [showReviewForm, setShowReviewForm] = useState(false)
   const navigate = useNavigate()
 
   const hoursData = cafe.hours ? formatHoursCompact(cafe.hours) : null
@@ -270,6 +272,31 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
           </div>
         )}
 
+        {/* User Reviews Section - Only show Write Review button if user is authenticated */}
+        {isUserAccountsEnabled && user && (
+          <div className="mt-8 animate-fade-in">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 p-2 rounded-xl shadow-md">
+                  <MessageSquare size={20} className="text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-charcoal-900">Community Reviews</h3>
+              </div>
+              <button
+                onClick={() => setShowReviewForm(true)}
+                className="bg-gradient-to-r from-matcha-600 to-matcha-500 text-white px-4 py-2 rounded-xl font-semibold hover:from-matcha-700 hover:to-matcha-600 transition-all duration-200 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 min-h-[44px]"
+              >
+                <Edit3 size={18} />
+                Write Review
+              </button>
+            </div>
+            {/* TODO: Display existing reviews here */}
+            <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-matcha-100 text-center text-gray-500">
+              No reviews yet. Be the first to review!
+            </div>
+          </div>
+        )}
+
         {/* Additional Info Sections */}
         {hoursData && hoursData.allHours.length > 0 && (
           <div className="mt-8 animate-fade-in">
@@ -421,6 +448,22 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
           </div>
         )}
       </ContentContainer>
+
+      {/* Review Form Modal */}
+      {showReviewForm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-scale-in">
+            <ReviewForm
+              cafeId={cafe.id}
+              onSuccess={() => {
+                setShowReviewForm(false)
+                // TODO: Refresh reviews list
+              }}
+              onCancel={() => setShowReviewForm(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
