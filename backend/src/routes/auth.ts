@@ -14,6 +14,7 @@ import {
 import { AuthenticatedRequest } from '../middleware/auth';
 import { safeValidate, registerSchema, loginSchema, refreshTokenSchema } from '../validators';
 import { AUTH_CONSTANTS, HTTP_STATUS, JWT_EXPIRY, JWT_EXPIRY_SECONDS } from '../constants';
+import { createAuthCookie, clearAuthCookie } from '../utils/cookies';
 
 /**
  * POST /api/auth/register
@@ -179,11 +180,11 @@ export async function login(request: IRequest, env: Env): Promise<Response> {
       env
     );
 
-    // Set httpOnly cookies with security flags
+    // Set httpOnly cookies with environment-aware security flags
     const accessMaxAge = user.role === 'admin' ? JWT_EXPIRY_SECONDS.ACCESS_TOKEN_ADMIN : JWT_EXPIRY_SECONDS.ACCESS_TOKEN;
     const refreshMaxAge = user.role === 'admin' ? JWT_EXPIRY_SECONDS.REFRESH_TOKEN_ADMIN : JWT_EXPIRY_SECONDS.REFRESH_TOKEN;
-    response.headers.append('Set-Cookie', `access_token=${accessToken}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${accessMaxAge}`);
-    response.headers.append('Set-Cookie', `refresh_token=${refreshToken}; HttpOnly; Secure; SameSite=Strict; Path=/api/auth/refresh; Max-Age=${refreshMaxAge}`);
+    response.headers.append('Set-Cookie', createAuthCookie('access_token', accessToken, { maxAge: accessMaxAge }, env));
+    response.headers.append('Set-Cookie', createAuthCookie('refresh_token', refreshToken, { maxAge: refreshMaxAge, path: '/api/auth/refresh' }, env));
 
     return response;
   } catch (error) {
@@ -240,8 +241,8 @@ export async function logout(request: IRequest, env: Env): Promise<Response> {
     );
 
     // Clear httpOnly cookies by setting them to expire immediately
-    response.headers.append('Set-Cookie', 'access_token=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0');
-    response.headers.append('Set-Cookie', 'refresh_token=; HttpOnly; Secure; SameSite=Strict; Path=/api/auth/refresh; Max-Age=0');
+    response.headers.append('Set-Cookie', clearAuthCookie('access_token', '/', env));
+    response.headers.append('Set-Cookie', clearAuthCookie('refresh_token', '/api/auth/refresh', env));
 
     return response;
   } catch (error) {
@@ -327,7 +328,7 @@ export async function refreshToken(request: IRequest, env: Env): Promise<Respons
 
     // Set new access token in httpOnly cookie
     const accessMaxAge = payload.role === 'admin' ? JWT_EXPIRY_SECONDS.ACCESS_TOKEN_ADMIN : JWT_EXPIRY_SECONDS.ACCESS_TOKEN;
-    response.headers.append('Set-Cookie', `access_token=${accessToken}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${accessMaxAge}`);
+    response.headers.append('Set-Cookie', createAuthCookie('access_token', accessToken, { maxAge: accessMaxAge }, env));
     
     return response;
   } catch (error) {
