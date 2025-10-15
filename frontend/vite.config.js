@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import yaml from '@rollup/plugin-yaml'
+import { codecovVitePlugin } from '@codecov/vite-plugin'
 import fs from 'fs'
 
 // Only load SSL certs if they exist (for local dev)
@@ -12,7 +13,16 @@ const httpsConfig = fs.existsSync('./localhost+2-key.pem') && fs.existsSync('./l
   : undefined
 
 export default defineConfig({
-  plugins: [react(), yaml()],
+  plugins: [
+    react(),
+    yaml(),
+    // Put the Codecov vite plugin after all other plugins
+    codecovVitePlugin({
+      enableBundleAnalysis: process.env.CODECOV_TOKEN !== undefined,
+      bundleName: 'matchamap-frontend',
+      uploadToken: process.env.CODECOV_TOKEN,
+    }),
+  ],
   build: {
     outDir: 'dist',
     sourcemap: true,

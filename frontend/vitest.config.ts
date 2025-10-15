@@ -15,6 +15,11 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     css: true,
+    // Output JUnit XML for Codecov test analytics
+    reporters: process.env.CI ? ['default', 'junit'] : ['default'],
+    outputFile: {
+      junit: './test-results/junit.xml',
+    },
     // Handle YAML files as assets
     server: {
       deps: {

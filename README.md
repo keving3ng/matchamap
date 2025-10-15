@@ -2,6 +2,8 @@
 
 A mobile-first, map-based guide to matcha cafes in Toronto featuring expert reviews, ratings, and location-based discovery tools.
 
+[![codecov](https://codecov.io/gh/keving3ng/matchamap/branch/main/graph/badge.svg?token=TQNXOMG9D5)](https://codecov.io/gh/keving3ng/matchamap)
+
 ## ✨ Features
 
 - **Interactive Map** - Explore cafes with location-based discovery and user geolocation
