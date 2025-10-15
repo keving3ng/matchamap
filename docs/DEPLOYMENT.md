@@ -295,22 +295,71 @@ ENVIRONMENT = "staging"
     - Automatic via Cloudflare Universal SSL
     - Active within minutes
 
-### API Domain
+### API Domain (REQUIRED for Authentication)
 
-1. **Add Route** (Workers Dashboard)
+**⚠️ CRITICAL:** Authentication cookies require the backend to be on a subdomain of your main domain (e.g., `api.matchamap.club`) to enable cookie sharing between frontend and backend.
+
+**Why?** Browsers block cross-domain cookies. If your frontend is at `matchamap.club` and backend is at `*.workers.dev`, cookies set by the backend cannot be read by the frontend. This causes authentication to fail on every navigation.
+
+**Setup Steps:**
+
+1. **Add Custom Domain to Worker** (Workers Dashboard)
 
     ```
-    Workers → matchamap-api → Triggers
-    Add Route: api.matchamap.com/*
+    Workers & Pages → matchamap-api-production → Settings → Domains & Routes
+    Click "Add" → Custom Domain
+    Enter: api.matchamap.club
     ```
 
-2. **DNS Configuration**
+2. **DNS Configuration** (automatic if using Cloudflare DNS)
     ```
     Type: CNAME
     Name: api
-    Target: matchamap.com
+    Target: matchamap.club
     Proxy: Enabled
     ```
+
+3. **Update Environment Variables**
+
+    **Frontend** (`frontend/.env.production`):
+    ```env
+    VITE_API_URL=https://api.matchamap.club
+    ```
+
+    **Backend** (`backend/wrangler.toml`):
+    ```toml
+    [vars]
+    COOKIE_DOMAIN = ".matchamap.club"  # Leading dot allows sharing across subdomains
+    ALLOWED_ORIGINS = "https://matchamap.club,https://*.matchamap.club"
+    ```
+
+4. **Deploy Changes**
+    ```bash
+    # Rebuild frontend with new API URL
+    cd frontend && npm run build
+
+    # Redeploy backend with COOKIE_DOMAIN set
+    cd backend && wrangler deploy
+    ```
+
+**How it works:**
+- Setting `COOKIE_DOMAIN=.matchamap.club` allows cookies to be shared between:
+  - `matchamap.club` (frontend)
+  - `api.matchamap.club` (backend)
+  - Any other `*.matchamap.club` subdomain
+- Cookies use `SameSite=None; Secure` when `COOKIE_DOMAIN` is set
+- Without `COOKIE_DOMAIN`, cookies use `SameSite=Strict` and are domain-specific
+
+**Verification:**
+```bash
+# Test cookie sharing
+curl -i https://api.matchamap.club/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@matchamap.club","password":"your-password"}'
+
+# Should see Set-Cookie header with Domain=.matchamap.club
+# Example: Set-Cookie: access_token=...; HttpOnly; Secure; SameSite=None; Domain=.matchamap.club; Path=/; Max-Age=86400
+```
 
 ## Cloudflare Access (Admin Protection)
 
@@ -428,6 +477,36 @@ jobs:
 ```
 
 ## Troubleshooting
+
+### Authentication Issues (Cookie Persistence)
+
+**Problem:** Admin logged in but immediately logged out on navigation. Network tab shows `{"error":"Unauthorized: Missing access token cookie"}`
+
+**Root Cause:** Cross-domain cookie blocking. Frontend and backend are on different domains (e.g., `matchamap.club` vs `*.workers.dev`), so cookies set by backend cannot be read by frontend.
+
+**Solution:**
+1. Set up custom subdomain for API (see "API Domain (REQUIRED for Authentication)" section above)
+2. Configure `COOKIE_DOMAIN=.matchamap.club` in `backend/wrangler.toml`
+3. Update `VITE_API_URL=https://api.matchamap.club` in `frontend/.env.production`
+4. Redeploy both frontend and backend
+
+**Quick Diagnosis:**
+```bash
+# Check cookie domain in Set-Cookie header
+curl -i https://YOUR_API_URL/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@example.com","password":"password"}'
+
+# ✅ CORRECT: Set-Cookie contains "Domain=.matchamap.club"
+# ❌ WRONG: Set-Cookie has no Domain attribute (defaults to exact domain)
+```
+
+**Verification:**
+```bash
+# After login, check if cookies are sent with subsequent requests
+# Open browser DevTools → Application → Cookies
+# Should see access_token and refresh_token with Domain=.matchamap.club
+```
 
 ### Build Failures
 
@@ -828,6 +907,9 @@ curl -H "Origin: https://matchamap.pages.dev" \
 -   [ ] Migrations run on production database
 -   [ ] CORS origins configured correctly in wrangler.toml
 -   [ ] HTTPS enforcement enabled (automatic in production)
+-   [ ] **COOKIE_DOMAIN configured** (e.g., `.matchamap.club`) for authentication
+-   [ ] **Custom API subdomain set up** (e.g., `api.matchamap.club`)
+-   [ ] **Frontend .env.production updated** with custom API URL
 -   [ ] Rate limiting configured
 -   [ ] Admin routes protected with JWT + role check
 -   [ ] Input validation (Zod schemas) in place

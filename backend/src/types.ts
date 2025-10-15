@@ -7,6 +7,7 @@ export interface Env {
   GOOGLE_PLACES_API_KEY: string;
   JWT_SECRET: string;
   PHOTOS_BASE_URL?: string; // Optional: Base URL for photo serving (e.g., https://photos.matchamap.app)
+  COOKIE_DOMAIN?: string; // Optional: Cookie domain for authentication (e.g., .matchamap.club for subdomain sharing)
 }
 
 // API Response types
