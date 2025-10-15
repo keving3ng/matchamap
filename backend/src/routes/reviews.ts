@@ -155,7 +155,7 @@ export async function getCafeReviews(request: IRequest, env: Env): Promise<Respo
         break;
     }
 
-    // Get reviews with user information
+    // Get reviews with user information (fetch +1 to check if more exist)
     const reviews = await db
       .select({
         id: userReviews.id,
@@ -186,11 +186,15 @@ export async function getCafeReviews(request: IRequest, env: Env): Promise<Respo
         )
       )
       .orderBy(orderClause)
-      .limit(queryParams.limit)
+      .limit(queryParams.limit + 1)
       .offset(queryParams.offset);
 
+    // Check if there are more results and slice to actual limit
+    const hasMore = reviews.length > queryParams.limit;
+    const paginatedReviews = hasMore ? reviews.slice(0, queryParams.limit) : reviews;
+
     // Parse tags from JSON strings
-    const processedReviews = reviews.map(review => ({
+    const processedReviews = paginatedReviews.map(review => ({
       ...review,
       tags: review.tags ? JSON.parse(review.tags) : null,
     }));
@@ -200,7 +204,7 @@ export async function getCafeReviews(request: IRequest, env: Env): Promise<Respo
       pagination: {
         limit: queryParams.limit,
         offset: queryParams.offset,
-        hasMore: reviews.length === queryParams.limit,
+        hasMore,
       },
     }, HTTP_STATUS.OK, request as Request, env);
   } catch (error) {
@@ -486,7 +490,7 @@ export async function getUserReviews(request: IRequest, env: Env): Promise<Respo
         break;
     }
 
-    // Get user's reviews with cafe information
+    // Get user's reviews with cafe information (fetch +1 to check if more exist)
     const reviews = await db
       .select({
         id: userReviews.id,
@@ -518,11 +522,15 @@ export async function getUserReviews(request: IRequest, env: Env): Promise<Respo
         )
       )
       .orderBy(orderClause)
-      .limit(queryParams.limit)
+      .limit(queryParams.limit + 1)
       .offset(queryParams.offset);
 
+    // Check if there are more results and slice to actual limit
+    const hasMore = reviews.length > queryParams.limit;
+    const paginatedReviews = hasMore ? reviews.slice(0, queryParams.limit) : reviews;
+
     // Parse tags from JSON strings
-    const processedReviews = reviews.map(review => ({
+    const processedReviews = paginatedReviews.map(review => ({
       ...review,
       tags: review.tags ? JSON.parse(review.tags) : null,
     }));
@@ -532,7 +540,7 @@ export async function getUserReviews(request: IRequest, env: Env): Promise<Respo
       pagination: {
         limit: queryParams.limit,
         offset: queryParams.offset,
-        hasMore: reviews.length === queryParams.limit,
+        hasMore,
       },
     }, HTTP_STATUS.OK, request as Request, env);
   } catch (error) {
