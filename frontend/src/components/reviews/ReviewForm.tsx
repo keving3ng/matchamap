@@ -117,7 +117,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ cafeId, onSuccess, onCan
           ✓ {COPY.reviews.submitSuccess}
         </div>
         <div className="text-gray-600">
-          Thank you for sharing your experience!
+          {COPY.reviews.submitSuccessMessage}
         </div>
       </div>
     )

@@ -561,6 +561,7 @@ export const COPY = {
     contentTooShort: (min: number) => `Review must be at least ${min} characters`,
     contentTooLong: (max: number) => `Review must be no more than ${max} characters`,
     submitSuccess: 'Review submitted successfully!',
+    submitSuccessMessage: 'Thank you for sharing your experience!',
     submitError: 'Failed to submit review. Please try again.',
     photoUploadError: 'Failed to upload photos. Please try again.',
   },

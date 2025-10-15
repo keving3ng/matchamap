@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { COPY } from '../../constants/copy'
 
 interface PhotoUploadWidgetProps {
@@ -16,6 +16,18 @@ export const PhotoUploadWidget: React.FC<PhotoUploadWidgetProps> = ({
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [previews, setPreviews] = useState<string[]>([])
+
+  // Cleanup blob URLs on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      previews.forEach((url) => {
+        // Only revoke blob URLs (data URLs don't need cleanup)
+        if (url.startsWith('blob:')) {
+          URL.revokeObjectURL(url)
+        }
+      })
+    }
+  }, [previews])
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || [])
