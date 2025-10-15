@@ -582,6 +582,100 @@ npm test -- --coverage      # With coverage
 
 ## Git Workflow
 
+### GitHub MCP Server (Required for All GitHub Operations)
+
+**CRITICAL:** ALWAYS use the GitHub MCP server tools (`mcp__github__*`) for ALL GitHub-related operations. NEVER use `gh` CLI or direct `git` commands for GitHub interactions.
+
+**Why?**
+- ✅ Centralized GitHub integration
+- ✅ Consistent error handling
+- ✅ Better automation support
+- ✅ Type-safe operations
+- ✅ No CLI configuration needed
+
+**Available GitHub MCP Tools:**
+
+**Repository Operations:**
+- `mcp__github__get_file_contents` - Read files from repository
+- `mcp__github__create_or_update_file` - Update single file
+- `mcp__github__push_files` - Push multiple files in one commit
+
+**Issue Management:**
+- `mcp__github__create_issue` - Create new issues
+- `mcp__github__list_issues` - List and filter issues
+- `mcp__github__get_issue` - Get issue details
+- `mcp__github__update_issue` - Update existing issues
+- `mcp__github__add_issue_comment` - Add comments to issues
+
+**Pull Request Management:**
+- `mcp__github__create_pull_request` - Create PRs
+- `mcp__github__list_pull_requests` - List PRs
+- `mcp__github__get_pull_request` - Get PR details
+- `mcp__github__get_pull_request_files` - Get changed files
+- `mcp__github__create_pull_request_review` - Review PRs
+- `mcp__github__merge_pull_request` - Merge PRs
+
+**Branch Operations:**
+- `mcp__github__create_branch` - Create new branch
+- `mcp__github__list_commits` - List commit history
+
+**Search:**
+- `mcp__github__search_code` - Search code across repos
+- `mcp__github__search_issues` - Search issues and PRs
+
+**✅ CORRECT GitHub Operations:**
+
+```typescript
+// Creating an issue
+await mcp__github__create_issue({
+  owner: 'username',
+  repo: 'matchamap',
+  title: 'Fix authentication bug',
+  body: 'Description of the issue...',
+  labels: ['bug', 'frontend', 'high-priority']
+})
+
+// Pushing changes
+await mcp__github__push_files({
+  owner: 'username',
+  repo: 'matchamap',
+  branch: 'main',
+  message: 'feat(cities): add Vancouver',
+  files: [
+    { path: 'shared/types/index.ts', content: '...' },
+    { path: 'frontend/src/stores/cityStore.ts', content: '...' }
+  ]
+})
+
+// Creating a PR
+await mcp__github__create_pull_request({
+  owner: 'username',
+  repo: 'matchamap',
+  title: 'Add new feature',
+  body: 'PR description...',
+  head: 'feature-branch',
+  base: 'main'
+})
+```
+
+**❌ INCORRECT - Don't Use These:**
+
+```bash
+# DON'T use gh CLI
+gh issue create --title "..." --body "..."
+gh pr create --title "..."
+
+# DON'T use git for GitHub operations
+git push origin main  # Use mcp__github__push_files instead
+```
+
+**Exception:** You MAY use basic `git` commands for local operations only:
+- `git status` - Check local changes
+- `git diff` - View local diffs
+- `git log` - View commit history
+
+But for ANY operation that interacts with GitHub (push, create issue, create PR), use the MCP server.
+
 ### Commit Message Format
 
 ```
@@ -682,8 +776,9 @@ Before marking any task complete, verify:
 
 ---
 
-_Last updated: 2025-10-12_
+_Last updated: 2025-10-15_
 _Project Phase: V2 Development (User Accounts + Social Features)_
 _React: 18.3+ | Zustand | Vite | TypeScript: Strict Mode_
 _UI Component Library: Available in `frontend/src/components/ui/`_
 _Test Suite: 762/920 passing (82.8%) - See docs/TESTING.md_
+_GitHub Operations: GitHub MCP Server (mcp__github__*) - See Git Workflow section_

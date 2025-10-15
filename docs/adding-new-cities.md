@@ -64,14 +64,14 @@ export const CITIES: Record<CityKey, City> = {
 
 ### Step 3: Deploy
 
-```bash
-# Commit changes
-git add shared/types/index.ts frontend/src/stores/cityStore.ts
-git commit -m "feat(cities): add Vancouver"
-git push
+**Using GitHub MCP Server (Recommended):**
 
-# Auto-deploys via Cloudflare Pages (1-2 minutes)
-```
+Use `mcp__github__push_files` to push the changes:
+- Files: `shared/types/index.ts`, `frontend/src/stores/cityStore.ts`
+- Commit message: `feat(cities): add Vancouver`
+- Branch: `main`
+
+Auto-deploys via Cloudflare Pages (1-2 minutes)
 
 ### Step 4: Add Cafes
 

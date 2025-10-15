@@ -140,18 +140,17 @@ Check if this should be part of the "V1 Launch" milestone or left unassigned.
 
 ## Step 6: Create the Issue
 
-Once you have all the information, create the issue using the GitHub CLI:
+Once you have all the information, create the issue using the GitHub MCP server:
 
-```bash
-gh issue create \
-  --title "Clear, actionable title (imperative mood)" \
-  --body "$(cat <<'EOF'
-[Full issue body from template above]
-EOF
-)" \
-  --label "label1,label2,label3" \
-  --milestone "V1 Launch"  # Optional, omit if not applicable
-```
+Use the `mcp__github__create_issue` tool with the following parameters:
+- `owner`: Repository owner (username or organization)
+- `repo`: Repository name
+- `title`: Clear, actionable title (imperative mood)
+- `body`: Full issue body from template above
+- `labels`: Array of label strings (e.g., ["bug", "frontend", "high-priority"])
+- `milestone`: Milestone number (optional - use `mcp__github__list_milestones` to find milestone numbers first)
+
+**Note:** To find the milestone number for "V1 Launch", first use the GitHub MCP server to list milestones, then use that number in the `milestone` parameter.
 
 ## Step 7: Confirm and Provide Context
 
