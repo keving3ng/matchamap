@@ -113,6 +113,8 @@ describe('isCurrentlyOpen edge cases', () => {
     mockConsoleWarn.mockClear()
     mockConsoleError.mockClear()
     vi.useFakeTimers()
+    // Set to Monday at 12:00 PM so createHoursData('...') will use Monday's hours
+    vi.setSystemTime(new Date('2024-01-01T12:00:00'))
   })
 
   afterEach(() => {
