@@ -312,8 +312,8 @@ export const userReviews = sqliteTable('user_reviews', {
   visitDate: text('visit_date'),
 
   // Moderation
-  moderationStatus: text('moderation_status', { 
-    enum: ['approved', 'pending', 'rejected'] 
+  moderationStatus: text('moderation_status', {
+    enum: ['pending', 'approved', 'rejected', 'flagged']
   }).notNull().default('approved'),
   
   // Settings

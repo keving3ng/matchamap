@@ -37,7 +37,14 @@ export async function createReview(request: AuthenticatedRequest, env: Env): Pro
     let validatedData;
     try {
       validatedData = validateCreateReview(body);
-    } catch (error) {
+    } catch (error: any) {
+      // Format Zod validation errors for user-friendly messages
+      if (error?.issues) {
+        const errorMessages = error.issues.map((issue: any) =>
+          `${issue.path.join('.')}: ${issue.message}`
+        ).join(', ');
+        return badRequestResponse(`Validation error: ${errorMessages}`, request as Request, env);
+      }
       return badRequestResponse(`Validation error: ${error}`, request as Request, env);
     }
 
@@ -81,10 +88,13 @@ export async function createReview(request: AuthenticatedRequest, env: Env): Pro
       .returning()
       .get();
 
-    // Update cafe aggregated rating asynchronously
-    updateCafeRating(env, cafeId);
+    // Update cafe aggregated rating asynchronously with error logging
+    updateCafeRating(env, cafeId).catch(error => {
+      console.error(`Failed to update cafe rating for cafe ${cafeId} after review creation:`, error);
+      // TODO: Consider queueing for retry or alerting on repeated failures
+    });
 
-    return jsonResponse({ review: newReview }, HTTP_STATUS.CREATED);
+    return jsonResponse({ review: newReview }, HTTP_STATUS.CREATED, request as Request, env);
   } catch (error) {
     console.error('Error creating review:', error);
     return errorResponse('Internal server error', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
@@ -111,7 +121,14 @@ export async function getCafeReviews(request: IRequest, env: Env): Promise<Respo
         offset: url.searchParams.get('offset'),
         sortBy: url.searchParams.get('sortBy'),
       });
-    } catch (error) {
+    } catch (error: any) {
+      // Format Zod validation errors for user-friendly messages
+      if (error?.issues) {
+        const errorMessages = error.issues.map((issue: any) =>
+          `${issue.path.join('.')}: ${issue.message}`
+        ).join(', ');
+        return badRequestResponse(`Invalid query parameters: ${errorMessages}`, request as Request, env);
+      }
       return badRequestResponse(`Invalid query parameters: ${error}`, request as Request, env);
     }
 
@@ -185,7 +202,7 @@ export async function getCafeReviews(request: IRequest, env: Env): Promise<Respo
         offset: queryParams.offset,
         hasMore: reviews.length === queryParams.limit,
       },
-    });
+    }, HTTP_STATUS.OK, request as Request, env);
   } catch (error) {
     console.error('Error getting cafe reviews:', error);
     return errorResponse('Internal server error', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
@@ -212,7 +229,14 @@ export async function updateReview(request: AuthenticatedRequest, env: Env): Pro
     let validatedData;
     try {
       validatedData = validateUpdateReview(body);
-    } catch (error) {
+    } catch (error: any) {
+      // Format Zod validation errors for user-friendly messages
+      if (error?.issues) {
+        const errorMessages = error.issues.map((issue: any) =>
+          `${issue.path.join('.')}: ${issue.message}`
+        ).join(', ');
+        return badRequestResponse(`Validation error: ${errorMessages}`, request as Request, env);
+      }
       return badRequestResponse(`Validation error: ${error}`, request as Request, env);
     }
 
@@ -257,10 +281,13 @@ export async function updateReview(request: AuthenticatedRequest, env: Env): Pro
 
     // Update cafe aggregated rating if overall rating changed
     if (validatedData.overallRating !== undefined) {
-      updateCafeRating(env, existingReview.cafeId);
+      updateCafeRating(env, existingReview.cafeId).catch(error => {
+        console.error(`Failed to update cafe rating for cafe ${existingReview.cafeId} after review update:`, error);
+        // TODO: Consider queueing for retry or alerting on repeated failures
+      });
     }
 
-    return jsonResponse({ success: true });
+    return jsonResponse({ success: true }, HTTP_STATUS.OK, request as Request, env);
   } catch (error) {
     console.error('Error updating review:', error);
     return errorResponse('Internal server error', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
@@ -302,9 +329,12 @@ export async function deleteReview(request: AuthenticatedRequest, env: Env): Pro
     await db.delete(userReviews).where(eq(userReviews.id, reviewId));
 
     // Update cafe aggregated rating
-    updateCafeRating(env, existingReview.cafeId);
+    updateCafeRating(env, existingReview.cafeId).catch(error => {
+      console.error(`Failed to update cafe rating for cafe ${existingReview.cafeId} after review deletion:`, error);
+      // TODO: Consider queueing for retry or alerting on repeated failures
+    });
 
-    return jsonResponse({ success: true });
+    return jsonResponse({ success: true }, HTTP_STATUS.OK, request as Request, env);
   } catch (error) {
     console.error('Error deleting review:', error);
     return errorResponse('Internal server error', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
@@ -334,31 +364,29 @@ export async function markHelpful(request: AuthenticatedRequest, env: Env): Prom
     }
 
     // Insert helpful vote (ignore if already exists due to unique constraint)
+    let voteAdded = false;
     try {
       await db.insert(reviewHelpful).values({
         reviewId: reviewId,
         userId: request.user.userId,
       });
-    } catch (error) {
+      voteAdded = true;
+    } catch (error: any) {
       // Ignore duplicate key errors (user already marked as helpful)
-      if (!error.message.includes('UNIQUE constraint failed')) {
+      if (!error.message?.includes('UNIQUE constraint failed')) {
         throw error;
       }
     }
 
-    // Update helpful count
-    const helpfulCountResult = await db
-      .select({ count: sql<number>`COUNT(*)` })
-      .from(reviewHelpful)
-      .where(eq(reviewHelpful.reviewId, reviewId))
-      .get();
+    // Atomically increment helpful count only if vote was added
+    if (voteAdded) {
+      await db
+        .update(userReviews)
+        .set({ helpfulCount: sql`${userReviews.helpfulCount} + 1` })
+        .where(eq(userReviews.id, reviewId));
+    }
 
-    await db
-      .update(userReviews)
-      .set({ helpfulCount: helpfulCountResult?.count || 0 })
-      .where(eq(userReviews.id, reviewId));
-
-    return jsonResponse({ success: true });
+    return jsonResponse({ success: true }, HTTP_STATUS.OK, request as Request, env);
   } catch (error) {
     console.error('Error marking review helpful:', error);
     return errorResponse('Internal server error', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
@@ -381,29 +409,26 @@ export async function removeHelpful(request: AuthenticatedRequest, env: Env): Pr
 
     const db = getDb(env.DB);
 
-    // Remove helpful vote
-    await db
+    // Remove helpful vote and track if anything was deleted
+    const result = await db
       .delete(reviewHelpful)
       .where(
         and(
           eq(reviewHelpful.reviewId, reviewId),
           eq(reviewHelpful.userId, request.user.userId)
         )
-      );
+      )
+      .returning();
 
-    // Update helpful count
-    const helpfulCountResult = await db
-      .select({ count: sql<number>`COUNT(*)` })
-      .from(reviewHelpful)
-      .where(eq(reviewHelpful.reviewId, reviewId))
-      .get();
+    // Atomically decrement helpful count only if vote was removed
+    if (result && result.length > 0) {
+      await db
+        .update(userReviews)
+        .set({ helpfulCount: sql`MAX(0, ${userReviews.helpfulCount} - 1)` })
+        .where(eq(userReviews.id, reviewId));
+    }
 
-    await db
-      .update(userReviews)
-      .set({ helpfulCount: helpfulCountResult?.count || 0 })
-      .where(eq(userReviews.id, reviewId));
-
-    return jsonResponse({ success: true });
+    return jsonResponse({ success: true }, HTTP_STATUS.OK, request as Request, env);
   } catch (error) {
     console.error('Error removing helpful vote:', error);
     return errorResponse('Internal server error', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
@@ -430,7 +455,14 @@ export async function getUserReviews(request: IRequest, env: Env): Promise<Respo
         offset: url.searchParams.get('offset'),
         sortBy: url.searchParams.get('sortBy'),
       });
-    } catch (error) {
+    } catch (error: any) {
+      // Format Zod validation errors for user-friendly messages
+      if (error?.issues) {
+        const errorMessages = error.issues.map((issue: any) =>
+          `${issue.path.join('.')}: ${issue.message}`
+        ).join(', ');
+        return badRequestResponse(`Invalid query parameters: ${errorMessages}`, request as Request, env);
+      }
       return badRequestResponse(`Invalid query parameters: ${error}`, request as Request, env);
     }
 
@@ -502,7 +534,7 @@ export async function getUserReviews(request: IRequest, env: Env): Promise<Respo
         offset: queryParams.offset,
         hasMore: reviews.length === queryParams.limit,
       },
-    });
+    }, HTTP_STATUS.OK, request as Request, env);
   } catch (error) {
     console.error('Error getting user reviews:', error);
     return errorResponse('Internal server error', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);

@@ -16,7 +16,15 @@ export const createReviewSchema = z.object({
   content: z.string().min(50, 'Content must be at least 50 characters').max(2000, 'Content must be less than 2000 characters'),
   tags: z.array(z.string().max(50, 'Tag must be less than 50 characters')).max(10, 'Maximum 10 tags allowed').optional(),
   
-  visitDate: z.string().optional(),
+  visitDate: z.string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Visit date must be in YYYY-MM-DD format')
+    .refine((date) => {
+      const visitDate = new Date(date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Reset time to start of day
+      return visitDate <= today;
+    }, 'Visit date cannot be in the future')
+    .optional(),
   isPublic: z.boolean().default(true),
 })
 
@@ -32,7 +40,16 @@ export const updateReviewSchema = z.object({
   content: z.string().min(50).max(2000).optional(),
   tags: z.array(z.string().max(50)).max(10).optional().nullable(),
   
-  visitDate: z.string().optional().nullable(),
+  visitDate: z.string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Visit date must be in YYYY-MM-DD format')
+    .refine((date) => {
+      const visitDate = new Date(date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Reset time to start of day
+      return visitDate <= today;
+    }, 'Visit date cannot be in the future')
+    .optional()
+    .nullable(),
   isPublic: z.boolean().optional(),
 }).refine(data => {
   // If content is provided, ensure it meets minimum length
