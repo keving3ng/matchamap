@@ -11,10 +11,10 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:ci": "vitest run",
+    "test:ci": "vitest run --reporter=default --reporter=junit --outputFile.junit=./test-results/junit.xml",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage",
+    "test:coverage": "vitest --coverage --reporter=default --reporter=junit --outputFile.junit=./test-results/junit.xml",
     "lint": "eslint . --ext js,jsx,ts,tsx --report-unused-disable-directives --max-warnings 0",
     "lint:ci": "eslint . --ext js,jsx,ts,tsx --report-unused-disable-directives --max-warnings 200",
     "typecheck": "tsc --noEmit"
