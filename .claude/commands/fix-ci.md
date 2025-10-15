@@ -1,385 +1,270 @@
----
-description: Check CI status of a PR and fix failing checks
-args:
-  - name: pr_number
-    description: Pull request number to check
-    required: true
----
+# Fix CI Command
 
-You are tasked with checking the CI/test status of a GitHub Pull Request and fixing any failures. Follow these steps:
+Quickly identify and fix CI failures on a pull request.
 
-## Step 1: Get Repository Info
-
-First, determine the repository owner and name from the git remote:
+## Usage
 
 ```bash
-git remote get-url origin
+/fix-ci <pr-number>
 ```
 
-Parse the owner/repo from the URL (e.g., `keving3ng/matchamap`).
+## Example
 
-## Step 2: Fetch PR and CI Status
-
-1. **Get PR details** using `mcp__github__pull_request_read` with `method: "get"`:
-   - `owner`: Repository owner
-   - `repo`: Repository name
-   - `pullNumber`: PR number from user input
-
-   Extract:
-   - PR title and description
-   - Source branch name (`head.ref`)
-   - Target branch name (`base.ref`)
-   - Current state (`state`, `draft`, `mergeable`)
-
-2. **Get CI/test status** using `mcp__github__pull_request_read` with `method: "get_status"`:
-   - `owner`: Repository owner
-   - `repo`: Repository name
-   - `pullNumber`: PR number
-
-   Analyze the status checks:
-   - `state`: Overall status (success, pending, failure, error)
-   - `statuses`: Array of individual check results
-   - `check_runs`: GitHub Actions check runs with details
-
-3. **Get changed files** using `mcp__github__pull_request_read` with `method: "get_files"`:
-   - Shows which files were modified in the PR
-   - Helps identify what might be causing failures
-
-## Step 3: Analyze CI Failures
-
-For each failing check, identify:
-
-**Common CI Failure Types:**
-
-1. **TypeScript Type Errors** (`typecheck` job)
-   - Look for `.ts` or `.tsx` files in changed files
-   - Common causes: missing types, `any` usage, interface mismatches
-   - Fix: Run `npm run typecheck` locally to see errors
-
-2. **Linting Errors** (`lint` job)
-   - ESLint violations in code
-   - Common causes: unused variables, formatting issues
-   - Fix: Run `npm run lint` locally and address issues
-
-3. **Test Failures** (`test` job)
-   - Unit tests or integration tests failing
-   - Common causes: broken assertions, missing mocks, outdated snapshots
-   - Fix: Run `npm test` locally to reproduce
-
-4. **Build Failures** (`build` job)
-   - Compilation or bundling errors
-   - Common causes: import errors, syntax errors, missing dependencies
-   - Fix: Run `npm run build` locally
-
-5. **Dependency Issues**
-   - Missing packages, version conflicts
-   - Fix: Run `npm install` or check `package.json`
-
-Create a clear summary:
-
-```
-CI STATUS SUMMARY
-=================
-
-Overall Status: ❌ FAILED (or ✅ PASSED, ⏳ PENDING)
-
-Failing Checks:
-1. ❌ typecheck - TypeScript compilation failed
-   - Files affected: src/components/NewComponent.tsx
-   - Error: Property 'foo' does not exist on type 'Bar'
-
-2. ❌ test - 3 tests failing
-   - Test suite: src/components/__tests__/NewComponent.test.tsx
-   - Failures: "should render correctly", "should handle click"
-
-3. ✅ lint - Passed
-4. ✅ build - Passed
-```
-
-## Step 4: Switch to PR Branch
-
-1. Check current branch:
-   ```bash
-   git branch --show-current
-   ```
-
-2. If not on the PR branch:
-   ```bash
-   git fetch origin
-   git checkout <pr-branch-name>
-   git pull origin <pr-branch-name>
-   ```
-
-3. Verify you're on the correct branch and it's up to date
-
-## Step 5: Reproduce Failures Locally
-
-For each failing check, run the corresponding command locally:
-
-1. **TypeScript errors:**
-   ```bash
-   npm run typecheck
-   ```
-   - Shows exact line numbers and error messages
-   - Identifies all type errors at once
-
-2. **Linting errors:**
-   ```bash
-   npm run lint
-   ```
-   - Shows linting violations
-   - Some can be auto-fixed with `npm run lint -- --fix`
-
-3. **Test failures:**
-   ```bash
-   npm test
-   ```
-   - Runs full test suite
-   - Use `npm test -- --watch` for iterative development
-   - Use `npm test -- path/to/test.ts` for specific tests
-
-4. **Build failures:**
-   ```bash
-   npm run build
-   ```
-   - Shows compilation errors
-   - Check for import/export issues
-
-## Step 6: Fix Each Failure
-
-For each error identified, read the relevant files and fix the issues:
-
-### TypeScript Fixes
-
-**Common patterns:**
-- Add proper type annotations (never use `any`)
-- Update interfaces to match actual data structures
-- Import missing types from shared/types
-- Use type guards for runtime checks
-
-**Example:**
-```typescript
-// ❌ BAD
-const data: any = await api.cafes.getAll()
-
-// ✅ GOOD
-const data: { cafes: Cafe[] } = await api.cafes.getAll()
-```
-
-### Linting Fixes
-
-**Common patterns:**
-- Remove unused variables/imports
-- Fix indentation (2 spaces)
-- Add missing semicolons (if configured)
-- Fix quote style (single vs double)
-
-**Auto-fix when possible:**
 ```bash
-npm run lint -- --fix
+/fix-ci 238
 ```
 
-### Test Fixes
+---
 
-**Common patterns:**
-- Update test assertions to match new behavior
-- Add missing mocks for new API calls
-- Use `waitFor()` for async operations
-- Use `userEvent` instead of `fireEvent`
+## Instructions
 
-**Example:**
+Fix CI failures efficiently by focusing on what actually failed.
+
+### Step 1: Check CI Status
+
+Use `mcp__github__pull_request_read` to get the status:
+
 ```typescript
-// ❌ BAD
-fireEvent.click(button)
-expect(mockFn).toHaveBeenCalled() // Too early!
-
-// ✅ GOOD
-await user.click(button)
-await waitFor(() => {
-  expect(mockFn).toHaveBeenCalled()
+// Get CI status
+await mcp__github__pull_request_read({
+  owner: 'keving3ng',
+  repo: 'matchamap',
+  pullNumber: <pr-number>,
+  method: 'get_status'
 })
 ```
 
-### Build Fixes
+Parse the response to identify FAILED checks. Common checks in this project:
+- **Static Analysis** (typecheck + lint:ci + audit) - Most common failure
+- **Frontend Tests** (vitest)
+- **Backend Tests** (vitest backend)
+- **Build** (vite build)
 
-**Common patterns:**
-- Fix import paths (check case sensitivity)
-- Ensure all exports are properly defined
-- Check for circular dependencies
-- Verify all dependencies are installed
+Look for `conclusion: "FAILURE"` in the `statusCheckRollup` array.
 
-## Step 7: Verify Fixes Locally
+### Step 2: Get PR Details and Switch to Branch
 
-After making fixes, run ALL checks locally to ensure everything passes:
+Get branch name and switch:
+
+```typescript
+// Get PR details
+const pr = await mcp__github__pull_request_read({
+  owner: 'keving3ng',
+  repo: 'matchamap',
+  pullNumber: <pr-number>,
+  method: 'get'
+})
+
+// Extract branch name: pr.head.ref
+```
+
+Then switch:
 
 ```bash
-# Run all quality checks
-npm run typecheck  # Must pass
-npm test           # Must pass
-npm run lint       # Must pass
-npm run build      # Must pass
+git fetch origin
+git checkout <pr.head.ref>
+git pull origin <pr.head.ref>
 ```
 
-**Don't proceed until all checks pass locally!**
+### Step 3: Reproduce the Specific Failure
 
-## Step 8: Commit and Push Fixes
+**Only run the check that failed** - don't waste time on passing checks.
 
-1. **Stage changes:**
-   ```bash
-   git add <changed-files>
-   ```
-
-2. **Commit with clear message:**
-   ```bash
-   git commit -m "fix(ci): resolve failing checks
-
-   - Fix TypeScript errors in NewComponent
-   - Update test assertions for new behavior
-   - Remove unused imports flagged by linter
-
-   Fixes CI failures in PR #<number>"
-   ```
-
-3. **Push to PR branch:**
-   ```bash
-   git push origin <pr-branch-name>
-   ```
-
-## Step 9: Verify CI Passes
-
-1. **Wait for CI to complete** (check GitHub PR page or use MCP tool)
-
-2. **Check status again** using `mcp__github__pull_request_read` with `method: "get_status"`:
-   - Verify `state` is now "success"
-   - Confirm all checks are green ✅
-
-3. **If still failing:**
-   - Review new error messages
-   - Repeat Steps 5-8 with new fixes
-   - Check for flaky tests or environment issues
-
-## Step 10: Add Summary Comment
-
-Once all checks pass, add a comment to the PR using `mcp__github__add_issue_comment`:
-
-```markdown
-### ✅ CI Checks Fixed
-
-All CI checks are now passing:
-
-**Fixed Issues:**
-- ✅ TypeScript compilation errors in `src/components/NewComponent.tsx`
-- ✅ 3 failing tests in `NewComponent.test.tsx`
-- ✅ ESLint warnings (unused imports)
-
-**Verification:**
-- [x] `npm run typecheck` - Passed
-- [x] `npm test` - Passed (969/969 tests)
-- [x] `npm run lint` - Passed
-- [x] `npm run build` - Passed
-
-Ready for review! 🚀
+**If Static Analysis failed:**
+```bash
+npm run typecheck  # TypeScript errors are the most common cause
 ```
 
-## Step 11: Final Report
+TypeScript errors? Fix the type issues. Common patterns:
+- Add type annotations: `const body = await request.json() as { field?: type }`
+- Fix D1 result access: Use `result.meta.changes` not `result.changes`
+- Follow existing patterns in similar files (check reviews.ts, photos.ts, etc.)
 
-Provide a summary to the user:
-
-```
-CI STATUS UPDATE
-================
-
-PR #<number>: <title>
-Branch: <branch-name>
-
-BEFORE:
-- ❌ typecheck - Failed
-- ❌ test - 3 failures
-- ✅ lint - Passed
-- ✅ build - Passed
-
-AFTER:
-- ✅ typecheck - Passed
-- ✅ test - Passed (969/969)
-- ✅ lint - Passed
-- ✅ build - Passed
-
-Commits pushed: 1
-- fix(ci): resolve failing checks
-
-Next steps:
-- CI is re-running (check PR page for live status)
-- All checks should pass in ~2-3 minutes
-- PR is ready for review once CI completes
+**If Frontend/Backend Tests failed:**
+```bash
+npm test  # or npm test --workspace=backend
 ```
 
-## Best Practices
+**If Build failed:**
+```bash
+npm run build
+```
 
-**Before making changes:**
-- ✅ Always reproduce the failure locally first
-- ✅ Understand the root cause before fixing
-- ✅ Check project guidelines in `CLAUDE.md`
-- ✅ Read existing code patterns
+**If Lint failed:**
+Check if it has `continue-on-error: true` in `.github/workflows/ci.yml` - if so, it won't block CI and you can ignore it.
 
-**When fixing:**
-- ✅ Fix one issue type at a time (types, then tests, then lint)
-- ✅ Run checks frequently to catch regressions
-- ✅ Make focused commits (separate commit per check type)
-- ✅ Add clear commit messages explaining what was fixed
+### Step 4: Fix and Verify
 
-**After fixing:**
-- ✅ Verify ALL checks pass locally before pushing
-- ✅ Wait for CI to confirm fixes before marking complete
-- ✅ Add summary comment to PR for transparency
+Make the fixes, then **only re-run the check that failed**:
 
-**Common pitfalls to avoid:**
-- ❌ Pushing fixes without running checks locally
-- ❌ Using `any` type to silence TypeScript errors
-- ❌ Commenting out failing tests instead of fixing them
-- ❌ Ignoring lint errors with disable comments
-- ❌ Force pushing and rewriting PR history
+```bash
+npm run typecheck  # For Static Analysis
+# OR
+npm test           # For test failures
+# OR
+npm run build      # For build failures
+```
 
-## Project-Specific Guidelines (MatchaMap)
+Don't run all checks - the pre-commit hook will do that automatically.
 
-When fixing failures, ensure compliance with MatchaMap patterns:
+### Step 5: Commit and Push
 
-**TypeScript:**
-- Strict mode enabled (no `any` types)
-- Import shared types from `shared/types/index.ts`
-- Define proper interfaces for all props
+```bash
+git add <changed-files>
+git commit -m "fix(ci): resolve <specific-check> failures
 
-**Code Patterns (from CLAUDE.md):**
-- Use COPY constants for user-facing strings (`COPY.section.key`)
-- Use API client for backend calls (`api.cafes.getAll()`)
-- Use shared UI components (`PrimaryButton`, `AlertDialog`, etc.)
-- Use design tokens (`spacing.cardPadding`, `borderRadius.xl`)
+- <what you fixed>
+- <specific change made>
 
-**Testing:**
-- Use `waitForPersistence()` for Zustand store tests
-- Use `userEvent` for user interactions
-- Use `vi.mocked()` for API mocking
-- See `docs/TESTING.md` for patterns
+Fixes CI failures in PR #<number>"
 
-**Performance:**
-- Maintain bundle size < 100KB per page
-- Keep components < 300 lines
-- Use lazy loading for routes
+git push origin <pr-branch-name>
+```
 
-## MCP Tools Reference
+The pre-commit hook will run typecheck + tests automatically and prevent bad commits.
 
-**PR Operations:**
-- `mcp__github__pull_request_read(method: "get")` - Get PR details
-- `mcp__github__pull_request_read(method: "get_status")` - Get CI status
-- `mcp__github__pull_request_read(method: "get_files")` - Get changed files
-- `mcp__github__pull_request_read(method: "get_diff")` - Get full PR diff
+### Step 6: Verify CI Passes
 
-**Issue Operations:**
-- `mcp__github__add_issue_comment` - Add comment to PR (PRs are issues)
+Wait ~30 seconds, then check status again:
 
-**Repository Info:**
-- Use `git remote get-url origin` to get repo URL
-- Parse owner/repo from URL
+```typescript
+await mcp__github__pull_request_read({
+  owner: 'keving3ng',
+  repo: 'matchamap',
+  pullNumber: <pr-number>,
+  method: 'get_status'
+})
+```
+
+If all checks show `conclusion: "SUCCESS"`, you're done! Add a summary comment:
+
+```typescript
+await mcp__github__add_issue_comment({
+  owner: 'keving3ng',
+  repo: 'matchamap',
+  issue_number: <pr-number>,  // PRs are issues in GitHub API
+  body: `✅ CI checks fixed
+
+Fixed Issues:
+- <specific failure> - <what was wrong>
+
+All checks now passing.`
+})
+```
 
 ---
 
-Now check CI status for PR #{{pr_number}} and fix any failures following the steps above.
+## Project-Specific Quick Reference
+
+### MatchaMap CI Jobs (`.github/workflows/ci.yml`)
+
+1. **Static Analysis** (most common failure source):
+   - `npm run typecheck` - TypeScript (can fail)
+   - `npm run lint:ci` - ESLint (continue-on-error: true, won't block)
+   - `npm audit` - Security (continue-on-error: true, won't block)
+
+2. **Frontend Tests**: `npm run test:coverage --workspace=frontend`
+
+3. **Backend Tests**: `npm run test:ci --workspace=backend`
+
+4. **Build** (depends on Static Analysis): `npm run build`
+
+### Common MatchaMap TypeScript Fixes
+
+**Request body parsing:**
+```typescript
+// ❌ Wrong
+const body = await request.json()
+const { field } = body  // TypeScript error: unknown
+
+// ✅ Right
+const body = await request.json() as { field?: type }
+const { field } = body
+```
+
+**D1 result access:**
+```typescript
+// ❌ Wrong
+const result = await db.run()
+if (result.changes > 0) // Property doesn't exist
+
+// ✅ Right
+const result = await db.run()
+if ((result.meta.changes || 0) > 0)
+```
+
+**Follow existing patterns:**
+- Check `backend/src/routes/reviews.ts` for Zod validation examples
+- Check `backend/src/routes/photos.ts` for body type assertions
+- Use patterns from similar endpoints
+
+### Pre-commit Hook
+
+The project has a pre-commit hook that runs:
+1. `npm run typecheck` (all workspaces)
+2. `npm test` (frontend only)
+
+If your commit succeeds, CI will likely pass. The hook prevents most CI failures.
+
+---
+
+## MCP Tools Reference
+
+**Get PR status:**
+```typescript
+mcp__github__pull_request_read({
+  owner: 'keving3ng',
+  repo: 'matchamap',
+  pullNumber: <number>,
+  method: 'get_status'
+})
+```
+
+**Get PR details:**
+```typescript
+mcp__github__pull_request_read({
+  owner: 'keving3ng',
+  repo: 'matchamap',
+  pullNumber: <number>,
+  method: 'get'
+})
+```
+
+**Add comment to PR:**
+```typescript
+mcp__github__add_issue_comment({
+  owner: 'keving3ng',
+  repo: 'matchamap',
+  issue_number: <pr-number>,
+  body: '...'
+})
+```
+
+---
+
+## Tips for Speed
+
+1. **Use MCP tools** - Type-safe and integrated
+2. **Focus on the failure** - Don't run checks that passed
+3. **Check .github/workflows/ci.yml** - Understand what actually blocks CI
+4. **Trust the pre-commit hook** - It catches most issues before push
+5. **Look for patterns** - TypeScript errors follow common patterns (body typing, D1 results)
+6. **Read similar files** - Copy working patterns from existing routes
+
+---
+
+## When Things Go Wrong
+
+**If pre-commit hook fails:**
+- Fix the errors shown (typecheck or test failures)
+- Don't bypass the hook - it's preventing CI failures
+
+**If CI still fails after your fix:**
+- Check the actual error in GitHub Actions logs
+- You might have fixed the wrong thing
+- Re-run Step 1 to see current failures
+
+**If you're unsure what failed:**
+- Click the "Details" link on the GitHub PR page for the failing check
+- Read the actual error message from the logs
+- Search for similar errors in the codebase

@@ -1,6 +1,6 @@
 # Fix PR Command
 
-Handles PR feedback by switching branches, addressing blocking issues, and creating follow-up tasks.
+Address PR feedback efficiently by fixing blocking issues and creating follow-up tasks.
 
 ## Usage
 
@@ -18,237 +18,380 @@ Handles PR feedback by switching branches, addressing blocking issues, and creat
 
 ## Instructions
 
-You are tasked with handling feedback on a GitHub Pull Request. Follow these steps carefully:
+Handle PR feedback efficiently by focusing on blocking issues first.
 
-### Step 1: Fetch and Analyze PR
+### Step 1: Gather PR Feedback
 
-First, determine the repository owner and name from the git remote:
+Get all feedback using MCP tools:
 
-```bash
-git remote get-url origin
+```typescript
+// Get PR details, reviews, and status in parallel
+const [pr, reviews, files, status] = await Promise.all([
+  mcp__github__pull_request_read({
+    owner: 'keving3ng',
+    repo: 'matchamap',
+    pullNumber: <pr-number>,
+    method: 'get'
+  }),
+  mcp__github__pull_request_read({
+    owner: 'keving3ng',
+    repo: 'matchamap',
+    pullNumber: <pr-number>,
+    method: 'get_reviews'
+  }),
+  mcp__github__pull_request_read({
+    owner: 'keving3ng',
+    repo: 'matchamap',
+    pullNumber: <pr-number>,
+    method: 'get_files'
+  }),
+  mcp__github__pull_request_read({
+    owner: 'keving3ng',
+    repo: 'matchamap',
+    pullNumber: <pr-number>,
+    method: 'get_status'
+  })
+])
 ```
 
-Parse the owner/repo from the URL (e.g., `keving3ng/matchamap`).
+Also get review comments if needed:
 
-1. Use `mcp__github__get_pull_request` to get PR details including:
+```typescript
+const comments = await mcp__github__pull_request_read({
+  owner: 'keving3ng',
+  repo: 'matchamap',
+  pullNumber: <pr-number>,
+  method: 'get_review_comments'
+})
+```
 
-    - PR title and description
-    - Source branch name (`head.ref`)
-    - Target branch name (`base.ref`)
-    - Current status (mergeable, state, draft, etc.)
-
-2. Use `mcp__github__get_pull_request_comments` to get all review comments
-
-3. Use `mcp__github__get_pull_request_status` to see CI/test status
-
-4. Use `mcp__github__get_pull_request_reviews` to get formal reviews
-
-5. Use `mcp__github__get_pull_request_files` to see which files were changed in the PR
+Parse to identify:
+- Formal reviews (APPROVED, CHANGES_REQUESTED, COMMENTED)
+- Review comments on specific lines
+- CI failures
+- Changed files
 
 ### Step 2: Switch to PR Branch
 
-1. Check current branch: `git branch --show-current`
-
-2. If not on the PR branch:
-
-    - Fetch the latest: `git fetch origin`
-    - Switch to branch: `git checkout <pr-branch-name>`
-    - Pull latest changes: `git pull origin <pr-branch-name>`
-
-3. Verify you're on the correct branch
+```bash
+git fetch origin
+git checkout <pr.head.ref>  # From step 1
+git pull origin <pr.head.ref>
+```
 
 ### Step 3: Categorize Feedback
 
-Analyze all comments and reviews. Classify each piece of feedback as either:
+Quickly categorize into two buckets:
 
-**BLOCKING** (must fix before merge):
+**BLOCKING** (fix now):
+- "Changes requested" reviews
+- CI/test failures
+- Type errors, linting failures
+- Code pattern violations (CLAUDE.md)
+- Security/critical bugs
+- Merge conflicts
 
--   Requested changes in formal reviews
--   Failing tests or CI checks
--   Merge conflicts
--   Critical bugs or security issues
--   Breaking changes
--   Code that doesn't match project patterns (check CLAUDE.md)
--   Missing required documentation
--   Type errors or linting failures
+**FOLLOW-UP** (create issues):
+- "Nice to have" suggestions
+- Refactoring ideas
+- Performance optimizations
+- Additional features
+- Tech debt notes
+- Test coverage improvements
 
-**FOLLOW-UP** (can be separate issues):
-
--   Nice-to-have improvements
--   Refactoring suggestions
--   Performance optimizations (non-critical)
--   Additional features suggested during review
--   Tech debt comments
--   Documentation enhancements
--   Test coverage improvements (if not blocking merge)
-
-Create a clear summary showing:
-
+Create mental (or written) summary:
 ```
-BLOCKING ISSUES (must fix now):
-1. [Description] - by @reviewer in comment link
-2. ...
+BLOCKING:
+1. Fix TypeScript errors in favorites.ts - @reviewer
+2. Add error handling to API call - @reviewer
 
-FOLLOW-UP TASKS (create issues):
-1. [Description] - by @reviewer in comment link
-2. ...
+FOLLOW-UP:
+1. Refactor duplicate validation logic - @reviewer
+2. Add integration tests for favorites - @reviewer
 ```
 
-### Step 4: Check for Duplicate Issues
+### Step 4: Fix Blocking Issues
 
-Before creating any follow-up issues, search existing issues to avoid duplicates:
+For each blocking item:
 
-1. Use `mcp__github__list_issues` with parameters:
+**1. Read the code**
+Use Read tool to view the file(s) mentioned in feedback.
 
-    - `owner`: repository owner
-    - `repo`: repository name
-    - `state: "all"` to search open and closed issues
-    - `per_page: 100` to get recent issues
+**2. Make the fix following MatchaMap patterns:**
+- COPY constants for user-facing strings (`COPY.section.key`)
+- API client for backend calls (`api.endpoint.method()`)
+- Shared UI components (`PrimaryButton`, `AlertDialog`, etc.)
+- TypeScript strict mode (no `any`)
+- Request body typing: `await request.json() as { field?: type }`
+- D1 results: `result.meta.changes` not `result.changes`
 
-2. For each follow-up task, search for similar issues:
+**3. Test the fix (only what you changed):**
+```bash
+npm run typecheck  # If TypeScript changes
+npm test           # If logic changes
+```
 
-    - Use `mcp__github__search_issues` with a query containing relevant keywords
-    - Example query: `"repo:owner/repo review sorting"` for a review sorting feature
-    - Check issue titles and descriptions for overlap
-    - Look for issues with labels like: `enhancement`, `tech-debt`, `refactor`, `follow-up`
+Don't run everything - pre-commit hook will validate.
 
-3. For each potential follow-up:
-    - If similar issue exists: Note it (e.g., "Similar to #456 - consider commenting there instead")
-    - If no duplicate found: Mark as "Ready to create"
+**4. Commit focused changes:**
+```bash
+git add <files>
+git commit -m "fix: address PR feedback - <what>
 
-### Step 5: Fix Blocking Issues
+- <specific change>
+- <why it was needed>
 
-For each blocking issue:
+Addresses feedback from @reviewer in PR #<number>"
+```
 
-1. Read the relevant code files mentioned in the feedback
+Repeat for each blocking issue.
 
-2. Implement the fix following project guidelines:
+### Step 5: Create Follow-Up Issues
 
-    - Check `CLAUDE.md` for patterns and architecture rules
-    - Use COPY constants for user-facing strings
-    - Use API client for backend calls
-    - Use shared UI components
-    - Follow TypeScript strict mode
-    - Maintain mobile-first approach
+**Check for duplicates first:**
 
-3. After each fix:
+```typescript
+// Search for similar issues
+const existingIssues = await mcp__github__search_issues({
+  query: 'repo:keving3ng/matchamap <keyword> label:enhancement,tech-debt,follow-up',
+  owner: 'keving3ng',
+  repo: 'matchamap'
+})
+```
 
-    - Run `npm run typecheck` to verify types
-    - Run `npm test` to ensure tests pass
-    - Run `npm run build` to verify build succeeds
+**If not duplicate, create issue:**
 
-4. Commit changes with clear messages:
+```typescript
+await mcp__github__create_issue({
+  owner: 'keving3ng',
+  repo: 'matchamap',
+  title: '<actionable title>',
+  body: `Context from PR #<number> review:
 
-    ```
-    fix: address PR feedback - <specific issue>
+<reviewer's feedback>
 
-    - <detail about what was fixed>
-    - <detail about approach>
+Original comment: <link to PR comment>
 
-    Addresses feedback from @reviewer
-    ```
+Suggested approach:
+- <approach from review or your idea>
 
-### Step 6: Create Follow-Up Issues
+Acceptance criteria:
+- [ ] <criterion 1>
+- [ ] <criterion 2>`,
+  labels: ['follow-up', 'enhancement']  // or ['follow-up', 'tech-debt']
+})
+```
 
-For each non-duplicate follow-up task:
+Track issue numbers for summary.
 
-1. Create a well-structured issue using `mcp__github__create_issue`:
+### Step 6: Push and Notify
 
-    - `owner`: repository owner
-    - `repo`: repository name
-    - `title`: Clear, actionable title
-    - `body`: Detailed description including:
-        - Context from PR review
-        - Link to original PR comment
-        - Suggested approach if provided
-        - Acceptance criteria
-    - `labels`: Array like `["follow-up", "enhancement"]` or `["follow-up", "tech-debt"]`
+**Push all fixes:**
+```bash
+git push origin <branch-name>
+```
 
-2. Add a comment to the PR linking the new issue using `mcp__github__add_issue_comment`:
-    - This creates a comment on the issue, not the PR
-    - Instead, note the issue number to include in the final PR summary comment (Step 7)
+Pre-commit hook validates typecheck + tests automatically.
 
-### Step 7: Push Changes
+**Add summary comment:**
 
-1. Push the fixes to the PR branch using git:
+```typescript
+await mcp__github__add_issue_comment({
+  owner: 'keving3ng',
+  repo: 'matchamap',
+  issue_number: <pr-number>,  // PRs are issues in GitHub API
+  body: `### PR Feedback Addressed
 
-    ```bash
-    git push origin <pr-branch-name>
-    ```
+✅ **Fixed blocking issues:**
+- <issue 1>: <what was fixed>
+- <issue 2>: <what was fixed>
 
-2. Verify push succeeded by checking PR status using `mcp__github__get_pull_request`:
+📋 **Created follow-up issues:**
+- #<issue-number>: <title>
+- #<issue-number>: <title>
 
-    - Check the `mergeable_state` field
-    - Check for any merge conflicts
+All blocking feedback addressed. Ready for re-review.`
+})
+```
 
-3. Add a summary comment to the PR using `mcp__github__add_issue_comment`:
+### Step 7: Verify CI Passes
 
-    - `owner`: repository owner
-    - `repo`: repository name
-    - `issue_number`: PR number (PRs are issues in GitHub's API)
-    - `body`: Summary in this format:
+Wait ~30 seconds, then check:
 
-    ```markdown
-    ### PR Feedback Addressed
+```typescript
+const status = await mcp__github__pull_request_read({
+  owner: 'keving3ng',
+  repo: 'matchamap',
+  pullNumber: <pr-number>,
+  method: 'get_status'
+})
+```
 
-    ✅ **Fixed blocking issues:**
+If all checks show `conclusion: "SUCCESS"`, you're done! If failures remain, use `/fix-ci <pr-number>`.
 
-    -   Issue 1: <description>
-    -   Issue 2: <description>
+---
 
-    📋 **Created follow-up issues:**
+## MatchaMap-Specific Patterns
 
-    -   #<issue-number>: <title>
-    -   #<issue-number>: <title>
+### TypeScript Fixes
 
-    All blocking feedback has been addressed. Ready for re-review.
-    ```
+**Request body parsing:**
+```typescript
+// ❌ Wrong
+const body = await request.json()
+const { field } = body  // Error: unknown
 
-### Step 8: Final Verification
+// ✅ Right (see photos.ts, reviews.ts)
+const body = await request.json() as { field?: type }
+const { field } = body
+```
 
-1. Check that CI/tests are now passing using `mcp__github__get_pull_request_status`:
+**D1 database results:**
+```typescript
+// ❌ Wrong
+if (result.changes > 0)  // Property doesn't exist
 
-    - Look at the `state` field (should be "success" or "pending")
-    - List any failing checks
+// ✅ Right
+if ((result.meta.changes || 0) > 0)
+```
 
-2. Verify no merge conflicts remain using `mcp__github__get_pull_request`:
+### Code Patterns (CLAUDE.md)
 
-    - Check `mergeable` field (should be `true`)
-    - Check `mergeable_state` field
+**Copy constants:**
+```typescript
+// ❌ Wrong
+<button>Get Directions</button>
 
-3. Confirm all blocking issues from Step 3 have been addressed
+// ✅ Right
+import { COPY } from '@/constants/copy'
+<button>{COPY.map.getDirections}</button>
+```
 
-4. Provide a final summary to the user with:
-    - Number of blocking issues fixed
-    - List of commits pushed
-    - Number of follow-up issues created (with issue numbers)
-    - Current PR status (ready to merge / waiting for CI / needs re-review)
-    - Next recommended action
+**API client:**
+```typescript
+// ❌ Wrong
+await fetch(`${API_URL}/cafes`)
 
-## Notes
+// ✅ Right
+import { api } from '@/utils/api'
+await api.cafes.getAll()
+```
 
--   **Use MCP tools for GitHub operations**: All GitHub API interactions should use `mcp__github__*` tools (get_pull_request, create_issue, add_issue_comment, etc.)
--   **Use git CLI for branch operations**: Use standard git commands for checkout, fetch, pull, push
--   Always preserve existing PR commits - don't force push or rebase unless explicitly requested
--   If you encounter ambiguous feedback, ask the user for clarification before making changes
--   If a blocking issue requires significant architectural changes, discuss with the user first
--   Keep commits focused - one commit per logical fix
--   If tests fail after fixes, treat that as a new blocking issue and fix it
--   For MatchaMap specifically: Always check CLAUDE.md patterns (Copy constants, API client, shared UI components)
+**Shared UI:**
+```typescript
+// ❌ Wrong
+<button className="bg-gradient...">Click</button>
+
+// ✅ Right
+import { PrimaryButton } from '@/components/ui'
+<PrimaryButton onClick={...}>Click</PrimaryButton>
+```
+
+### Common Review Feedback
+
+**"Add error handling":**
+```typescript
+try {
+  await api.endpoint()
+  setSuccess(true)
+} catch (error) {
+  console.error('Operation failed:', error)
+  // Use AlertDialog for user-facing errors
+}
+```
+
+**"Add validation":**
+```typescript
+if (!field || typeof field !== 'expected-type') {
+  return badRequestResponse('Field is required', request, env)
+}
+```
+
+**"Follow existing patterns":**
+- Check similar files: `reviews.ts`, `photos.ts`, `favorites.ts`
+- Look for Zod validators in `backend/src/validators/`
+- Check frontend patterns in similar components
+
+---
 
 ## MCP Tools Reference
 
-**Pull Request Operations:**
+**Get PR details:**
+```typescript
+mcp__github__pull_request_read({
+  owner: 'keving3ng',
+  repo: 'matchamap',
+  pullNumber: <number>,
+  method: 'get'  // or 'get_reviews', 'get_files', 'get_status', 'get_review_comments'
+})
+```
 
--   `mcp__github__get_pull_request` - Get PR details
--   `mcp__github__get_pull_request_comments` - Get review comments
--   `mcp__github__get_pull_request_reviews` - Get formal reviews
--   `mcp__github__get_pull_request_files` - Get changed files
--   `mcp__github__get_pull_request_status` - Get CI/test status
+**Search for issues:**
+```typescript
+mcp__github__search_issues({
+  query: 'repo:keving3ng/matchamap <keywords> label:enhancement',
+  owner: 'keving3ng',
+  repo: 'matchamap'
+})
+```
 
-**Issue Operations:**
+**Create issue:**
+```typescript
+mcp__github__create_issue({
+  owner: 'keving3ng',
+  repo: 'matchamap',
+  title: '...',
+  body: '...',
+  labels: ['follow-up', 'enhancement']
+})
+```
 
--   `mcp__github__list_issues` - List issues with filters
--   `mcp__github__search_issues` - Search issues by query
--   `mcp__github__create_issue` - Create new issue
--   `mcp__github__add_issue_comment` - Add comment (works for PRs too, since PRs are issues)
+**Add comment to PR:**
+```typescript
+mcp__github__add_issue_comment({
+  owner: 'keving3ng',
+  repo: 'matchamap',
+  issue_number: <pr-number>,
+  body: '...'
+})
+```
+
+---
+
+## Tips for Efficiency
+
+1. **Use MCP tools** - Type-safe and integrated into Claude Code
+2. **Fetch in parallel** - Use `Promise.all()` for multiple PR queries
+3. **Batch related fixes** - Commit multiple related changes together
+4. **Trust pre-commit hook** - Don't manually run all checks
+5. **Check similar files** - Copy working patterns
+6. **Ask if unclear** - Don't guess on ambiguous feedback
+7. **Create issues liberally** - Better to track than forget
+8. **Link everything** - Always reference PR/comment in follow-up issues
+
+---
+
+## When Things Go Wrong
+
+**Pre-commit hook fails:**
+- Fix the errors (usually typecheck or tests)
+- Don't bypass - it prevents CI failures
+
+**Reviewer disagrees with approach:**
+- Discuss in PR comments before implementing
+- Ask for clarification on ambiguous feedback
+
+**Too many blocking items:**
+- Prioritize by severity (CI failures first, then code issues)
+- Fix and push incrementally
+- Don't try to fix everything at once
+
+**Unsure if duplicate issue:**
+- Search more broadly with `mcp__github__search_issues`
+- Check closed issues too (state: "all")
+- When in doubt, create it - can close if duplicate found
+
+**CI fails after fixes:**
+- Use `/fix-ci <pr-number>` to debug
+- May have introduced new issues while fixing
+- Check the specific failure in GitHub Actions
