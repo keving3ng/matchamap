@@ -23,24 +23,27 @@ export function createAuthCookie(
 ): string {
   // Determine if we're in production (HTTPS environment)
   const isProduction = env.ENVIRONMENT === 'production';
-  
-  // Use Lax for development (allows cookies on HTTP localhost)
-  // Use Strict for production (maximum security on HTTPS)
-  const sameSite = isProduction ? 'Strict' : 'Lax';
-  
+
+  // SameSite cookie policy:
+  // - Production (HTTPS): Use 'Strict' for maximum security
+  // - Development (HTTP): Omit SameSite to allow cross-origin cookies on localhost
+  //   (SameSite=Lax would block cookies from localhost:3000 to localhost:8787)
+  //   (SameSite=None requires Secure flag, which doesn't work on HTTP)
+  const sameSiteAttr = isProduction ? 'SameSite=Strict' : null;
+
   // Only use Secure flag on HTTPS (production)
   // HTTP localhost will reject cookies with Secure flag
-  const secureFlag = isProduction ? 'Secure' : '';
-  
+  const secureFlag = isProduction ? 'Secure' : null;
+
   const parts = [
     `${name}=${value}`,
     options.httpOnly !== false ? 'HttpOnly' : null,
     secureFlag,
-    `SameSite=${sameSite}`,
+    sameSiteAttr,
     `Path=${options.path || '/'}`,
     `Max-Age=${options.maxAge}`,
   ].filter(Boolean);
-  
+
   return parts.join('; ');
 }
 
@@ -54,17 +57,17 @@ export function createAuthCookie(
  */
 export function clearAuthCookie(name: string, path: string = '/', env: Env): string {
   const isProduction = env.ENVIRONMENT === 'production';
-  const sameSite = isProduction ? 'Strict' : 'Lax';
-  const secureFlag = isProduction ? 'Secure' : '';
-  
+  const sameSiteAttr = isProduction ? 'SameSite=Strict' : null;
+  const secureFlag = isProduction ? 'Secure' : null;
+
   const parts = [
     `${name}=`,
     'HttpOnly',
     secureFlag,
-    `SameSite=${sameSite}`,
+    sameSiteAttr,
     `Path=${path}`,
     'Max-Age=0',
   ].filter(Boolean);
-  
+
   return parts.join('; ');
 }
