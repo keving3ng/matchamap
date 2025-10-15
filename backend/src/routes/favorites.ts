@@ -86,7 +86,7 @@ export async function addFavorite(request: AuthenticatedRequest, env: Env): Prom
       return errorResponse('Not authenticated', HTTP_STATUS.UNAUTHORIZED, request as Request, env);
     }
 
-    const body = await request.json();
+    const body = await request.json() as { cafeId?: number; notes?: string };
     const { cafeId, notes } = body;
 
     // Validate required fields
@@ -152,13 +152,13 @@ export async function removeFavorite(request: AuthenticatedRequest, env: Env): P
 
     // Delete the favorite (idempotent - no error if doesn't exist)
     const result = await env.DB.prepare(`
-      DELETE FROM user_favorites 
+      DELETE FROM user_favorites
       WHERE user_id = ? AND cafe_id = ?
     `).bind(request.user.userId, cafeIdNum).run();
 
-    return jsonResponse({ 
+    return jsonResponse({
       success: true,
-      removed: result.changes > 0 
+      removed: (result.meta.changes || 0) > 0
     }, HTTP_STATUS.OK, request as Request, env);
   } catch (error) {
     console.error('Remove favorite error:', error);
@@ -183,7 +183,7 @@ export async function updateFavoriteNotes(request: AuthenticatedRequest, env: En
       return badRequestResponse('Valid cafeId is required', request as Request, env);
     }
 
-    const body = await request.json();
+    const body = await request.json() as { notes?: string };
     const { notes } = body;
 
     // Validate notes
