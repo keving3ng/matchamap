@@ -183,8 +183,15 @@ export async function login(request: IRequest, env: Env): Promise<Response> {
     // Set httpOnly cookies with environment-aware security flags
     const accessMaxAge = user.role === 'admin' ? JWT_EXPIRY_SECONDS.ACCESS_TOKEN_ADMIN : JWT_EXPIRY_SECONDS.ACCESS_TOKEN;
     const refreshMaxAge = user.role === 'admin' ? JWT_EXPIRY_SECONDS.REFRESH_TOKEN_ADMIN : JWT_EXPIRY_SECONDS.REFRESH_TOKEN;
-    response.headers.append('Set-Cookie', createAuthCookie('access_token', accessToken, { maxAge: accessMaxAge }, env));
-    response.headers.append('Set-Cookie', createAuthCookie('refresh_token', refreshToken, { maxAge: refreshMaxAge, path: '/api/auth/refresh' }, env));
+
+    const accessCookie = createAuthCookie('access_token', accessToken, { maxAge: accessMaxAge }, env);
+    const refreshCookie = createAuthCookie('refresh_token', refreshToken, { maxAge: refreshMaxAge, path: '/api/auth/refresh' }, env);
+
+    console.log('🍪 [LOGIN] Setting access_token cookie:', accessCookie);
+    console.log('🍪 [LOGIN] Setting refresh_token cookie:', refreshCookie);
+
+    response.headers.append('Set-Cookie', accessCookie);
+    response.headers.append('Set-Cookie', refreshCookie);
 
     return response;
   } catch (error) {
