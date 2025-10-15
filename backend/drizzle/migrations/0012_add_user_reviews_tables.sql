@@ -89,3 +89,7 @@ CREATE INDEX `idx_review_photos_created_at` ON `review_photos` (`created_at`);--
 
 CREATE INDEX `idx_review_helpful_review` ON `review_helpful` (`review_id`);--> statement-breakpoint
 CREATE INDEX `idx_review_helpful_user` ON `review_helpful` (`user_id`);
+
+-- Add aggregated user rating columns to cafes table
+ALTER TABLE `cafes` ADD COLUMN `user_rating_avg` real;
+ALTER TABLE `cafes` ADD COLUMN `user_rating_count` integer DEFAULT 0;
