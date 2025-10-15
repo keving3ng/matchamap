@@ -64,8 +64,23 @@ MatchaMap is a full-stack React application with Cloudflare edge infrastructure,
 ### Data
 
 -   **Database**: Cloudflare D1 (SQLite)
--   **Storage**: Cloudflare R2 (S3-compatible)
+-   **Storage**: Cloudflare R2 (S3-compatible object storage for user photos)
 -   **Cache**: HTTP Cache-Control headers
+
+**R2 Configuration:**
+```toml
+# Photo storage buckets
+[[r2_buckets]]
+binding = "PHOTOS_BUCKET"
+bucket_name = "matchamap-photos"           # Production
+preview_bucket_name = "matchamap-photos-dev"  # Development
+```
+
+**Storage Structure:**
+- Full-size images: `photos/{cafeId}/{userId}/{timestamp}-{randomId}.{ext}`
+- Thumbnails: `thumbnails/{cafeId}/{userId}/{timestamp}-{randomId}.webp`
+- Cache control: `public, max-age=31536000` (1 year)
+- Metadata: userId, cafeId, uploadedAt, originalFilename
 
 ### Hosting
 
@@ -149,12 +164,41 @@ GET  /api/cafes              # List all cafes
 GET  /api/cafes/:id          # Get single cafe
 GET  /api/feed               # News feed
 GET  /api/events             # Upcoming events
+GET  /api/cafes/:id/photos   # Get approved photos for cafe
 
-Admin API (Cloudflare Access protected):
-POST   /api/admin/cafes      # Create cafe
-PUT    /api/admin/cafes/:id  # Update cafe
-DELETE /api/admin/cafes/:id  # Soft delete cafe
-GET    /api/admin/cafe-stats # Analytics dashboard
+Authentication Required:
+POST   /api/auth/register    # Register new user
+POST   /api/auth/login       # Login user
+POST   /api/auth/logout      # Logout user
+GET    /api/auth/me          # Get current user
+POST   /api/auth/refresh     # Refresh access token
+
+User Profile API:
+GET    /api/users/:username/profile  # Get public profile
+GET    /api/users/me/profile         # Get own profile
+PUT    /api/users/me/profile         # Update own profile
+POST   /api/users/me/avatar          # Upload avatar
+
+Check-ins API (Passport):
+POST   /api/checkins                 # Create check-in
+GET    /api/users/me/checkins        # Get user's check-ins (planned)
+
+Photo Upload API:
+POST   /api/photos/upload            # Upload photo to R2
+GET    /api/users/me/photos          # Get user's photos
+DELETE /api/photos/:id               # Delete own photo
+
+Admin API (JWT + Admin Role required):
+POST   /api/admin/cafes              # Create cafe
+PUT    /api/admin/cafes/:id          # Update cafe
+DELETE /api/admin/cafes/:id          # Soft delete cafe
+GET    /api/admin/cafe-stats         # Analytics dashboard
+GET    /api/admin/users              # List users
+GET    /api/admin/users/:id          # Get user details
+PUT    /api/admin/users/:id/role     # Update user role
+DELETE /api/admin/users/:id          # Delete user
+GET    /api/admin/photos             # Get pending photos
+PUT    /api/admin/photos/:id/moderate # Approve/reject photo
 
 Analytics API (fire-and-forget):
 POST /api/stats/cafe/:id/:stat   # Track cafe metric

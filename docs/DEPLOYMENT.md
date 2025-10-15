@@ -134,8 +134,8 @@ npx wrangler pages deploy dist --branch preview
 ### Initial Setup
 
 ```bash
-# Navigate to workers directory
-cd workers
+# Navigate to backend directory
+cd backend
 
 # Install dependencies
 npm install
@@ -148,6 +148,51 @@ npx wrangler d1 create matchamap-db
 
 # Update wrangler.toml with database ID
 ```
+
+### R2 Bucket Setup (Photo Storage)
+
+**Required for:** User photo uploads, profile avatars, cafe photos
+
+```bash
+# Create production R2 bucket
+npx wrangler r2 bucket create matchamap-photos
+
+# Create development R2 bucket
+npx wrangler r2 bucket create matchamap-photos-dev
+
+# Verify buckets were created
+npx wrangler r2 bucket list
+```
+
+**Configuration:**
+The R2 buckets are already configured in `backend/wrangler.toml`:
+
+```toml
+[[r2_buckets]]
+binding = "PHOTOS_BUCKET"
+bucket_name = "matchamap-photos"
+preview_bucket_name = "matchamap-photos-dev"
+```
+
+**Custom Domain (Optional):**
+For production deployments, configure a custom domain for photo URLs:
+
+1. Navigate to R2 in Cloudflare Dashboard
+2. Select `matchamap-photos` bucket
+3. Go to Settings → Public Access
+4. Click "Connect Domain"
+5. Enter subdomain: `photos.matchamap.club`
+6. Add DNS record (CNAME): `photos → matchamap-photos.r2.dev`
+
+**Environment Variable:**
+Set `PHOTOS_BASE_URL` in `wrangler.toml` for custom photo URLs:
+
+```toml
+[vars]
+PHOTOS_BASE_URL = "https://photos.matchamap.club"
+```
+
+If not set, defaults to `https://photos.matchamap.app`
 
 ### wrangler.toml Configuration
 

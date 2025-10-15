@@ -1,6 +1,6 @@
 # MatchaMap Documentation Guide
 
-**Last Updated:** 2025-10-10
+**Last Updated:** 2025-10-14
 
 This guide helps you navigate the MatchaMap documentation and find exactly what you need for your task.
 
@@ -49,6 +49,7 @@ This guide helps you navigate the MatchaMap documentation and find exactly what 
 | Track analytics/metrics | `metrics-tracking-prd.md` |
 | Add a new city | `adding-new-cities.md` |
 | Integrate Google Places | `GOOGLE_PLACES_SETUP.md` |
+| Implement photo uploads | `photo-upload-guide.md` ⭐ NEW |
 
 ### Deployment & Operations
 
@@ -191,6 +192,23 @@ This guide helps you navigate the MatchaMap documentation and find exactly what 
 
 ---
 
+#### `photo-upload-guide.md` ⭐ NEW (Photo Upload System)
+**Location:** `docs/`
+**Purpose:** Technical guide for photo upload infrastructure
+**Contents:**
+- Architecture overview (R2 + D1 integration)
+- Database schema (`review_photos` table)
+- API endpoints (upload, retrieve, moderate)
+- Image processing (validation, dimensions, thumbnails)
+- R2 storage configuration and naming conventions
+- Security and moderation workflow
+- Known limitations and next steps
+- Frontend integration examples
+
+**When to read:** Implementing photo uploads, understanding moderation, R2 setup
+
+---
+
 ### Deployment Documents
 
 #### `DEPLOYMENT.md` (Deployment Guide)
@@ -257,6 +275,13 @@ Historical documents for reference:
 3. Update feature flags via `feature-flags-guide.md`
 4. Deploy via `DEPLOYMENT.md`
 
+### Implementing Photo Uploads
+1. Read `photo-upload-guide.md` (backend implementation)
+2. Set up R2 buckets via `DEPLOYMENT.md` (R2 Bucket Setup section)
+3. Run database migrations (0012_add_user_reviews_tables.sql)
+4. Test endpoints via curl/Postman
+5. Implement frontend UI components
+
 ---
 
 ## 🔍 Finding Specific Information
@@ -284,6 +309,9 @@ Historical documents for reference:
 
 ### Analytics
 → `metrics-tracking-prd.md`
+
+### Photo Upload System
+→ `photo-upload-guide.md`
 
 ---
 

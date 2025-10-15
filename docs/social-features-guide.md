@@ -198,40 +198,73 @@ function calculateCombinedScore(cafe: Cafe, userReviews: UserReview[]): number {
 
 ### Phase 2C: Photo Uploads & Gallery
 
-**Photo System**
+**Status:** ✅ **Infrastructure Complete** (PR #211) | 🚧 **Frontend UI Pending**
+
+**Photo System** (Backend Implemented)
 
 *Upload Flow:*
-1. User clicks "Add Photo" on cafe detail page or during check-in/review
-2. Upload image (max 5MB, JPG/PNG/HEIC)
-3. Image is processed:
-   - Resized to optimal dimensions (1200x1200 max)
-   - Compressed for web
-   - Uploaded to Cloudflare Images
-4. Optional: Add caption and tag drink type
-5. Photo enters moderation queue
-6. Admin approves → Photo appears in gallery
+1. User clicks "Add Photo" on cafe detail page or during check-in/review *(Frontend pending)*
+2. Upload image (max 5MB, JPG/PNG/WebP) ✅
+3. Image is processed: ✅
+   - Validated for type, size, dimensions ✅
+   - Uploaded to Cloudflare R2 ✅
+   - Thumbnail generated (200px WebP) ✅ *(Placeholder - full implementation pending)*
+   - Image dimensions extracted from headers ✅
+4. Optional: Add caption ✅
+5. Photo enters moderation queue (`pending` status) ✅
+6. Admin approves → Photo appears in gallery ✅
 
-*Storage: Cloudflare Images*
-- Automatic resizing and optimization
-- Delivery via CDN
-- Variants for thumbnails (200x200, 400x400, 1200x1200)
+*Storage: Cloudflare R2* ✅
+- R2 bucket bindings configured in `wrangler.toml`
+- Public URLs via custom domain (configurable)
+- Cache headers: 1 year for immutability
+- Custom metadata: userId, cafeId, uploadedAt, originalFilename
 
-*Moderation:*
+*Moderation:* ✅
 - All photos require admin approval before public display
-- Admin can reject inappropriate photos
-- Flagging system for community reporting
+- Photos default to `pending` status
+- Admin endpoints: `/api/admin/photos` (list), `/api/admin/photos/:id/moderate`
+- Admin can approve/reject with optional notes
+- Rejected photos kept in database for audit trail
 
-*Display:*
-- Cafe detail page: Photo gallery (grid layout)
-- User profile: Personal photo gallery
-- Feed: Recent photos from followed users
+*Display:* 🚧
+- Cafe detail page: Photo gallery (grid layout) *(Frontend pending)*
+- User profile: Personal photo gallery *(Frontend pending)*
+- Feed: Recent photos from followed users *(Phase 2D)*
+
+**Implemented API Endpoints** (PR #211):
+```
+POST   /api/photos/upload                  - Upload photo to R2 bucket
+GET    /api/cafes/:id/photos               - Get approved photos for cafe
+DELETE /api/photos/:id                     - Delete own photo
+GET    /api/users/me/photos                - Get user's uploaded photos
+GET    /api/admin/photos                   - Get pending photos (admin)
+PUT    /api/admin/photos/:id/moderate      - Approve/reject photo (admin)
+```
+
+**Technical Implementation:**
+- File validation: Max 5MB, JPEG/PNG/WebP only
+- Unique R2 keys: `photos/{cafeId}/{userId}/{timestamp}-{randomId}.{ext}`
+- Thumbnail keys: `thumbnails/{cafeId}/{userId}/{timestamp}-{randomId}.webp`
+- Database: `review_photos` table with moderation workflow
+- Image dimensions parsed from JPEG/PNG/WebP headers
+- Rate limiting: Write rate limit (max 10 uploads/minute)
+
+**Known Limitations:**
+- ⚠️ Thumbnail generation is placeholder (returns full image as WebP)
+  - **TODO:** Implement proper thumbnail resizing before production
+  - **Options:** Sharp via WASM, Cloudflare Images Transform API, or Canvas API
+- HEIC format not supported (requires conversion)
+- No client-side image compression yet
 
 **User Stories:**
-- As a user, I want to upload photos of my matcha drinks
-- As a user, I want to add photos when checking in or reviewing
-- As a user, I want to see all my uploaded photos on my profile
-- As a visitor, I want to browse photo galleries for each cafe
-- As a visitor, I want to see real photos from actual visitors
+- ✅ As a user, I can upload photos of my matcha drinks via API
+- ✅ As a user, I can add captions to my photos
+- ✅ As a user, I can delete my own photos
+- ✅ As a user, I can see all my uploaded photos via API
+- ✅ As a visitor, I can browse approved photo galleries for each cafe via API
+- 🚧 As a user, I want a UI to upload photos *(Phase 2C - Frontend)*
+- 🚧 As a user, I want to see my photos on my profile page *(Phase 2C - Frontend)*
 
 ---
 
@@ -754,20 +787,36 @@ GET    /api/recommendations/similar/:cafeId - Similar to this cafe
 
 ### Phase 2C: Photo Uploads (Week 5-6)
 
+**Status:** ✅ Backend Complete | 🚧 Frontend Pending
+
 **Setup:**
-- [ ] Cloudflare Images account setup
-- [ ] Image upload API integration
+- [x] Cloudflare R2 bucket setup (PR #211)
+- [x] R2 bindings in wrangler.toml (PR #211)
+- [x] Image upload API integration (PR #211)
 
-**Backend:**
-- [ ] Photo upload endpoints
-- [ ] Moderation queue
-- [ ] Photo approval/rejection logic
+**Backend:** ✅ Complete (PR #211)
+- [x] Photo upload endpoints (`POST /api/photos/upload`)
+- [x] Moderation queue (`GET /api/admin/photos`)
+- [x] Photo approval/rejection logic (`PUT /api/admin/photos/:id/moderate`)
+- [x] Get cafe photos (`GET /api/cafes/:id/photos`)
+- [x] Get user photos (`GET /api/users/me/photos`)
+- [x] Delete photo endpoint (`DELETE /api/photos/:id`)
+- [x] Image validation (type, size, dimensions)
+- [x] R2 storage with unique keys
+- [x] Thumbnail generation (placeholder implementation)
+- [x] `review_photos` table schema and migration
 
-**Frontend:**
+**Frontend:** 🚧 Pending
 - [ ] `PhotoUploadModal`
 - [ ] `PhotoGallery` component
 - [ ] Admin photo moderation queue
 - [ ] Test upload and approval flow
+
+**Next Steps:**
+1. Implement proper thumbnail generation (Sharp/WASM or Cloudflare Transform)
+2. Create frontend photo upload UI
+3. Build photo gallery components
+4. Add admin moderation UI
 
 **Success Metrics:**
 - 100+ photos uploaded in first month
