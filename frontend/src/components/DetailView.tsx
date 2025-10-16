@@ -12,6 +12,8 @@ import { api } from '../utils/api'
 import { trackCafeStat, trackCheckIn } from '../utils/analytics'
 import { useAuthStore } from '../stores/authStore'
 import { ReviewForm } from './reviews/ReviewForm'
+import { AggregatedRating } from './reviews/AggregatedRating'
+import { ReviewList } from './reviews/ReviewList'
 import type { DetailViewProps } from '../types'
 import type { Event } from '../../../shared/types'
 
@@ -22,6 +24,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
   const mapsUrl = getMapsUrl(cafe.address || '', cafe.link)
   const [cafeEvents, setCafeEvents] = useState<Event[]>([])
   const [showReviewForm, setShowReviewForm] = useState(false)
+  const [reviewCount, setReviewCount] = useState(cafe.userRatingCount || 0)
   const navigate = useNavigate()
 
   const hoursData = cafe.hours ? formatHoursCompact(cafe.hours) : null
@@ -272,28 +275,44 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
           </div>
         )}
 
-        {/* User Reviews Section - Only show Write Review button if user is authenticated */}
-        {isUserAccountsEnabled && user && (
+        {/* User Reviews Section */}
+        {isUserAccountsEnabled && (
           <div className="mt-8 animate-fade-in">
-            <div className="flex items-center justify-between mb-4">
+            
+            {/* Aggregated Rating Component */}
+            <div className="mb-6">
+              <AggregatedRating
+                expertScore={cafe.displayScore ?? undefined}
+                userScore={cafe.userRatingAvg ?? undefined}
+                reviewCount={reviewCount}
+              />
+            </div>
+
+            {/* Review Header with Write Button */}
+            <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2.5">
                 <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 p-2 rounded-xl shadow-md">
                   <MessageSquare size={20} className="text-white" />
                 </div>
                 <h3 className="text-xl font-bold text-charcoal-900">Community Reviews</h3>
               </div>
-              <button
-                onClick={() => setShowReviewForm(true)}
-                className="bg-gradient-to-r from-matcha-600 to-matcha-500 text-white px-4 py-2 rounded-xl font-semibold hover:from-matcha-700 hover:to-matcha-600 transition-all duration-200 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 min-h-[44px]"
-              >
-                <Edit3 size={18} />
-                Write Review
-              </button>
+              {user && (
+                <button
+                  onClick={() => setShowReviewForm(true)}
+                  className="bg-gradient-to-r from-matcha-600 to-matcha-500 text-white px-4 py-2 rounded-xl font-semibold hover:from-matcha-700 hover:to-matcha-600 transition-all duration-200 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 min-h-[44px]"
+                >
+                  <Edit3 size={18} />
+                  Write Review
+                </button>
+              )}
             </div>
-            {/* TODO: Display existing reviews here */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-matcha-100 text-center text-gray-500">
-              No reviews yet. Be the first to review!
-            </div>
+
+            {/* Review List Component */}
+            <ReviewList
+              cafeId={cafe.id}
+              className="mt-4"
+              onReviewsLoaded={(total) => setReviewCount(total)}
+            />
           </div>
         )}
 
@@ -457,7 +476,8 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
               cafeId={cafe.id}
               onSuccess={() => {
                 setShowReviewForm(false)
-                // TODO: Refresh reviews list
+                // Increment review count when a new review is added
+                setReviewCount((prev: number) => prev + 1)
               }}
               onCancel={() => setShowReviewForm(false)}
             />

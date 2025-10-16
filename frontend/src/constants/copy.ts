@@ -564,6 +564,39 @@ export const COPY = {
     submitSuccessMessage: 'Thank you for sharing your experience!',
     submitError: 'Failed to submit review. Please try again.',
     photoUploadError: 'Failed to upload photos. Please try again.',
+    
+    // Aggregated Ratings & Display
+    expertScore: 'Expert Score',
+    userScore: 'User Score',
+    communityRating: 'Community Rating',
+    basedOnReviews: (count: number) => `Based on ${count} review${count === 1 ? '' : 's'}`,
+    noReviews: 'No reviews yet',
+    
+    // Review List
+    sortBy: 'Sort by',
+    sortRecent: 'Most Recent',
+    sortRating: 'Highest Rating',
+    sortHelpful: 'Most Helpful',
+    filterBy: 'Filter by Rating',
+    allRatings: 'All Ratings',
+    ratingRange: (min: number, max: number) => `${min}-${max} stars`,
+    loadMore: 'Load More Reviews',
+    noReviewsFound: 'No reviews found',
+    
+    // Review Card
+    helpful: 'Helpful',
+    markHelpful: 'Mark as helpful',
+    visitedOn: 'Visited on',
+    ago: (time: string) => `${time} ago`,
+    viewProfile: 'View profile',
+    showPhotos: 'Show photos',
+    hidePhotos: 'Hide photos',
+    featuredReview: 'Featured Review',
+
+    // Error States
+    loadError: 'Failed to load reviews',
+    tryAgain: 'Please try again',
+    retry: 'Retry',
   },
 } as const
 

@@ -27,6 +27,8 @@ ENVIRONMENT = "production"
 ALLOWED_ORIGINS = "https://matchamap.club,https://*.matchamap.club,https://matchamap.pages.dev,https://*.matchamap.pages.dev,http://localhost:3000,http://localhost:5174"
 # COOKIE_DOMAIN: Set this when using a custom subdomain (e.g., api.matchamap.club)
 # to allow cookie sharing between frontend and backend on different subdomains
+# NOTE: In local dev with 'npx wrangler dev', this setting is ignored by the code
+# to prevent cookie issues with localhost (cookies.ts detects local dev automatically)
 COOKIE_DOMAIN = ".matchamap.club"
 
 # SECURITY: Required secrets (set via Wrangler CLI)

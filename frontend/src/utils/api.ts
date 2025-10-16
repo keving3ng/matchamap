@@ -718,18 +718,37 @@ export const reviewsAPI = {
   /**
    * Get reviews for a cafe
    */
+  async getForCafe(cafeId: number, filters?: {
+    page?: number
+    limit?: number
+    offset?: number
+    sortBy?: string
+    sortOrder?: 'asc' | 'desc'
+    minRating?: number
+    maxRating?: number
+  }): Promise<{ reviews: UserReview[]; total: number; hasMore: boolean }> {
+    const params = new URLSearchParams()
+    if (filters?.page) params.append('page', filters.page.toString())
+    if (filters?.limit) params.append('limit', filters.limit.toString())
+    if (filters?.offset) params.append('offset', filters.offset.toString())
+    if (filters?.sortBy) params.append('sortBy', filters.sortBy)
+    if (filters?.sortOrder) params.append('sortOrder', filters.sortOrder)
+    if (filters?.minRating) params.append('minRating', filters.minRating.toString())
+    if (filters?.maxRating) params.append('maxRating', filters.maxRating.toString())
+
+    const query = params.toString() ? `?${params.toString()}` : ''
+    return fetchAPI(`/cafes/${cafeId}/reviews${query}`)
+  },
+
+  /**
+   * Get reviews for a cafe (legacy method name for compatibility)
+   */
   async getByCafe(cafeId: number, filters?: {
     limit?: number
     offset?: number
     sortBy?: 'newest' | 'oldest' | 'rating_high' | 'rating_low'
   }): Promise<{ reviews: UserReview[]; total: number; hasMore: boolean }> {
-    const params = new URLSearchParams()
-    if (filters?.limit) params.append('limit', filters.limit.toString())
-    if (filters?.offset) params.append('offset', filters.offset.toString())
-    if (filters?.sortBy) params.append('sortBy', filters.sortBy)
-
-    const query = params.toString() ? `?${params.toString()}` : ''
-    return fetchAPI(`/cafes/${cafeId}/reviews${query}`)
+    return this.getForCafe(cafeId, filters)
   },
 
   /**
@@ -763,6 +782,16 @@ export const reviewsAPI = {
   async delete(reviewId: number): Promise<{ success: boolean; message: string }> {
     return fetchAPI(`/reviews/${reviewId}`, {
       method: 'DELETE',
+    })
+  },
+
+  /**
+   * Vote on a review (helpful/unhelpful)
+   */
+  async vote(reviewId: number, isHelpful: boolean): Promise<{ success: boolean; newCount: number }> {
+    return fetchAPI(`/reviews/${reviewId}/vote`, {
+      method: 'POST',
+      body: JSON.stringify({ isHelpful }),
     })
   },
 }
