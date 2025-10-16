@@ -592,6 +592,11 @@ export const COPY = {
     showPhotos: 'Show photos',
     hidePhotos: 'Hide photos',
     featuredReview: 'Featured Review',
+
+    // Error States
+    loadError: 'Failed to load reviews',
+    tryAgain: 'Please try again',
+    retry: 'Retry',
   },
 } as const
 

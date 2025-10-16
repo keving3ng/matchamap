@@ -19,8 +19,10 @@ interface ReviewCardProps {
  *
  * Mobile-first design with collapsible photo gallery and helpful voting.
  * Shows all review ratings, user profile info, and engagement actions.
+ *
+ * Performance: Memoized to prevent unnecessary re-renders in large lists
  */
-export const ReviewCard: React.FC<ReviewCardProps> = ({
+export const ReviewCard: React.FC<ReviewCardProps> = React.memo(({
   review,
   onHelpfulVote,
   className = ''
@@ -248,4 +250,4 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
       </div>
     </div>
   )
-}
+})

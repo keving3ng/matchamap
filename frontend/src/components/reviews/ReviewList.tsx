@@ -39,7 +39,8 @@ export const ReviewList: React.FC<ReviewListProps> = ({
   const [hasMore, setHasMore] = useState(true)
   const [total, setTotal] = useState(0)
   const [currentPage, setCurrentPage] = useState(1)
-  
+  const [error, setError] = useState<string | null>(null)
+
   // Filter and sort state
   const [sortBy, setSortBy] = useState<SortOption>('recent')
   const [filterBy, setFilterBy] = useState<FilterOption>('all')
@@ -92,10 +93,17 @@ export const ReviewList: React.FC<ReviewListProps> = ({
       }
     } catch (error) {
       console.error('Failed to load reviews:', error)
+      setError(COPY.reviews.loadError)
     } finally {
       setLoading(false)
       setLoadingMore(false)
     }
+  }
+
+  // Retry loading reviews
+  const handleRetry = () => {
+    setError(null)
+    loadReviews(1, false)
   }
 
   // Load initial reviews
@@ -165,7 +173,21 @@ export const ReviewList: React.FC<ReviewListProps> = ({
     )
   }
 
-  if (reviews.length === 0) {
+  // Error state with retry
+  if (error && reviews.length === 0) {
+    return (
+      <div className={`text-center py-12 ${className}`}>
+        <div className="text-6xl mb-4">⚠️</div>
+        <h3 className="text-lg font-bold text-gray-800 mb-2">{COPY.reviews.loadError}</h3>
+        <p className="text-gray-600 mb-6">{COPY.reviews.tryAgain}</p>
+        <SecondaryButton onClick={handleRetry}>
+          {COPY.reviews.retry}
+        </SecondaryButton>
+      </div>
+    )
+  }
+
+  if (reviews.length === 0 && !loading) {
     return (
       <div className={`text-center py-12 ${className}`}>
         <div className="text-6xl mb-4">💭</div>
