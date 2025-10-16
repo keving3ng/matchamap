@@ -1,7 +1,7 @@
 import { IRequest } from 'itty-router';
 import { eq, and, sql, desc, asc, isNull } from 'drizzle-orm';
 import { Env } from '../types';
-import { getDb, userReviews, reviewHelpful, cafes, users, userProfiles } from '../db';
+import { getDb, userReviews, reviewHelpful, cafes, users, userProfiles, reviewPhotos } from '../db';
 import {
   jsonResponse,
   errorResponse,
@@ -83,10 +83,43 @@ export async function createReview(request: AuthenticatedRequest, env: Env): Pro
         tags: validatedData.tags ? JSON.stringify(validatedData.tags) : null,
         visitDate: validatedData.visitDate || null,
         isPublic: validatedData.isPublic,
-        moderationStatus: shouldAutoApprove(validatedData.content, validatedData.title) ? 'approved' : 'pending',
+        moderationStatus: 'approved', // Auto-approve all reviews for now
       })
       .returning()
       .get();
+
+    // Link photos to the review if photoIds provided
+    if (validatedData.photoIds && validatedData.photoIds.length > 0) {
+      console.log(`Linking ${validatedData.photoIds.length} photos to review ${newReview.id}`);
+
+      // Verify photos exist and belong to the user
+      for (const photoId of validatedData.photoIds) {
+        const photo = await db
+          .select()
+          .from(reviewPhotos)
+          .where(
+            and(
+              eq(reviewPhotos.id, photoId),
+              eq(reviewPhotos.userId, request.user.userId),
+              eq(reviewPhotos.cafeId, cafeId)
+            )
+          )
+          .get();
+
+        if (!photo) {
+          console.error(`Photo ${photoId} not found or doesn't belong to user ${request.user.userId}`);
+          return badRequestResponse(`Photo ${photoId} not found or access denied`, request as Request, env);
+        }
+
+        // Link photo to review
+        await db
+          .update(reviewPhotos)
+          .set({ reviewId: newReview.id })
+          .where(eq(reviewPhotos.id, photoId));
+      }
+
+      console.log(`Successfully linked ${validatedData.photoIds.length} photos to review ${newReview.id}`);
+    }
 
     // Update cafe aggregated rating asynchronously with retry logic
     updateCafeRatingWithRetry(env, cafeId, 'review creation').catch(error => {
@@ -97,6 +130,8 @@ export async function createReview(request: AuthenticatedRequest, env: Env): Pro
     return jsonResponse({ review: newReview }, HTTP_STATUS.CREATED, request as Request, env);
   } catch (error) {
     console.error('Error creating review:', error);
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    console.error('Error message:', error instanceof Error ? error.message : String(error));
     return errorResponse('Internal server error', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
   }
 }
@@ -117,9 +152,13 @@ export async function getCafeReviews(request: IRequest, env: Env): Promise<Respo
     let queryParams;
     try {
       queryParams = validateGetCafeReviewsQuery({
+        page: url.searchParams.get('page'),
         limit: url.searchParams.get('limit'),
         offset: url.searchParams.get('offset'),
         sortBy: url.searchParams.get('sortBy'),
+        sortOrder: url.searchParams.get('sortOrder'),
+        minRating: url.searchParams.get('minRating'),
+        maxRating: url.searchParams.get('maxRating'),
       });
     } catch (error: any) {
       // Format Zod validation errors for user-friendly messages
@@ -140,19 +179,39 @@ export async function getCafeReviews(request: IRequest, env: Env): Promise<Respo
       return notFoundResponse(request as Request, env);
     }
 
-    // Build sorting clause
-    let orderClause;
+    // Build sorting clause based on sortBy and sortOrder
+    let sortColumn;
     switch (queryParams.sortBy) {
       case 'rating':
-        orderClause = desc(userReviews.overallRating);
+      case 'overallRating':
+        sortColumn = userReviews.overallRating;
         break;
       case 'helpful':
-        orderClause = desc(userReviews.helpfulCount);
+      case 'helpfulCount':
+        sortColumn = userReviews.helpfulCount;
         break;
       case 'recent':
+      case 'createdAt':
       default:
-        orderClause = desc(userReviews.createdAt);
+        sortColumn = userReviews.createdAt;
         break;
+    }
+
+    const orderClause = queryParams.sortOrder === 'asc' ? asc(sortColumn) : desc(sortColumn);
+
+    // Build where conditions with optional rating filters
+    const whereConditions: any[] = [
+      eq(userReviews.cafeId, cafeId),
+      eq(userReviews.moderationStatus, 'approved'),
+      eq(userReviews.isPublic, true)
+    ];
+
+    // Add rating range filters if provided
+    if (queryParams.minRating !== undefined && queryParams.minRating !== null) {
+      whereConditions.push(sql`${userReviews.overallRating} >= ${queryParams.minRating}`);
+    }
+    if (queryParams.maxRating !== undefined && queryParams.maxRating !== null) {
+      whereConditions.push(sql`${userReviews.overallRating} <= ${queryParams.maxRating}`);
     }
 
     // Get reviews with user information (fetch +1 to check if more exist)
@@ -178,13 +237,7 @@ export async function getCafeReviews(request: IRequest, env: Env): Promise<Respo
       .from(userReviews)
       .innerJoin(users, eq(userReviews.userId, users.id))
       .leftJoin(userProfiles, eq(userReviews.userId, userProfiles.userId))
-      .where(
-        and(
-          eq(userReviews.cafeId, cafeId),
-          eq(userReviews.moderationStatus, 'approved'),
-          eq(userReviews.isPublic, true)
-        )
-      )
+      .where(and(...whereConditions))
       .orderBy(orderClause)
       .limit(queryParams.limit + 1)
       .offset(queryParams.offset);
@@ -193,19 +246,68 @@ export async function getCafeReviews(request: IRequest, env: Env): Promise<Respo
     const hasMore = reviews.length > queryParams.limit;
     const paginatedReviews = hasMore ? reviews.slice(0, queryParams.limit) : reviews;
 
-    // Parse tags from JSON strings
+    // Get total count of reviews matching the filters
+    const countResult = await db
+      .select({ count: sql<number>`COUNT(*)` })
+      .from(userReviews)
+      .innerJoin(users, eq(userReviews.userId, users.id))
+      .leftJoin(userProfiles, eq(userReviews.userId, userProfiles.userId))
+      .where(and(...whereConditions))
+      .get();
+
+    const total = countResult?.count || 0;
+
+    // Fetch photos for all reviews
+    const reviewIds = paginatedReviews.map(r => r.id);
+    let photosMap: Map<number, any[]> = new Map();
+
+    if (reviewIds.length > 0) {
+      const photos = await db
+        .select({
+          id: reviewPhotos.id,
+          reviewId: reviewPhotos.reviewId,
+          imageUrl: reviewPhotos.imageUrl,
+          thumbnailUrl: reviewPhotos.thumbnailUrl,
+          caption: reviewPhotos.caption,
+          width: reviewPhotos.width,
+          height: reviewPhotos.height,
+        })
+        .from(reviewPhotos)
+        .where(
+          and(
+            sql`${reviewPhotos.reviewId} IN (${sql.join(reviewIds.map(id => sql`${id}`), sql`, `)})`,
+            eq(reviewPhotos.moderationStatus, 'approved')
+          )
+        )
+        .all();
+
+      // Group photos by reviewId
+      photos.forEach(photo => {
+        if (photo.reviewId) {
+          if (!photosMap.has(photo.reviewId)) {
+            photosMap.set(photo.reviewId, []);
+          }
+          photosMap.get(photo.reviewId)!.push(photo);
+        }
+      });
+    }
+
+    // Parse tags from JSON strings and attach photos
     const processedReviews = paginatedReviews.map(review => ({
       ...review,
       tags: review.tags ? JSON.parse(review.tags) : null,
+      photos: photosMap.get(review.id) || [],
+      user: review.username ? {
+        username: review.username,
+        displayName: review.displayName || undefined,
+        avatarUrl: review.avatarUrl || undefined,
+      } : undefined,
     }));
 
     return jsonResponse({
       reviews: processedReviews,
-      pagination: {
-        limit: queryParams.limit,
-        offset: queryParams.offset,
-        hasMore,
-      },
+      total,
+      hasMore,
     }, HTTP_STATUS.OK, request as Request, env);
   } catch (error) {
     console.error('Error getting cafe reviews:', error);
@@ -538,10 +640,46 @@ export async function getUserReviews(request: IRequest, env: Env): Promise<Respo
     const hasMore = reviews.length > queryParams.limit;
     const paginatedReviews = hasMore ? reviews.slice(0, queryParams.limit) : reviews;
 
-    // Parse tags from JSON strings
+    // Fetch photos for all reviews
+    const reviewIds = paginatedReviews.map(r => r.id);
+    let photosMap: Map<number, any[]> = new Map();
+
+    if (reviewIds.length > 0) {
+      const photos = await db
+        .select({
+          id: reviewPhotos.id,
+          reviewId: reviewPhotos.reviewId,
+          imageUrl: reviewPhotos.imageUrl,
+          thumbnailUrl: reviewPhotos.thumbnailUrl,
+          caption: reviewPhotos.caption,
+          width: reviewPhotos.width,
+          height: reviewPhotos.height,
+        })
+        .from(reviewPhotos)
+        .where(
+          and(
+            sql`${reviewPhotos.reviewId} IN (${sql.join(reviewIds.map(id => sql`${id}`), sql`, `)})`,
+            eq(reviewPhotos.moderationStatus, 'approved')
+          )
+        )
+        .all();
+
+      // Group photos by reviewId
+      photos.forEach(photo => {
+        if (photo.reviewId) {
+          if (!photosMap.has(photo.reviewId)) {
+            photosMap.set(photo.reviewId, []);
+          }
+          photosMap.get(photo.reviewId)!.push(photo);
+        }
+      });
+    }
+
+    // Parse tags from JSON strings and attach photos
     const processedReviews = paginatedReviews.map(review => ({
       ...review,
       tags: review.tags ? JSON.parse(review.tags) : null,
+      photos: photosMap.get(review.id) || [],
     }));
 
     return jsonResponse({

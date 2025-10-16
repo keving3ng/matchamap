@@ -95,15 +95,20 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ cafeId, onSuccess, onCan
       }
       
       // Submit review
-      await api.reviews.create(cafeId, reviewData)
-      
+      console.log('[ReviewForm] Submitting review:', reviewData)
+      const result = await api.reviews.create(cafeId, reviewData)
+      console.log('[ReviewForm] Review created successfully:', result)
+
       setSuccess(true)
       setTimeout(() => {
         onSuccess?.()
       }, 2000)
-      
+
     } catch (err) {
-      setError(err instanceof Error ? err.message : COPY.reviews.submitError)
+      console.error('[ReviewForm] Error submitting review:', err)
+      const errorMessage = err instanceof Error ? err.message : COPY.reviews.submitError
+      console.error('[ReviewForm] Error message:', errorMessage)
+      setError(errorMessage)
     } finally {
       setSubmitting(false)
       setUploadingPhotos(false)

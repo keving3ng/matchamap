@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
-import { Star, ThumbsUp, User, Calendar, Badge, Image, ChevronDown, ChevronUp } from 'lucide-react'
+import { ThumbsUp, User, Calendar, Badge, Image, ChevronDown, ChevronUp } from 'lucide-react'
 import { SecondaryButton, StatusBadge } from '../ui'
 import { COPY } from '../../constants/copy'
 import { api } from '../../utils/api'
-import type { UserReview } from '../../../shared/types'
+import type { UserReview } from '../../../../shared/types'
 
 interface ReviewCardProps {
   /** Review data with optional user and photos */
@@ -16,7 +16,7 @@ interface ReviewCardProps {
 
 /**
  * ReviewCard - Displays individual user review with ratings, content, and photos
- * 
+ *
  * Mobile-first design with collapsible photo gallery and helpful voting.
  * Shows all review ratings, user profile info, and engagement actions.
  */
@@ -29,11 +29,11 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
   const [isVotingHelpful, setIsVotingHelpful] = useState(false)
 
   // Format visit date
-  const visitDate = review.visitDate 
-    ? new Date(review.visitDate).toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
+  const visitDate = review.visitDate
+    ? new Date(review.visitDate).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
       })
     : null
 
@@ -44,7 +44,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
   const diffWeeks = Math.floor(diffDays / 7)
   const diffMonths = Math.floor(diffDays / 30)
-  
+
   let timeAgo: string
   if (diffDays === 0) {
     timeAgo = 'Today'
@@ -64,7 +64,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
 
   const handleHelpfulVote = async () => {
     if (isVotingHelpful || !onHelpfulVote) return
-    
+
     setIsVotingHelpful(true)
     try {
       await api.reviews.vote(review.id, true)
@@ -76,48 +76,42 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
     }
   }
 
-  const renderRatingStars = (rating: number) => {
+  const renderRatingBadge = (rating: number, size: 'sm' | 'lg' = 'sm') => {
+    const sizeClasses = size === 'lg'
+      ? 'px-3 py-1.5 text-lg font-bold'
+      : 'px-2 py-0.5 text-sm font-semibold'
+
     return (
-      <div className="flex items-center gap-0.5">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Star 
-            key={star} 
-            size={14} 
-            className={`${
-              star <= Math.round(rating / 2) 
-                ? 'text-yellow-500 fill-yellow-500' 
-                : 'text-gray-300'
-            }`} 
-          />
-        ))}
+      <div className={`bg-gradient-to-br from-matcha-500 to-matcha-600 text-white rounded-lg ${sizeClasses} shadow-sm`}>
+        {rating.toFixed(1)}
       </div>
     )
   }
 
   return (
     <div className={`bg-white rounded-2xl shadow-md border border-gray-200 p-5 hover:shadow-lg transition-shadow ${className}`}>
-      
+
       {/* Header with user info and overall rating */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3 flex-1">
           {/* User Avatar */}
           <div className="w-10 h-10 bg-gradient-to-br from-matcha-400 to-matcha-600 rounded-full flex items-center justify-center flex-shrink-0">
-            {review.user?.avatarUrl ? (
-              <img 
-                src={review.user.avatarUrl} 
-                alt={review.user.displayName || review.user.username}
+            {review.user?.user?.avatarUrl ? (
+              <img
+                src={review.user.user.avatarUrl}
+                alt={review.user.user.displayName || review.user.user.username}
                 className="w-full h-full rounded-full object-cover"
               />
             ) : (
               <User size={20} className="text-white" />
             )}
           </div>
-          
+
           {/* User Info */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <h4 className="font-bold text-gray-800 text-sm truncate">
-                {review.user?.displayName || review.user?.username || 'Anonymous User'}
+                {review.user?.user?.displayName || review.user?.user?.username || 'Anonymous User'}
               </h4>
               {review.isFeatured && (
                 <StatusBadge variant="success" className="text-xs">
@@ -133,9 +127,8 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
         </div>
 
         {/* Overall Rating */}
-        <div className="flex items-center gap-2 flex-shrink-0">
-          {renderRatingStars(review.overallRating)}
-          <span className="font-bold text-gray-800">{(review.overallRating / 2).toFixed(1)}</span>
+        <div className="flex-shrink-0">
+          {renderRatingBadge(review.overallRating, 'lg')}
         </div>
       </div>
 
@@ -156,46 +149,26 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
         <div className="grid grid-cols-2 gap-3 mb-4">
           {review.matchaQualityRating && (
             <div className="flex items-center justify-between text-xs">
-              <span className="text-gray-600">{COPY.reviews.matchaQuality}</span>
-              <div className="flex items-center gap-1">
-                {renderRatingStars(review.matchaQualityRating)}
-                <span className="font-medium text-gray-700 ml-1">
-                  {(review.matchaQualityRating / 2).toFixed(1)}
-                </span>
-              </div>
+              <span className="text-gray-600 font-medium">{COPY.reviews.matchaQuality}</span>
+              {renderRatingBadge(review.matchaQualityRating)}
             </div>
           )}
           {review.ambianceRating && (
             <div className="flex items-center justify-between text-xs">
-              <span className="text-gray-600">{COPY.reviews.ambiance}</span>
-              <div className="flex items-center gap-1">
-                {renderRatingStars(review.ambianceRating)}
-                <span className="font-medium text-gray-700 ml-1">
-                  {(review.ambianceRating / 2).toFixed(1)}
-                </span>
-              </div>
+              <span className="text-gray-600 font-medium">{COPY.reviews.ambiance}</span>
+              {renderRatingBadge(review.ambianceRating)}
             </div>
           )}
           {review.serviceRating && (
             <div className="flex items-center justify-between text-xs">
-              <span className="text-gray-600">{COPY.reviews.service}</span>
-              <div className="flex items-center gap-1">
-                {renderRatingStars(review.serviceRating)}
-                <span className="font-medium text-gray-700 ml-1">
-                  {(review.serviceRating / 2).toFixed(1)}
-                </span>
-              </div>
+              <span className="text-gray-600 font-medium">{COPY.reviews.service}</span>
+              {renderRatingBadge(review.serviceRating)}
             </div>
           )}
           {review.valueRating && (
             <div className="flex items-center justify-between text-xs">
-              <span className="text-gray-600">{COPY.reviews.value}</span>
-              <div className="flex items-center gap-1">
-                {renderRatingStars(review.valueRating)}
-                <span className="font-medium text-gray-700 ml-1">
-                  {(review.valueRating / 2).toFixed(1)}
-                </span>
-              </div>
+              <span className="text-gray-600 font-medium">{COPY.reviews.value}</span>
+              {renderRatingBadge(review.valueRating)}
             </div>
           )}
         </div>
@@ -204,7 +177,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
       {/* Tags */}
       {review.tags && review.tags.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-4">
-          {review.tags.map((tag, index) => (
+          {review.tags.map((tag: string, index: number) => (
             <StatusBadge key={index} variant="info" className="text-xs">
               {tag}
             </StatusBadge>
@@ -229,15 +202,15 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
           >
             <Image size={16} />
             <span>
-              {showPhotos ? COPY.reviews.hidePhotos : COPY.reviews.showPhotos} 
+              {showPhotos ? COPY.reviews.hidePhotos : COPY.reviews.showPhotos}
               ({review.photos.length})
             </span>
             {showPhotos ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </button>
-          
+
           {showPhotos && (
             <div className="grid grid-cols-2 gap-3">
-              {review.photos.map((photo) => (
+              {review.photos.map((photo: { id: number; imageUrl: string }) => (
                 <div key={photo.id} className="aspect-square rounded-xl overflow-hidden">
                   <img
                     src={photo.imageUrl}

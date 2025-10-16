@@ -52,6 +52,8 @@ export interface Cafe {
   // Ratings
   ambianceScore?: number | null // Cafe ambiance rating (0-10)
   displayScore?: number | null // Calculated from drinks (default OR highest)
+  userRatingAvg?: number | null // Average user rating (0-10) - aggregated from reviews
+  userRatingCount?: number // Number of user reviews
 
   // Menu & Pricing
   drinks?: DrinkItem[] // All drink offerings

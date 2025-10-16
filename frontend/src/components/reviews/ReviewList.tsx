@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import { Filter, Clock, Star, TrendingUp, ChevronDown } from 'lucide-react'
+import { Filter, Clock, Star, TrendingUp, ChevronDown, type LucideIcon } from 'lucide-react'
 import { FilterButton, SecondaryButton } from '../ui'
 import { ReviewCard } from './ReviewCard'
 import { COPY } from '../../constants/copy'
 import { api } from '../../utils/api'
-import type { UserReview } from '../../../shared/types'
+import type { UserReview } from '../../../../shared/types'
 
 interface ReviewListProps {
   /** Cafe ID to fetch reviews for */
@@ -13,6 +13,8 @@ interface ReviewListProps {
   initialReviews?: UserReview[]
   /** Optional className for styling */
   className?: string
+  /** Callback when reviews are loaded with total count */
+  onReviewsLoaded?: (total: number) => void
 }
 
 type SortOption = 'recent' | 'rating' | 'helpful'
@@ -28,7 +30,8 @@ type FilterOption = 'all' | '4-5' | '3-4' | '2-3' | '1-2'
 export const ReviewList: React.FC<ReviewListProps> = ({
   cafeId,
   initialReviews = [],
-  className = ''
+  className = '',
+  onReviewsLoaded
 }) => {
   const [reviews, setReviews] = useState<UserReview[]>(initialReviews)
   const [loading, setLoading] = useState(false)
@@ -78,10 +81,15 @@ export const ReviewList: React.FC<ReviewListProps> = ({
       } else {
         setReviews(response.reviews)
       }
-      
+
       setTotal(response.total)
       setHasMore(response.hasMore)
       setCurrentPage(page)
+
+      // Notify parent of total count
+      if (onReviewsLoaded) {
+        onReviewsLoaded(response.total)
+      }
     } catch (error) {
       console.error('Failed to load reviews:', error)
     } finally {
@@ -123,7 +131,7 @@ export const ReviewList: React.FC<ReviewListProps> = ({
   ]
 
   // Sort options
-  const sortOptions: { value: SortOption; label: string; icon: React.ComponentType<any> }[] = [
+  const sortOptions: { value: SortOption; label: string; icon: LucideIcon }[] = [
     { value: 'recent', label: COPY.reviews.sortRecent, icon: Clock },
     { value: 'rating', label: COPY.reviews.sortRating, icon: Star },
     { value: 'helpful', label: COPY.reviews.sortHelpful, icon: TrendingUp },

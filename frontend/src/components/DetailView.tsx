@@ -24,10 +24,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
   const mapsUrl = getMapsUrl(cafe.address || '', cafe.link)
   const [cafeEvents, setCafeEvents] = useState<Event[]>([])
   const [showReviewForm, setShowReviewForm] = useState(false)
-  const [reviewStats, setReviewStats] = useState<{
-    userScore?: number
-    reviewCount: number
-  }>({ reviewCount: 0 })
+  const [reviewCount, setReviewCount] = useState(cafe.userRatingCount || 0)
   const navigate = useNavigate()
 
   const hoursData = cafe.hours ? formatHoursCompact(cafe.hours) : null
@@ -49,38 +46,6 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
     }
 
     fetchCafeEvents()
-  }, [cafe.id])
-
-  // Fetch review statistics
-  useEffect(() => {
-    const fetchReviewStats = async () => {
-      try {
-        const response = await api.reviews.getForCafe(cafe.id, { 
-          page: 1, 
-          limit: 1  // Just get the first review to get stats
-        })
-        
-        // Calculate average user rating from all reviews
-        const allReviews = await api.reviews.getForCafe(cafe.id, { 
-          page: 1, 
-          limit: 100  // Get more reviews to calculate average
-        })
-        
-        if (allReviews.reviews.length > 0) {
-          const avgRating = allReviews.reviews.reduce((sum, review) => sum + review.overallRating, 0) / allReviews.reviews.length
-          setReviewStats({
-            userScore: avgRating,
-            reviewCount: allReviews.total
-          })
-        } else {
-          setReviewStats({ reviewCount: 0 })
-        }
-      } catch (error) {
-        console.error('Failed to fetch review stats:', error)
-      }
-    }
-
-    fetchReviewStats()
   }, [cafe.id])
 
   const handleViewEvent = () => {
@@ -317,9 +282,9 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
             {/* Aggregated Rating Component */}
             <div className="mb-6">
               <AggregatedRating
-                expertScore={cafe.displayScore}
-                userScore={reviewStats.userScore}
-                reviewCount={reviewStats.reviewCount}
+                expertScore={cafe.displayScore ?? undefined}
+                userScore={cafe.userRatingAvg ?? undefined}
+                reviewCount={reviewCount}
               />
             </div>
 
@@ -343,9 +308,10 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
             </div>
 
             {/* Review List Component */}
-            <ReviewList 
+            <ReviewList
               cafeId={cafe.id}
               className="mt-4"
+              onReviewsLoaded={(total) => setReviewCount(total)}
             />
           </div>
         )}
@@ -510,11 +476,8 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
               cafeId={cafe.id}
               onSuccess={() => {
                 setShowReviewForm(false)
-                // Refresh review stats when a new review is added
-                setReviewStats(prev => ({
-                  ...prev,
-                  reviewCount: prev.reviewCount + 1
-                }))
+                // Increment review count when a new review is added
+                setReviewCount((prev: number) => prev + 1)
               }}
               onCancel={() => setShowReviewForm(false)}
             />

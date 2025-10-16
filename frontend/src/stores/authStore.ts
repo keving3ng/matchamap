@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 import type { User, LoginRequest, RegisterRequest } from '../../../shared/types'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8787'
@@ -19,11 +20,13 @@ interface AuthState {
   clearError: () => void
 }
 
-export const useAuthStore = create<AuthState>()((set, get) => ({
-  user: null,
-  isAuthenticated: false,
-  isLoading: false,
-  error: null,
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set, get) => ({
+      user: null,
+      isAuthenticated: false,
+      isLoading: false,
+      error: null,
 
       login: async (credentials: LoginRequest) => {
         set({ isLoading: true, error: null })
@@ -166,5 +169,14 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         }
       },
 
-  clearError: () => set({ error: null }),
-}))
+      clearError: () => set({ error: null }),
+    }),
+    {
+      name: 'auth-storage', // localStorage key
+      partialize: (state) => ({
+        user: state.user,
+        isAuthenticated: state.isAuthenticated,
+      }),
+    }
+  )
+)

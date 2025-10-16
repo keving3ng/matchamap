@@ -43,6 +43,8 @@ export interface Cafe {
   // Ratings
   ambianceScore?: number | null // Cafe ambiance rating (0-10)
   displayScore?: number | null // Calculated from drinks (default OR highest)
+  userRatingAvg?: number | null // Aggregated user rating average (0-10 scale)
+  userRatingCount?: number // Count of user reviews
 
   // Menu & Pricing
   drinks?: Drink[] // All drink offerings
@@ -469,7 +471,7 @@ export interface PaginatedResponse<T> {
 // ADMIN TYPES
 // ============================================================================
 
-export interface CafeFormData extends Omit<Cafe, 'id' | 'createdAt' | 'updatedAt' | 'displayScore' | 'drinks'> {
+export interface CafeFormData extends Omit<Cafe, 'id' | 'createdAt' | 'updatedAt' | 'displayScore' | 'drinks' | 'userRatingAvg' | 'userRatingCount'> {
   id?: number
 }
 

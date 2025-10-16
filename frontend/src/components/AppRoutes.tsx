@@ -56,6 +56,7 @@ const CafeDetailWrapper: React.FC = () => {
   const { slug } = useParams<{ cityShortcode: string; slug: string }>()
   const { cafesWithDistance } = useCafeStore()
   const { visitedCafeIds, toggleVisited } = useVisitedCafesStore()
+  const { cafesFetched, isLoading } = useDataStore()
 
   // Find cafe by slug
   const cafe = cafesWithDistance.find(c => {
@@ -64,6 +65,23 @@ const CafeDetailWrapper: React.FC = () => {
     return cafeSlug === slug
   })
 
+  // Show loading state while cafes are being fetched
+  if (!cafesFetched || isLoading) {
+    return (
+      <div className="flex-1 overflow-y-auto pb-24 pt-0">
+        <Skeleton variant="rectangular" height={224} className="mb-4" />
+        <div className="px-4 max-w-2xl mx-auto">
+          <Skeleton variant="text" width="80%" height={32} className="mb-4" />
+          <Skeleton variant="rectangular" height={200} className="mb-4" />
+          <Skeleton variant="text" width="100%" height={20} className="mb-2" />
+          <Skeleton variant="text" width="100%" height={20} className="mb-2" />
+          <Skeleton variant="text" width="60%" height={20} />
+        </div>
+      </div>
+    )
+  }
+
+  // Only redirect if cafes are loaded and cafe not found
   if (!cafe) {
     return <Navigate to="/" replace />
   }

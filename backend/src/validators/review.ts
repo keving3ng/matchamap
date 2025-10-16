@@ -11,11 +11,11 @@ export const createReviewSchema = z.object({
   ambianceRating: z.number().min(0).max(10).optional(),
   serviceRating: z.number().min(0).max(10).optional(),
   valueRating: z.number().min(0).max(10).optional(),
-  
+
   title: z.string().max(100, 'Title must be less than 100 characters').optional(),
   content: z.string().min(50, 'Content must be at least 50 characters').max(2000, 'Content must be less than 2000 characters'),
   tags: z.array(z.string().max(50, 'Tag must be less than 50 characters')).max(10, 'Maximum 10 tags allowed').optional(),
-  
+
   visitDate: z.string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, 'Visit date must be in YYYY-MM-DD format')
     .refine((date) => {
@@ -26,6 +26,7 @@ export const createReviewSchema = z.object({
     }, 'Visit date cannot be in the future')
     .optional(),
   isPublic: z.boolean().default(true),
+  photoIds: z.array(z.number().int().positive()).max(10, 'Maximum 10 photos allowed per review').optional(),
 })
 
 // Update review schema (all fields optional except content validation)
@@ -64,9 +65,23 @@ export const updateReviewSchema = z.object({
 
 // Get cafe reviews query parameters
 export const getCafeReviewsQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).optional(),
   limit: z.coerce.number().int().min(1).max(50).default(20),
-  offset: z.coerce.number().int().min(0).default(0),
-  sortBy: z.enum(['recent', 'rating', 'helpful']).default('recent'),
+  offset: z.coerce.number().int().min(0).optional(),
+  sortBy: z.enum(['recent', 'rating', 'helpful', 'createdAt', 'overallRating', 'helpfulCount']).default('recent'),
+  sortOrder: z.enum(['asc', 'desc']).default('desc'),
+  minRating: z.preprocess(
+    (val) => val === null || val === '' ? undefined : val,
+    z.coerce.number().min(0).max(10).optional()
+  ),
+  maxRating: z.preprocess(
+    (val) => val === null || val === '' ? undefined : val,
+    z.coerce.number().min(0).max(10).optional()
+  ),
+}).transform((data) => {
+  // Calculate offset from page if provided (page takes precedence)
+  const offset = data.page ? (data.page - 1) * data.limit : (data.offset || 0);
+  return { ...data, offset };
 })
 
 // Get user reviews query parameters  

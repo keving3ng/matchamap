@@ -5,26 +5,27 @@ import { HTTP_STATUS } from '../constants';
 import { getDb } from '../db';
 import { reviewPhotos, cafes, users } from '../../drizzle/schema';
 import { eq, and, desc } from 'drizzle-orm';
-import { 
-  validateImage, 
-  generateImageKey, 
+import { AuthenticatedRequest } from '../middleware/auth';
+import {
+  validateImage,
+  generateImageKey,
   generateThumbnailKey,
   getFileExtension,
   generateThumbnail,
-  getImageDimensions 
+  getImageDimensions
 } from '../utils/imageProcessing';
 
 /**
  * Upload photo to R2 bucket
  * POST /api/photos/upload
  */
-export async function uploadPhoto(request: IRequest, env: Env): Promise<Response> {
+export async function uploadPhoto(request: AuthenticatedRequest, env: Env): Promise<Response> {
   try {
-    const userId = (request as any).userId;
-    
-    if (!userId) {
-      return jsonResponse({ error: 'Authentication required' }, HTTP_STATUS.UNAUTHORIZED, request, env);
+    if (!request.user) {
+      return jsonResponse({ error: 'Authentication required' }, HTTP_STATUS.UNAUTHORIZED, request as Request, env);
     }
+
+    const userId = request.user.userId;
 
     // Parse multipart form data
     const formData = await request.formData();
@@ -107,12 +108,12 @@ export async function uploadPhoto(request: IRequest, env: Env): Promise<Response
       height: dimensions?.height || null,
       fileSize: validation.fileSize!,
       mimeType: validation.mimeType!,
-      moderationStatus: 'pending',
+      moderationStatus: 'approved', // Auto-approve photos for now
     }).returning().get();
 
     return jsonResponse({
       photo: newPhoto,
-      message: 'Photo uploaded successfully. It will be reviewed before appearing publicly.'
+      message: 'Photo uploaded successfully!'
     }, HTTP_STATUS.CREATED, request, env);
 
   } catch (error) {
@@ -173,14 +174,14 @@ export async function getCafePhotos(request: IRequest, env: Env): Promise<Respon
  * Delete a photo (only by the owner)
  * DELETE /api/photos/:id
  */
-export async function deletePhoto(request: IRequest, env: Env): Promise<Response> {
+export async function deletePhoto(request: AuthenticatedRequest, env: Env): Promise<Response> {
   try {
-    const userId = (request as any).userId;
-    const { id: photoId } = request.params;
-
-    if (!userId) {
-      return jsonResponse({ error: 'Authentication required' }, HTTP_STATUS.UNAUTHORIZED, request, env);
+    if (!request.user) {
+      return jsonResponse({ error: 'Authentication required' }, HTTP_STATUS.UNAUTHORIZED, request as Request, env);
     }
+
+    const userId = request.user.userId;
+    const { id: photoId } = request.params;
 
     if (!photoId) {
       return jsonResponse({ error: 'Photo ID is required' }, HTTP_STATUS.BAD_REQUEST, request, env);
@@ -225,13 +226,13 @@ export async function deletePhoto(request: IRequest, env: Env): Promise<Response
  * Get photos uploaded by the current user
  * GET /api/users/me/photos
  */
-export async function getMyPhotos(request: IRequest, env: Env): Promise<Response> {
+export async function getMyPhotos(request: AuthenticatedRequest, env: Env): Promise<Response> {
   try {
-    const userId = (request as any).userId;
-
-    if (!userId) {
-      return jsonResponse({ error: 'Authentication required' }, HTTP_STATUS.UNAUTHORIZED, request, env);
+    if (!request.user) {
+      return jsonResponse({ error: 'Authentication required' }, HTTP_STATUS.UNAUTHORIZED, request as Request, env);
     }
+
+    const userId = request.user.userId;
 
     const db = getDb(env.DB);
     
@@ -310,15 +311,15 @@ export async function getPhotosForModeration(request: IRequest, env: Env): Promi
  * Admin: Approve or reject a photo
  * PUT /api/admin/photos/:id/moderate
  */
-export async function moderatePhoto(request: IRequest, env: Env): Promise<Response> {
+export async function moderatePhoto(request: AuthenticatedRequest, env: Env): Promise<Response> {
   try {
-    const adminUserId = (request as any).userId;
+    if (!request.user) {
+      return jsonResponse({ error: 'Authentication required' }, HTTP_STATUS.UNAUTHORIZED, request as Request, env);
+    }
+
+    const adminUserId = request.user.userId;
     const { id: photoId } = request.params;
     const body = await request.json() as { status?: string; notes?: string };
-
-    if (!adminUserId) {
-      return jsonResponse({ error: 'Authentication required' }, HTTP_STATUS.UNAUTHORIZED, request, env);
-    }
 
     if (!photoId) {
       return jsonResponse({ error: 'Photo ID is required' }, HTTP_STATUS.BAD_REQUEST, request, env);

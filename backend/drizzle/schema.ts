@@ -224,34 +224,36 @@ export const reviewPhotos = sqliteTable('review_photos', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   cafeId: integer('cafe_id').notNull().references(() => cafes.id, { onDelete: 'cascade' }),
-  
+  reviewId: integer('review_id').references(() => userReviews.id, { onDelete: 'cascade' }), // Nullable - photos can exist before review
+
   // R2 Storage keys and URLs
   imageKey: text('image_key').notNull().unique(), // R2 object key (unique identifier)
   imageUrl: text('image_url').notNull(), // Public URL for full-size image
   thumbnailKey: text('thumbnail_key').notNull(), // R2 object key for thumbnail
   thumbnailUrl: text('thumbnail_url'), // Public URL for thumbnail (200px)
-  
+
   // Photo metadata
   caption: text('caption'),
   width: integer('width'), // Original image width in pixels
   height: integer('height'), // Original image height in pixels
   fileSize: integer('file_size'), // File size in bytes
   mimeType: text('mime_type').notNull(), // image/jpeg, image/png, etc.
-  
+
   // Moderation
-  moderationStatus: text('moderation_status', { 
-    enum: ['pending', 'approved', 'rejected'] 
+  moderationStatus: text('moderation_status', {
+    enum: ['pending', 'approved', 'rejected']
   }).notNull().default('pending'),
   moderatedAt: text('moderated_at'),
   moderatedBy: integer('moderated_by').references(() => users.id),
   moderationNotes: text('moderation_notes'),
-  
+
   // Timestamps
   createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
 }, (table) => ({
   userIdx: index('review_photos_user_idx').on(table.userId),
   cafeIdx: index('review_photos_cafe_idx').on(table.cafeId),
+  reviewIdx: index('review_photos_review_idx').on(table.reviewId),
   imageKeyIdx: index('review_photos_image_key_idx').on(table.imageKey),
   moderationStatusIdx: index('review_photos_moderation_status_idx').on(table.moderationStatus),
   createdAtIdx: index('review_photos_created_at_idx').on(table.createdAt),

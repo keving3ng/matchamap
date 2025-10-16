@@ -41,21 +41,37 @@ export function requireAuth() {
 
     const token = tokenCookie.split('=')[1];
     console.log('🔐 [AUTH] Token extracted:', token ? token.substring(0, 20) + '...' : 'EMPTY');
-    
+
     if (!token) {
+      console.log('❌ [AUTH] Token is empty after extraction');
       return errorResponse('Unauthorized: Invalid access token cookie', HTTP_STATUS.UNAUTHORIZED, request as Request, env);
     }
 
     if (!env.JWT_SECRET) {
-      console.error('JWT_SECRET is not configured');
+      console.error('❌ [AUTH] JWT_SECRET is not configured');
       return errorResponse('Server configuration error', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
     }
 
-    const payload = await verifyToken(token, env.JWT_SECRET);
+    console.log('🔐 [AUTH] JWT_SECRET is configured, verifying token...');
+
+    let payload;
+    try {
+      payload = await verifyToken(token, env.JWT_SECRET);
+      console.log('🔐 [AUTH] Token verification result:', payload ? 'SUCCESS' : 'FAILED (null)');
+      if (payload) {
+        console.log('🔐 [AUTH] Payload:', { userId: payload.userId, email: payload.email, role: payload.role });
+      }
+    } catch (error) {
+      console.error('❌ [AUTH] Token verification threw error:', error);
+      return errorResponse('Unauthorized: Token verification failed', HTTP_STATUS.UNAUTHORIZED, request as Request, env);
+    }
 
     if (!payload) {
+      console.log('❌ [AUTH] Token verification returned null (invalid or expired token)');
       return errorResponse('Unauthorized: Invalid or expired token', HTTP_STATUS.UNAUTHORIZED, request as Request, env);
     }
+
+    console.log('✅ [AUTH] Authentication successful, attaching user to request');
 
     // Attach user to request
     request.user = payload;
