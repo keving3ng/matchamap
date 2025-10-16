@@ -84,18 +84,6 @@ vi.mock('../../stores/authStore', () => ({
   useAuthStore: () => mockAuthStore,
 }))
 
-// Mock data store
-vi.mock('../../stores/dataStore', () => ({
-  useDataStore: () => ({
-    feedItems: [],
-    eventItems: [],
-    fetchCafes: vi.fn(),
-    eventsFetched: false,
-    isLoading: false,
-    fetchEvents: vi.fn(),
-  }),
-}))
-
 // Mock cafe store with test cafe
 const mockCafe = {
   id: 1,
@@ -104,7 +92,25 @@ const mockCafe = {
   address: '123 Test St',
   latitude: 43.6532,
   longitude: -79.3832,
+  city: 'toronto',
+  quickNote: 'Test quick note',
 }
+
+// Mock data store
+vi.mock('../../stores/dataStore', () => ({
+  useDataStore: () => ({
+    cafes: [mockCafe],
+    feedItems: [],
+    eventItems: [],
+    fetchCafes: vi.fn(),
+    fetchFeed: vi.fn(),
+    fetchEvents: vi.fn(),
+    cafesFetched: true,
+    feedFetched: true,
+    eventsFetched: true,
+    isLoading: false,
+  }),
+}))
 
 vi.mock('../../stores/cafeStore', () => ({
   useCafeStore: () => ({

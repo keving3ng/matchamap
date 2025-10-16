@@ -37,6 +37,36 @@ vi.mock('../../constants/copy', () => ({
   },
 }))
 
+// Mock review components to simplify testing
+vi.mock('../reviews/AggregatedRating', () => ({
+  AggregatedRating: ({ expertScore, userScore, reviewCount }: any) => (
+    <div data-testid="aggregated-rating">
+      {expertScore && <span>Expert: {expertScore}</span>}
+      {userScore && <span>User: {userScore}</span>}
+      {reviewCount !== undefined && <span>Reviews: {reviewCount}</span>}
+    </div>
+  ),
+}))
+
+vi.mock('../reviews/ReviewList', () => ({
+  ReviewList: ({ cafeId, onReviewsLoaded }: any) => {
+    // Call onReviewsLoaded if provided to simulate review count syncing
+    if (onReviewsLoaded) {
+      setTimeout(() => onReviewsLoaded(0), 0)
+    }
+    return <div data-testid="review-list">ReviewList for cafe {cafeId}</div>
+  },
+}))
+
+vi.mock('../reviews/ReviewForm', () => ({
+  ReviewForm: ({ onSuccess, onCancel }: any) => (
+    <div data-testid="review-form">
+      <button onClick={onSuccess}>Submit</button>
+      <button onClick={onCancel}>Cancel</button>
+    </div>
+  ),
+}))
+
 // Mock hooks
 vi.mock('../../hooks/useAppFeatures', () => ({
   useAppFeatures: () => ({
@@ -50,6 +80,10 @@ vi.mock('../../utils/api', () => ({
   api: {
     events: {
       getAll: vi.fn(),
+    },
+    reviews: {
+      getForCafe: vi.fn(),
+      vote: vi.fn(),
     },
     stats: {
       trackCafeStat: vi.fn(),
@@ -103,6 +137,8 @@ const mockCafe: CafeWithDistance = {
   city: 'Toronto',
   ambianceScore: 8.5,
   displayScore: 9.0,
+  userRatingAvg: 8.8,
+  userRatingCount: 12,
   chargeForAltMilk: 0.75,
   quickNote: 'A cozy matcha spot downtown',
   review: 'Amazing matcha lattes with perfect foam art. The space is small but cozy.',
@@ -149,6 +185,12 @@ describe('DetailView', () => {
     vi.clearAllMocks()
     // Mock API to return no events by default
     vi.mocked(api.events.getAll).mockResolvedValue({ events: [] })
+    // Mock reviews API to return empty reviews by default
+    vi.mocked(api.reviews.getForCafe).mockResolvedValue({
+      reviews: [],
+      total: 0,
+      hasMore: false,
+    })
   })
 
   it('should render cafe details', () => {
