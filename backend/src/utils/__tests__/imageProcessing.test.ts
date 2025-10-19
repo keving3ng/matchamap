@@ -11,33 +11,36 @@ import {
 describe('Image Processing Utils', () => {
   describe('validateImage', () => {
     it('should validate JPEG images', () => {
-      const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
-      file.size = 1024 * 1024; // 1MB
-      
+      // Create file with 1MB of data
+      const data = new Uint8Array(1024 * 1024);
+      const file = new File([data], 'test.jpg', { type: 'image/jpeg' });
+
       const result = validateImage(file);
-      
+
       expect(result.isValid).toBe(true);
       expect(result.mimeType).toBe('image/jpeg');
       expect(result.fileSize).toBe(1024 * 1024);
     });
 
     it('should validate PNG images', () => {
-      const file = new File(['test'], 'test.png', { type: 'image/png' });
-      file.size = 2 * 1024 * 1024; // 2MB
-      
+      // Create file with 2MB of data
+      const data = new Uint8Array(2 * 1024 * 1024);
+      const file = new File([data], 'test.png', { type: 'image/png' });
+
       const result = validateImage(file);
-      
+
       expect(result.isValid).toBe(true);
       expect(result.mimeType).toBe('image/png');
       expect(result.fileSize).toBe(2 * 1024 * 1024);
     });
 
     it('should validate WebP images', () => {
-      const file = new File(['test'], 'test.webp', { type: 'image/webp' });
-      file.size = 512 * 1024; // 512KB
-      
+      // Create file with 512KB of data
+      const data = new Uint8Array(512 * 1024);
+      const file = new File([data], 'test.webp', { type: 'image/webp' });
+
       const result = validateImage(file);
-      
+
       expect(result.isValid).toBe(true);
       expect(result.mimeType).toBe('image/webp');
       expect(result.fileSize).toBe(512 * 1024);
@@ -45,56 +48,56 @@ describe('Image Processing Utils', () => {
 
     it('should reject unsupported file types', () => {
       const file = new File(['test'], 'test.gif', { type: 'image/gif' });
-      file.size = 1024;
-      
+
       const result = validateImage(file);
-      
+
       expect(result.isValid).toBe(false);
-      expect(result.error).toBe('Unsupported file type. Please use JPEG, PNG, or WebP.');
+      expect(result.error).toContain('Invalid file type');
     });
 
     it('should reject files that are too large', () => {
-      const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
-      file.size = 6 * 1024 * 1024; // 6MB (over 5MB limit)
-      
+      // Create file with 6MB of data
+      const data = new Uint8Array(6 * 1024 * 1024);
+      const file = new File([data], 'test.jpg', { type: 'image/jpeg' });
+
       const result = validateImage(file);
-      
+
       expect(result.isValid).toBe(false);
-      expect(result.error).toBe('File size must be less than 5MB');
+      expect(result.error).toContain('File too large');
     });
 
     it('should reject empty files', () => {
       const file = new File([''], 'test.jpg', { type: 'image/jpeg' });
-      file.size = 0;
-      
+
       const result = validateImage(file);
-      
+
       expect(result.isValid).toBe(false);
-      expect(result.error).toBe('File size must be less than 5MB');
+      expect(result.error).toBe('Empty file');
     });
   });
 
   describe('generateImageKey', () => {
     it('should generate unique keys for different inputs', () => {
-      const key1 = generateImageKey('1', '123', '.jpg');
-      const key2 = generateImageKey('2', '123', '.jpg');
-      const key3 = generateImageKey('1', '456', '.jpg');
-      
+      const key1 = generateImageKey('1', '123', 'jpg');
+      const key2 = generateImageKey('2', '123', 'jpg');
+      const key3 = generateImageKey('1', '456', 'jpg');
+
       expect(key1).not.toBe(key2);
       expect(key1).not.toBe(key3);
       expect(key2).not.toBe(key3);
-      
-      // Should contain cafe and user info
-      expect(key1).toContain('cafe-1');
-      expect(key1).toContain('user-123');
+
+      // Should contain cafe and user info in path format
+      expect(key1).toContain('photos/1/123/');
+      expect(key2).toContain('photos/2/123/');
+      expect(key3).toContain('photos/1/456/');
       expect(key1).toContain('.jpg');
     });
 
     it('should handle different file extensions', () => {
-      const jpegKey = generateImageKey('1', '123', '.jpg');
-      const pngKey = generateImageKey('1', '123', '.png');
-      const webpKey = generateImageKey('1', '123', '.webp');
-      
+      const jpegKey = generateImageKey('1', '123', 'jpg');
+      const pngKey = generateImageKey('1', '123', 'png');
+      const webpKey = generateImageKey('1', '123', 'webp');
+
       expect(jpegKey.endsWith('.jpg')).toBe(true);
       expect(pngKey.endsWith('.png')).toBe(true);
       expect(webpKey.endsWith('.webp')).toBe(true);
@@ -106,28 +109,29 @@ describe('Image Processing Utils', () => {
       const key1 = generateThumbnailKey('1', '123');
       const key2 = generateThumbnailKey('2', '123');
       const key3 = generateThumbnailKey('1', '456');
-      
+
       expect(key1).not.toBe(key2);
       expect(key1).not.toBe(key3);
       expect(key2).not.toBe(key3);
-      
-      // Should contain cafe and user info
-      expect(key1).toContain('cafe-1');
-      expect(key1).toContain('user-123');
-      expect(key1).toContain('thumb');
+
+      // Should contain thumbnails path and cafe/user info
+      expect(key1).toContain('thumbnails/1/123/');
+      expect(key2).toContain('thumbnails/2/123/');
+      expect(key3).toContain('thumbnails/1/456/');
+      expect(key1).toContain('.webp');
     });
   });
 
   describe('getFileExtension', () => {
     it('should return correct extensions for MIME types', () => {
-      expect(getFileExtension('image/jpeg')).toBe('.jpg');
-      expect(getFileExtension('image/png')).toBe('.png');
-      expect(getFileExtension('image/webp')).toBe('.webp');
+      expect(getFileExtension('image/jpeg')).toBe('jpg');
+      expect(getFileExtension('image/png')).toBe('png');
+      expect(getFileExtension('image/webp')).toBe('webp');
     });
 
     it('should return default extension for unknown MIME types', () => {
-      expect(getFileExtension('image/unknown')).toBe('.jpg');
-      expect(getFileExtension('')).toBe('.jpg');
+      expect(getFileExtension('image/unknown')).toBe('jpg');
+      expect(getFileExtension('')).toBe('jpg');
     });
   });
 

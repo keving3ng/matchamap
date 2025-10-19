@@ -7,11 +7,6 @@ ENABLE_PASSPORT:
   dev: false
   prod: false
 
-# News Feed - Updates and announcements
-# Displays latest cafe additions, score updates, and matcha-related announcements
-ENABLE_FEED:
-  dev: false
-  prod: false
 
 # Search Functionality
 # Allows users to search for cafes by name, neighborhood, or other criteria

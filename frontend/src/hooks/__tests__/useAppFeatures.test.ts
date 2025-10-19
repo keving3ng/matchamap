@@ -55,13 +55,12 @@ describe('useAppFeatures', () => {
     renderHook(() => useAppFeatures())
 
     expect(mockUseFeatureToggle).toHaveBeenCalledWith('ENABLE_PASSPORT')
-    expect(mockUseFeatureToggle).toHaveBeenCalledWith('ENABLE_FEED')
     expect(mockUseFeatureToggle).toHaveBeenCalledWith('ENABLE_EVENTS')
     expect(mockUseFeatureToggle).toHaveBeenCalledWith('ENABLE_MENU')
     expect(mockUseFeatureToggle).toHaveBeenCalledWith('ENABLE_CITY_SELECTOR')
     expect(mockUseFeatureToggle).toHaveBeenCalledWith('ENABLE_USER_ACCOUNTS')
     expect(mockUseFeatureToggle).toHaveBeenCalledWith('SHOW_COMING_SOON')
-    expect(mockUseFeatureToggle).toHaveBeenCalledTimes(7)
+    expect(mockUseFeatureToggle).toHaveBeenCalledTimes(6)
   })
 
   it('should return all features disabled when all flags are false', () => {

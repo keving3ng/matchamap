@@ -27,14 +27,6 @@ export async function trackCafeStat(
   await api.stats.trackCafeStat(cafeId, stat, userId)
 }
 
-/**
- * Track feed article click
- * Fire-and-forget - errors are silently ignored
- */
-export async function trackFeedClick(feedItemId: number): Promise<void> {
-  const userId = getUserId()
-  await api.stats.trackFeedClick(feedItemId, userId)
-}
 
 /**
  * Track event click

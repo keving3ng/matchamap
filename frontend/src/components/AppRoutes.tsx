@@ -4,7 +4,6 @@ import MapView from './MapView'
 import ListView from './ListView'
 import DetailView from './DetailView'
 import EventDetailView from './EventDetailView'
-import FeedView from './FeedView'
 import PassportView from './PassportView'
 import EventsView from './EventsView'
 import LoginPage from './auth/LoginPage'
@@ -19,7 +18,6 @@ const AdminLayout = React.lazy(() => import('./admin/AdminLayout'))
 const AdminErrorBoundary = React.lazy(() => import('./admin/AdminErrorBoundary'))
 const AdminSettingsPage = React.lazy(() => import('./admin/AdminSettingsPage'))
 const CafeManagementPage = React.lazy(() => import('./admin/CafeManagementPage'))
-const NewsfeedManagementPage = React.lazy(() => import('./admin/NewsfeedManagementPage'))
 const EventManagementPage = React.lazy(() => import('./admin/EventManagementPage'))
 const ApiManagementPage = React.lazy(() => import('./admin/ApiManagementPage'))
 const UserManagementPage = React.lazy(() => import('./admin/UserManagementPage'))
@@ -145,14 +143,14 @@ const EventDetailWrapper: React.FC = () => {
 }
 
 export const AppRoutes: React.FC = () => {
-  const { isFeedEnabled, isEventsEnabled, isPassportEnabled } = useAppFeatures()
+  const { isEventsEnabled, isPassportEnabled } = useAppFeatures()
   const isAdminEnabled = useFeatureToggle('ENABLE_ADMIN_PANEL')
   const isContactEnabled = useFeatureToggle('ENABLE_CONTACT')
   const isAboutEnabled = useFeatureToggle('ENABLE_ABOUT')
   const isStoreEnabled = useFeatureToggle('ENABLE_STORE')
   const isSettingsEnabled = useFeatureToggle('ENABLE_SETTINGS')
 
-  const { feedItems, eventItems, fetchCafes } = useDataStore()
+  const { eventItems, fetchCafes } = useDataStore()
   const { cafesWithDistance, selectedCafe } = useCafeStore()
   const { showPopover, expandedCard, setExpandedCard, closePopover } = useUIStore()
   const { stampedCafeIds, toggleStamp } = useVisitedCafesStore()
@@ -197,11 +195,6 @@ export const AppRoutes: React.FC = () => {
           onViewDetails={viewDetails}
         />
       } />
-      {isFeedEnabled && (
-        <Route path="/feed" element={
-          <FeedView feedItems={feedItems} />
-        } />
-      )}
       {isEventsEnabled && (
         <>
           <Route path="/events" element={
@@ -259,17 +252,6 @@ export const AppRoutes: React.FC = () => {
                 <AdminErrorBoundary>
                   <AdminLayout>
                     <CafeManagementPage />
-                  </AdminLayout>
-                </AdminErrorBoundary>
-              </Suspense>
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/newsfeed" element={
-            <ProtectedRoute requireAdmin={true}>
-              <Suspense fallback={<AdminLoadingFallback />}>
-                <AdminErrorBoundary>
-                  <AdminLayout>
-                    <NewsfeedManagementPage />
                   </AdminLayout>
                 </AdminErrorBoundary>
               </Suspense>

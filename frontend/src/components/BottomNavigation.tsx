@@ -1,6 +1,6 @@
 import React from 'react'
 import { useNavigate, useLocation } from 'react-router'
-import { MapPin, List, User, Newspaper, Calendar } from 'lucide-react'
+import { MapPin, List, User, Calendar } from 'lucide-react'
 import { getCurrentEnvironment } from '../hooks/useFeatureToggle'
 import { useAppFeatures } from '../hooks/useAppFeatures'
 
@@ -9,7 +9,7 @@ export const BottomNavigation: React.FC = () => {
   const location = useLocation()
   const currentEnv = getCurrentEnvironment()
 
-  const { isPassportEnabled, isFeedEnabled, isEventsEnabled } = useAppFeatures()
+  const { isPassportEnabled, isEventsEnabled } = useAppFeatures()
 
   // Check if admin banner is shown (only in dev mode)
   const hasAdminBanner = currentEnv === 'dev'
@@ -18,10 +18,9 @@ export const BottomNavigation: React.FC = () => {
   // Check for detail view: /:cityShortcode/:slug pattern (two segments, not a known single-segment route)
   const pathSegments = location.pathname.split('/').filter(Boolean)
   const isDetailView = pathSegments.length === 2 &&
-    !['list', 'feed', 'passport', 'events', 'about', 'contact', 'store', 'settings', 'admin', 'login'].includes(pathSegments[0])
+    !['list', 'passport', 'events', 'about', 'contact', 'store', 'settings', 'admin', 'login'].includes(pathSegments[0])
 
   const currentView = location.pathname === '/list' ? 'list'
-    : location.pathname === '/feed' ? 'feed'
     : location.pathname === '/passport' ? 'passport'
     : location.pathname === '/events' ? 'events'
     : isDetailView ? 'detail'
@@ -53,17 +52,6 @@ export const BottomNavigation: React.FC = () => {
           <List size={24} strokeWidth={currentView === 'list' ? 2.5 : 2} />
           <span className={`text-xs ${currentView === 'list' ? 'font-semibold' : ''}`}>List</span>
         </button>
-        {isFeedEnabled && (
-          <button
-            onClick={() => navigate('/feed')}
-            className={`flex flex-col items-center gap-1 transition ${
-              currentView === 'feed' ? 'text-green-600' : 'text-gray-400'
-            }`}
-          >
-            <Newspaper size={24} strokeWidth={currentView === 'feed' ? 2.5 : 2} />
-            <span className={`text-xs ${currentView === 'feed' ? 'font-semibold' : ''}`}>Feed</span>
-          </button>
-        )}
         {isEventsEnabled && (
           <button
             onClick={() => navigate('/events')}

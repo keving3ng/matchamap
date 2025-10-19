@@ -6,8 +6,6 @@ import { HTTP_STATUS } from './constants';
 import { listCafes, getCafe, createCafe, updateCafe, deleteCafe } from './routes/cafes';
 import { listCities } from './routes/cities';
 import { listDrinks, createDrink, updateDrink, deleteDrink, setDefaultDrink, getDrinks, getDrink } from './routes/drinks';
-import { listFeedItems } from './routes/feed';
-import { listAllFeedItems, getFeedItem, createFeedItem, updateFeedItem, deleteFeedItem } from './routes/admin-feed';
 import { listEvents } from './routes/events';
 import { listAllEvents, getEvent, createEvent, updateEvent, deleteEvent } from './routes/admin-events';
 import { lookupPlace } from './routes/places';
@@ -16,7 +14,7 @@ import { register, login, logout, getCurrentUser, refreshToken } from './routes/
 import { joinWaitlist, getWaitlistAdmin } from './routes/waitlist';
 import { getUserProfile, getMyProfile, updateMyProfile, uploadAvatar } from './routes/profile';
 import { listUsers, getUserStats, getUser, updateUserRole, deleteUser } from './routes/admin-users';
-import { trackCafeStat, trackFeedClick, trackEventClick, handleCheckIn } from './routes/stats';
+import { trackCafeStat, trackEventClick, handleCheckIn } from './routes/stats';
 import { uploadPhoto, getCafePhotos, deletePhoto, getMyPhotos, getPhotosForModeration, moderatePhoto, servePhoto, getAdminCafePhotos } from './routes/photos';
 import { createReview, getCafeReviews, updateReview, deleteReview, markHelpful, removeHelpful, getUserReviews, getAdminCafeReviews, getAdminCafeReviewsCount, moderateReview } from './routes/reviews';
 import { getMyFavorites, addFavorite, removeFavorite, updateFavoriteNotes } from './routes/favorites';
@@ -64,13 +62,11 @@ router.get('/api/cafes/:id', publicRateLimit(), getCafe);
 router.get('/api/cities', publicRateLimit(), listCities);
 router.get('/api/drinks', publicRateLimit(), getDrinks);
 router.get('/api/drinks/:id', publicRateLimit(), getDrink);
-router.get('/api/feed', publicRateLimit(), listFeedItems);
 router.get('/api/events', publicRateLimit(), listEvents);
 router.post('/api/waitlist', authRateLimit(), joinWaitlist);
 
 // Stats tracking endpoints (public, no auth required)
 router.post('/api/stats/cafe/:cafeId/:stat', publicRateLimit(), trackCafeStat);
-router.post('/api/stats/feed/:feedItemId', publicRateLimit(), trackFeedClick);
 router.post('/api/stats/event/:eventId', publicRateLimit(), trackEventClick);
 
 // Check-in endpoint (authenticated users only)
@@ -127,12 +123,6 @@ router.delete('/api/admin/drinks/:id', writeRateLimit(), requireAdminAuth(), del
 router.post('/api/admin/import/cafes', writeRateLimit(), requireAdminAuth(), bulkImportCafes);
 router.get('/api/admin/export/cafes', publicRateLimit(), requireAdminAuth(), exportCafes);
 
-// Feed admin endpoints
-router.get('/api/admin/feed', publicRateLimit(), requireAdminAuth(), listAllFeedItems);
-router.get('/api/admin/feed/:id', publicRateLimit(), requireAdminAuth(), getFeedItem);
-router.post('/api/admin/feed', writeRateLimit(), requireAdminAuth(), createFeedItem);
-router.put('/api/admin/feed/:id', writeRateLimit(), requireAdminAuth(), updateFeedItem);
-router.delete('/api/admin/feed/:id', writeRateLimit(), requireAdminAuth(), deleteFeedItem);
 
 // Events admin endpoints
 router.get('/api/admin/events', publicRateLimit(), requireAdminAuth(), listAllEvents);

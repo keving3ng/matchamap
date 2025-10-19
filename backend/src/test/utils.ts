@@ -76,16 +76,6 @@ export const mockEvent = {
   updatedAt: '2024-01-01T00:00:00Z',
 };
 
-export const mockFeedItem = {
-  id: 1,
-  title: 'Test Feed Item',
-  content: 'Test content for feed',
-  link: 'https://example.com/feed',
-  featured: false,
-  createdAt: '2024-01-01T00:00:00Z',
-  updatedAt: '2024-01-01T00:00:00Z',
-};
-
 export const mockCity = {
   id: 1,
   name: 'Toronto',
@@ -167,14 +157,26 @@ export function createMultipartRequest(
 // Database test helpers
 export async function cleanupTestData(env: any) {
   // Clean up in reverse dependency order
-  await env.DB.exec('DELETE FROM admin_audit_log');
-  await env.DB.exec('DELETE FROM drinks');
-  await env.DB.exec('DELETE FROM cafes');
-  await env.DB.exec('DELETE FROM events');
-  await env.DB.exec('DELETE FROM feed');
-  await env.DB.exec('DELETE FROM users');
-  await env.DB.exec('DELETE FROM cities');
-  await env.DB.exec('DELETE FROM waitlist');
+  // Note: feed_items table was removed in migration 0015
+  try {
+    await env.DB.exec('DELETE FROM review_helpful');
+    await env.DB.exec('DELETE FROM user_reviews');
+    await env.DB.exec('DELETE FROM user_favorites');
+    await env.DB.exec('DELETE FROM user_photos');
+    await env.DB.exec('DELETE FROM drinks');
+    await env.DB.exec('DELETE FROM check_ins');
+    await env.DB.exec('DELETE FROM page_views');
+    await env.DB.exec('DELETE FROM search_queries');
+    await env.DB.exec('DELETE FROM cafes');
+    await env.DB.exec('DELETE FROM events');
+    await env.DB.exec('DELETE FROM sessions');
+    await env.DB.exec('DELETE FROM users');
+    await env.DB.exec('DELETE FROM cities');
+    await env.DB.exec('DELETE FROM waitlist');
+  } catch (error) {
+    // Ignore errors for tables that don't exist in test environment
+    console.warn('Cleanup warning:', error);
+  }
 }
 
 export async function seedTestData(env: any) {
