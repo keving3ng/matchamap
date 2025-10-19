@@ -51,6 +51,76 @@ MatchaMap is a mobile-first web application providing a curated, map-based guide
 -   Remove unused code aggressively
 -   Bundle analysis on every major change
 
+### Bundle Size Strategy 📦
+
+**Target:** < 100KB gzipped per page (enforced in CI/CD)
+
+**Tools:**
+- `npm run build:analyze` - Visual bundle analysis with treemap
+- `npm run bundle:check` - CI-friendly size check (fails build if exceeded)
+- Vite bundle analyzer - Automatic on build with `ANALYZE=true`
+
+**Optimization Techniques:**
+
+**1. Tree-Shaking (CRITICAL)**
+- ✅ Import icons individually: `import { MapPin } from '@/components/icons'`
+- ✅ Use ES modules (not CommonJS)
+- ❌ Avoid `import *` patterns (imports entire library)
+
+**2. Code Splitting**
+- ✅ Admin panel: Lazy loaded via `React.lazy()`
+- ✅ Events page: Lazy loaded
+- ✅ Photos functionality: Contained within admin (lazy loaded)
+- ✅ Route-based splitting enabled by default
+
+**3. Dependency Management**
+- Audit new dependencies: `npm run bundle:check` before adding
+- Prefer lightweight alternatives
+- Tree-shakeable libraries only
+
+**4. Manual Chunking (Optimized)**
+- `vendor`: React + React DOM (~50KB gzipped)
+- `router`: React Router (~15KB gzipped)
+- `maps`: Leaflet (heavy ~43KB gzipped)
+- `state`: Zustand (~3KB gzipped)
+- `utils`: DOMPurify (~6KB gzipped)
+
+**5. Compression**
+- Gzip: Enabled in production
+- Brotli: Enabled in production (better compression)
+- Pre-compressed assets served by Cloudflare Pages
+
+**Icon Tree-Shaking (IMPLEMENTED):**
+```tsx
+// ✅ CORRECT - Tree-shakeable
+import { MapPin, Navigation } from '@/components/icons'
+
+// ❌ INCORRECT - Imports entire library
+import { MapPin, Navigation } from 'lucide-react'
+```
+
+**CI/CD Enforcement:**
+- Bundle size check runs on every PR
+- Build fails if budget exceeded
+- Bundle analyzer artifacts available for review
+
+**Adding New Dependencies:**
+```bash
+# 1. Check bundle impact first
+npm install --save new-dependency
+npm run build:analyze
+
+# 2. Verify bundle size
+npm run bundle:check
+
+# 3. If exceeded, consider alternatives or lazy loading
+```
+
+**Monitoring:**
+- Codecov bundle analysis integration
+- Bundle size trending in CI logs
+- Manual review during PR process
+
 ---
 
 ## Critical Patterns (ALWAYS Follow)

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react'
-import { Navigation, MapPin, ChevronDown, Crosshair, Filter, X, Search, Coffee, Star, Building2, Instagram, Clock } from 'lucide-react'
+import { Navigation, MapPin, ChevronDown, Crosshair, Filter, X, Search, Coffee, Star, Building2, Instagram, Clock } from '@/components/icons'
 import { TikTokIcon } from './TikTokIcon'
 import { useGeolocation } from '../hooks/useGeolocation'
 import { useUIStore } from '../stores/uiStore'

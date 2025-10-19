@@ -5,7 +5,8 @@ import ListView from './ListView'
 import DetailView from './DetailView'
 import EventDetailView from './EventDetailView'
 import PassportView from './PassportView'
-import EventsView from './EventsView'
+// Lazy load events components for better performance
+const EventsView = React.lazy(() => import('./EventsView'))
 import LoginPage from './auth/LoginPage'
 import ProtectedRoute from './auth/ProtectedRoute'
 import { UserProfilePage } from './profile/UserProfilePage'
@@ -198,7 +199,9 @@ export const AppRoutes: React.FC = () => {
       {isEventsEnabled && (
         <>
           <Route path="/events" element={
-            <EventsView eventItems={eventItems} />
+            <Suspense fallback={<AdminLoadingFallback />}>
+              <EventsView eventItems={eventItems} />
+            </Suspense>
           } />
           <Route path="/events/:id" element={<EventDetailWrapper />} />
         </>

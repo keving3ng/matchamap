@@ -1,5 +1,5 @@
 import React from 'react'
-import { MapPin, Navigation, Crosshair, Coffee, Star, Building2, ChevronDown, Route, Instagram } from 'lucide-react'
+import { MapPin, Navigation, Crosshair, Coffee, Star, Building2, ChevronDown, Route, Instagram } from '@/components/icons'
 import { TikTokIcon } from './TikTokIcon'
 import { useLeafletMap } from '../hooks/useLeafletMap'
 import { useGeolocation } from '../hooks/useGeolocation'

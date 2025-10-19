@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { MapPin, Navigation, Heart, CheckCircle, Instagram, Star, Coffee, MessageSquare, Clock, Calendar as CalendarIcon, Edit3 } from 'lucide-react'
+import { MapPin, Navigation, Heart, CheckCircle, Instagram, Star, Coffee, MessageSquare, Clock, Calendar as CalendarIcon, Edit3 } from '@/components/icons'
 import { useNavigate } from 'react-router'
 import { TikTokIcon } from './TikTokIcon'
 import { useAppFeatures } from '../hooks/useAppFeatures'

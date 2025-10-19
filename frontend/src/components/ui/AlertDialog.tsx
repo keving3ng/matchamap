@@ -1,5 +1,5 @@
 import React from 'react'
-import { LucideIcon, AlertCircle, CheckCircle, XCircle, Info } from 'lucide-react'
+import { type LucideIcon, AlertCircle, CheckCircle, XCircle, Info } from '@/components/icons'
 
 interface AlertDialogProps {
   title: string
