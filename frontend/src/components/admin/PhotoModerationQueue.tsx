@@ -117,7 +117,7 @@ export const PhotoModerationQueue: React.FC<PhotoModerationQueueProps> = ({ clas
           {COPY.photos.moderation.noPending}
         </h3>
         <p className="text-gray-600">
-          All photos have been reviewed. New uploads will appear here.
+          {COPY.photos.moderation.allReviewed}
         </p>
       </div>
     )

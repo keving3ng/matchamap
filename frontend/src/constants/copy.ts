@@ -635,6 +635,7 @@ export const COPY = {
     myPhotos: {
       title: 'My Photos',
       noPhotos: 'You haven\'t uploaded any photos yet.',
+      startVisiting: 'Start by visiting a cafe and sharing your experience!',
       status: {
         pending: 'Pending Review',
         approved: 'Approved',
@@ -649,6 +650,7 @@ export const COPY = {
       title: 'Photo Moderation',
       queue: 'Moderation Queue',
       noPending: 'No photos pending moderation',
+      allReviewed: 'All photos have been reviewed. New uploads will appear here.',
       approve: 'Approve',
       reject: 'Reject',
       notes: 'Notes (optional)',

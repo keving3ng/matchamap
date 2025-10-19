@@ -138,7 +138,7 @@ export const UserPhotosPage: React.FC<UserPhotosPageProps> = ({ className = '' }
               {COPY.photos.myPhotos.noPhotos}
             </h3>
             <p className="text-gray-600 mb-4">
-              Start by visiting a cafe and sharing your experience!
+              {COPY.photos.myPhotos.startVisiting}
             </p>
             <PrimaryButton
               onClick={() => navigate('/cafes')}
