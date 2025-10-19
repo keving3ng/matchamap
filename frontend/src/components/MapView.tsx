@@ -525,9 +525,10 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                 </a>
                 <button
                   onClick={() => onViewDetails(selectedCafe)}
-                  className="flex-1 bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-green-600 transition shadow-md"
+                  className="flex-1 bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-green-600 transition shadow-md flex items-center justify-center gap-1.5"
                 >
-                  {COPY.map.viewDetails}
+                  <span>{COPY.map.viewDetails}</span>
+                  <ChevronDown size={14} className="-rotate-90" />
                 </button>
               </div>
 
@@ -714,9 +715,10 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                 {/* Primary Action: View Details */}
                 <button
                   onClick={() => onViewDetails(selectedCafe)}
-                  className="w-full bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-green-600 transition shadow-md"
+                  className="w-full bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-green-600 transition shadow-md flex items-center justify-center gap-1.5"
                 >
-                  {COPY.map.viewDetails}
+                  <span>{COPY.map.viewDetails}</span>
+                  <ChevronDown size={14} className="-rotate-90" />
                 </button>
 
                 {/* Secondary Action: Show Route on Map - Feature toggled */}
