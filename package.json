@@ -44,5 +44,8 @@
     "frontend/**/*.{ts,tsx}": [
       "npm run lint --workspace=frontend"
     ]
+  },
+  "dependencies": {
+    "terser": "^5.44.0"
   }
 }
