@@ -602,7 +602,6 @@ export const COPY = {
   // Photos & Gallery (Phase 2C)
   photos: {
     title: 'Photos',
-    upload: 'Add Photo',
     noPhotos: 'No photos yet',
     beFirst: 'Be the first to share a photo!',
     showMore: (count: number) => `Show ${count} more photo${count !== 1 ? 's' : ''}`,
@@ -629,6 +628,9 @@ export const COPY = {
       error: 'Failed to upload photo',
       submit: 'Upload Photo',
       cancel: 'Cancel',
+      invalidFileType: 'Invalid file type. Please upload a JPEG, PNG, or WebP image.',
+      fileTooLarge: 'File too large. Maximum size is 5MB.',
+      emptyFile: 'File is empty. Please select a valid image.',
     },
     myPhotos: {
       title: 'My Photos',

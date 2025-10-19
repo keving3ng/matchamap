@@ -43,8 +43,8 @@ export const PhotoModerationQueue: React.FC<PhotoModerationQueueProps> = ({ clas
   }, [])
 
   const handleModerate = async (
-    photoId: number, 
-    status: 'approved' | 'rejected', 
+    photoId: number,
+    status: 'approved' | 'rejected',
     notes?: string
   ) => {
     try {
@@ -69,24 +69,6 @@ export const PhotoModerationQueue: React.FC<PhotoModerationQueueProps> = ({ clas
         return newSet
       })
     }
-  }
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes'
-    const k = 1024
-    const sizes = ['Bytes', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-  }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
   }
 
   if (loading) {
@@ -181,6 +163,24 @@ const PhotoModerationCard: React.FC<PhotoModerationCardProps> = ({
 }) => {
   const [notes, setNotes] = useState('')
   const [showNotesInput, setShowNotesInput] = useState(false)
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes'
+    const k = 1024
+    const sizes = ['Bytes', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  }
 
   const handleApprove = () => {
     onModerate(photo.id, 'approved', notes || undefined)

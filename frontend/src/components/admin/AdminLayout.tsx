@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router'
-import { Settings, Menu, X, Coffee, Newspaper, Calendar, Code, Users, Package, Wrench, Upload, Mail } from 'lucide-react'
+import { Settings, Menu, X, Coffee, Newspaper, Calendar, Code, Users, Package, Wrench, Upload, Mail, Image, FileText } from 'lucide-react'
 
 interface AdminLayoutProps {
   children: React.ReactNode
@@ -28,6 +28,12 @@ const coreNavItems: NavItem[] = [
     path: '/admin/users',
   },
   {
+    id: 'content',
+    label: 'Content',
+    icon: <FileText size={20} />,
+    path: '/admin/content',
+  },
+  {
     id: 'newsfeed',
     label: 'Feed (Legacy)',
     icon: <Newspaper size={20} />,
@@ -44,6 +50,12 @@ const coreNavItems: NavItem[] = [
     label: 'Waitlist',
     icon: <Mail size={20} />,
     path: '/admin/waitlist',
+  },
+  {
+    id: 'photos',
+    label: 'Photos',
+    icon: <Image size={20} />,
+    path: '/admin/photos',
   },
 ]
 

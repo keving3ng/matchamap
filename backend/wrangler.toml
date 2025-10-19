@@ -30,6 +30,7 @@ ALLOWED_ORIGINS = "https://matchamap.club,https://*.matchamap.club,https://match
 # NOTE: In local dev with 'npx wrangler dev', this setting is ignored by the code
 # to prevent cookie issues with localhost (cookies.ts detects local dev automatically)
 COOKIE_DOMAIN = ".matchamap.club"
+PHOTOS_BASE_URL = "https://photos.matchamap.club"
 
 # SECURITY: Required secrets (set via Wrangler CLI)
 # NEVER commit secrets to git - they must be set via Wrangler CLI:

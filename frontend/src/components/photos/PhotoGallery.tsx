@@ -4,6 +4,7 @@ import { api } from '../../utils/api'
 import { COPY } from '../../constants/copy'
 import { Skeleton } from '../ui'
 import { useFeatureToggle } from '../../hooks/useFeatureToggle'
+import { usePhotosStore } from '../../stores/photosStore'
 import type { ReviewPhoto } from '../../../../shared/types'
 
 interface PhotoGalleryProps {
@@ -25,31 +26,97 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showAll, setShowAll] = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
   const hasUserAccounts = useFeatureToggle('ENABLE_USER_ACCOUNTS')
 
-  const fetchPhotos = useCallback(async () => {
+  // Cache management
+  const { getPhotos: getCachedPhotos, setPhotos: cachePhotos, isCacheValid } = usePhotosStore()
+
+  const fetchPhotos = useCallback(async (force = false) => {
+    // Check cache first unless force refresh
+    if (!force) {
+      const cached = getCachedPhotos(cafeId)
+      if (cached && isCacheValid(cafeId)) {
+        setPhotos(cached)
+        setLoading(false)
+        return
+      }
+    }
+
     try {
       setLoading(true)
       setError(null)
-      const response = await api.photos.getByCafe(cafeId, {
-        limit: showAll ? 50 : maxInitialPhotos + 1, // +1 to check if there are more
+
+      // Stage 1: Fetch initial visible photos (fast initial load)
+      const initialLimit = maxInitialPhotos + 3 // Load a few extra for smooth "show more"
+      const initialResponse = await api.photos.getByCafe(cafeId, {
+        limit: initialLimit,
         offset: 0
       })
-      setPhotos(response.photos)
+
+      // Show initial photos immediately
+      setPhotos(initialResponse.photos)
+      setLoading(false)
+
+      // Stage 2: Fetch remaining photos in background (if there are more)
+      if (initialResponse.total > initialLimit) {
+        // Load remaining photos in the background
+        const remainingResponse = await api.photos.getByCafe(cafeId, {
+          limit: 50 - initialLimit,
+          offset: initialLimit
+        })
+
+        // Merge with initial photos
+        const allPhotos = [...initialResponse.photos, ...remainingResponse.photos]
+        setPhotos(allPhotos)
+        cachePhotos(cafeId, allPhotos)
+      } else {
+        // Cache what we have if it's all photos
+        cachePhotos(cafeId, initialResponse.photos)
+      }
     } catch (err) {
       console.error('Failed to fetch photos:', err)
       setError('Failed to load photos')
-    } finally {
       setLoading(false)
     }
-  }, [cafeId, showAll, maxInitialPhotos])
+  }, [cafeId, getCachedPhotos, isCacheValid, cachePhotos, maxInitialPhotos])
 
   useEffect(() => {
     fetchPhotos()
   }, [fetchPhotos])
 
+  // Prefetch all photos when user interacts with gallery
+  const prefetchAllPhotos = useCallback(async () => {
+    if (loadingMore || loading) return
+
+    const cached = getCachedPhotos(cafeId)
+    if (cached && cached.length >= 50) return // Already have all photos
+
+    try {
+      setLoadingMore(true)
+      // Fetch all photos if we haven't already
+      const response = await api.photos.getByCafe(cafeId, {
+        limit: 50,
+        offset: 0
+      })
+      setPhotos(response.photos)
+      cachePhotos(cafeId, response.photos)
+    } catch (err) {
+      console.error('Failed to prefetch photos:', err)
+    } finally {
+      setLoadingMore(false)
+    }
+  }, [cafeId, loading, loadingMore, getCachedPhotos, cachePhotos])
+
   const handlePhotoClick = (photo: ReviewPhoto, index: number) => {
+    // Prefetch all photos when opening lightbox
+    prefetchAllPhotos()
     onPhotoClick?.(photo, index, photos)
+  }
+
+  const handleGalleryHover = () => {
+    // Prefetch all photos on hover for instant lightbox experience
+    prefetchAllPhotos()
   }
 
   const displayedPhotos = showAll ? photos : photos.slice(0, maxInitialPhotos)
@@ -92,7 +159,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
               className="flex items-center gap-2 px-3 py-1.5 bg-matcha-500 text-white text-sm font-medium rounded-lg hover:bg-matcha-600 transition-colors active:scale-95"
             >
               <Camera size={16} />
-              {COPY.photos.upload}
+              {COPY.photos.upload.title}
             </button>
           )}
         </div>
@@ -125,13 +192,16 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
             className="flex items-center gap-2 px-3 py-1.5 bg-matcha-500 text-white text-sm font-medium rounded-lg hover:bg-matcha-600 transition-colors active:scale-95"
           >
             <Camera size={16} />
-            {COPY.photos.upload}
+            {COPY.photos.upload.title}
           </button>
         )}
       </div>
 
       {/* Photo Grid */}
-      <div className="grid grid-cols-3 gap-2">
+      <div
+        className="grid grid-cols-3 gap-2"
+        onMouseEnter={handleGalleryHover}
+      >
         {displayedPhotos.map((photo, index) => (
           <div
             key={photo.id}
@@ -152,7 +222,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity">
               <div className="flex items-center gap-1 text-white text-xs">
                 <User size={12} />
-                <span className="truncate">{photo.userId}</span>
+                <span className="truncate">{photo.username || `User ${photo.userId}`}</span>
               </div>
               {photo.createdAt && (
                 <div className="flex items-center gap-1 text-white text-xs mt-1">

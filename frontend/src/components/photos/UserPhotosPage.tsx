@@ -7,7 +7,7 @@ import { Skeleton } from '../ui'
 import { api } from '../../utils/api'
 import { ContentContainer } from '../ContentContainer'
 import { PhotoLightbox } from './PhotoLightbox'
-import type { ReviewPhoto, PhotoModerationStatus } from '../../../../shared/types'
+import type { ReviewPhoto } from '../../../../shared/types'
 
 interface UserPhotosPageProps {
   className?: string
@@ -69,37 +69,8 @@ export const UserPhotosPage: React.FC<UserPhotosPageProps> = ({ className = '' }
     }
   }
 
-  const handlePhotoClick = (photo: PhotoWithCafeInfo, index: number) => {
+  const handlePhotoClick = (_photo: PhotoWithCafeInfo, index: number) => {
     setLightboxPhoto({ photos, index })
-  }
-
-  const getStatusVariant = (status: PhotoModerationStatus): 'default' | 'success' | 'warning' | 'error' => {
-    switch (status) {
-      case 'approved':
-        return 'success'
-      case 'pending':
-        return 'warning'
-      case 'rejected':
-        return 'error'
-      default:
-        return 'default'
-    }
-  }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
-  }
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes'
-    const k = 1024
-    const sizes = ['Bytes', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
   }
 
   if (loading) {
@@ -155,7 +126,7 @@ export const UserPhotosPage: React.FC<UserPhotosPageProps> = ({ className = '' }
             className="flex items-center gap-2"
           >
             <Camera size={16} />
-            {COPY.photos.upload}
+            {COPY.photos.upload.title}
           </PrimaryButton>
         </div>
 
@@ -218,6 +189,22 @@ const PhotoCard: React.FC<PhotoCardProps> = ({
   onDelete,
   isDeleting
 }) => {
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    })
+  }
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes'
+    const k = 1024
+    const sizes = ['Bytes', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
+  }
+
   return (
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
       <div className="p-4">

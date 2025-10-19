@@ -11,21 +11,25 @@ import { COPY } from '../constants/copy'
 import { api } from '../utils/api'
 import { trackCafeStat, trackCheckIn } from '../utils/analytics'
 import { useAuthStore } from '../stores/authStore'
+import { usePhotosStore } from '../stores/photosStore'
 import { ReviewForm } from './reviews/ReviewForm'
 import { AggregatedRating } from './reviews/AggregatedRating'
 import { ReviewList } from './reviews/ReviewList'
 import { PhotoGallery } from './photos/PhotoGallery'
 import { PhotoLightbox } from './photos/PhotoLightbox'
+import { PhotoUploadModal } from './photos/PhotoUploadModal'
 import type { DetailViewProps } from '../types'
 import type { Event, ReviewPhoto } from '../../../shared/types'
 
 export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, onToggleVisited }) => {
   const { isPassportEnabled, isUserAccountsEnabled } = useAppFeatures()
   const { user } = useAuthStore()
+  const { invalidateCache } = usePhotosStore()
   const isVisited: boolean = visitedLocations.includes(cafe.id)
   const mapsUrl = getMapsUrl(cafe.address || '', cafe.link)
   const [cafeEvents, setCafeEvents] = useState<Event[]>([])
   const [showReviewForm, setShowReviewForm] = useState(false)
+  const [showPhotoUpload, setShowPhotoUpload] = useState(false)
   const [reviewCount, setReviewCount] = useState(cafe.userRatingCount || 0)
   const [lightboxPhoto, setLightboxPhoto] = useState<{
     photos: ReviewPhoto[]
@@ -59,14 +63,17 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
     navigate('/events')
   }
 
-  const handlePhotoClick = (photo: ReviewPhoto, index: number, photos: ReviewPhoto[]) => {
+  const handlePhotoClick = (_photo: ReviewPhoto, index: number, photos: ReviewPhoto[]) => {
     setLightboxPhoto({ photos, index })
   }
 
   const handleUploadClick = () => {
-    // For now, just show the review form which includes photo upload
-    // In a full implementation, this could open a dedicated photo upload modal
-    setShowReviewForm(true)
+    setShowPhotoUpload(true)
+  }
+
+  const handlePhotoUploadSuccess = () => {
+    // Invalidate cache to trigger photo gallery refresh
+    invalidateCache(cafe.id)
   }
 
   return (
@@ -523,6 +530,17 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
             name: cafe.name,
             city: cafe.city
           }}
+        />
+      )}
+
+      {/* Photo Upload Modal */}
+      {showPhotoUpload && (
+        <PhotoUploadModal
+          cafeId={cafe.id}
+          cafeName={cafe.name}
+          isOpen={showPhotoUpload}
+          onClose={() => setShowPhotoUpload(false)}
+          onSuccess={handlePhotoUploadSuccess}
         />
       )}
     </div>

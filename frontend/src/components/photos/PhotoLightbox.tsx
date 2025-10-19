@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { X, ChevronLeft, ChevronRight, Download, User, Calendar, MapPin } from 'lucide-react'
+import { X, ChevronLeft, ChevronRight, Download, Calendar, MapPin } from 'lucide-react'
 import { COPY } from '../../constants/copy'
 import { zIndex } from '../../styles/spacing'
 import type { ReviewPhoto } from '../../../../shared/types'
@@ -69,6 +69,28 @@ export const PhotoLightbox: React.FC<PhotoLightboxProps> = ({
       document.body.style.overflow = 'unset'
     }
   }, [isOpen])
+
+  // Preload adjacent images for instant navigation
+  useEffect(() => {
+    if (!isOpen || photos.length <= 1) return
+
+    const preloadImage = (url: string) => {
+      const img = new Image()
+      img.src = url
+    }
+
+    // Preload previous image
+    const prevIndex = currentIndex > 0 ? currentIndex - 1 : photos.length - 1
+    if (photos[prevIndex]?.imageUrl) {
+      preloadImage(photos[prevIndex].imageUrl)
+    }
+
+    // Preload next image
+    const nextIndex = currentIndex < photos.length - 1 ? currentIndex + 1 : 0
+    if (photos[nextIndex]?.imageUrl) {
+      preloadImage(photos[nextIndex].imageUrl)
+    }
+  }, [currentIndex, photos, isOpen])
 
   const goToPrevious = useCallback(() => {
     setCurrentIndex((prev) => (prev > 0 ? prev - 1 : photos.length - 1))
@@ -164,8 +186,8 @@ export const PhotoLightbox: React.FC<PhotoLightboxProps> = ({
       )}
 
       {/* Main image container */}
-      <div className="flex items-center justify-center h-full p-4 pt-20 pb-24">
-        <div className="relative max-w-full max-h-full">
+      <div className="flex items-center justify-center h-full p-4 pt-20 pb-24 sm:pb-32">
+        <div className="relative w-full h-full flex items-center justify-center">
           {isImageLoading && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -174,7 +196,7 @@ export const PhotoLightbox: React.FC<PhotoLightboxProps> = ({
           <img
             src={currentPhoto.imageUrl}
             alt={currentPhoto.caption || 'Photo'}
-            className="max-w-full max-h-full object-contain"
+            className="max-w-full max-h-full w-auto h-auto object-contain"
             onLoad={handleImageLoad}
           />
         </div>
@@ -193,19 +215,9 @@ export const PhotoLightbox: React.FC<PhotoLightboxProps> = ({
           {/* Metadata */}
           <div className="flex flex-wrap items-center gap-4 text-sm text-gray-300">
             <div className="flex items-center gap-2">
-              <User size={14} />
-              <span>{COPY.photos.lightbox.uploadedBy} User {currentPhoto.userId}</span>
-            </div>
-            <div className="flex items-center gap-2">
               <Calendar size={14} />
-              <span>{COPY.photos.lightbox.uploadedOn} {formatDate(currentPhoto.createdAt)}</span>
+              <span>{formatDate(currentPhoto.createdAt)}</span>
             </div>
-            {currentPhoto.width && currentPhoto.height && (
-              <span>{currentPhoto.width} × {currentPhoto.height}</span>
-            )}
-            {currentPhoto.fileSize && (
-              <span>{Math.round(currentPhoto.fileSize / 1024)} KB</span>
-            )}
           </div>
 
           {/* Thumbnail navigation for desktop */}
