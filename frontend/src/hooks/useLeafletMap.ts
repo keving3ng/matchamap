@@ -153,6 +153,25 @@ export const useLeafletMap = ({
             )
           }
         })
+        .on('dblclick', (e) => {
+          // Prevent default map zoom on double-click
+          e.originalEvent.stopPropagation()
+          
+          // Always center the pin on the map and ensure reasonable zoom
+          const currentZoom = mapRef.current?.getZoom() ?? initialZoom
+          const REASONABLE_ZOOM = 15
+          const targetZoom = Math.max(currentZoom, REASONABLE_ZOOM)
+          
+          // Smoothly center and zoom to the cafe location
+          mapRef.current?.setView(
+            [cafe.lat ?? cafe.latitude, cafe.lng ?? cafe.longitude],
+            targetZoom,
+            { animate: true, duration: 0.5 }
+          )
+          
+          // Ensure cafe card is open
+          onPinClick(cafe)
+        })
 
       markersRef.current.set(cafe.id, marker)
     })
