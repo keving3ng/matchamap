@@ -531,6 +531,65 @@ npx wrangler d1 list
 npx wrangler d1 execute DB --local --file=migrations/rollback.sql
 ```
 
+### Migration Failures (Schema Drift)
+
+**Problem:** Migration fails with "duplicate column name" or similar errors due to schema drift between environments.
+
+**Common Causes:**
+- Manual database modifications outside the migration system
+- Schema changes applied directly in production
+- Inconsistent migration state between local and production
+
+**Solution Steps:**
+
+1. **Identify the failing migration:**
+   ```bash
+   # Check which migrations have been applied
+   npx wrangler d1 execute matchamap-db --remote --command \
+     "SELECT name, applied_at FROM d1_migrations ORDER BY applied_at DESC LIMIT 10;"
+   ```
+
+2. **Check current schema state:**
+   ```bash
+   # Examine table structure
+   npx wrangler d1 execute matchamap-db --remote --command \
+     "PRAGMA table_info(table_name);"
+   
+   # List all indexes
+   npx wrangler d1 execute matchamap-db --remote --command \
+     "SELECT name, sql FROM sqlite_master WHERE type='index';"
+   ```
+
+3. **For column already exists errors:**
+   ```bash
+   # Manually mark migration as applied (CAREFUL!)
+   npx wrangler d1 execute matchamap-db --remote --command \
+     "INSERT INTO d1_migrations (name, applied_at) VALUES ('migration_name.sql', datetime('now'));"
+   ```
+
+4. **For missing index errors:**
+   ```bash
+   # Create missing indexes manually
+   npx wrangler d1 execute matchamap-db --remote --command \
+     "CREATE INDEX IF NOT EXISTS index_name ON table_name (column_name);"
+   ```
+
+5. **Verify fix:**
+   ```bash
+   # Run migrations again to ensure they pass
+   npm run db:migrate:prod
+   ```
+
+**Prevention:**
+- ⚠️ Never modify production database directly
+- Always use Drizzle migrations for schema changes
+- Test migrations on staging before production
+- Keep migration history in sync across environments
+
+**Example: Fixing Migration 0014 (review_id column already exists):**
+
+See migration file comments in `backend/drizzle/migrations/0014_add_review_id_to_photos.sql` for specific steps.
+
 ### Deployment Issues
 
 ```bash
