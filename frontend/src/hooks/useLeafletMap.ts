@@ -137,25 +137,20 @@ export const useLeafletMap = ({
       const marker = L.marker([cafe.lat ?? cafe.latitude, cafe.lng ?? cafe.longitude], { icon: customIcon })
         .addTo(mapRef.current!)
         .on('click', () => {
-          // If zoomed out too far, zoom in to a reasonable level first
+          // Show cafe card immediately for instant feedback
+          onPinClick(cafe)
+
+          // If zoomed out too far, zoom in to a reasonable level in background
           const currentZoom = mapRef.current?.getZoom() ?? initialZoom
           const REASONABLE_ZOOM = 15 // Good zoom level to see cafe details
 
           if (currentZoom < REASONABLE_ZOOM) {
-            // Smoothly pan and zoom to the cafe location
+            // Smoothly pan and zoom to the cafe location (happens in background)
             mapRef.current?.setView(
               [cafe.lat ?? cafe.latitude, cafe.lng ?? cafe.longitude],
               REASONABLE_ZOOM,
               { animate: true, duration: 0.5 }
             )
-
-            // Wait for animation to complete before showing popover
-            setTimeout(() => {
-              onPinClick(cafe)
-            }, 500)
-          } else {
-            // Already zoomed in enough, just show the popover
-            onPinClick(cafe)
           }
         })
 
