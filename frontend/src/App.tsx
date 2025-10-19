@@ -11,7 +11,7 @@ const SESSION_KEY = 'matchamap_unlocked'
 
 export const App: React.FC = () => {
   const { showComingSoon } = useAppFeatures()
-  const { getCurrentUser } = useAuthStore()
+  const { getCurrentUser, user, isAuthenticated } = useAuthStore()
   const [hasEnteredPassword, setHasEnteredPassword] = useState(() => {
     // Check sessionStorage on mount
     return sessionStorage.getItem(SESSION_KEY) === 'true'
@@ -30,7 +30,10 @@ export const App: React.FC = () => {
     setHasEnteredPassword(true)
   }
 
-  if (showComingSoon && !hasEnteredPassword) {
+  // Admin users bypass cover page
+  const isAdmin = isAuthenticated && user?.role === 'admin'
+  
+  if (showComingSoon && !hasEnteredPassword && !isAdmin) {
     return <ComingSoon onPasswordCorrect={handlePasswordCorrect} />
   }
 
