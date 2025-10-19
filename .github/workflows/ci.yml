@@ -123,14 +123,6 @@ jobs:
       - name: Run build
         run: npm run build
 
-      - name: Check bundle size
-        run: |
-          echo "📦 Frontend bundle sizes:"
-          du -sh frontend/dist/* | sort -h
-          echo ""
-          echo "📊 Total frontend bundle size:"
-          du -sh frontend/dist
-
   # Summary job to ensure all required jobs passed
   ci-success:
     name: CI Success
