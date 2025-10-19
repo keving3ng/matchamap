@@ -109,41 +109,6 @@ export interface CityWithCount {
   cafe_count: number
 }
 
-// ============================================================================
-// FEED/NEWS TYPES
-// ============================================================================
-
-export type FeedItemType = 'new_location' | 'score_update' | 'announcement' | 'menu_update' | 'closure'
-
-export interface FeedItem {
-  id: number
-  type: FeedItemType
-  title: string
-  date: string // ISO 8601 format for database storage
-  preview: string // Short preview text - REQUIRED
-  content?: string | null // Full article/announcement content
-
-  // Related cafe (if applicable)
-  cafeId?: number | null
-  cafeName?: string | null
-
-  // Score updates
-  score?: number | null
-  previousScore?: number | null
-
-  // Location info
-  neighborhood?: string | null
-
-  // Media
-  image?: string | null
-
-  // Metadata
-  author?: string | null
-  tags?: string[] | null // JSON array
-  published: boolean // For draft/published states
-  createdAt?: string
-  updatedAt?: string
-}
 
 // ============================================================================
 // EVENT TYPES
@@ -476,9 +441,6 @@ export interface CafeFormData extends Omit<Cafe, 'id' | 'createdAt' | 'updatedAt
   id?: number
 }
 
-export interface FeedItemFormData extends Omit<FeedItem, 'id' | 'createdAt' | 'updatedAt'> {
-  id?: number
-}
 
 export interface EventFormData extends Omit<Event, 'id' | 'createdAt' | 'updatedAt'> {
   id?: number

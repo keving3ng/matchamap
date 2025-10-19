@@ -2,15 +2,12 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useDataStore } from '../dataStore'
 import { api } from '../../utils/api'
-import type { Cafe, FeedItem, EventItem } from '../../../shared/types'
+import type { Cafe, EventItem } from '../../../shared/types'
 
 // Mock the API client
 vi.mock('../../utils/api', () => ({
   api: {
     cafes: {
-      getAll: vi.fn(),
-    },
-    feed: {
       getAll: vi.fn(),
     },
     events: {
@@ -69,46 +66,6 @@ describe('dataStore', () => {
     },
   ]
 
-  const mockFeedItems: FeedItem[] = [
-    {
-      id: 1,
-      type: 'new_location',
-      title: 'New Cafe Opens',
-      date: '2023-01-01T00:00:00Z',
-      preview: 'A great new cafe has opened',
-      content: 'Full article content here',
-      cafeId: 1,
-      cafeName: 'Test Cafe One',
-      score: 8.5,
-      previousScore: null,
-      neighborhood: 'Downtown',
-      image: 'https://example.com/feed1.jpg',
-      author: 'Test Author',
-      tags: ['new', 'opening'],
-      published: true,
-      createdAt: '2023-01-01T00:00:00Z',
-      updatedAt: '2023-01-01T00:00:00Z',
-    },
-    {
-      id: 2,
-      type: 'score_update',
-      title: 'Score Update',
-      date: '2023-01-02T00:00:00Z',
-      preview: 'Cafe score has been updated',
-      content: 'Score update details',
-      cafeId: 2,
-      cafeName: 'Test Cafe Two',
-      score: 7.5,
-      previousScore: 7.0,
-      neighborhood: 'Midtown',
-      image: 'https://example.com/feed2.jpg',
-      author: 'Test Reviewer',
-      tags: ['update'],
-      published: true,
-      createdAt: '2023-01-02T00:00:00Z',
-      updatedAt: '2023-01-02T00:00:00Z',
-    },
-  ]
 
   const mockEvents: EventItem[] = [
     {
@@ -149,12 +106,10 @@ describe('dataStore', () => {
     // Reset store before each test
     useDataStore.setState({
       allCafes: [],
-      feedItems: [],
       eventItems: [],
       isLoading: false,
       error: null,
       cafesFetched: false,
-      feedFetched: false,
       eventsFetched: false,
     })
     
@@ -171,12 +126,10 @@ describe('dataStore', () => {
       const { result } = renderHook(() => useDataStore())
       
       expect(result.current.allCafes).toEqual([])
-      expect(result.current.feedItems).toEqual([])
       expect(result.current.eventItems).toEqual([])
       expect(result.current.isLoading).toBe(false)
       expect(result.current.error).toBeNull()
       expect(result.current.cafesFetched).toBe(false)
-      expect(result.current.feedFetched).toBe(false)
       expect(result.current.eventsFetched).toBe(false)
     })
   })
@@ -376,142 +329,6 @@ describe('dataStore', () => {
     })
   })
 
-  describe('fetchFeed', () => {
-    it('should fetch feed items successfully', async () => {
-      const { result } = renderHook(() => useDataStore())
-
-      vi.mocked(api.feed.getAll).mockResolvedValueOnce({
-        items: mockFeedItems,
-      })
-
-      await act(async () => {
-        await result.current.fetchFeed()
-      })
-
-      expect(result.current.feedItems).toHaveLength(2)
-      expect(result.current.feedItems[0].title).toBe('New Cafe Opens')
-      expect(result.current.feedItems[1].title).toBe('Score Update')
-      expect(result.current.feedFetched).toBe(true)
-      expect(result.current.isLoading).toBe(false)
-      expect(result.current.error).toBeNull()
-
-      expect(vi.mocked(api.feed.getAll)).toHaveBeenCalledWith(
-        { limit: 100 },
-        false
-      )
-    })
-
-    it('should skip fetch if already fetched', async () => {
-      const { result } = renderHook(() => useDataStore())
-
-      act(() => {
-        useDataStore.setState({ feedFetched: true })
-      })
-
-      await act(async () => {
-        await result.current.fetchFeed()
-      })
-
-      expect(vi.mocked(api.feed.getAll)).not.toHaveBeenCalled()
-    })
-
-    it('should bust cache when requested', async () => {
-      const { result } = renderHook(() => useDataStore())
-
-      act(() => {
-        useDataStore.setState({ feedFetched: true })
-      })
-
-      vi.mocked(api.feed.getAll).mockResolvedValueOnce({
-        items: mockFeedItems,
-      })
-
-      await act(async () => {
-        await result.current.fetchFeed(true)
-      })
-
-      expect(vi.mocked(api.feed.getAll)).toHaveBeenCalledWith(
-        { limit: 100 },
-        true
-      )
-    })
-
-    it('should handle feed API error', async () => {
-      const { result } = renderHook(() => useDataStore())
-
-      vi.mocked(api.feed.getAll).mockRejectedValueOnce(new Error('Feed API Error'))
-
-      await act(async () => {
-        await result.current.fetchFeed()
-      })
-
-      expect(result.current.error).toBe('Feed API Error')
-      expect(result.current.feedItems).toEqual([])
-      expect(result.current.feedFetched).toBe(false)
-    })
-
-    it('should transform feed API response', async () => {
-      const { result } = renderHook(() => useDataStore())
-
-      const apiFeedItem = {
-        id: 1,
-        type: 'new_location',
-        title: 'API Feed Item',
-        date: '2023-01-01T00:00:00Z',
-        preview: 'API preview',
-        content: 'API content',
-        cafeId: 1,
-        cafeName: 'API Cafe',
-        score: 8.5,
-        previousScore: null,
-        neighborhood: 'API District',
-        image: 'https://example.com/api-feed.jpg',
-        author: 'API Author',
-        tags: '["api", "test"]', // JSON string
-        published: true,
-      }
-
-      vi.mocked(api.feed.getAll).mockResolvedValueOnce({
-        items: [apiFeedItem],
-      })
-
-      await act(async () => {
-        await result.current.fetchFeed()
-      })
-
-      const feedItem = result.current.feedItems[0]
-      expect(feedItem.type).toBe('new_location')
-      expect(feedItem.tags).toEqual(['api', 'test']) // Parsed from JSON
-      expect(feedItem.content).toBe('API content')
-    })
-
-    it('should handle missing tags field', async () => {
-      const { result } = renderHook(() => useDataStore())
-
-      const feedItemWithoutTags = {
-        id: 1,
-        type: 'announcement',
-        title: 'No Tags Item',
-        date: '2023-01-01T00:00:00Z',
-        preview: 'No tags preview',
-        published: true,
-        // tags field missing
-      }
-
-      vi.mocked(api.feed.getAll).mockResolvedValueOnce({
-        items: [feedItemWithoutTags],
-      })
-
-      await act(async () => {
-        await result.current.fetchFeed()
-      })
-
-      const feedItem = result.current.feedItems[0]
-      expect(feedItem.tags).toEqual([])
-      expect(feedItem.content).toBe('')
-      expect(feedItem.image).toBe('')
-    })
-  })
 
   describe('fetchEvents', () => {
     it('should fetch events successfully', async () => {
@@ -633,7 +450,6 @@ describe('dataStore', () => {
       const { result } = renderHook(() => useDataStore())
 
       vi.mocked(api.cafes.getAll).mockResolvedValueOnce({ cafes: mockCafes })
-      vi.mocked(api.feed.getAll).mockResolvedValueOnce({ items: mockFeedItems })
       vi.mocked(api.events.getAll).mockResolvedValueOnce({ events: mockEvents })
 
       await act(async () => {
@@ -641,18 +457,12 @@ describe('dataStore', () => {
       })
 
       expect(result.current.allCafes).toHaveLength(2)
-      expect(result.current.feedItems).toHaveLength(2)
       expect(result.current.eventItems).toHaveLength(2)
       expect(result.current.cafesFetched).toBe(true)
-      expect(result.current.feedFetched).toBe(true)
       expect(result.current.eventsFetched).toBe(true)
 
       expect(vi.mocked(api.cafes.getAll)).toHaveBeenCalledWith(
         { city: undefined, limit: 500 },
-        false
-      )
-      expect(vi.mocked(api.feed.getAll)).toHaveBeenCalledWith(
-        { limit: 100 },
         false
       )
       expect(vi.mocked(api.events.getAll)).toHaveBeenCalledWith(
@@ -665,7 +475,6 @@ describe('dataStore', () => {
       const { result } = renderHook(() => useDataStore())
 
       vi.mocked(api.cafes.getAll).mockResolvedValueOnce({ cafes: [] })
-      vi.mocked(api.feed.getAll).mockResolvedValueOnce({ items: [] })
       vi.mocked(api.events.getAll).mockResolvedValueOnce({ events: [] })
 
       await act(async () => {
@@ -674,10 +483,6 @@ describe('dataStore', () => {
 
       expect(vi.mocked(api.cafes.getAll)).toHaveBeenCalledWith(
         { city: 'toronto', limit: 500 },
-        true
-      )
-      expect(vi.mocked(api.feed.getAll)).toHaveBeenCalledWith(
-        { limit: 100 },
         true
       )
       expect(vi.mocked(api.events.getAll)).toHaveBeenCalledWith(
@@ -690,8 +495,7 @@ describe('dataStore', () => {
       const { result } = renderHook(() => useDataStore())
 
       vi.mocked(api.cafes.getAll).mockResolvedValueOnce({ cafes: mockCafes })
-      vi.mocked(api.feed.getAll).mockRejectedValueOnce(new Error('Feed API Error'))
-      vi.mocked(api.events.getAll).mockResolvedValueOnce({ events: mockEvents })
+      vi.mocked(api.events.getAll).mockRejectedValueOnce(new Error('Events API Error'))
 
       await act(async () => {
         await result.current.fetchAll()
@@ -699,14 +503,12 @@ describe('dataStore', () => {
 
       // Successful fetches should still work
       expect(result.current.allCafes).toHaveLength(2)
-      expect(result.current.eventItems).toHaveLength(2)
       expect(result.current.cafesFetched).toBe(true)
-      expect(result.current.eventsFetched).toBe(true)
 
       // Failed fetch should not update state
-      expect(result.current.feedItems).toEqual([])
-      expect(result.current.feedFetched).toBe(false)
-      expect(result.current.error).toBe('Feed API Error')
+      expect(result.current.eventItems).toEqual([])
+      expect(result.current.eventsFetched).toBe(false)
+      expect(result.current.error).toBe('Events API Error')
     })
   })
 
@@ -718,21 +520,19 @@ describe('dataStore', () => {
       act(() => {
         useDataStore.setState({
           cafesFetched: true,
-          feedFetched: false,
-          eventsFetched: true,
+          eventsFetched: false,
         })
       })
 
-      vi.mocked(api.feed.getAll).mockResolvedValueOnce({ items: mockFeedItems })
+      vi.mocked(api.events.getAll).mockResolvedValueOnce({ events: mockEvents })
 
       await act(async () => {
         await result.current.fetchAll()
       })
 
-      // Only feed should be fetched (others are cached)
+      // Only events should be fetched (cafes are cached)
       expect(vi.mocked(api.cafes.getAll)).not.toHaveBeenCalled()
-      expect(vi.mocked(api.feed.getAll)).toHaveBeenCalled()
-      expect(vi.mocked(api.events.getAll)).not.toHaveBeenCalled()
+      expect(vi.mocked(api.events.getAll)).toHaveBeenCalled()
     })
 
     it('should bypass all caches when bustCache is true', async () => {
@@ -742,13 +542,11 @@ describe('dataStore', () => {
       act(() => {
         useDataStore.setState({
           cafesFetched: true,
-          feedFetched: true,
           eventsFetched: true,
         })
       })
 
       vi.mocked(api.cafes.getAll).mockResolvedValueOnce({ cafes: [] })
-      vi.mocked(api.feed.getAll).mockResolvedValueOnce({ items: [] })
       vi.mocked(api.events.getAll).mockResolvedValueOnce({ events: [] })
 
       await act(async () => {
@@ -757,7 +555,6 @@ describe('dataStore', () => {
 
       // All should be fetched despite cache flags
       expect(vi.mocked(api.cafes.getAll)).toHaveBeenCalled()
-      expect(vi.mocked(api.feed.getAll)).toHaveBeenCalled()
       expect(vi.mocked(api.events.getAll)).toHaveBeenCalled()
     })
   })
@@ -772,11 +569,6 @@ describe('dataStore', () => {
       vi.mocked(api.cafes.getAll).mockReturnValueOnce(
         new Promise(resolve => {
           resolvePromises.push(() => resolve({ cafes: [] }))
-        })
-      )
-      vi.mocked(api.feed.getAll).mockReturnValueOnce(
-        new Promise(resolve => {
-          resolvePromises.push(() => resolve({ items: [] }))
         })
       )
       vi.mocked(api.events.getAll).mockReturnValueOnce(
@@ -797,7 +589,6 @@ describe('dataStore', () => {
       await act(async () => {
         resolvePromises[0]()
         resolvePromises[1]()
-        resolvePromises[2]()
         await new Promise(resolve => setTimeout(resolve, 0))
       })
 
@@ -831,7 +622,7 @@ describe('dataStore', () => {
       act(() => {
         useDataStore.setState({
           allCafes: mockCafes,
-          feedItems: mockFeedItems,
+          eventItems: mockEvents,
         })
       })
 
@@ -844,13 +635,12 @@ describe('dataStore', () => {
 
       // Existing data should be preserved
       expect(result.current.allCafes).toEqual(mockCafes)
-      expect(result.current.feedItems).toEqual(mockFeedItems)
       
       // Error should be set
       expect(result.current.error).toBe('Events Error')
       
-      // Events should remain empty
-      expect(result.current.eventItems).toEqual([])
+      // Events should remain as they were before the failed fetch
+      expect(result.current.eventItems).toEqual(mockEvents)
     })
   })
 })

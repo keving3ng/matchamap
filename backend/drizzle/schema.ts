@@ -68,36 +68,6 @@ export const drinks = sqliteTable('drinks', {
   defaultIdx: index('drinks_default_idx').on(table.isDefault),
 }));
 
-// Feed items table (Legacy - Blog/Article Style)
-// NOTE: This table will be replaced by activity_feed in Phase 2
-// See docs/feed-refactoring-plan.md for new schema design
-export const feedItems = sqliteTable('feed_items', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  type: text('type').notNull(), // new_location, score_update, announcement, menu_update, closure
-
-  title: text('title').notNull(),
-  preview: text('preview').notNull(),
-  content: text('content'),
-
-  cafeId: integer('cafe_id').references(() => cafes.id),
-  cafeName: text('cafe_name'),
-
-  score: real('score'),
-  previousScore: real('previous_score'),
-  neighborhood: text('neighborhood'),
-
-  image: text('image'),
-  author: text('author'),
-  tags: text('tags'), // JSON array
-
-  published: integer('published', { mode: 'boolean' }).default(false),
-  date: text('date').notNull(),
-  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
-}, (table) => ({
-  publishedDateIdx: index('feed_published_date_idx').on(table.published, table.date),
-  typeIdx: index('feed_type_idx').on(table.type),
-}));
 
 // Events table
 export const events = sqliteTable('events', {
@@ -374,8 +344,6 @@ export type Cafe = typeof cafes.$inferSelect;
 export type NewCafe = typeof cafes.$inferInsert;
 export type Drink = typeof drinks.$inferSelect;
 export type NewDrink = typeof drinks.$inferInsert;
-export type FeedItem = typeof feedItems.$inferSelect;
-export type NewFeedItem = typeof feedItems.$inferInsert;
 export type Event = typeof events.$inferSelect;
 export type NewEvent = typeof events.$inferInsert;
 export type User = typeof users.$inferSelect;

@@ -7,7 +7,6 @@ import { useFeatureToggle } from './useFeatureToggle'
  */
 export const useAppFeatures = () => {
   const isPassportEnabled = useFeatureToggle('ENABLE_PASSPORT')
-  const isFeedEnabled = useFeatureToggle('ENABLE_FEED')
   const isEventsEnabled = useFeatureToggle('ENABLE_EVENTS')
   const isMenuEnabled = useFeatureToggle('ENABLE_MENU')
   const isCitySelectorEnabled = useFeatureToggle('ENABLE_CITY_SELECTOR')
@@ -16,7 +15,6 @@ export const useAppFeatures = () => {
 
   return {
     isPassportEnabled,
-    isFeedEnabled,
     isEventsEnabled,
     isMenuEnabled,
     isCitySelectorEnabled,

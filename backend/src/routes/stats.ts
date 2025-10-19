@@ -74,39 +74,6 @@ export async function trackCafeStat(request: IRequest, env: Env): Promise<Respon
   }
 }
 
-/**
- * Track feed item clicks
- * Handles both anonymous and authenticated users using fire-and-forget pattern
- */
-export async function trackFeedClick(request: IRequest, env: Env): Promise<Response> {
-  try {
-    const { feedItemId } = request.params;
-    
-    // Parse and validate feedItemId
-    const parsedFeedItemId = parseInt(feedItemId);
-    if (isNaN(parsedFeedItemId)) {
-      return jsonResponse({ success: true }, HTTP_STATUS.OK, request, env); // Fire-and-forget: return OK even on invalid ID
-    }
-    
-    // Increment feed_stats counter (upsert pattern)
-    await env.DB.prepare(`
-      INSERT INTO feed_stats (feed_item_id, clicks, updated_at)
-      VALUES (?, 1, CURRENT_TIMESTAMP)
-      ON CONFLICT(feed_item_id)
-      DO UPDATE SET
-        clicks = clicks + 1,
-        updated_at = CURRENT_TIMESTAMP
-    `)
-      .bind(parsedFeedItemId)
-      .run();
-    
-    return jsonResponse({ success: true }, HTTP_STATUS.OK, request, env);
-  } catch (error) {
-    console.error('Error tracking feed click:', error);
-    // Return OK even on error (fire-and-forget pattern)
-    return jsonResponse({ success: true }, HTTP_STATUS.OK, request, env);
-  }
-}
 
 /**
  * Track event clicks

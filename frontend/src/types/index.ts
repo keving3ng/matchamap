@@ -85,41 +85,6 @@ export interface CafeWithDistance extends Cafe {
   distanceInfo: import('../utils/distance').DistanceResult | null
 }
 
-export enum FeedItemType {
-  NEW_LOCATION = 'new_location',
-  SCORE_UPDATE = 'score_update',
-  ANNOUNCEMENT = 'announcement',
-  MENU_UPDATE = 'menu_update',
-  CLOSURE = 'closure',
-}
-
-export interface FeedItem {
-  id: number
-  type: FeedItemType
-  title: string
-  date: string // ISO 8601 format for database storage
-  preview: string // Short preview text
-  content?: string // Full article/announcement content
-
-  // Related cafe (if applicable)
-  cafeId?: number
-  cafeName?: string
-
-  // Score updates
-  score?: number
-  previousScore?: number
-
-  // Location info
-  neighborhood?: string
-
-  // Media
-  image?: string
-
-  // Metadata
-  author?: string
-  tags?: string[]
-  published: boolean // For draft/published states
-}
 
 export interface EventItem {
   id: number
@@ -140,12 +105,11 @@ export interface EventItem {
 
 export interface CafeData {
   cafes: Cafe[]
-  feed: FeedItem[]
   events: EventItem[]
   last_updated: string
 }
 
-export type ViewType = 'map' | 'list' | 'detail' | 'feed' | 'passport' | 'events'
+export type ViewType = 'map' | 'list' | 'detail' | 'passport' | 'events'
 
 // Component Props Types
 export interface MapViewProps {
@@ -170,9 +134,6 @@ export interface DetailViewProps {
   onToggleVisited: (id: number) => void
 }
 
-export interface FeedViewProps {
-  feedItems: FeedItem[]
-}
 
 export interface PassportViewProps {
   cafes: Cafe[]

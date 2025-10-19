@@ -5,7 +5,7 @@
 
 import { useAuthStore } from '../stores/authStore'
 import { useSessionExpiry } from '../hooks/useSessionExpiry'
-import type { Cafe, Drink, FeedItem, Event, PublicUserProfile, UpdateProfileRequest, UserProfile, CityWithCount, User, UserFavorite, FavoritesResponse, AddFavoriteRequest, UpdateFavoriteNotesRequest, UserReview, ReviewPhoto } from '../../../shared/types'
+import type { Cafe, Drink, Event, PublicUserProfile, UpdateProfileRequest, UserProfile, CityWithCount, User, UserFavorite, FavoritesResponse, AddFavoriteRequest, UpdateFavoriteNotesRequest, UserReview, ReviewPhoto } from '../../../shared/types'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -143,83 +143,6 @@ export const cafeAPI = {
   },
 }
 
-/**
- * Feed API endpoints (Legacy - Deprecated)
- * 
- * TODO(Phase 2): Replace with activity_feed system
- * See: docs/feed-refactoring-plan.md
- */
-export const feedAPI = {
-  /**
-   * Get feed items with optional filtering
-   */
-  async getAll(filters?: {
-    type?: string
-    limit?: number
-    offset?: number
-  }, bustCache = false): Promise<{ items: FeedItem[]; hasMore: boolean }> {
-    const params = new URLSearchParams()
-    if (filters?.type) params.append('type', filters.type)
-    if (filters?.limit) params.append('limit', filters.limit.toString())
-    if (filters?.offset) params.append('offset', filters.offset.toString())
-
-    const query = params.toString() ? `?${params.toString()}` : ''
-    return fetchAPI(`/feed${query}`, { bustCache })
-  },
-
-  /**
-   * Get all feed items including unpublished (admin only)
-   */
-  async getAllAdmin(filters?: {
-    published?: boolean
-    limit?: number
-    offset?: number
-  }): Promise<{ items: FeedItem[]; hasMore: boolean }> {
-    const params = new URLSearchParams()
-    if (filters?.published !== undefined) params.append('published', filters.published.toString())
-    if (filters?.limit) params.append('limit', filters.limit.toString())
-    if (filters?.offset) params.append('offset', filters.offset.toString())
-
-    const query = params.toString() ? `?${params.toString()}` : ''
-    return fetchAPI(`/admin/feed${query}`)
-  },
-
-  /**
-   * Get single feed item by ID (admin only)
-   */
-  async getById(id: number): Promise<FeedItem> {
-    return fetchAPI(`/admin/feed/${id}`)
-  },
-
-  /**
-   * Create new feed item (admin only)
-   */
-  async create(feedItem: Partial<FeedItem>): Promise<FeedItem> {
-    return fetchAPI('/admin/feed', {
-      method: 'POST',
-      body: JSON.stringify(feedItem),
-    })
-  },
-
-  /**
-   * Update feed item (admin only)
-   */
-  async update(id: number, feedItem: Partial<FeedItem>): Promise<FeedItem> {
-    return fetchAPI(`/admin/feed/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(feedItem),
-    })
-  },
-
-  /**
-   * Delete feed item (admin only)
-   */
-  async delete(id: number): Promise<{ success: boolean; message: string }> {
-    return fetchAPI(`/admin/feed/${id}`, {
-      method: 'DELETE',
-    })
-  },
-}
 
 /**
  * Events API endpoints
@@ -643,15 +566,6 @@ export const statsAPI = {
     }).catch(() => {}) // Ignore errors silently
   },
 
-  /**
-   * Track feed item click
-   */
-  async trackFeedClick(feedItemId: number, userId?: number | null): Promise<void> {
-    await fetchAPI(`/stats/feed/${feedItemId}`, {
-      method: 'POST',
-      body: JSON.stringify({ userId: userId ?? null }),
-    }).catch(() => {})
-  },
 
   /**
    * Track event click
@@ -901,7 +815,6 @@ export const photosAPI = {
 export const api = {
   cafes: cafeAPI,
   cities: citiesAPI,
-  feed: feedAPI,
   events: eventsAPI,
   health: healthAPI,
   places: placesAPI,
