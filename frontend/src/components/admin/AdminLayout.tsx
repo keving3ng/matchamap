@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router'
-import { Settings, Menu, X, Coffee, Newspaper, Calendar, Code, Users, Package, Wrench, Upload, Mail, Image, FileText } from 'lucide-react'
+import { Settings, Menu, X, Coffee, Newspaper, Calendar, Code, Users, Package, Wrench, Upload, Mail, FileText } from 'lucide-react'
 
 interface AdminLayoutProps {
   children: React.ReactNode
@@ -50,12 +50,6 @@ const coreNavItems: NavItem[] = [
     label: 'Waitlist',
     icon: <Mail size={20} />,
     path: '/admin/waitlist',
-  },
-  {
-    id: 'photos',
-    label: 'Photos',
-    icon: <Image size={20} />,
-    path: '/admin/photos',
   },
 ]
 
