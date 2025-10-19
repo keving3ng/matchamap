@@ -14,7 +14,7 @@ import { register, login, logout, getCurrentUser, refreshToken } from './routes/
 import { joinWaitlist, getWaitlistAdmin } from './routes/waitlist';
 import { getUserProfile, getMyProfile, updateMyProfile, uploadAvatar } from './routes/profile';
 import { listUsers, getUserStats, getUser, updateUserRole, deleteUser } from './routes/admin-users';
-import { trackCafeStat, trackFeedClick, trackEventClick, handleCheckIn } from './routes/stats';
+import { trackCafeStat, trackEventClick, handleCheckIn } from './routes/stats';
 import { uploadPhoto, getCafePhotos, deletePhoto, getMyPhotos, getPhotosForModeration, moderatePhoto, servePhoto, getAdminCafePhotos } from './routes/photos';
 import { createReview, getCafeReviews, updateReview, deleteReview, markHelpful, removeHelpful, getUserReviews, getAdminCafeReviews, getAdminCafeReviewsCount, moderateReview } from './routes/reviews';
 import { getMyFavorites, addFavorite, removeFavorite, updateFavoriteNotes } from './routes/favorites';

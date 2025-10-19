@@ -40,7 +40,7 @@ describe('BottomNavigation', () => {
     mockGetCurrentEnvironment.mockReturnValue('production')
     mockUseAppFeatures.mockReturnValue({
       isPassportEnabled: true,
-      isFeedEnabled: true,
+      isFeedEnabled: false,
       isEventsEnabled: true,
     })
     mockUseLocation.mockReturnValue({ pathname: '/' })
@@ -51,7 +51,7 @@ describe('BottomNavigation', () => {
 
     expect(screen.getByText('Map')).toBeInTheDocument()
     expect(screen.getByText('List')).toBeInTheDocument()
-    expect(screen.getByText('Feed')).toBeInTheDocument()
+    expect(screen.queryByText('Feed')).not.toBeInTheDocument()
     expect(screen.getByText('Events')).toBeInTheDocument()
     expect(screen.getByText('Passport')).toBeInTheDocument()
   })
@@ -78,12 +78,11 @@ describe('BottomNavigation', () => {
     expect(listButton).toHaveClass('text-green-600')
   })
 
-  it('should highlight active feed view', () => {
+  it('should not render feed button when feed is disabled', () => {
     mockUseLocation.mockReturnValue({ pathname: '/feed' })
     renderWithRouter(<BottomNavigation />)
 
-    const feedButton = screen.getByText('Feed').closest('button')!
-    expect(feedButton).toHaveClass('text-green-600')
+    expect(screen.queryByText('Feed')).not.toBeInTheDocument()
   })
 
   it('should highlight active events view', () => {
@@ -133,14 +132,10 @@ describe('BottomNavigation', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/list')
   })
 
-  it('should navigate to feed when clicking feed button', async () => {
-    const user = userEvent.setup()
+  it('should not show feed button when feed is disabled', async () => {
     renderWithRouter(<BottomNavigation />)
 
-    const feedButton = screen.getByText('Feed')
-    await user.click(feedButton)
-
-    expect(mockNavigate).toHaveBeenCalledWith('/feed')
+    expect(screen.queryByText('Feed')).not.toBeInTheDocument()
   })
 
   it('should navigate to events when clicking events button', async () => {
@@ -182,7 +177,7 @@ describe('BottomNavigation', () => {
   it('should not render events button when events is disabled', () => {
     mockUseAppFeatures.mockReturnValue({
       isPassportEnabled: true,
-      isFeedEnabled: true,
+      isFeedEnabled: false,
       isEventsEnabled: false,
     })
 
@@ -190,7 +185,7 @@ describe('BottomNavigation', () => {
 
     expect(screen.getByText('Map')).toBeInTheDocument()
     expect(screen.getByText('List')).toBeInTheDocument()
-    expect(screen.getByText('Feed')).toBeInTheDocument()
+    expect(screen.queryByText('Feed')).not.toBeInTheDocument()
     expect(screen.queryByText('Events')).not.toBeInTheDocument()
     expect(screen.getByText('Passport')).toBeInTheDocument()
   })
@@ -198,7 +193,7 @@ describe('BottomNavigation', () => {
   it('should not render passport button when passport is disabled', () => {
     mockUseAppFeatures.mockReturnValue({
       isPassportEnabled: false,
-      isFeedEnabled: true,
+      isFeedEnabled: false,
       isEventsEnabled: true,
     })
 
@@ -206,7 +201,7 @@ describe('BottomNavigation', () => {
 
     expect(screen.getByText('Map')).toBeInTheDocument()
     expect(screen.getByText('List')).toBeInTheDocument()
-    expect(screen.getByText('Feed')).toBeInTheDocument()
+    expect(screen.queryByText('Feed')).not.toBeInTheDocument()
     expect(screen.getByText('Events')).toBeInTheDocument()
     expect(screen.queryByText('Passport')).not.toBeInTheDocument()
   })
@@ -275,7 +270,7 @@ describe('BottomNavigation', () => {
     renderWithRouter(<BottomNavigation />)
 
     const buttons = screen.getAllByRole('button')
-    expect(buttons).toHaveLength(5) // All 5 navigation buttons
+    expect(buttons).toHaveLength(4) // Map, List, Events, Passport (Feed is disabled)
 
     buttons.forEach(button => {
       expect(button).toBeEnabled()
@@ -298,7 +293,6 @@ describe('BottomNavigation', () => {
     const testCases = [
       { pathname: '/', expectedActive: 'Map' },
       { pathname: '/list', expectedActive: 'List' },
-      { pathname: '/feed', expectedActive: 'Feed' },
       { pathname: '/passport', expectedActive: 'Passport' },
       { pathname: '/events', expectedActive: 'Events' },
       { pathname: '/toronto/test-cafe', expectedActive: 'detail' }, // detail view (new route pattern)

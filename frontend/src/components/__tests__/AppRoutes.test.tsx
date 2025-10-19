@@ -63,7 +63,7 @@ vi.mock('../profile/UserProfilePage', () => ({
 // Mock feature toggles
 vi.mock('../../hooks/useAppFeatures', () => ({
   useAppFeatures: () => ({
-    isFeedEnabled: true,
+    isFeedEnabled: false,
     isPassportEnabled: true,
     isEventsEnabled: true,
     isStoreEnabled: true,
@@ -184,14 +184,15 @@ describe('AppRoutes', () => {
     expect(screen.getByText('Detail View')).toBeInTheDocument()
   })
 
-  it('should render feed view on /feed path', () => {
+  it('should redirect to map view when feed is disabled and /feed is accessed', () => {
     render(
       <MemoryRouter initialEntries={['/feed']}>
         <AppRoutes />
       </MemoryRouter>
     )
 
-    expect(screen.getByText('Feed View')).toBeInTheDocument()
+    // Feed is disabled, should redirect to map view
+    expect(screen.getByText('Map View')).toBeInTheDocument()
   })
 
   it('should render passport view on /passport path', () => {

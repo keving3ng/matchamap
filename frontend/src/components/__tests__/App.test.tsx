@@ -20,7 +20,7 @@ vi.mock('react-router', async (importOriginal) => {
 vi.mock('../../hooks/useAppFeatures', () => ({
   useAppFeatures: () => ({
     showComingSoon: false,
-    isFeedEnabled: true,
+    isFeedEnabled: false,
     isPassportEnabled: true,
     isEventsEnabled: true,
     isStoreEnabled: true,
@@ -47,7 +47,7 @@ describe('App', () => {
     renderWithRouter(<App />)
     expect(screen.getByText('Map')).toBeInTheDocument()
     expect(screen.getByText('List')).toBeInTheDocument()
-    expect(screen.getByText('Feed')).toBeInTheDocument()
+    expect(screen.queryByText('Feed')).not.toBeInTheDocument()
     expect(screen.getByText('Passport')).toBeInTheDocument()
   })
 
