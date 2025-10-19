@@ -796,3 +796,143 @@ function shouldAutoApprove(content: string, title?: string | null): boolean {
   // Auto-approve if content passes all checks
   return !hasSuspiciousContent && !excessiveCaps && !repetitive;
 }
+/**
+ * Admin: Get all reviews for a specific cafe (including hidden ones)
+ * GET /api/admin/cafes/:id/reviews
+ */
+export async function getAdminCafeReviews(request: IRequest, env: Env): Promise<Response> {
+  try {
+    const { id: cafeId } = request.params;
+
+    if (!cafeId) {
+      return badRequestResponse('Cafe ID is required', request as Request, env);
+    }
+
+    const db = getDb(env.DB);
+
+    // Get all reviews (including hidden) for the cafe
+    const reviews = await db
+      .select({
+        id: userReviews.id,
+        overallRating: userReviews.overallRating,
+        matchaQualityRating: userReviews.matchaQualityRating,
+        ambianceRating: userReviews.ambianceRating,
+        serviceRating: userReviews.serviceRating,
+        valueRating: userReviews.valueRating,
+        title: userReviews.title,
+        content: userReviews.content,
+        tags: userReviews.tags,
+        visitDate: userReviews.visitDate,
+        helpfulCount: userReviews.helpfulCount,
+        moderationStatus: userReviews.moderationStatus,
+        createdAt: userReviews.createdAt,
+        updatedAt: userReviews.updatedAt,
+        userId: userReviews.userId,
+        username: users.username,
+      })
+      .from(userReviews)
+      .innerJoin(users, eq(userReviews.userId, users.id))
+      .where(eq(userReviews.cafeId, parseInt(cafeId)))
+      .orderBy(desc(userReviews.createdAt))
+      .limit(100)
+      .all();
+
+    // Parse tags from JSON strings
+    const processedReviews = reviews.map(review => ({
+      ...review,
+      tags: review.tags ? JSON.parse(review.tags) : null,
+    }));
+
+    return jsonResponse({ reviews: processedReviews }, HTTP_STATUS.OK, request as Request, env);
+
+  } catch (error) {
+    console.error('Get admin cafe reviews error:', error);
+    return errorResponse('Internal server error', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
+  }
+}
+
+/**
+ * Admin: Get review count for a cafe
+ * GET /api/admin/cafes/:id/reviews/count
+ */
+export async function getAdminCafeReviewsCount(request: IRequest, env: Env): Promise<Response> {
+  try {
+    const { id: cafeId } = request.params;
+
+    if (!cafeId) {
+      return badRequestResponse('Cafe ID is required', request as Request, env);
+    }
+
+    const db = getDb(env.DB);
+
+    const countResult = await db
+      .select({ count: sql<number>`COUNT(*)` })
+      .from(userReviews)
+      .where(eq(userReviews.cafeId, parseInt(cafeId)))
+      .get();
+
+    return jsonResponse({ count: countResult?.count || 0 }, HTTP_STATUS.OK, request as Request, env);
+
+  } catch (error) {
+    console.error('Get admin cafe reviews count error:', error);
+    return errorResponse('Internal server error', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
+  }
+}
+
+/**
+ * Admin: Moderate a review (approve, reject, flag)
+ * PUT /api/admin/reviews/:id/moderate
+ */
+export async function moderateReview(request: AuthenticatedRequest, env: Env): Promise<Response> {
+  try {
+    if (!request.user) {
+      return errorResponse('Unauthorized', HTTP_STATUS.UNAUTHORIZED, request as Request, env);
+    }
+
+    const reviewId = parseInt(request.params?.id as string);
+    if (isNaN(reviewId)) {
+      return badRequestResponse('Invalid review ID', request as Request, env);
+    }
+
+    const body = await request.json() as { status?: string; notes?: string };
+
+    if (!body.status || !['approved', 'rejected', 'flagged'].includes(body.status)) {
+      return badRequestResponse('Valid status is required (approved, rejected, or flagged)', request as Request, env);
+    }
+
+    const db = getDb(env.DB);
+
+    // Get the review to check if it exists
+    const review = await db.select().from(userReviews).where(eq(userReviews.id, reviewId)).get();
+    if (!review) {
+      return notFoundResponse(request as Request, env);
+    }
+
+    // Update review moderation status
+    const updateData: any = {
+      moderationStatus: body.status as 'approved' | 'rejected' | 'pending' | 'flagged',
+      updatedAt: sql`CURRENT_TIMESTAMP`,
+    };
+
+    await db
+      .update(userReviews)
+      .set(updateData)
+      .where(eq(userReviews.id, reviewId));
+
+    // Update cafe aggregated rating if status changed affects public visibility
+    if (body.status === 'approved' || review.moderationStatus === 'approved') {
+      updateCafeRatingWithRetry(env, review.cafeId, 'review moderation').catch(error => {
+        console.error(`Failed to update cafe rating for cafe ${review.cafeId} after review moderation (all retries exhausted):`, error);
+      });
+    }
+
+    return jsonResponse({
+      success: true,
+      message: `Review ${body.status} successfully`
+    }, HTTP_STATUS.OK, request as Request, env);
+
+  } catch (error) {
+    console.error('Error moderating review:', error);
+    return errorResponse('Internal server error', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
+  }
+}

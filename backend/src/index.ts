@@ -17,8 +17,8 @@ import { joinWaitlist, getWaitlistAdmin } from './routes/waitlist';
 import { getUserProfile, getMyProfile, updateMyProfile, uploadAvatar } from './routes/profile';
 import { listUsers, getUserStats, getUser, updateUserRole, deleteUser } from './routes/admin-users';
 import { trackCafeStat, trackFeedClick, trackEventClick, handleCheckIn } from './routes/stats';
-import { uploadPhoto, getCafePhotos, deletePhoto, getMyPhotos, getPhotosForModeration, moderatePhoto } from './routes/photos';
-import { createReview, getCafeReviews, updateReview, deleteReview, markHelpful, removeHelpful, getUserReviews } from './routes/reviews';
+import { uploadPhoto, getCafePhotos, deletePhoto, getMyPhotos, getPhotosForModeration, moderatePhoto, servePhoto, getAdminCafePhotos } from './routes/photos';
+import { createReview, getCafeReviews, updateReview, deleteReview, markHelpful, removeHelpful, getUserReviews, getAdminCafeReviews, getAdminCafeReviewsCount, moderateReview } from './routes/reviews';
 import { getMyFavorites, addFavorite, removeFavorite, updateFavoriteNotes } from './routes/favorites';
 import { requireAuth, requireAdminAuth } from './middleware/auth';
 import { authRateLimit, publicRateLimit, writeRateLimit } from './middleware/rateLimit';
@@ -154,6 +154,16 @@ router.delete('/api/admin/users/:id', writeRateLimit(), requireAdminAuth(), dele
 // Photo moderation admin endpoints
 router.get('/api/admin/photos', publicRateLimit(), requireAdminAuth(), getPhotosForModeration);
 router.put('/api/admin/photos/:id/moderate', writeRateLimit(), requireAdminAuth(), moderatePhoto);
+
+// Content management admin endpoints
+router.get('/api/admin/cafes/:id/photos', publicRateLimit(), requireAdminAuth(), getAdminCafePhotos);
+router.get('/api/admin/cafes/:id/reviews', publicRateLimit(), requireAdminAuth(), getAdminCafeReviews);
+router.get('/api/admin/cafes/:id/reviews/count', publicRateLimit(), requireAdminAuth(), getAdminCafeReviewsCount);
+router.put('/api/admin/reviews/:id/moderate', writeRateLimit(), requireAdminAuth(), moderateReview);
+
+// Photo serving endpoints (for local dev with local R2)
+router.get('/photos/*', servePhoto);
+router.get('/thumbnails/*', servePhoto);
 
 // Handle OPTIONS for CORS preflight
 router.options('*', (request, env: Env) => handleCorsPreflightRequest(request, env));

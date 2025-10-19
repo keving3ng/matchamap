@@ -11,20 +11,30 @@ import { COPY } from '../constants/copy'
 import { api } from '../utils/api'
 import { trackCafeStat, trackCheckIn } from '../utils/analytics'
 import { useAuthStore } from '../stores/authStore'
+import { usePhotosStore } from '../stores/photosStore'
 import { ReviewForm } from './reviews/ReviewForm'
 import { AggregatedRating } from './reviews/AggregatedRating'
 import { ReviewList } from './reviews/ReviewList'
+import { PhotoGallery } from './photos/PhotoGallery'
+import { PhotoLightbox } from './photos/PhotoLightbox'
+import { PhotoUploadModal } from './photos/PhotoUploadModal'
 import type { DetailViewProps } from '../types'
-import type { Event } from '../../../shared/types'
+import type { Event, ReviewPhoto } from '../../../shared/types'
 
 export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, onToggleVisited }) => {
   const { isPassportEnabled, isUserAccountsEnabled } = useAppFeatures()
   const { user } = useAuthStore()
+  const { invalidateCache } = usePhotosStore()
   const isVisited: boolean = visitedLocations.includes(cafe.id)
   const mapsUrl = getMapsUrl(cafe.address || '', cafe.link)
   const [cafeEvents, setCafeEvents] = useState<Event[]>([])
   const [showReviewForm, setShowReviewForm] = useState(false)
+  const [showPhotoUpload, setShowPhotoUpload] = useState(false)
   const [reviewCount, setReviewCount] = useState(cafe.userRatingCount || 0)
+  const [lightboxPhoto, setLightboxPhoto] = useState<{
+    photos: ReviewPhoto[]
+    index: number
+  } | null>(null)
   const navigate = useNavigate()
 
   const hoursData = cafe.hours ? formatHoursCompact(cafe.hours) : null
@@ -51,6 +61,19 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
   const handleViewEvent = () => {
     // Navigate to events view
     navigate('/events')
+  }
+
+  const handlePhotoClick = (_photo: ReviewPhoto, index: number, photos: ReviewPhoto[]) => {
+    setLightboxPhoto({ photos, index })
+  }
+
+  const handleUploadClick = () => {
+    setShowPhotoUpload(true)
+  }
+
+  const handlePhotoUploadSuccess = () => {
+    // Invalidate cache to trigger photo gallery refresh
+    invalidateCache(cafe.id)
   }
 
   return (
@@ -316,6 +339,17 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
           </div>
         )}
 
+        {/* Photo Gallery Section */}
+        <div className="mt-8 animate-fade-in">
+          <PhotoGallery
+            cafeId={cafe.id}
+            onPhotoClick={handlePhotoClick}
+            showUploadButton={true}
+            onUploadClick={handleUploadClick}
+            maxInitialPhotos={6}
+          />
+        </div>
+
         {/* Additional Info Sections */}
         {hoursData && hoursData.allHours.length > 0 && (
           <div className="mt-8 animate-fade-in">
@@ -483,6 +517,31 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
             />
           </div>
         </div>
+      )}
+
+      {/* Photo Lightbox */}
+      {lightboxPhoto && (
+        <PhotoLightbox
+          photos={lightboxPhoto.photos}
+          initialIndex={lightboxPhoto.index}
+          isOpen={true}
+          onClose={() => setLightboxPhoto(null)}
+          cafeInfo={{
+            name: cafe.name,
+            city: cafe.city
+          }}
+        />
+      )}
+
+      {/* Photo Upload Modal */}
+      {showPhotoUpload && (
+        <PhotoUploadModal
+          cafeId={cafe.id}
+          cafeName={cafe.name}
+          isOpen={showPhotoUpload}
+          onClose={() => setShowPhotoUpload(false)}
+          onSuccess={handlePhotoUploadSuccess}
+        />
       )}
     </div>
   )

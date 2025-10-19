@@ -273,7 +273,7 @@ export async function getMyPhotos(request: AuthenticatedRequest, env: Env): Prom
 export async function getPhotosForModeration(request: IRequest, env: Env): Promise<Response> {
   try {
     const db = getDb(env.DB);
-    
+
     // Get all photos pending moderation
     const photos = await db
       .select({
@@ -304,6 +304,82 @@ export async function getPhotosForModeration(request: IRequest, env: Env): Promi
   } catch (error) {
     console.error('Get photos for moderation error:', error);
     return jsonResponse({ error: 'Failed to retrieve photos' }, HTTP_STATUS.INTERNAL_SERVER_ERROR, request, env);
+  }
+}
+
+/**
+ * Admin: Get all photos for a specific cafe (including hidden ones)
+ * GET /api/admin/cafes/:id/photos
+ */
+export async function getAdminCafePhotos(request: IRequest, env: Env): Promise<Response> {
+  try {
+    const { id: cafeId } = request.params;
+
+    if (!cafeId) {
+      return jsonResponse({ error: 'Cafe ID is required' }, HTTP_STATUS.BAD_REQUEST, request, env);
+    }
+
+    const db = getDb(env.DB);
+
+    // Get all photos (including hidden) for the cafe
+    const photos = await db
+      .select({
+        id: reviewPhotos.id,
+        imageUrl: reviewPhotos.imageUrl,
+        thumbnailUrl: reviewPhotos.thumbnailUrl,
+        caption: reviewPhotos.caption,
+        width: reviewPhotos.width,
+        height: reviewPhotos.height,
+        fileSize: reviewPhotos.fileSize,
+        moderationStatus: reviewPhotos.moderationStatus,
+        createdAt: reviewPhotos.createdAt,
+        userId: reviewPhotos.userId,
+        username: users.username,
+      })
+      .from(reviewPhotos)
+      .innerJoin(users, eq(reviewPhotos.userId, users.id))
+      .where(eq(reviewPhotos.cafeId, parseInt(cafeId)))
+      .orderBy(desc(reviewPhotos.createdAt))
+      .limit(100)
+      .all();
+
+    return jsonResponse({ photos }, HTTP_STATUS.OK, request, env);
+
+  } catch (error) {
+    console.error('Get admin cafe photos error:', error);
+    return jsonResponse({ error: 'Failed to retrieve photos' }, HTTP_STATUS.INTERNAL_SERVER_ERROR, request, env);
+  }
+}
+
+/**
+ * Serve photo from R2 bucket
+ * GET /photos/* or /thumbnails/*
+ * Used for local development to serve files from local R2 storage
+ */
+export async function servePhoto(request: IRequest, env: Env): Promise<Response> {
+  try {
+    const url = new URL(request.url);
+    // Remove leading slash from pathname
+    const key = url.pathname.substring(1);
+
+    // Get file from R2
+    const object = await env.PHOTOS_BUCKET.get(key);
+
+    if (!object) {
+      return new Response('Photo not found', { status: HTTP_STATUS.NOT_FOUND });
+    }
+
+    // Return the file with appropriate headers
+    return new Response(object.body, {
+      headers: {
+        'Content-Type': object.httpMetadata?.contentType || 'image/jpeg',
+        'Cache-Control': object.httpMetadata?.cacheControl || 'public, max-age=31536000',
+        'Access-Control-Allow-Origin': '*',
+      }
+    });
+  } catch (error) {
+    console.error('Serve photo error:', error);
+    return new Response('Failed to serve photo', { status: HTTP_STATUS.INTERNAL_SERVER_ERROR });
   }
 }
 

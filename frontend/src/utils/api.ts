@@ -411,6 +411,34 @@ export const adminAPI = {
       body: JSON.stringify(data),
     })
   },
+
+  /**
+   * Get photos pending moderation (admin only)
+   */
+  async getPhotosForModeration(filters?: {
+    limit?: number
+    offset?: number
+  }): Promise<{ photos: ReviewPhoto[]; total: number; hasMore: boolean }> {
+    const params = new URLSearchParams()
+    if (filters?.limit) params.append('limit', filters.limit.toString())
+    if (filters?.offset) params.append('offset', filters.offset.toString())
+
+    const query = params.toString() ? `?${params.toString()}` : ''
+    return fetchAPI(`/admin/photos${query}`)
+  },
+
+  /**
+   * Moderate a photo (approve/reject) (admin only)
+   */
+  async moderatePhoto(photoId: number, data: {
+    status: 'approved' | 'rejected'
+    notes?: string
+  }): Promise<{ photo: ReviewPhoto; message: string }> {
+    return fetchAPI(`/admin/photos/${photoId}/moderate`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+  },
 }
 
 /**
@@ -840,6 +868,21 @@ export const photosAPI = {
 
     const query = params.toString() ? `?${params.toString()}` : ''
     return fetchAPI(`/cafes/${cafeId}/photos${query}`)
+  },
+
+  /**
+   * Get my photos (authenticated)
+   */
+  async getMyPhotos(filters?: {
+    limit?: number
+    offset?: number
+  }): Promise<{ photos: ReviewPhoto[]; total: number; hasMore: boolean }> {
+    const params = new URLSearchParams()
+    if (filters?.limit) params.append('limit', filters.limit.toString())
+    if (filters?.offset) params.append('offset', filters.offset.toString())
+
+    const query = params.toString() ? `?${params.toString()}` : ''
+    return fetchAPI(`/users/me/photos${query}`)
   },
 
   /**

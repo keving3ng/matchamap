@@ -365,24 +365,25 @@ export interface ReviewPhoto {
   reviewId: number
   userId: number
   cafeId: number
-  
+
   // R2 storage
   imageKey: string
   imageUrl: string
   thumbnailUrl?: string
-  
+
   // Metadata
   caption?: string
   drinkType?: string
   width?: number
   height?: number
   fileSize?: number
-  
+  username?: string // Populated by backend when fetching photos
+
   // Moderation
   moderationStatus: PhotoModerationStatus
   moderatedBy?: number
   moderatedAt?: string
-  
+
   // Timestamps
   createdAt: string
   updatedAt: string

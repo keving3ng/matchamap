@@ -27,6 +27,9 @@ const ProductsManagementPage = React.lazy(() => import('./admin/ProductsManageme
 const MiscAdminPage = React.lazy(() => import('./admin/MiscAdminPage'))
 const BulkImporterPage = React.lazy(() => import('./admin/BulkImporterPage'))
 const WaitlistPage = React.lazy(() => import('./admin/WaitlistPage'))
+const ContentManagementPage = React.lazy(() => import('./admin/ContentManagementPage'))
+const CafePhotosManagementPage = React.lazy(() => import('./admin/CafePhotosManagementPage'))
+const CafeReviewsManagementPage = React.lazy(() => import('./admin/CafeReviewsManagementPage'))
 import { useFeatureToggle } from '../hooks/useFeatureToggle'
 import { useAppFeatures } from '../hooks/useAppFeatures'
 import { useDataStore } from '../stores/dataStore'
@@ -355,6 +358,39 @@ export const AppRoutes: React.FC = () => {
                 <AdminErrorBoundary>
                   <AdminLayout>
                     <AdminSettingsPage />
+                  </AdminLayout>
+                </AdminErrorBoundary>
+              </Suspense>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/content" element={
+            <ProtectedRoute requireAdmin={true}>
+              <Suspense fallback={<AdminLoadingFallback />}>
+                <AdminErrorBoundary>
+                  <AdminLayout>
+                    <ContentManagementPage />
+                  </AdminLayout>
+                </AdminErrorBoundary>
+              </Suspense>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/content/cafes/:cafeId/photos" element={
+            <ProtectedRoute requireAdmin={true}>
+              <Suspense fallback={<AdminLoadingFallback />}>
+                <AdminErrorBoundary>
+                  <AdminLayout>
+                    <CafePhotosManagementPage />
+                  </AdminLayout>
+                </AdminErrorBoundary>
+              </Suspense>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/content/cafes/:cafeId/reviews" element={
+            <ProtectedRoute requireAdmin={true}>
+              <Suspense fallback={<AdminLoadingFallback />}>
+                <AdminErrorBoundary>
+                  <AdminLayout>
+                    <CafeReviewsManagementPage />
                   </AdminLayout>
                 </AdminErrorBoundary>
               </Suspense>
