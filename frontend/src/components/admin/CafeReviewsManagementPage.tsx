@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { ArrowLeft, MessageSquare, EyeOff, Eye, Loader, Calendar, User, Star } from 'lucide-react'
+import { ArrowLeft, MessageSquare, EyeOff, Eye, Loader, Calendar, User, Star } from '@/components/icons'
 import { useNavigate, useParams } from 'react-router'
 import { api } from '../../utils/api'
 import type { UserReview } from '../../../../shared/types'

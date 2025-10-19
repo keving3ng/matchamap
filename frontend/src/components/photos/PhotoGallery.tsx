@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { Camera, ChevronRight, User, Calendar } from 'lucide-react'
+import { Camera, ChevronRight, User, Calendar } from '@/components/icons'
 import { api } from '../../utils/api'
 import { COPY } from '../../constants/copy'
 import { Skeleton } from '../ui'

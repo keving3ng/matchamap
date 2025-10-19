@@ -3,7 +3,7 @@ import { useAdminStore } from '../stores/adminStore'
 import { useAuthStore } from '../stores/authStore'
 import { getCurrentEnvironment } from '../hooks/useFeatureToggle'
 import { useNavigate } from 'react-router'
-import { Settings, AlertTriangle, LogOut, User } from 'lucide-react'
+import { Settings, AlertTriangle, LogOut, User } from '@/components/icons'
 import { COPY } from '../constants/copy'
 
 interface AdminWrapperProps {

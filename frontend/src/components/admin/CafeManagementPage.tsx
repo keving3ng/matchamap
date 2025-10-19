@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react'
-import { Coffee, Plus, Search, Edit, Trash2, Loader, AlertCircle, Info } from 'lucide-react'
+import { Coffee, Plus, Search, Edit, Trash2, Loader, AlertCircle, Info } from '@/components/icons'
 import { useDataStore } from '../../stores/dataStore'
 import { api } from '../../utils/api'
 import { CafeForm } from './CafeForm'

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { X, Save, Coffee } from 'lucide-react'
+import { X, Save, Coffee } from '@/components/icons'
 import { api } from '../../utils/api'
 import type { DrinkItem } from '../../types'
 

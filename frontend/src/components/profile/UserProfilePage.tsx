@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, Navigate, useNavigate } from 'react-router'
-import { Loader2, AlertCircle, Sparkles, MapPin, Star } from 'lucide-react'
+import { Loader2, AlertCircle, Sparkles, MapPin, Star } from '@/components/icons'
 import { useUserProfile, useMyProfile } from '../../hooks/useUserProfile'
 import { useAuthStore } from '../../stores/authStore'
 import { ProfileHeader } from './ProfileHeader'

@@ -1,5 +1,5 @@
 import { Component, ErrorInfo, ReactNode } from 'react'
-import { AlertTriangle, RefreshCw, Copy } from 'lucide-react'
+import { AlertTriangle, RefreshCw, Copy } from '@/components/icons'
 import { SecondaryButton, TertiaryButton } from '../ui/Button'
 import { COPY } from '../../constants/copy'
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { ThumbsUp, User, Calendar, Badge, Image, ChevronDown, ChevronUp } from 'lucide-react'
+import { ThumbsUp, User, Calendar, Badge, Image, ChevronDown, ChevronUp } from '@/components/icons'
 import { SecondaryButton, StatusBadge } from '../ui'
 import { COPY } from '../../constants/copy'
 import { api } from '../../utils/api'

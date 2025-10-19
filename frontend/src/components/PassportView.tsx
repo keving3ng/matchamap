@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { TrendingUp } from 'lucide-react'
+import { TrendingUp } from '@/components/icons'
 import { ContentContainer } from './ContentContainer'
 import type { PassportViewProps } from '../types'
 

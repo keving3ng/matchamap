@@ -1,5 +1,5 @@
 import React from 'react'
-import { Calendar, Clock, MapPin, DollarSign, Star, Navigation, ChevronDown, ChevronUp } from 'lucide-react'
+import { Calendar, Clock, MapPin, DollarSign, Star, Navigation, ChevronDown, ChevronUp } from '@/components/icons'
 import { useNavigate } from 'react-router'
 import { ContentContainer } from './ContentContainer'
 import { ListSkeleton, ErrorAlert } from './ui'

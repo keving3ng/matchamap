@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { X, Save, MapPin, Coffee, RefreshCw, Lock } from 'lucide-react'
+import { X, Save, MapPin, Coffee, RefreshCw, Lock } from '@/components/icons'
 import { api } from '../../utils/api'
 import { COPY } from '../../constants/copy'
 import { CITIES } from '../../stores/cityStore'

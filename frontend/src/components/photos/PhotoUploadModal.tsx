@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react'
-import { Camera, X, Upload, Image as ImageIcon, AlertCircle, CheckCircle } from 'lucide-react'
+import { Camera, X, Upload, Image as ImageIcon, AlertCircle, CheckCircle } from '@/components/icons'
 import { COPY } from '../../constants/copy'
 import { PrimaryButton, SecondaryButton } from '../ui'
 import { api } from '../../utils/api'

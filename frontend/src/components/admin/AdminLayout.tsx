@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router'
-import { Settings, Menu, X, Coffee, Calendar, Code, Users, Package, Wrench, Upload, Mail, FileText } from 'lucide-react'
+import { Settings, Menu, X, Coffee, Calendar, Code, Users, Package, Wrench, Upload, Mail, FileText } from '@/components/icons'
 
 interface AdminLayoutProps {
   children: React.ReactNode

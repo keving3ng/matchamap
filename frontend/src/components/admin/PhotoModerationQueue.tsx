@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Check, X, User, Calendar, MapPin, Image as ImageIcon, FileImage } from 'lucide-react'
+import { Check, X, User, Calendar, MapPin, Image as ImageIcon, FileImage } from '@/components/icons'
 import { COPY } from '../../constants/copy'
 import { PrimaryButton, SecondaryButton } from '../ui'
 import { Skeleton } from '../ui'

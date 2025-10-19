@@ -1,5 +1,5 @@
 import React from 'react'
-import { Star, Users, Award } from 'lucide-react'
+import { Star, Users, Award } from '@/components/icons'
 import { ScoreBadge } from '../ui'
 import { COPY } from '../../constants/copy'
 

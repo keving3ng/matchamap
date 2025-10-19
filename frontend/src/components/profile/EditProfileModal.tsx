@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { X, Save } from 'lucide-react'
+import { X, Save } from '@/components/icons'
 import { PrimaryButton, SecondaryButton } from '../ui'
 import { COPY } from '../../constants/copy'
 import type { UserProfile, UpdateProfileRequest } from '../../../../shared/types'

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Image, Search, ChevronRight, Loader, MessageSquare } from 'lucide-react'
+import { Image, Search, ChevronRight, Loader, MessageSquare } from '@/components/icons'
 import { useNavigate } from 'react-router'
 import { useDataStore } from '../../stores/dataStore'
 import { CITIES } from '../../stores/cityStore'

@@ -2,7 +2,7 @@ import React from 'react'
 import { useAdminStore } from '../../stores/adminStore'
 import { getCurrentEnvironment } from '../../hooks/useFeatureToggle'
 import featureConfig from '../../config/features.yaml'
-import { RotateCcw, Info, Power } from 'lucide-react'
+import { RotateCcw, Info, Power } from '@/components/icons'
 
 type FeatureKey = keyof typeof featureConfig
 

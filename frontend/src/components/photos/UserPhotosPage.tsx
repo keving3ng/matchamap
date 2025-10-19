@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Camera, Trash2, MapPin, Calendar, FileImage, AlertCircle } from 'lucide-react'
+import { Camera, Trash2, MapPin, Calendar, FileImage, AlertCircle } from '@/components/icons'
 import { useNavigate } from 'react-router'
 import { COPY } from '../../constants/copy'
 import { PrimaryButton, SecondaryButton, StatusBadge } from '../ui'

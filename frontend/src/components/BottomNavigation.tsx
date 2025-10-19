@@ -1,6 +1,6 @@
 import React from 'react'
 import { useNavigate, useLocation } from 'react-router'
-import { MapPin, List, User, Calendar } from 'lucide-react'
+import { MapPin, List, User, Calendar } from '@/components/icons'
 import { getCurrentEnvironment } from '../hooks/useFeatureToggle'
 import { useAppFeatures } from '../hooks/useAppFeatures'
 

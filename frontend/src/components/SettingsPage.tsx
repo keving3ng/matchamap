@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Settings, Bell, MapPin, Palette, Database, Shield, LogOut } from 'lucide-react'
+import { Settings, Bell, MapPin, Palette, Database, Shield, LogOut } from '@/components/icons'
 import { ContentContainer } from './ContentContainer'
 
 export const SettingsPage: React.FC = () => {

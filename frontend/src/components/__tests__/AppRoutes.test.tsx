@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { BrowserRouter, MemoryRouter } from 'react-router-dom'
 import { AppRoutes } from '../AppRoutes'
 
@@ -205,14 +205,17 @@ describe('AppRoutes', () => {
     expect(screen.getByText('Passport View')).toBeInTheDocument()
   })
 
-  it('should render events view on /events path', () => {
+  it('should render events view on /events path', async () => {
     render(
       <MemoryRouter initialEntries={['/events']}>
         <AppRoutes />
       </MemoryRouter>
     )
 
-    expect(screen.getByText('Events View')).toBeInTheDocument()
+    // EventsView is lazy loaded, so we need to wait for it
+    await waitFor(() => {
+      expect(screen.getByText('Events View')).toBeInTheDocument()
+    })
   })
 
   it('should render about page on /about path', () => {

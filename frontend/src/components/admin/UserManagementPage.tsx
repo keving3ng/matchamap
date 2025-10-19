@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Users, Search, Filter, Trash2, Shield, Mail, CheckCircle, XCircle, Eye, MoreVertical } from 'lucide-react'
+import { Users, Search, Filter, Trash2, Shield, Mail, CheckCircle, XCircle, Eye, MoreVertical } from '@/components/icons'
 import { api, type AdminUserListItem, type AdminUserStats } from '../../utils/api'
 import { useAuthStore } from '../../stores/authStore'
 import { UserDetailModal } from './UserDetailModal'

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Package, Plus, Search, Edit, Trash2, AlertCircle, DollarSign, ExternalLink } from 'lucide-react'
+import { Package, Plus, Search, Edit, Trash2, AlertCircle, DollarSign, ExternalLink } from '@/components/icons'
 
 export const ProductsManagementPage: React.FC = () => {
   return (

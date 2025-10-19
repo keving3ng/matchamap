@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Calendar, Plus, Search, Edit, Trash2, Star, MoreVertical, Download, Upload, Eye, ExternalLink, Check, Clock, MapPin, DollarSign } from 'lucide-react'
+import { Calendar, Plus, Search, Edit, Trash2, Star, MoreVertical, Download, Upload, Eye, ExternalLink, Check, Clock, MapPin, DollarSign } from '@/components/icons'
 import { api } from '../../utils/api'
 import { COPY } from '../../constants/copy'
 import { useCafeStore } from '../../stores/cafeStore'

@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react'
-import { Download, Upload, Loader, CheckCircle, AlertCircle, X } from 'lucide-react'
+import { Download, Upload, Loader, CheckCircle, AlertCircle, X } from '@/components/icons'
 import { api } from '../../utils/api'
 
 interface DataManagementProps {
