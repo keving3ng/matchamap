@@ -11,6 +11,9 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 })
 
+// Reasonable zoom level to see cafe details
+const REASONABLE_ZOOM = 15
+
 interface UseLeafletMapOptions {
   cafes: CafeWithDistance[]
   onPinClick: (cafe: CafeWithDistance) => void
@@ -142,7 +145,6 @@ export const useLeafletMap = ({
 
           // If zoomed out too far, zoom in to a reasonable level in background
           const currentZoom = mapRef.current?.getZoom() ?? initialZoom
-          const REASONABLE_ZOOM = 15 // Good zoom level to see cafe details
 
           if (currentZoom < REASONABLE_ZOOM) {
             // Smoothly pan and zoom to the cafe location (happens in background)
@@ -152,6 +154,25 @@ export const useLeafletMap = ({
               { animate: true, duration: 0.5 }
             )
           }
+        })
+        .on('dblclick', (e) => {
+          // Prevent default map zoom on double-click
+          e.originalEvent.stopPropagation()
+          e.originalEvent.preventDefault()
+
+          // Always center the pin on the map and ensure reasonable zoom
+          const currentZoom = mapRef.current?.getZoom() ?? initialZoom
+          const targetZoom = Math.max(currentZoom, REASONABLE_ZOOM)
+          
+          // Smoothly center and zoom to the cafe location
+          mapRef.current?.setView(
+            [cafe.lat ?? cafe.latitude, cafe.lng ?? cafe.longitude],
+            targetZoom,
+            { animate: true, duration: 0.5 }
+          )
+          
+          // Ensure cafe card is open
+          onPinClick(cafe)
         })
 
       markersRef.current.set(cafe.id, marker)
