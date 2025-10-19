@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { Calendar, Clock, MapPin, DollarSign, Navigation, Instagram, ArrowLeft } from 'lucide-react'
+import { Calendar, Clock, MapPin, DollarSign, Navigation, Instagram, ArrowLeft } from '@/components/icons'
 import { useNavigate } from 'react-router'
 import { ContentContainer } from './ContentContainer'
 import { COPY } from '../constants/copy'

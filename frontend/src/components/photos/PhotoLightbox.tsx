@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { X, ChevronLeft, ChevronRight, Download, Calendar, MapPin } from 'lucide-react'
+import { X, ChevronLeft, ChevronRight, Download, Calendar, MapPin } from '@/components/icons'
 import { COPY } from '../../constants/copy'
 import { zIndex } from '../../styles/spacing'
 import type { ReviewPhoto } from '../../../../shared/types'

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Download, ArrowUpDown, Users, TrendingUp, Calendar, Percent } from 'lucide-react'
+import { Download, ArrowUpDown, Users, TrendingUp, Calendar, Percent } from '@/components/icons'
 import { api } from '../../utils/api'
 import { COPY } from '../../constants/copy'
 import { PrimaryButton, SecondaryButton, StatusBadge } from '../ui'

@@ -1,5 +1,5 @@
 import React from 'react'
-import { AlertTriangle, X } from 'lucide-react'
+import { AlertTriangle, X } from '@/components/icons'
 
 interface ErrorAlertProps {
   message: string

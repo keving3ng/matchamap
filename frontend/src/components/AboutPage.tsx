@@ -1,5 +1,5 @@
 import React from 'react'
-import { Heart, Coffee, MapPin, Star } from 'lucide-react'
+import { Heart, Coffee, MapPin, Star } from '@/components/icons'
 import { ContentContainer } from './ContentContainer'
 
 export const AboutPage: React.FC = () => {

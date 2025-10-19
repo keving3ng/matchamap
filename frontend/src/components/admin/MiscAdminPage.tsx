@@ -1,5 +1,5 @@
 import React from 'react'
-import { Wrench, AlertCircle, Database, FileText, Bell, Globe, Palette } from 'lucide-react'
+import { Wrench, AlertCircle, Database, FileText, Bell, Globe, Palette } from '@/components/icons'
 
 export const MiscAdminPage: React.FC = () => {
   return (

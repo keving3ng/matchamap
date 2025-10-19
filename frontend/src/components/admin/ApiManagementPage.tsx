@@ -1,5 +1,5 @@
 import React from 'react'
-import { Code, Key, Plus, Copy, Trash2, AlertCircle, Activity } from 'lucide-react'
+import { Code, Key, Plus, Copy, Trash2, AlertCircle, Activity } from '@/components/icons'
 
 export const ApiManagementPage: React.FC = () => {
   return (

@@ -1,5 +1,5 @@
 import React from 'react'
-import { MapPin, Instagram, Globe, Edit2 } from 'lucide-react'
+import { MapPin, Instagram, Globe, Edit2 } from '@/components/icons'
 import { SecondaryButton } from '../ui'
 import { COPY } from '../../constants/copy'
 import type { PublicUserProfile } from '../../../../shared/types'

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router'
-import { ArrowLeft, Menu, Instagram, LogIn, LogOut, Mail, Info, ShoppingBag, Sliders, User } from 'lucide-react'
+import { ArrowLeft, Menu, Instagram, LogIn, LogOut, Mail, Info, ShoppingBag, Sliders, User } from '@/components/icons'
 import { useFeatureToggle } from '../hooks/useFeatureToggle'
 import { useAuthStore } from '../stores/authStore'
 import { COPY } from '../constants/copy'

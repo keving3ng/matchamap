@@ -1,5 +1,5 @@
 import React from 'react'
-import { LucideIcon } from 'lucide-react'
+import { LucideIcon } from '@/components/icons'
 
 interface CircleButtonProps {
   onClick?: () => void

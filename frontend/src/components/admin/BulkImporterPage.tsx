@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react'
-import { Upload, CheckCircle, AlertCircle, FileText, Loader, Download } from 'lucide-react'
+import { Upload, CheckCircle, AlertCircle, FileText, Loader, Download } from '@/components/icons'
 import { parseCsvToCafes } from '../../utils/csvParser'
 import { parseJsonToCafes } from '../../utils/jsonParser'
 import { generateChangelog, type ImportChangelog } from '../../utils/importDiffEngine'

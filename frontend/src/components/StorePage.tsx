@@ -1,5 +1,5 @@
 import React from 'react'
-import { ShoppingBag, Star, TrendingUp } from 'lucide-react'
+import { ShoppingBag, Star, TrendingUp } from '@/components/icons'
 import { ContentContainer } from './ContentContainer'
 
 interface Product {

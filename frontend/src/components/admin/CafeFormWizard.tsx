@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { X, Save, MapPin, Star, Coffee, ArrowRight, ArrowLeft, Search } from 'lucide-react'
+import { X, Save, MapPin, Star, Coffee, ArrowRight, ArrowLeft, Search } from '@/components/icons'
 import { api } from '../../utils/api'
 import { formatHoursList } from '../../utils/formatHours'
 import { CITIES, CityKey } from '../../stores/cityStore'

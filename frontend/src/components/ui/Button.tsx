@@ -1,5 +1,5 @@
 import React from 'react'
-import { LucideIcon } from 'lucide-react'
+import { type LucideIcon } from '@/components/icons'
 
 interface BaseButtonProps {
   onClick?: () => void

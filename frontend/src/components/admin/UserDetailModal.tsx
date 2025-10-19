@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { X, Mail, Calendar, Shield, CheckCircle, XCircle, MapPin, Instagram, Globe, Clock, Star } from 'lucide-react'
+import { X, Mail, Calendar, Shield, CheckCircle, XCircle, MapPin, Instagram, Globe, Clock, Star } from '@/components/icons'
 import { api } from '../../utils/api'
 import type { User, UserProfile } from '../../../../shared/types'
 import { formatDate, formatRelativeTime } from '../../utils/dateFormatter'

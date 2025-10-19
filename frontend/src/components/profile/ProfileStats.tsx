@@ -1,5 +1,5 @@
 import React from 'react'
-import { MessageCircle, MapPin, Camera, Award } from 'lucide-react'
+import { MessageCircle, MapPin, Camera, Award } from '@/components/icons'
 import { COPY } from '../../constants/copy'
 import type { UserProfileStats } from '../../../../shared/types'
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Send, Mail, MessageSquare, User } from 'lucide-react'
+import { Send, Mail, MessageSquare, User } from '@/components/icons'
 import { ContentContainer } from './ContentContainer'
 
 export const ContactPage: React.FC = () => {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Filter, Clock, Star, TrendingUp, ChevronDown, type LucideIcon } from 'lucide-react'
+import { Filter, Clock, Star, TrendingUp, ChevronDown, type LucideIcon } from '@/components/icons'
 import { FilterButton, SecondaryButton } from '../ui'
 import { ReviewCard } from './ReviewCard'
 import { COPY } from '../../constants/copy'
