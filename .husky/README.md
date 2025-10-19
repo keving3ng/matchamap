@@ -2,44 +2,89 @@
 
 This directory contains Git hooks managed by [Husky](https://typicode.github.io/husky/).
 
-## Available Hooks
+## Pre-commit Hook (Smart Bypass)
 
-### `pre-commit` (Default)
-Runs comprehensive checks before each commit:
-- ✅ TypeScript typecheck across all workspaces
-- ✅ Unit tests (frontend) in CI mode (non-watch)
+The `pre-commit` hook is **smart** and automatically bypasses expensive checks when only non-code files are changed.
 
-This ensures code quality but may be slower for large commits (~7-10 seconds).
+### ✨ Automatic Bypass
 
-### `pre-commit-fast` (Alternative)
-Runs only typecheck, skipping tests for faster commits:
-- ✅ TypeScript typecheck only
-- ⏭️ Skips tests (run manually with `npm run test:ci`)
+The hook will **skip tests and typecheck** when ALL staged files match these patterns:
 
-## Switching Between Hooks
+- `.github/workflows/` - GitHub Actions workflows
+- `docs/` - Documentation
+- `.husky/` - Git hooks themselves
+- `README.md`, `CHANGELOG.md`, `LICENSE` - Project meta files
+- `*.md` - Any markdown files
+- Configuration files (`.gitignore`, `.npmrc`, `.nvmrc`)
+- Lock files (`package-lock.json`)
 
-### Use fast pre-commit (typecheck only)
+**Example output when bypassed:**
+```
+✨ Only non-code files changed (workflows, docs, etc.)
+📄 Changed files:
+   - .github/workflows/auto-merge.yml
+   - docs/workflow-guide.md
+⚡ Skipping tests and typecheck (not needed for these files)
+✅ Pre-commit checks bypassed!
+```
+
+### 🔍 Full Checks
+
+When ANY code file (`.ts`, `.tsx`, `.js`, `.jsx`, `.json`, etc.) is staged, the hook runs:
+
+1. **TypeScript typecheck** (`npm run typecheck`)
+2. **Tests** (`npm run test:ci`)
+
+**Example output:**
+```
+🔍 Running pre-commit checks...
+
+📝 TypeScript type checking...
+✓ No TypeScript errors found
+
+🧪 Running tests...
+✓ All 969 tests passed
+
+✅ All pre-commit checks passed!
+```
+
+## Alternative Hooks
+
+### `pre-commit-fast` (Typecheck Only)
+
+If you want to **always** skip tests (and only run typecheck), use the fast hook:
+
 ```bash
 mv .husky/pre-commit .husky/pre-commit-full
 mv .husky/pre-commit-fast .husky/pre-commit
 chmod +x .husky/pre-commit
 ```
 
-### Restore full pre-commit (typecheck + tests)
-```bash
-mv .husky/pre-commit .husky/pre-commit-fast
-mv .husky/pre-commit-full .husky/pre-commit
-chmod +x .husky/pre-commit
-```
+**Note:** The smart bypass in the default hook is recommended for most workflows!
 
-## Bypassing Hooks (Emergency Only)
+## Manual Override
 
-If you need to bypass hooks for an urgent commit:
+To bypass checks manually (use sparingly!):
+
 ```bash
-git commit --no-verify -m "your message"
+git commit --no-verify -m "message"
 ```
 
 ⚠️ **Warning:** Only use `--no-verify` in emergencies. Always fix issues properly.
+
+## Adding More Bypass Patterns
+
+To add more file patterns that should bypass checks, edit `.husky/pre-commit` and add to the `BYPASS_PATTERNS` array:
+
+```bash
+BYPASS_PATTERNS=(
+  "^\.github/workflows/"     # GitHub Actions workflows
+  "^docs/"                   # Documentation
+  "^your-pattern-here/"      # Add your pattern
+)
+```
+
+Patterns use regex syntax (grep -E).
 
 ## Troubleshooting
 
@@ -68,4 +113,4 @@ rm -rf .husky
 
 - **TypeScript**: All `.ts` and `.tsx` files in frontend, backend, and shared workspaces
 - **Tests**: All test files in `frontend/src/**/__tests__/**`
-- **Current Status**: 762/920 tests passing (see `docs/TESTING.md`)
+- **Current Status**: 969/969 tests passing ✅ (see `docs/TESTING.md`)

@@ -1,17 +1,79 @@
+#!/bin/sh
+
+# Smart pre-commit hook with automatic bypass for non-code changes
+# Skips expensive checks (tests, typecheck) for workflow/doc-only changes
+
+# Get list of staged files
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
+
+if [ -z "$STAGED_FILES" ]; then
+  echo "⚠️  No staged files found"
+  exit 0
+fi
+
+# Files that don't require full checks
+BYPASS_PATTERNS=(
+  "^\.github/workflows/"     # GitHub Actions workflows
+  "^docs/"                   # Documentation
+  "^\.husky/"                # Git hooks
+  "^README\.md$"             # README
+  "^CHANGELOG\.md$"          # Changelog
+  "^LICENSE$"                # License
+  "^\.gitignore$"            # Git ignore
+  "^\.npmrc$"                # NPM config
+  "^\.nvmrc$"                # NVM config
+  "^package-lock\.json$"     # Lock files (auto-generated)
+  "^.*\.md$"                 # Any markdown files
+)
+
+# Check if ALL staged files match bypass patterns
+ALL_BYPASS=true
+for file in $STAGED_FILES; do
+  FILE_MATCHES_BYPASS=false
+
+  for pattern in "${BYPASS_PATTERNS[@]}"; do
+    if echo "$file" | grep -qE "$pattern"; then
+      FILE_MATCHES_BYPASS=true
+      break
+    fi
+  done
+
+  if [ "$FILE_MATCHES_BYPASS" = false ]; then
+    ALL_BYPASS=false
+    break
+  fi
+done
+
+# If all files are bypass-eligible, skip expensive checks
+if [ "$ALL_BYPASS" = true ]; then
+  echo "✨ Only non-code files changed (workflows, docs, etc.)"
+  echo "📄 Changed files:"
+  for file in $STAGED_FILES; do
+    echo "   - $file"
+  done
+  echo "⚡ Skipping tests and typecheck (not needed for these files)"
+  echo "✅ Pre-commit checks bypassed!"
+  exit 0
+fi
+
+# Otherwise, run full checks
 echo "🔍 Running pre-commit checks..."
+echo ""
 
 # Run typecheck on all workspaces
-echo "\n📝 TypeScript type checking..."
+echo "📝 TypeScript type checking..."
 npm run typecheck || {
   echo "❌ TypeScript errors found. Fix them before committing."
   exit 1
 }
+echo ""
 
-# Run tests in CI mode (non-watch)
-echo "\n🧪 Running tests..."
+# Run tests
+echo "🧪 Running tests..."
 npm run test:ci || {
   echo "❌ Tests failed. Fix them before committing."
   exit 1
 }
+echo ""
 
-echo "\n✅ All pre-commit checks passed!"
+echo "✅ All pre-commit checks passed!"
