@@ -55,6 +55,7 @@ export default {
       animation: {
         'slide-up': 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
         'slide-down': 'slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+        'slide-down-out': 'slideDownOut 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
         'slide-in-left': 'slideInLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
         'slide-in-right': 'slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
         'fade-in': 'fadeIn 0.2s ease-out',
@@ -88,6 +89,16 @@ export default {
           '100%': {
             transform: 'translateY(0)',
             opacity: '1',
+          },
+        },
+        slideDownOut: {
+          '0%': {
+            transform: 'translateY(0) scale(1)',
+            opacity: '1',
+          },
+          '100%': {
+            transform: 'translateY(100%) scale(0.95)',
+            opacity: '0',
           },
         },
         slideInLeft: {

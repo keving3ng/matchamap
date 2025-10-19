@@ -27,6 +27,9 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
   const { selectedDrinkType, setSelectedDrinkType } = useUIStore()
   const routeDisplayEnabled = useFeatureToggle('ENABLE_ROUTE_DISPLAY')
 
+  // State for exit animation
+  const [isClosing, setIsClosing] = React.useState(false)
+
   // Quick filter state
   const [showCityDropdown, setShowCityDropdown] = React.useState(false)
   const [showDrinkDropdown, setShowDrinkDropdown] = React.useState(false)
@@ -172,6 +175,38 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
   // Track programmatic city changes to avoid infinite loops
   const isProgrammaticChangeRef = React.useRef(false)
 
+  // Handle popover closing with exit animation
+  const handleClosePopover = React.useCallback(() => {
+    if (isClosing) return // Prevent multiple close attempts
+    
+    setIsClosing(true)
+    setTimeout(() => {
+      setIsClosing(false)
+      onClosePopover()
+    }, 300) // Match animation duration
+  }, [isClosing, onClosePopover])
+
+  // Reset closing state when popover opens
+  React.useEffect(() => {
+    if (showPopover && !isClosing) {
+      setIsClosing(false)
+    }
+  }, [showPopover, isClosing])
+
+  // Handle view details with animation
+  const handleViewDetails = React.useCallback((cafe: typeof selectedCafe) => {
+    if (!cafe) return
+    
+    if (isClosing) return // Prevent multiple close attempts
+    
+    setIsClosing(true)
+    setTimeout(() => {
+      setIsClosing(false)
+      onClosePopover()
+      onViewDetails(cafe)
+    }, 300) // Match animation duration
+  }, [isClosing, onClosePopover, onViewDetails])
+
   // Track city transitions for smooth loading state
   const [isTransitioningCity, setIsTransitioningCity] = React.useState(false)
   const [spinDuration, setSpinDuration] = React.useState(1)
@@ -236,7 +271,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
       // We have route data for current cafe, just need to show it and hide popover
       drawRoute(route.coordinates)
       toggleRoute()
-      onClosePopover() // Hide the card when showing route
+      handleClosePopover() // Hide the card when showing route
     } else {
       // Load new route for this cafe (or different cafe) and hide popover
       await loadRoute(
@@ -244,7 +279,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
         { lat: selectedCafe.lat ?? selectedCafe.latitude, lng: selectedCafe.lng ?? selectedCafe.longitude },
         selectedCafe.id
       )
-      onClosePopover() // Hide the card when showing route
+      handleClosePopover() // Hide the card when showing route
     }
   }
 
@@ -294,7 +329,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
         ref={containerRef}
         className="w-full h-full"
         style={{ minHeight: '400px' }}
-        onClick={onClosePopover}
+        onClick={handleClosePopover}
       />
 
       {/* City Transition Overlay - Instant up, quick fade down */}
@@ -414,13 +449,17 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
         <>
           {/* Backdrop overlay for mobile */}
           <div
-            className="absolute inset-0 bg-black bg-opacity-20 backdrop-blur-sm z-[9998] animate-fade-in md:hidden"
-            onClick={onClosePopover}
+            className={`absolute inset-0 bg-black bg-opacity-20 backdrop-blur-sm z-[9998] md:hidden ${
+              isClosing ? 'animate-fade-out' : 'animate-fade-in'
+            }`}
+            onClick={handleClosePopover}
           />
 
           {/* Mobile Bottom Sheet */}
           <div
-            className="absolute bottom-4 left-4 right-4 bg-white rounded-2xl shadow-2xl p-4 z-[9999] border-2 border-green-200 map-popover md:hidden transform transition-all duration-300 ease-out animate-slide-up max-h-[40vh] overflow-y-auto"
+            className={`absolute bottom-4 left-4 right-4 bg-white rounded-2xl shadow-2xl p-4 z-[9999] border-2 border-green-200 map-popover md:hidden transform transition-all duration-300 ease-out max-h-[40vh] overflow-y-auto ${
+              isClosing ? 'animate-slide-down-out' : 'animate-slide-up'
+            }`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Handle indicator */}
@@ -524,7 +563,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                   {COPY.map.directions}
                 </a>
                 <button
-                  onClick={() => onViewDetails(selectedCafe)}
+                  onClick={() => handleViewDetails(selectedCafe)}
                   className="flex-1 bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-green-600 transition shadow-md flex items-center justify-center gap-1.5"
                 >
                   <span>{COPY.map.viewDetails}</span>
@@ -714,7 +753,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
 
                 {/* Primary Action: View Details */}
                 <button
-                  onClick={() => onViewDetails(selectedCafe)}
+                  onClick={() => handleViewDetails(selectedCafe)}
                   className="w-full bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-green-600 transition shadow-md flex items-center justify-center gap-1.5"
                 >
                   <span>{COPY.map.viewDetails}</span>
