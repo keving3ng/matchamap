@@ -18,6 +18,11 @@ jobs:
     name: Auto Merge PR
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write        # Required to merge PRs
+      pull-requests: write   # Required to read reviews and add comments
+      checks: read          # Required to read check runs
+
     # Only run on PRs with auto-merge label
     if: |
       github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'auto-merge') ||
