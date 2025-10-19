@@ -29,7 +29,7 @@
     "db:migrate:local": "wrangler d1 migrations apply matchamap-db --local",
     "db:migrate:remote": "wrangler d1 migrations apply matchamap-db --remote",
     "deploy": "wrangler deploy",
-    "prepare": "husky || true"
+    "prepare": "husky"
   },
   "devDependencies": {
     "@codecov/vite-plugin": "^1.9.1",
