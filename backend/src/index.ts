@@ -12,7 +12,7 @@ import { lookupPlace } from './routes/places';
 import { bulkImportCafes, exportCafes } from './routes/import';
 import { register, login, logout, getCurrentUser, refreshToken } from './routes/auth';
 import { joinWaitlist, getWaitlistAdmin } from './routes/waitlist';
-import { getUserProfile, getMyProfile, updateMyProfile, uploadAvatar } from './routes/profile';
+import { getUserProfile, getMyProfile, updateMyProfile, updatePrivacySettings, uploadAvatar } from './routes/profile';
 import { listUsers, getUserStats, getUser, updateUserRole, deleteUser } from './routes/admin-users';
 import { trackCafeStat, trackEventClick, handleCheckIn } from './routes/stats';
 import { uploadPhoto, getCafePhotos, deletePhoto, getMyPhotos, getPhotosForModeration, moderatePhoto, servePhoto, getAdminCafePhotos } from './routes/photos';
@@ -88,6 +88,7 @@ router.post('/api/auth/refresh', authRateLimit(), refreshToken);
 // User profile endpoints (more specific routes first)
 router.get('/api/users/me/profile', authRateLimit(), requireAuth(), getMyProfile);
 router.put('/api/users/me/profile', writeRateLimit(), requireAuth(), updateMyProfile);
+router.put('/api/users/me/privacy', writeRateLimit(), requireAuth(), updatePrivacySettings);
 router.post('/api/users/me/avatar', writeRateLimit(), requireAuth(), uploadAvatar);
 router.get('/api/users/:username/profile', publicRateLimit(), getUserProfile);
 
