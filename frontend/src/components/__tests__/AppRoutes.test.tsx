@@ -154,37 +154,43 @@ describe('AppRoutes', () => {
     mockAuthStore.user = null
   })
 
-  it('should render map view on root path', () => {
+  it('should render map view on root path', async () => {
     render(
       <MemoryRouter initialEntries={['/']}>
         <AppRoutes />
       </MemoryRouter>
     )
 
-    expect(screen.getByText('Map View')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Map View')).toBeInTheDocument()
+    })
   })
 
-  it('should render list view on /list path', () => {
+  it('should render list view on /list path', async () => {
     render(
       <MemoryRouter initialEntries={['/list']}>
         <AppRoutes />
       </MemoryRouter>
     )
 
-    expect(screen.getByText('List View')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('List View')).toBeInTheDocument()
+    })
   })
 
-  it('should render detail view on cafe paths', () => {
+  it('should render detail view on cafe paths', async () => {
     render(
       <MemoryRouter initialEntries={['/toronto/test-cafe']}>
         <AppRoutes />
       </MemoryRouter>
     )
 
-    expect(screen.getByText('Detail View')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Detail View')).toBeInTheDocument()
+    })
   })
 
-  it('should redirect to map view when feed is disabled and /feed is accessed', () => {
+  it('should redirect to map view when feed is disabled and /feed is accessed', async () => {
     render(
       <MemoryRouter initialEntries={['/feed']}>
         <AppRoutes />
@@ -192,17 +198,21 @@ describe('AppRoutes', () => {
     )
 
     // Feed is disabled, should redirect to map view
-    expect(screen.getByText('Map View')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Map View')).toBeInTheDocument()
+    })
   })
 
-  it('should render passport view on /passport path', () => {
+  it('should render passport view on /passport path', async () => {
     render(
       <MemoryRouter initialEntries={['/passport']}>
         <AppRoutes />
       </MemoryRouter>
     )
 
-    expect(screen.getByText('Passport View')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Passport View')).toBeInTheDocument()
+    })
   })
 
   it('should render events view on /events path', async () => {
@@ -218,49 +228,57 @@ describe('AppRoutes', () => {
     })
   })
 
-  it('should render about page on /about path', () => {
+  it('should render about page on /about path', async () => {
     render(
       <MemoryRouter initialEntries={['/about']}>
         <AppRoutes />
       </MemoryRouter>
     )
 
-    expect(screen.getByText('About Page')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('About Page')).toBeInTheDocument()
+    })
   })
 
-  it('should render contact page on /contact path', () => {
+  it('should render contact page on /contact path', async () => {
     render(
       <MemoryRouter initialEntries={['/contact']}>
         <AppRoutes />
       </MemoryRouter>
     )
 
-    expect(screen.getByText('Contact Page')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Contact Page')).toBeInTheDocument()
+    })
   })
 
-  it('should render store page on /store path', () => {
+  it('should render store page on /store path', async () => {
     render(
       <MemoryRouter initialEntries={['/store']}>
         <AppRoutes />
       </MemoryRouter>
     )
 
-    expect(screen.getByText('Store Page')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Store Page')).toBeInTheDocument()
+    })
   })
 
-  it('should render settings page on /settings path when authenticated', () => {
+  it('should render settings page on /settings path when authenticated', async () => {
     mockAuthStore.isAuthenticated = true
-    
+
     render(
       <MemoryRouter initialEntries={['/settings']}>
         <AppRoutes />
       </MemoryRouter>
     )
 
-    expect(screen.getByText('Settings Page')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Settings Page')).toBeInTheDocument()
+    })
   })
 
-  it('should redirect to login when accessing protected routes without auth', () => {
+  it('should redirect to login when accessing protected routes without auth', async () => {
     render(
       <MemoryRouter initialEntries={['/settings']}>
         <AppRoutes />
@@ -269,10 +287,12 @@ describe('AppRoutes', () => {
 
     // Settings page doesn't require auth (ProtectedRoute is only for admin routes)
     // So it should be accessible
-    expect(screen.getByText('Settings Page')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Settings Page')).toBeInTheDocument()
+    })
   })
 
-  it('should handle 404 routes gracefully', () => {
+  it('should handle 404 routes gracefully', async () => {
     render(
       <MemoryRouter initialEntries={['/unknown-city/unknown-cafe']}>
         <AppRoutes />
@@ -280,30 +300,36 @@ describe('AppRoutes', () => {
     )
 
     // Unknown cafes should redirect to home
-    expect(screen.getByText('Map View')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Map View')).toBeInTheDocument()
+    })
   })
 
-  it('should handle dynamic cafe routes with slugs', () => {
+  it('should handle dynamic cafe routes with slugs', async () => {
     render(
       <MemoryRouter initialEntries={['/toronto/test-cafe']}>
         <AppRoutes />
       </MemoryRouter>
     )
 
-    expect(screen.getByText('Detail View')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Detail View')).toBeInTheDocument()
+    })
   })
 
-  it('should handle route parameters correctly', () => {
+  it('should handle route parameters correctly', async () => {
     render(
       <MemoryRouter initialEntries={['/toronto/test-cafe']}>
         <AppRoutes />
       </MemoryRouter>
     )
 
-    expect(screen.getByText('Detail View')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Detail View')).toBeInTheDocument()
+    })
   })
 
-  it('should handle nested admin routes', () => {
+  it('should handle nested admin routes', async () => {
     mockAuthStore.isAuthenticated = true
     mockAuthStore.user = { role: 'admin' }
 
@@ -316,11 +342,13 @@ describe('AppRoutes', () => {
     // Admin routes are lazy loaded and wrapped in ProtectedRoute which we mocked to render children
     // Since admin components are mocked, we won't see actual admin content in tests
     // Just verify no error is thrown
-    const body = document.body
-    expect(body).toBeInTheDocument()
+    await waitFor(() => {
+      const body = document.body
+      expect(body).toBeInTheDocument()
+    })
   })
 
-  it('should lazy load routes for performance', () => {
+  it('should lazy load routes for performance', async () => {
     render(
       <MemoryRouter initialEntries={['/']}>
         <AppRoutes />
@@ -328,6 +356,8 @@ describe('AppRoutes', () => {
     )
 
     // Routes should be lazy loaded (this is more of an implementation detail)
-    expect(screen.getByText('Map View')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Map View')).toBeInTheDocument()
+    })
   })
 })

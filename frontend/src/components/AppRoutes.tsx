@@ -1,19 +1,22 @@
 import React, { useEffect, Suspense } from 'react'
 import { Routes, Route, Navigate, useParams, useLocation } from 'react-router'
-import MapView from './MapView'
-import ListView from './ListView'
-import DetailView from './DetailView'
-import EventDetailView from './EventDetailView'
-import PassportView from './PassportView'
-// Lazy load events components for better performance
+
+// Lazy load ALL components for optimal bundle splitting
+// Only load what users actually navigate to
+const MapView = React.lazy(() => import('./MapView'))
+const ListView = React.lazy(() => import('./ListView'))
+const DetailView = React.lazy(() => import('./DetailView'))
+const EventDetailView = React.lazy(() => import('./EventDetailView'))
+const PassportView = React.lazy(() => import('./PassportView'))
 const EventsView = React.lazy(() => import('./EventsView'))
-import LoginPage from './auth/LoginPage'
-import ProtectedRoute from './auth/ProtectedRoute'
-import { UserProfilePage } from './profile/UserProfilePage'
-import ContactPage from './ContactPage'
-import AboutPage from './AboutPage'
-import StorePage from './StorePage'
-import SettingsPage from './SettingsPage'
+const LoginPage = React.lazy(() => import('./auth/LoginPage'))
+const ProtectedRoute = React.lazy(() => import('./auth/ProtectedRoute'))
+const UserProfilePage = React.lazy(() => import('./profile/UserProfilePage').then(m => ({ default: m.UserProfilePage })))
+const ContactPage = React.lazy(() => import('./ContactPage'))
+const AboutPage = React.lazy(() => import('./AboutPage'))
+const StorePage = React.lazy(() => import('./StorePage'))
+const SettingsPage = React.lazy(() => import('./SettingsPage'))
+
 // Lazy load admin components for better performance
 const AdminLayout = React.lazy(() => import('./admin/AdminLayout'))
 const AdminErrorBoundary = React.lazy(() => import('./admin/AdminErrorBoundary'))
@@ -49,6 +52,17 @@ const AdminLoadingFallback: React.FC = () => (
         <Skeleton variant="text" width="80%" height={20} />
         <Skeleton variant="text" width="40%" height={20} />
       </div>
+    </div>
+  </div>
+)
+
+// Loading fallback for user-facing pages (minimal/fast)
+const PageLoadingFallback: React.FC = () => (
+  <div className="flex-1 flex items-center justify-center">
+    <div className="animate-pulse text-green-600">
+      <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+      </svg>
     </div>
   </div>
 )
@@ -179,22 +193,26 @@ export const AppRoutes: React.FC = () => {
   return (
     <Routes>
       <Route path="/" element={
-        <MapView
-          cafes={cafesWithDistance}
-          showPopover={showPopover}
-          selectedCafe={selectedCafe}
-          onPinClick={handlePinClick}
-          onViewDetails={viewDetails}
-          onClosePopover={closePopover}
-        />
+        <Suspense fallback={<PageLoadingFallback />}>
+          <MapView
+            cafes={cafesWithDistance}
+            showPopover={showPopover}
+            selectedCafe={selectedCafe}
+            onPinClick={handlePinClick}
+            onViewDetails={viewDetails}
+            onClosePopover={closePopover}
+          />
+        </Suspense>
       } />
       <Route path="/list" element={
-        <ListView
-          cafes={cafesWithDistance}
-          expandedCard={expandedCard}
-          onToggleExpand={setExpandedCard}
-          onViewDetails={viewDetails}
-        />
+        <Suspense fallback={<PageLoadingFallback />}>
+          <ListView
+            cafes={cafesWithDistance}
+            expandedCard={expandedCard}
+            onToggleExpand={setExpandedCard}
+            onViewDetails={viewDetails}
+          />
+        </Suspense>
       } />
       {isEventsEnabled && (
         <>
@@ -203,37 +221,67 @@ export const AppRoutes: React.FC = () => {
               <EventsView eventItems={eventItems} />
             </Suspense>
           } />
-          <Route path="/events/:id" element={<EventDetailWrapper />} />
+          <Route path="/events/:id" element={
+            <Suspense fallback={<PageLoadingFallback />}>
+              <EventDetailWrapper />
+            </Suspense>
+          } />
         </>
       )}
       {isPassportEnabled && (
         <Route path="/passport" element={
-          <PassportView
-            cafes={cafesWithDistance}
-            visitedStamps={stampedCafeIds}
-            onToggleStamp={toggleStamp}
-          />
+          <Suspense fallback={<PageLoadingFallback />}>
+            <PassportView
+              cafes={cafesWithDistance}
+              visitedStamps={stampedCafeIds}
+              onToggleStamp={toggleStamp}
+            />
+          </Suspense>
         } />
       )}
       {/* Login route - only if user accounts enabled */}
       {useFeatureToggle('ENABLE_USER_ACCOUNTS') && (
-        <Route path="/login" element={<LoginPage />} />
+        <Route path="/login" element={
+          <Suspense fallback={<PageLoadingFallback />}>
+            <LoginPage />
+          </Suspense>
+        } />
       )}
       {/* Profile route - only if user accounts AND profiles enabled */}
       {useFeatureToggle('ENABLE_USER_ACCOUNTS') && useFeatureToggle('ENABLE_USER_PROFILES') && (
-        <Route path="/profile/:username" element={<UserProfilePage />} />
+        <Route path="/profile/:username" element={
+          <Suspense fallback={<PageLoadingFallback />}>
+            <UserProfilePage />
+          </Suspense>
+        } />
       )}
       {isContactEnabled && (
-        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/contact" element={
+          <Suspense fallback={<PageLoadingFallback />}>
+            <ContactPage />
+          </Suspense>
+        } />
       )}
       {isAboutEnabled && (
-        <Route path="/about" element={<AboutPage />} />
+        <Route path="/about" element={
+          <Suspense fallback={<PageLoadingFallback />}>
+            <AboutPage />
+          </Suspense>
+        } />
       )}
       {isStoreEnabled && (
-        <Route path="/store" element={<StorePage />} />
+        <Route path="/store" element={
+          <Suspense fallback={<PageLoadingFallback />}>
+            <StorePage />
+          </Suspense>
+        } />
       )}
       {isSettingsEnabled && (
-        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/settings" element={
+          <Suspense fallback={<PageLoadingFallback />}>
+            <SettingsPage />
+          </Suspense>
+        } />
       )}
       {isAdminEnabled && (
         <>
@@ -384,7 +432,11 @@ export const AppRoutes: React.FC = () => {
         </>
       )}
       {/* New URL pattern: /{city-shortcode}/{cafe-slug} */}
-      <Route path="/:cityShortcode/:slug" element={<CafeDetailWrapper />} />
+      <Route path="/:cityShortcode/:slug" element={
+        <Suspense fallback={<PageLoadingFallback />}>
+          <CafeDetailWrapper />
+        </Suspense>
+      } />
 
       {/* Legacy route for backwards compatibility - redirect to new format */}
       <Route path="/cafe/:id" element={<Navigate to="/" replace />} />
