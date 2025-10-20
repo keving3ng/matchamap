@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: Get PR number
         id: pr
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const pulls = await github.rest.pulls.list({
@@ -37,7 +37,7 @@ jobs:
       - name: Get workflow jobs
         id: jobs
         if: steps.pr.outputs.result != 'null'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const jobs = await github.rest.actions.listJobsForWorkflowRun({
@@ -57,7 +57,7 @@ jobs:
 
       - name: Remove labels based on passing checks
         if: steps.pr.outputs.result != 'null'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const prNumber = ${{ steps.pr.outputs.result }};
