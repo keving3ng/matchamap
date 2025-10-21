@@ -138,7 +138,16 @@ export const userProfiles = sqliteTable('user_profiles', {
   totalReviews: integer('total_reviews').default(0),
   totalCheckins: integer('total_checkins').default(0),
   totalPhotos: integer('total_photos').default(0),
+  totalFavorites: integer('total_favorites').default(0),
+  passportCompletion: real('passport_completion').default(0.0), // Percentage (0-100)
   reputationScore: integer('reputation_score').default(0),
+
+  // Social stats (Phase 2D)
+  followerCount: integer('follower_count').default(0),
+  followingCount: integer('following_count').default(0),
+
+  // Privacy settings (JSON)
+  privacySettings: text('privacy_settings').default('{"isPublic":true,"showActivity":true,"showFollowers":true}'),
 
   // Timestamps
   createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
@@ -146,6 +155,8 @@ export const userProfiles = sqliteTable('user_profiles', {
 }, (table) => ({
   userIdx: index('user_profiles_user_id_idx').on(table.userId),
   displayNameIdx: index('user_profiles_display_name_idx').on(table.displayName),
+  reputationIdx: index('idx_user_profiles_reputation').on(table.reputationScore),
+  checkinsIdx: index('idx_user_profiles_checkins').on(table.totalCheckins),
 }));
 
 // Sessions table

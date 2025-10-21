@@ -189,6 +189,12 @@ export interface UserProfilePreferences {
   dietaryRestrictions?: string[]
 }
 
+export interface UserProfilePrivacySettings {
+  isPublic: boolean
+  showActivity: boolean
+  showFollowers: boolean
+}
+
 export interface UserProfile {
   id: number
   userId: number
@@ -202,11 +208,22 @@ export interface UserProfile {
   preferences?: UserProfilePreferences | null
   isPublic: boolean
   showActivity: boolean
+  
+  // Stats (denormalized for performance)
   totalReviews: number
   totalCheckins: number
   totalPhotos: number
-  passportCompletion: number
+  totalFavorites: number
+  passportCompletion: number // 0-100 percentage
   reputationScore: number
+  
+  // Social stats (Phase 2D)
+  followerCount: number
+  followingCount: number
+  
+  // Privacy settings (JSON)
+  privacySettings: UserProfilePrivacySettings
+  
   createdAt: string
   updatedAt: string
 }
@@ -215,8 +232,11 @@ export interface UserProfileStats {
   totalReviews: number
   totalCheckins: number
   totalPhotos: number
-  passportCompletion: number
+  totalFavorites: number
+  passportCompletion: number // 0-100 percentage
   reputationScore: number
+  followerCount: number
+  followingCount: number
 }
 
 export interface PublicUserProfile {
@@ -246,10 +266,13 @@ export interface UpdateProfileRequest {
   tiktok?: string | null
   website?: string | null
   preferences?: UserProfilePreferences
-  privacy?: {
-    isPublic?: boolean
-    showActivity?: boolean
-  }
+  privacy?: Partial<UserProfilePrivacySettings>
+}
+
+export interface UpdatePrivacySettingsRequest {
+  isPublic?: boolean
+  showActivity?: boolean
+  showFollowers?: boolean
 }
 
 export interface UserBadge {
