@@ -18,6 +18,7 @@ import { ReviewList } from './reviews/ReviewList'
 import { PhotoGallery } from './photos/PhotoGallery'
 import { PhotoLightbox } from './photos/PhotoLightbox'
 import { PhotoUploadModal } from './photos/PhotoUploadModal'
+import { CheckInButton } from './checkin'
 import type { DetailViewProps } from '../types'
 import type { Event, ReviewPhoto } from '../../../shared/types'
 
@@ -35,6 +36,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
     photos: ReviewPhoto[]
     index: number
   } | null>(null)
+  const [isCheckedIn, setIsCheckedIn] = useState(false)
   const navigate = useNavigate()
 
   const hoursData = cafe.hours ? formatHoursCompact(cafe.hours) : null
@@ -143,6 +145,16 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
             <Navigation size={20} />
             {COPY.detail.getDirections}
           </a>
+
+          {/* Check-in Button */}
+          <div className="mt-4">
+            <CheckInButton
+              cafe={cafe}
+              isCheckedIn={isCheckedIn}
+              onCheckInSuccess={() => setIsCheckedIn(true)}
+              className="w-full"
+            />
+          </div>
         </div>
 
         {/* Visited Checkbox - Only show if passport is enabled */}
