@@ -13,11 +13,51 @@ import {
 } from '../utils/validation';
 import { HTTP_STATUS } from '../constants';
 
+// Constants
+const DECIMAL_PRECISION = 100; // For rounding to 2 decimal places
+const DEFAULT_PRIVACY_SETTINGS = { isPublic: true, showActivity: true, showFollowers: true };
+
+/**
+ * Parse privacy settings from JSON string with fallback to defaults
+ */
+function parsePrivacySettings(privacySettingsJson: string | null): typeof DEFAULT_PRIVACY_SETTINGS {
+  if (!privacySettingsJson) {
+    return { ...DEFAULT_PRIVACY_SETTINGS };
+  }
+
+  try {
+    return JSON.parse(privacySettingsJson);
+  } catch {
+    return { ...DEFAULT_PRIVACY_SETTINGS };
+  }
+}
+
+/**
+ * Parse preferences from JSON string with fallback to null
+ */
+function parsePreferences(preferencesJson: string | null): any {
+  if (!preferencesJson) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(preferencesJson);
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Sync profile stats with actual data
  * Updates denormalized stats in user_profiles table
+ * Includes retry logic for transient failures
  */
-export async function syncProfileStats(env: Env, userId: number): Promise<void> {
+export async function syncProfileStats(
+  env: Env,
+  userId: number,
+  retryCount = 0,
+  maxRetries = 2
+): Promise<void> {
   try {
     const db = getDb(env.DB);
 
@@ -73,14 +113,24 @@ export async function syncProfileStats(env: Env, userId: number): Promise<void> 
         totalPhotos: photoCount,
         totalCheckins: checkinCount,
         totalFavorites: favoriteCount,
-        passportCompletion: Math.round(passportCompletion * 100) / 100, // Round to 2 decimal places
+        passportCompletion: Math.round(passportCompletion * DECIMAL_PRECISION) / DECIMAL_PRECISION,
         updatedAt: new Date().toISOString(),
       })
       .where(eq(userProfiles.userId, userId))
       .run();
   } catch (error) {
-    console.error('Error syncing profile stats:', error);
+    console.error(`Error syncing profile stats (attempt ${retryCount + 1}/${maxRetries + 1}):`, error);
+
+    // Retry if we haven't exceeded max retries
+    if (retryCount < maxRetries) {
+      // Exponential backoff: wait 100ms, then 200ms, etc.
+      const backoffMs = 100 * Math.pow(2, retryCount);
+      await new Promise(resolve => setTimeout(resolve, backoffMs));
+      return syncProfileStats(env, userId, retryCount + 1, maxRetries);
+    }
+
     // Don't throw - stats sync should not break profile requests
+    console.error('Failed to sync profile stats after max retries');
   }
 }
 
@@ -142,14 +192,7 @@ export async function getUserProfile(request: IRequest, env: Env): Promise<Respo
     }
 
     // Parse privacy settings
-    let privacySettings = { isPublic: true, showActivity: true, showFollowers: true };
-    if (profile.privacySettings) {
-      try {
-        privacySettings = JSON.parse(profile.privacySettings);
-      } catch {
-        // Use defaults on parse error
-      }
-    }
+    const privacySettings = parsePrivacySettings(profile.privacySettings);
 
     // Check if profile is public (or if requesting own profile)
     const requestUser = (request as AuthenticatedRequest).user;
@@ -168,14 +211,7 @@ export async function getUserProfile(request: IRequest, env: Env): Promise<Respo
     }
 
     // Parse preferences JSON
-    let preferences = null;
-    if (profile.preferences) {
-      try {
-        preferences = JSON.parse(profile.preferences);
-      } catch {
-        // Ignore parse errors
-      }
-    }
+    const preferences = parsePreferences(profile.preferences);
 
     // Build public profile response (using denormalized stats)
     const publicProfile = {
@@ -267,25 +303,9 @@ export async function getMyProfile(request: AuthenticatedRequest, env: Env): Pro
       return errorResponse('Profile not found', HTTP_STATUS.NOT_FOUND, request as Request, env);
     }
 
-    // Parse preferences
-    let preferences = null;
-    if (profile.preferences) {
-      try {
-        preferences = JSON.parse(profile.preferences);
-      } catch {
-        // Ignore
-      }
-    }
-
-    // Parse privacy settings
-    let privacySettings = { isPublic: true, showActivity: true, showFollowers: true };
-    if (profile.privacySettings) {
-      try {
-        privacySettings = JSON.parse(profile.privacySettings);
-      } catch {
-        // Use defaults on parse error
-      }
-    }
+    // Parse preferences and privacy settings
+    const preferences = parsePreferences(profile.preferences);
+    const privacySettings = parsePrivacySettings(profile.privacySettings);
 
     // Return full profile (including private fields)
     const fullProfile = {
@@ -406,25 +426,27 @@ export async function updateMyProfile(
     // Handle privacy settings
     if (body.privacy) {
       // Parse existing privacy settings
-      let currentPrivacy = { isPublic: true, showActivity: true, showFollowers: true };
-      if (profile.privacySettings) {
-        try {
-          currentPrivacy = JSON.parse(profile.privacySettings);
-        } catch {
-          // Use defaults
-        }
-      }
+      const currentPrivacy = parsePrivacySettings(profile.privacySettings);
 
-      // Update individual privacy fields
+      // Update individual privacy fields with type validation
       if (body.privacy.isPublic !== undefined) {
+        if (typeof body.privacy.isPublic !== 'boolean') {
+          return badRequestResponse('isPublic must be a boolean', request as Request, env);
+        }
         currentPrivacy.isPublic = body.privacy.isPublic;
         updates.isPublic = body.privacy.isPublic; // Keep legacy field in sync
       }
       if (body.privacy.showActivity !== undefined) {
+        if (typeof body.privacy.showActivity !== 'boolean') {
+          return badRequestResponse('showActivity must be a boolean', request as Request, env);
+        }
         currentPrivacy.showActivity = body.privacy.showActivity;
         updates.showActivity = body.privacy.showActivity; // Keep legacy field in sync
       }
       if (body.privacy.showFollowers !== undefined) {
+        if (typeof body.privacy.showFollowers !== 'boolean') {
+          return badRequestResponse('showFollowers must be a boolean', request as Request, env);
+        }
         currentPrivacy.showFollowers = body.privacy.showFollowers;
       }
 
@@ -439,25 +461,9 @@ export async function updateMyProfile(
       .returning()
       .get();
 
-    // Parse preferences
-    let preferences = null;
-    if (updatedProfile.preferences) {
-      try {
-        preferences = JSON.parse(updatedProfile.preferences);
-      } catch {
-        // Ignore
-      }
-    }
-
-    // Parse privacy settings
-    let privacySettings = { isPublic: true, showActivity: true, showFollowers: true };
-    if (updatedProfile.privacySettings) {
-      try {
-        privacySettings = JSON.parse(updatedProfile.privacySettings);
-      } catch {
-        // Use defaults
-      }
-    }
+    // Parse preferences and privacy settings
+    const preferences = parsePreferences(updatedProfile.preferences);
+    const privacySettings = parsePrivacySettings(updatedProfile.privacySettings);
 
     return jsonResponse(
       {
@@ -513,23 +519,25 @@ export async function updatePrivacySettings(
     }
 
     // Parse existing privacy settings
-    let currentPrivacy = { isPublic: true, showActivity: true, showFollowers: true };
-    if (profile.privacySettings) {
-      try {
-        currentPrivacy = JSON.parse(profile.privacySettings);
-      } catch {
-        // Use defaults
-      }
-    }
+    const currentPrivacy = parsePrivacySettings(profile.privacySettings);
 
-    // Update with provided values
+    // Update with provided values (with type validation)
     if (body.isPublic !== undefined) {
+      if (typeof body.isPublic !== 'boolean') {
+        return badRequestResponse('isPublic must be a boolean', request as Request, env);
+      }
       currentPrivacy.isPublic = body.isPublic;
     }
     if (body.showActivity !== undefined) {
+      if (typeof body.showActivity !== 'boolean') {
+        return badRequestResponse('showActivity must be a boolean', request as Request, env);
+      }
       currentPrivacy.showActivity = body.showActivity;
     }
     if (body.showFollowers !== undefined) {
+      if (typeof body.showFollowers !== 'boolean') {
+        return badRequestResponse('showFollowers must be a boolean', request as Request, env);
+      }
       currentPrivacy.showFollowers = body.showFollowers;
     }
 

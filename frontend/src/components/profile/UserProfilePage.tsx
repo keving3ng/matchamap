@@ -83,8 +83,11 @@ export const UserProfilePage: React.FC = () => {
           totalReviews: myProfile.profile.totalReviews,
           totalCheckins: myProfile.profile.totalCheckins,
           totalPhotos: myProfile.profile.totalPhotos,
+          totalFavorites: myProfile.profile.totalFavorites || 0,
           passportCompletion: myProfile.profile.passportCompletion,
           reputationScore: myProfile.profile.reputationScore,
+          followerCount: myProfile.profile.followerCount || 0,
+          followingCount: myProfile.profile.followingCount || 0,
         },
         badges: [],
         social: {
