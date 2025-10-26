@@ -704,6 +704,38 @@ export const COPY = {
     alreadyCheckedIn: 'You\'ve already checked in to this cafe today',
     networkError: 'Check your internet connection and try again',
   },
+
+  // PWA (Progressive Web App)
+  pwa: {
+    // Install Prompt
+    installTitle: 'Install MatchaMap',
+    installSubtitle: 'Add to your home screen for quick access',
+    installDescription: 'Get the full app experience with offline support and faster loading',
+    installButton: 'Install App',
+    installLater: 'Maybe Later',
+    installDismiss: 'Dismiss',
+    
+    // Features
+    offlineSupport: 'Works offline',
+    fastLoading: 'Faster loading',
+    homeScreen: 'Home screen access',
+    nativeExperience: 'Native app experience',
+    
+    // Update Available
+    updateAvailable: 'Update Available',
+    updateDescription: 'A new version of MatchaMap is ready to install',
+    updateNow: 'Update Now',
+    updateLater: 'Update Later',
+    
+    // Offline States
+    offlineMode: 'You\'re offline',
+    offlineDescription: 'Some features may be limited while offline',
+    offlineRetry: 'Try Again',
+    
+    // Connection Restored
+    backOnline: 'Back online',
+    backOnlineDescription: 'All features are now available',
+  },
 } as const
 
 // Type helper to ensure type safety when accessing COPY

@@ -118,5 +118,11 @@ export { Loader2 } from 'lucide-react'
 export { RotateCcw } from 'lucide-react'
 export { Power } from 'lucide-react'
 
+// PWA/Device icons
+export { Smartphone } from 'lucide-react'
+export { Zap } from 'lucide-react'
+export { Wifi } from 'lucide-react'
+export { WifiOff } from 'lucide-react'
+
 // Type export for LucideIcon
 export { type LucideIcon } from 'lucide-react'

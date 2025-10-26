@@ -4,6 +4,7 @@ import BottomNavigation from './components/BottomNavigation'
 import AppRoutes from './components/AppRoutes'
 import ComingSoon from './components/ComingSoon'
 import { SessionExpiredDialog } from './components/SessionExpiredDialog'
+import { PWAInstallPrompt, PWAUpdatePrompt, PWAOfflineIndicator } from './components/PWAInstallPrompt'
 import { useAppFeatures } from './hooks/useAppFeatures'
 import { useAuthStore } from './stores/authStore'
 
@@ -43,6 +44,9 @@ export const App: React.FC = () => {
       <AppRoutes />
       <BottomNavigation />
       <SessionExpiredDialog />
+      <PWAInstallPrompt />
+      <PWAUpdatePrompt />
+      <PWAOfflineIndicator />
     </div>
   )
 }

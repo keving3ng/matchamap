@@ -4,6 +4,7 @@ import yaml from '@rollup/plugin-yaml'
 import { codecovVitePlugin } from '@codecov/vite-plugin'
 import { visualizer } from 'rollup-plugin-visualizer'
 import viteCompression from 'vite-plugin-compression'
+import { VitePWA } from 'vite-plugin-pwa'
 import fs from 'fs'
 import path from 'path'
 
@@ -19,6 +20,104 @@ export default defineConfig({
   plugins: [
     react(),
     yaml(),
+    
+    // PWA configuration
+    VitePWA({
+      registerType: 'autoUpdate',
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}'],
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/unpkg\.com\/leaflet/,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'leaflet-cache',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+              },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com/,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'google-fonts-stylesheets',
+            },
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.gstatic\.com/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts-webfonts',
+              expiration: {
+                maxEntries: 30,
+                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+              },
+            },
+          },
+          {
+            urlPattern: /\/api\//,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'api-cache',
+              networkTimeoutSeconds: 3,
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24, // 1 day
+              },
+            },
+          },
+        ],
+      },
+      manifest: {
+        name: 'MatchaMap Toronto',
+        short_name: 'MatchaMap',
+        description: 'A curated, map-based guide to matcha cafes in Toronto',
+        theme_color: '#7cb342',
+        background_color: '#ffffff',
+        display: 'standalone',
+        orientation: 'portrait',
+        scope: '/',
+        start_url: '/',
+        categories: ['food', 'travel', 'lifestyle'],
+        lang: 'en',
+        icons: [
+          {
+            src: '/android-chrome-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any maskable'
+          },
+          {
+            src: '/android-chrome-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable'
+          }
+        ],
+        shortcuts: [
+          {
+            name: 'Find Cafes',
+            short_name: 'Map',
+            description: 'Find matcha cafes near you',
+            url: '/?view=map',
+            icons: [{ src: '/android-chrome-192x192.png', sizes: '192x192' }]
+          },
+          {
+            name: 'My Passport',
+            short_name: 'Passport',
+            description: 'View your visited cafes',
+            url: '/?view=passport',
+            icons: [{ src: '/android-chrome-192x192.png', sizes: '192x192' }]
+          }
+        ]
+      },
+      devOptions: {
+        enabled: true,
+        type: 'module'
+      }
+    }),
     
     // Gzip compression for production
     viteCompression({
