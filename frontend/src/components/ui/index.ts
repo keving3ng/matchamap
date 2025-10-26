@@ -34,3 +34,5 @@ export {
 } from './Skeleton'
 
 export { ErrorAlert } from './ErrorAlert'
+
+export { ThemeToggle } from './ThemeToggle'
