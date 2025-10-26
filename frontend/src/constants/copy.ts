@@ -163,6 +163,19 @@ export const COPY = {
     confirm: 'Clear',
     noVisited: 'No cafes visited yet',
     startExploring: 'Start exploring to build your matcha passport!',
+    visitedOn: (date: string) => `Visited on ${date}`,
+    addNote: 'Add Note',
+    notes: 'Notes',
+    migrationModal: {
+      title: 'Sync Your Passport',
+      description: 'We found visits saved locally on your device. Would you like to sync them to your account?',
+      localVisits: (count: number) => `${count} local visit${count !== 1 ? 's' : ''} found`,
+      migrate: 'Sync to Account',
+      skip: 'Skip for Now',
+      migrating: 'Syncing...',
+      success: 'Successfully synced your visits!',
+      error: 'Failed to sync visits. Please try again.',
+    },
   },
 
 
