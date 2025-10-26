@@ -653,6 +653,57 @@ export const COPY = {
       dimensions: 'Dimensions',
     },
   },
+
+  // Check-ins (Phase 2C)
+  checkin: {
+    // Button Text
+    checkIn: 'Check In',
+    checkedIn: 'Checked In',
+    checkingIn: 'Checking in...',
+
+    // Modal
+    title: 'Check in to',
+    subtitle: 'Share your experience at this cafe',
+    notesLabel: 'Notes (Optional)',
+    notesPlaceholder: 'How was your visit? Any recommendations?',
+    photosLabel: 'Photos (Optional)',
+    ratingLabel: 'Quick Rating',
+    ratingOptional: '(Optional)',
+    submitButton: 'Check In',
+    submittingButton: 'Checking in...',
+    cancel: 'Cancel',
+
+    // Success States
+    successTitle: 'Checked in successfully!',
+    successMessage: 'Your check-in has been recorded.',
+    successClose: 'Close',
+
+    // Error States
+    errorTitle: 'Check-in Failed',
+    errorMessage: 'Unable to record your check-in. Please try again.',
+    errorRetry: 'Try Again',
+    errorClose: 'Close',
+
+    // Photo Upload
+    addPhotos: 'Add Photos',
+    removePhoto: 'Remove photo',
+    photoUploading: 'Uploading photo...',
+    photoError: 'Failed to upload photo',
+
+    // Rating
+    ratingPrompt: 'Rate your experience',
+    stars: (count: number) => `${count} star${count !== 1 ? 's' : ''}`,
+    clearRating: 'Clear rating',
+
+    // Character Limits
+    notesMaxLength: 500,
+    notesCharCount: (current: number, max: number) => `${current}/${max}`,
+    notesTooLong: (max: number) => `Notes must be ${max} characters or less`,
+
+    // Validation
+    alreadyCheckedIn: 'You\'ve already checked in to this cafe today',
+    networkError: 'Check your internet connection and try again',
+  },
 } as const
 
 // Type helper to ensure type safety when accessing COPY
