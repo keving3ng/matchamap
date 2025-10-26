@@ -9,7 +9,7 @@ import { ComponentErrorBoundary } from './ComponentErrorBoundary'
 import { IconButton } from '../ui'
 import { COPY } from '../../constants/copy'
 import { OPTIONAL_CAFE_FIELDS } from '../../constants/cafeFields'
-import { borderRadius, zIndex } from '../../styles/spacing'
+import { borderRadius, zIndex, spacing } from '../../styles/spacing'
 import { CITIES } from '../../stores/cityStore'
 import type { Cafe } from '../../types'
 
@@ -80,8 +80,9 @@ export const CafeManagementPage: React.FC = () => {
       const spaceAbove = rect.top
       const spaceBelow = window.innerHeight - rect.bottom
       
-      // If not enough space above (< 120px for tooltip), position below
-      return spaceAbove < 120 && spaceBelow > 120 ? 'top-full mt-2' : 'bottom-full mb-2'
+      // If not enough space above (< threshold for tooltip), position below
+      const threshold = parseInt(spacing.tooltipPositionThreshold)
+      return spaceAbove < threshold && spaceBelow > threshold ? 'top-full mt-2' : 'bottom-full mb-2'
     }
 
     const handleToggleTooltip = (event: React.MouseEvent) => {
@@ -112,12 +113,16 @@ export const CafeManagementPage: React.FC = () => {
         
         {isTooltipOpen && (
           <div
-            className={`absolute left-1/2 transform -translate-x-1/2 px-4 py-3 bg-gray-800 text-white text-sm shadow-xl ${getTooltipPosition()}`}
+            className={`absolute left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-sm shadow-xl ${getTooltipPosition()}`}
             style={{
               zIndex: zIndex.modal,
               borderRadius: borderRadius.lg,
-              maxWidth: '480px',
-              minWidth: '280px'
+              maxWidth: spacing.tooltipMaxWidth,
+              minWidth: spacing.tooltipMinWidth,
+              paddingLeft: spacing.tooltipPaddingX,
+              paddingRight: spacing.tooltipPaddingX,
+              paddingTop: spacing.tooltipPadding,
+              paddingBottom: spacing.tooltipPadding
             }}
           >
             <div className="font-semibold mb-1">
@@ -127,11 +132,16 @@ export const CafeManagementPage: React.FC = () => {
               {COPY.admin.cafeManagement.missingFieldsList(missingFields)}
             </div>
             {/* Tooltip arrow */}
-            <div className={`absolute left-1/2 transform -translate-x-1/2 border-4 border-transparent ${
-              getTooltipPosition().includes('bottom-full') 
-                ? 'top-full border-t-gray-800' 
-                : 'bottom-full border-b-gray-800'
-            }`}></div>
+            <div 
+              className={`absolute left-1/2 transform -translate-x-1/2 border-transparent ${
+                getTooltipPosition().includes('bottom-full') 
+                  ? 'top-full border-t-gray-800' 
+                  : 'bottom-full border-b-gray-800'
+              }`}
+              style={{
+                borderWidth: spacing.tooltipArrowSize
+              }}
+            ></div>
           </div>
         )}
       </div>
