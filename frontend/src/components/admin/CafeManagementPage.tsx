@@ -81,7 +81,7 @@ export const CafeManagementPage: React.FC = () => {
       const spaceBelow = window.innerHeight - rect.bottom
       
       // If not enough space above (< threshold for tooltip), position below
-      const threshold = parseInt(spacing.tooltipPositionThreshold)
+      const threshold = parseInt(spacing.tooltipPositionThreshold, 10)
       return spaceAbove < threshold && spaceBelow > threshold ? 'top-full mt-2' : 'bottom-full mb-2'
     }
 
