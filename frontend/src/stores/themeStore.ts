@@ -38,7 +38,7 @@ const resolveTheme = (theme: Theme): 'light' | 'dark' => {
 export const useThemeStore = create<ThemeState>()(
   persist(
     (set, get) => ({
-      theme: 'system', // Default to system preference
+      theme: 'light', // Default to light mode
       resolvedTheme: 'light', // Will be updated on initialization
       
       setTheme: (theme: Theme) => {
