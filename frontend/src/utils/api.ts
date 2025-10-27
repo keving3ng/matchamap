@@ -5,7 +5,7 @@
 
 import { useAuthStore } from '../stores/authStore'
 import { useSessionExpiry } from '../hooks/useSessionExpiry'
-import type { Cafe, Drink, Event, PublicUserProfile, UpdateProfileRequest, UserProfile, CityWithCount, User, UserFavorite, FavoritesResponse, AddFavoriteRequest, UpdateFavoriteNotesRequest, UserReview, ReviewPhoto } from '../../../shared/types'
+import type { Cafe, Drink, Event, PublicUserProfile, UpdateProfileRequest, UserProfile, CityWithCount, User, UserFavorite, FavoritesResponse, AddFavoriteRequest, UpdateFavoriteNotesRequest, UserReview, ReviewPhoto, BadgesResponse, BadgeCheckResponse, BadgeProgressResponse, BadgeDefinitionsResponse } from '../../../shared/types'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -835,6 +835,41 @@ export const photosAPI = {
 }
 
 /**
+ * Badges API endpoints (Phase 2C)
+ */
+export const badgesAPI = {
+  /**
+   * Get my earned badges (authenticated)
+   */
+  async getMyBadges(): Promise<BadgesResponse> {
+    return fetchAPI('/users/me/badges')
+  },
+
+  /**
+   * Check for new badges and award them (authenticated)
+   */
+  async checkAndAward(): Promise<BadgeCheckResponse> {
+    return fetchAPI('/users/me/badges/check', {
+      method: 'POST',
+    })
+  },
+
+  /**
+   * Get my badge progress (authenticated)
+   */
+  async getMyProgress(): Promise<BadgeProgressResponse> {
+    return fetchAPI('/users/me/badges/progress')
+  },
+
+  /**
+   * Get all badge definitions (public)
+   */
+  async getDefinitions(): Promise<BadgeDefinitionsResponse> {
+    return fetchAPI('/badges/definitions')
+  },
+}
+
+/**
  * Export all APIs
  */
 export const api = {
@@ -852,6 +887,7 @@ export const api = {
   favorites: favoritesAPI,
   reviews: reviewsAPI,
   photos: photosAPI,
+  badges: badgesAPI,
 }
 
 export default api

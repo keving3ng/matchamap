@@ -440,6 +440,59 @@ export interface CheckInResponse {
 }
 
 // ============================================================================
+// BADGE TYPES
+// ============================================================================
+
+export type BadgeCategory = 'passport' | 'reviews' | 'photos' | 'special'
+
+export interface BadgeDefinition {
+  key: string
+  category: BadgeCategory
+  name: string
+  description: string
+  icon: string // Emoji or icon identifier
+  threshold?: number // For progress-based badges
+  isSpecial?: boolean // For special/unique badges
+}
+
+export interface UserBadge {
+  id: number
+  userId: number
+  badgeKey: string
+  badgeCategory: BadgeCategory
+  earnedAt: string
+  progressValue?: number | null
+  createdAt: string
+  definition?: BadgeDefinition // Enriched on API responses
+}
+
+export interface BadgeProgress {
+  badge: BadgeDefinition
+  currentValue: number
+  targetValue: number
+  progress: number // 0-1
+  isEligible: boolean
+}
+
+export interface BadgesResponse {
+  badges: UserBadge[]
+}
+
+export interface BadgeCheckResponse {
+  newBadges: UserBadge[]
+  totalEarned: number
+}
+
+export interface BadgeProgressResponse {
+  progress: BadgeProgress[]
+}
+
+export interface BadgeDefinitionsResponse {
+  allBadges: BadgeDefinition[]
+  byCategory: Record<BadgeCategory, BadgeDefinition[]>
+}
+
+// ============================================================================
 // API RESPONSE TYPES
 // ============================================================================
 

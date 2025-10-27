@@ -722,6 +722,92 @@ export const COPY = {
     alreadyCheckedIn: 'You\'ve already checked in to this cafe today',
     networkError: 'Check your internet connection and try again',
   },
+
+  // Badges & Achievements (Phase 2C)
+  badges: {
+    // Main Badge Interface
+    title: 'Badges',
+    myBadges: 'My Badges',
+    earnedBadges: 'Earned Badges',
+    badgeProgress: 'Progress',
+    allBadges: 'All Badges',
+    noBadges: 'No badges yet',
+    earnBadges: 'Start visiting cafes and writing reviews to earn badges!',
+    
+    // Badge Categories
+    categories: {
+      passport: 'Passport',
+      reviews: 'Reviews',
+      photos: 'Photos',
+      special: 'Special',
+    },
+
+    // Badge Notifications
+    newBadge: 'New Badge Earned!',
+    congratulations: 'Congratulations!',
+    youEarned: 'You earned the',
+    badge: 'badge',
+    viewBadge: 'View Badge',
+    viewAllBadges: 'View All Badges',
+    dismiss: 'Dismiss',
+    
+    // Progress Display
+    progressToNext: 'Progress to next badge',
+    almostThere: 'Almost there!',
+    nextBadge: 'Next badge',
+    currentProgress: (current: number, target: number) => `${current} of ${target}`,
+    progressPercent: (percent: number) => `${Math.round(percent * 100)}% complete`,
+    
+    // Common Badge Actions
+    checkProgress: 'Check Progress',
+    checkingProgress: 'Checking...',
+    progressChecked: 'Progress updated!',
+    noNewBadges: 'No new badges to award',
+    
+    // Badge Display
+    earnedOn: 'Earned on',
+    justEarned: 'Just earned!',
+    shareAchievement: 'Share Achievement',
+    badgeDescription: 'Badge Description',
+    requirements: 'Requirements',
+    yourProgress: 'Your Progress',
+    completed: 'Completed',
+    
+    // Error States
+    loadError: 'Failed to load badges',
+    checkError: 'Failed to check for new badges',
+    tryAgain: 'Please try again',
+    retry: 'Retry',
+    
+    // Placeholder Text
+    comingSoon: 'More badges coming soon!',
+    keepExploring: 'Keep exploring to unlock more achievements.',
+    
+    // Specific Badge Names (from backend definitions)
+    badgeNames: {
+      passport_5: 'Explorer',
+      passport_10: 'Adventurer',
+      passport_25: 'Neighborhood Expert',
+      passport_50: 'City Explorer',
+      passport_100: 'Matcha Master',
+      reviews_10: 'Reviewer',
+      reviews_25: 'Critic',
+      reviews_50: 'Expert Reviewer',
+      reviews_100: 'Review Master',
+      photos_10: 'Photographer',
+      photos_50: 'Visual Storyteller',
+      photos_100: 'Photo Master',
+      early_adopter: 'Early Adopter',
+    },
+    
+    // Achievement Messages
+    achievementMessage: {
+      passport: 'Great job exploring the matcha scene!',
+      reviews: 'Thanks for sharing your experiences!',
+      photos: 'Beautiful photos! Keep sharing.',
+      special: 'You\'re part of the MatchaMap family!',
+    },
+  },
 } as const
 
 // Type helper to ensure type safety when accessing COPY
