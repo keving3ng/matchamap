@@ -238,7 +238,7 @@ export const mockApi = {
    * Call this in beforeEach or test setup
    */
   setup: () => {
-    global.fetch = vi.fn((url: string | URL | Request, options?: RequestInit) => {
+    globalThis.fetch = vi.fn((url: string | URL | Request, options?: RequestInit) => {
       const method = (options?.method || 'GET').toUpperCase()
       const urlStr = typeof url === 'string' ? url : url.toString()
 
