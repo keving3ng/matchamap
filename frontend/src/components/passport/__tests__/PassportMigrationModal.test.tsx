@@ -25,15 +25,15 @@ describe('PassportMigrationModal', () => {
   it('should render when open', () => {
     render(<PassportMigrationModal {...defaultProps} />)
 
-    expect(screen.getByText('Sync Your Passport')).toBeInTheDocument()
-    expect(screen.getByText('We found visits saved locally on your device. Would you like to sync them to your account?')).toBeInTheDocument()
+    expect(screen.getByText('Clean Up Local Data')).toBeInTheDocument()
+    expect(screen.getByText('Your passport is now built from your check-in history. Would you like to clean up the old local data?')).toBeInTheDocument()
     expect(screen.getByText('5 local visits found')).toBeInTheDocument()
   })
 
   it('should not render when closed', () => {
     render(<PassportMigrationModal {...defaultProps} isOpen={false} />)
 
-    expect(screen.queryByText('Sync Your Passport')).not.toBeInTheDocument()
+    expect(screen.queryByText('Clean Up Local Data')).not.toBeInTheDocument()
   })
 
   it('should handle plural vs singular visit count text', () => {
@@ -51,7 +51,7 @@ describe('PassportMigrationModal', () => {
     const user = userEvent.setup()
     render(<PassportMigrationModal {...defaultProps} />)
 
-    const migrateButton = screen.getByText('Sync to Account')
+    const migrateButton = screen.getByText('Clean Up')
     await user.click(migrateButton)
 
     expect(mockOnMigrate).toHaveBeenCalledTimes(1)
@@ -61,7 +61,7 @@ describe('PassportMigrationModal', () => {
     const user = userEvent.setup()
     render(<PassportMigrationModal {...defaultProps} />)
 
-    const skipButton = screen.getByText('Skip for Now')
+    const skipButton = screen.getByText('Keep Data')
     await user.click(skipButton)
 
     expect(mockOnSkip).toHaveBeenCalledTimes(1)
@@ -80,9 +80,9 @@ describe('PassportMigrationModal', () => {
   it('should show loading state', () => {
     render(<PassportMigrationModal {...defaultProps} isLoading={true} />)
 
-    expect(screen.getByText('Syncing...')).toBeInTheDocument()
+    expect(screen.getByText('Cleaning...')).toBeInTheDocument()
 
-    const migrateButton = screen.getByRole('button', { name: /syncing/i })
+    const migrateButton = screen.getByRole('button', { name: /cleaning/i })
     expect(migrateButton).toBeDisabled()
   })
 
@@ -97,8 +97,8 @@ describe('PassportMigrationModal', () => {
   it('should disable buttons when loading', () => {
     render(<PassportMigrationModal {...defaultProps} isLoading={true} />)
 
-    const migrateButton = screen.getByRole('button', { name: /syncing/i })
-    const skipButton = screen.getByRole('button', { name: /skip for now/i })
+    const migrateButton = screen.getByRole('button', { name: /cleaning/i })
+    const skipButton = screen.getByRole('button', { name: /keep data/i })
 
     expect(migrateButton).toBeDisabled()
     expect(skipButton).toBeDisabled()
@@ -119,8 +119,8 @@ describe('PassportMigrationModal', () => {
   it('should have proper accessibility attributes', () => {
     render(<PassportMigrationModal {...defaultProps} />)
 
-    const migrateButton = screen.getByRole('button', { name: /sync to account/i })
-    const skipButton = screen.getByRole('button', { name: /skip for now/i })
+    const migrateButton = screen.getByRole('button', { name: /clean up/i })
+    const skipButton = screen.getByRole('button', { name: /keep data/i })
     const closeButton = screen.getByRole('button', { name: /close/i })
 
     expect(migrateButton).toHaveAttribute('type', 'button')
@@ -150,6 +150,6 @@ describe('PassportMigrationModal', () => {
     render(<PassportMigrationModal {...defaultProps} localVisitCount={0} />)
 
     expect(screen.getByText('0 local visits found')).toBeInTheDocument()
-    expect(screen.getByText('Sync to Account')).toBeInTheDocument()
+    expect(screen.getByText('Clean Up')).toBeInTheDocument()
   })
 })

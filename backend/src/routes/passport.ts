@@ -1,5 +1,5 @@
 import { IRequest } from 'itty-router';
-import { eq, sql } from 'drizzle-orm';
+import { eq, sql, isNull } from 'drizzle-orm';
 import { Env } from '../types';
 import { getDb, userCheckins, cafes } from '../db';
 import { HTTP_STATUS } from '../constants';
@@ -25,11 +25,11 @@ export async function getUserPassport(request: AuthenticatedRequest, env: Env): 
     const totalCafesResult = await db
       .select({ count: sql<number>`count(*)` })
       .from(cafes)
-      .where(sql`deleted_at IS NULL`)
+      .where(isNull(cafes.deletedAt))
       .get();
-    
+
     const totalCafes = totalCafesResult?.count || 0;
-    
+
     // Get user's check-ins with cafe details
     const checkins = await db
       .select({
@@ -40,7 +40,6 @@ export async function getUserPassport(request: AuthenticatedRequest, env: Env): 
         cafeName: cafes.name,
         cafeSlug: cafes.slug,
         cafeCity: cafes.city,
-        cafeDisplayScore: cafes.displayScore,
       })
       .from(userCheckins)
       .leftJoin(cafes, eq(userCheckins.cafeId, cafes.id))
@@ -73,7 +72,6 @@ export async function getUserPassport(request: AuthenticatedRequest, env: Env): 
           name: checkin.cafeName,
           slug: checkin.cafeSlug,
           city: checkin.cafeCity,
-          displayScore: checkin.cafeDisplayScore,
         } : null,
       }));
     

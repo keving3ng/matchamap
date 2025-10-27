@@ -646,7 +646,6 @@ export const statsAPI = {
         name: string
         slug: string
         city: string
-        displayScore: number | null
       } | null
     }>
     lastUpdated: string

@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react'
 import { useAuthStore } from '../stores/authStore'
 import { useVisitedCafesStore } from '../stores/visitedCafesStore'
-import { api } from '../utils/api'
 
 interface MigrationState {
   isOpen: boolean
