@@ -104,8 +104,8 @@ export const CafeManagementPage: React.FC = () => {
         <span
           className="inline-flex items-center justify-center bg-amber-100 text-amber-600 border border-amber-300 cursor-help hover:bg-amber-200 transition-colors"
           style={{
-            width: '20px',
-            height: '20px',
+            width: spacing.tooltipTriggerSize,
+            height: spacing.tooltipTriggerSize,
             borderRadius: borderRadius.full
           }}
           title={COPY.admin.cafeManagement.missingFieldsList(missingFields)}

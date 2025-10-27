@@ -41,6 +41,7 @@ export const spacing = {
   tooltipMinWidth: '17.5rem', // Minimum width for content (280px)
   tooltipArrowSize: '4px',    // Border width for tooltip arrows
   tooltipPositionThreshold: '120px', // Space needed above for upward positioning
+  tooltipTriggerSize: '20px', // Size for small tooltip trigger buttons
 } as const
 
 /**
