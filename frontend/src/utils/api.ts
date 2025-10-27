@@ -586,6 +586,31 @@ export const statsAPI = {
       body: JSON.stringify({ cafeId, notes }),
     })
   },
+
+  /**
+   * Get my check-ins (authenticated users only)
+   */
+  async getMyCheckins(): Promise<{ checkins: Array<{
+    id: number
+    cafeId: number
+    visitedAt: string
+    notes: string | null
+    cafe: {
+      id: number
+      name: string
+      slug: string
+      address: string | null
+      latitude: number
+      longitude: number
+      city: string
+      quickNote: string
+      instagram: string | null
+      tiktokPostLink: string | null
+      instagramPostLink: string | null
+    } | null
+  }> }> {
+    return fetchAPI('/users/me/checkins')
+  },
 }
 
 /**

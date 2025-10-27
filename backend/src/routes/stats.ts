@@ -1,5 +1,7 @@
 import { IRequest } from 'itty-router';
+import { eq } from 'drizzle-orm';
 import { Env } from '../types';
+import { getDb, userCheckins, cafes } from '../db';
 import { HTTP_STATUS } from '../constants';
 import { jsonResponse, errorResponse } from '../utils/response';
 import { AuthenticatedRequest } from '../middleware/auth';
@@ -187,5 +189,72 @@ export async function handleCheckIn(request: AuthenticatedRequest, env: Env): Pr
   } catch (error) {
     console.error('Error handling check-in:', error);
     return errorResponse('Failed to check in', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
+  }
+}
+
+/**
+ * GET /api/users/me/checkins
+ * Get authenticated user's check-ins with cafe details
+ */
+export async function getUserCheckins(request: AuthenticatedRequest, env: Env): Promise<Response> {
+  try {
+    // Extract userId from JWT (set by requireAuth middleware)
+    const userId = request.user?.userId;
+    
+    if (!userId) {
+      return errorResponse('Unauthorized', HTTP_STATUS.UNAUTHORIZED, request as Request, env);
+    }
+    
+    const db = getDb(env.DB);
+    
+    // Get user check-ins with cafe details
+    const checkins = await db
+      .select({
+        id: userCheckins.id,
+        cafeId: userCheckins.cafeId,
+        visitedAt: userCheckins.visitedAt,
+        notes: userCheckins.notes,
+        cafeName: cafes.name,
+        cafeSlug: cafes.slug,
+        cafeAddress: cafes.address,
+        cafeLatitude: cafes.latitude,
+        cafeLongitude: cafes.longitude,
+        cafeCity: cafes.city,
+        cafeQuickNote: cafes.quickNote,
+        cafeInstagram: cafes.instagram,
+        cafeTiktokPostLink: cafes.tiktokPostLink,
+        cafeInstagramPostLink: cafes.instagramPostLink,
+      })
+      .from(userCheckins)
+      .leftJoin(cafes, eq(userCheckins.cafeId, cafes.id))
+      .where(eq(userCheckins.userId, userId))
+      .orderBy(userCheckins.visitedAt)
+      .all();
+    
+    // Transform the data to match expected API response format
+    const transformedCheckins = checkins.map(checkin => ({
+      id: checkin.id,
+      cafeId: checkin.cafeId,
+      visitedAt: checkin.visitedAt,
+      notes: checkin.notes,
+      cafe: checkin.cafeName ? {
+        id: checkin.cafeId,
+        name: checkin.cafeName,
+        slug: checkin.cafeSlug,
+        address: checkin.cafeAddress,
+        latitude: checkin.cafeLatitude,
+        longitude: checkin.cafeLongitude,
+        city: checkin.cafeCity,
+        quickNote: checkin.cafeQuickNote,
+        instagram: checkin.cafeInstagram,
+        tiktokPostLink: checkin.cafeTiktokPostLink,
+        instagramPostLink: checkin.cafeInstagramPostLink,
+      } : null,
+    }));
+    
+    return jsonResponse({ checkins: transformedCheckins }, HTTP_STATUS.OK, request as Request, env);
+  } catch (error) {
+    console.error('Error getting user check-ins:', error);
+    return errorResponse('Failed to get check-ins', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
   }
 }

@@ -14,7 +14,7 @@ import { register, login, logout, getCurrentUser, refreshToken } from './routes/
 import { joinWaitlist, getWaitlistAdmin } from './routes/waitlist';
 import { getUserProfile, getMyProfile, updateMyProfile, updatePrivacySettings, uploadAvatar } from './routes/profile';
 import { listUsers, getUserStats, getUser, updateUserRole, deleteUser } from './routes/admin-users';
-import { trackCafeStat, trackEventClick, handleCheckIn } from './routes/stats';
+import { trackCafeStat, trackEventClick, handleCheckIn, getUserCheckins } from './routes/stats';
 import { uploadPhoto, getCafePhotos, deletePhoto, getMyPhotos, getPhotosForModeration, moderatePhoto, servePhoto, getAdminCafePhotos } from './routes/photos';
 import { createReview, getCafeReviews, updateReview, deleteReview, markHelpful, removeHelpful, getUserReviews, getAdminCafeReviews, getAdminCafeReviewsCount, moderateReview } from './routes/reviews';
 import { getMyFavorites, addFavorite, removeFavorite, updateFavoriteNotes } from './routes/favorites';
@@ -69,8 +69,9 @@ router.post('/api/waitlist', authRateLimit(), joinWaitlist);
 router.post('/api/stats/cafe/:cafeId/:stat', publicRateLimit(), trackCafeStat);
 router.post('/api/stats/event/:eventId', publicRateLimit(), trackEventClick);
 
-// Check-in endpoint (authenticated users only)
+// Check-in endpoints (authenticated users only)
 router.post('/api/checkins', writeRateLimit(), requireAuth(), handleCheckIn);
+router.get('/api/users/me/checkins', authRateLimit(), requireAuth(), getUserCheckins);
 
 // Photo upload endpoints
 router.post('/api/photos/upload', writeRateLimit(), requireAuth(), uploadPhoto);
