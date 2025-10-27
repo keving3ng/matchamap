@@ -48,21 +48,24 @@ export const useDataStore = create<DataStore>((set, get) => ({
     maxPrice?: number
     limit?: number
     offset?: number
-  }, bustCache = false) => {
+  } | string, bustCache = false) => {
+    // Handle legacy single string parameter (city)
+    const filterParams = typeof filters === 'string' ? { city: filters } : filters
+
     // Skip if already fetched (unless cache busting) and no filters provided
-    if (!bustCache && get().cafesFetched && !filters?.search && !filters?.userMinRating && !filters?.userMaxRating) return
+    if (!bustCache && get().cafesFetched && !filterParams?.search && !filterParams?.userMinRating && !filterParams?.userMaxRating) return
 
     try {
       set({ isLoading: true, error: null })
-      const response = await api.cafes.getAll({ 
-        city: filters?.city, 
-        search: filters?.search,
-        userMinRating: filters?.userMinRating,
-        userMaxRating: filters?.userMaxRating,
-        minScore: filters?.minScore,
-        maxPrice: filters?.maxPrice,
-        limit: filters?.limit || 500,
-        offset: filters?.offset || 0
+      const response = await api.cafes.getAll({
+        city: filterParams?.city,
+        search: filterParams?.search,
+        userMinRating: filterParams?.userMinRating,
+        userMaxRating: filterParams?.userMaxRating,
+        minScore: filterParams?.minScore,
+        maxPrice: filterParams?.maxPrice,
+        limit: filterParams?.limit || 500,
+        offset: filterParams?.offset || 0
       }, bustCache)
 
       // Transform API response to frontend format
