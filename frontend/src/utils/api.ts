@@ -10,6 +10,25 @@ import type { Cafe, Drink, Event, PublicUserProfile, UpdateProfileRequest, UserP
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 /**
+ * Helper to build query parameters from filters
+ * Consolidates duplicate pagination and filtering logic across API endpoints
+ * 
+ * @param filters - Object containing filter parameters
+ * @returns Query string with leading '?' or empty string if no params
+ */
+function buildQueryParams(filters: Record<string, any>): string {
+  const params = new URLSearchParams()
+  
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      params.append(key, value.toString())
+    }
+  })
+  
+  return params.toString() ? `?${params.toString()}` : ''
+}
+
+/**
  * Generic fetch wrapper with error handling
  */
 async function fetchAPI<T>(endpoint: string, options?: RequestInit & { bustCache?: boolean }): Promise<T> {
@@ -73,14 +92,7 @@ export const cafeAPI = {
     limit?: number
     offset?: number
   }, bustCache = false): Promise<{ cafes: Cafe[]; total: number; hasMore: boolean }> {
-    const params = new URLSearchParams()
-    if (filters?.city) params.append('city', filters.city)
-    if (filters?.minScore) params.append('minScore', filters.minScore.toString())
-    if (filters?.maxPrice) params.append('maxPrice', filters.maxPrice.toString())
-    if (filters?.limit) params.append('limit', filters.limit.toString())
-    if (filters?.offset) params.append('offset', filters.offset.toString())
-
-    const query = params.toString() ? `?${params.toString()}` : ''
+    const query = filters ? buildQueryParams(filters) : ''
     return fetchAPI(`/cafes${query}`, { bustCache })
   },
 
@@ -157,13 +169,7 @@ export const eventsAPI = {
     cafeId?: number
     limit?: number
   }, bustCache = false): Promise<{ events: Event[] }> {
-    const params = new URLSearchParams()
-    if (filters?.upcoming !== undefined) params.append('upcoming', filters.upcoming.toString())
-    if (filters?.featured !== undefined) params.append('featured', filters.featured.toString())
-    if (filters?.cafeId !== undefined) params.append('cafeId', filters.cafeId.toString())
-    if (filters?.limit) params.append('limit', filters.limit.toString())
-
-    const query = params.toString() ? `?${params.toString()}` : ''
+    const query = filters ? buildQueryParams(filters) : ''
     return fetchAPI(`/events${query}`, { bustCache })
   },
 
@@ -175,12 +181,7 @@ export const eventsAPI = {
     limit?: number
     offset?: number
   }, bustCache = false): Promise<{ events: Event[]; hasMore: boolean }> {
-    const params = new URLSearchParams()
-    if (filters?.published !== undefined) params.append('published', filters.published.toString())
-    if (filters?.limit) params.append('limit', filters.limit.toString())
-    if (filters?.offset) params.append('offset', filters.offset.toString())
-
-    const query = params.toString() ? `?${params.toString()}` : ''
+    const query = filters ? buildQueryParams(filters) : ''
     return fetchAPI(`/admin/events${query}`, { bustCache })
   },
 
@@ -320,20 +321,6 @@ export const drinksAPI = {
  * Admin API endpoints
  */
 export const adminAPI = {
-  /**
-   * Bulk import cafes and drinks from CSV
-   */
-  async bulkImportCafes(data: { cafes: Partial<Cafe>[] }): Promise<{
-    success: number
-    failed: number
-    message: string
-    errors?: string[]
-  }> {
-    return fetchAPI('/admin/import/cafes', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    })
-  },
 
   /**
    * Get photos pending moderation (admin only)
@@ -342,11 +329,7 @@ export const adminAPI = {
     limit?: number
     offset?: number
   }): Promise<{ photos: ReviewPhoto[]; total: number; hasMore: boolean }> {
-    const params = new URLSearchParams()
-    if (filters?.limit) params.append('limit', filters.limit.toString())
-    if (filters?.offset) params.append('offset', filters.offset.toString())
-
-    const query = params.toString() ? `?${params.toString()}` : ''
+    const query = filters ? buildQueryParams(filters) : ''
     return fetchAPI(`/admin/photos${query}`)
   },
 
@@ -408,13 +391,7 @@ export const waitlistAPI = {
       conversionRate: number
     }
   }> {
-    const params = new URLSearchParams()
-    if (filters?.limit) params.append('limit', filters.limit.toString())
-    if (filters?.offset) params.append('offset', filters.offset.toString())
-    if (filters?.sortBy) params.append('sortBy', filters.sortBy)
-    if (filters?.sortOrder) params.append('sortOrder', filters.sortOrder)
-
-    const query = params.toString() ? `?${params.toString()}` : ''
+    const query = filters ? buildQueryParams(filters) : ''
     return fetchAPI(`/admin/waitlist${query}`)
   },
 }
@@ -499,13 +476,7 @@ export const userAdminAPI = {
     offset: number
     hasMore: boolean
   }> {
-    const params = new URLSearchParams()
-    if (filters?.limit) params.append('limit', filters.limit.toString())
-    if (filters?.offset) params.append('offset', filters.offset.toString())
-    if (filters?.search) params.append('search', filters.search)
-    if (filters?.role) params.append('role', filters.role)
-
-    const query = params.toString() ? `?${params.toString()}` : ''
+    const query = filters ? buildQueryParams(filters) : ''
     return fetchAPI(`/admin/users${query}`)
   },
 
@@ -745,16 +716,7 @@ export const reviewsAPI = {
     minRating?: number
     maxRating?: number
   }): Promise<{ reviews: UserReview[]; total: number; hasMore: boolean }> {
-    const params = new URLSearchParams()
-    if (filters?.page) params.append('page', filters.page.toString())
-    if (filters?.limit) params.append('limit', filters.limit.toString())
-    if (filters?.offset) params.append('offset', filters.offset.toString())
-    if (filters?.sortBy) params.append('sortBy', filters.sortBy)
-    if (filters?.sortOrder) params.append('sortOrder', filters.sortOrder)
-    if (filters?.minRating) params.append('minRating', filters.minRating.toString())
-    if (filters?.maxRating) params.append('maxRating', filters.maxRating.toString())
-
-    const query = params.toString() ? `?${params.toString()}` : ''
+    const query = filters ? buildQueryParams(filters) : ''
     return fetchAPI(`/cafes/${cafeId}/reviews${query}`)
   },
 
@@ -776,11 +738,7 @@ export const reviewsAPI = {
     limit?: number
     offset?: number
   }): Promise<{ reviews: UserReview[]; total: number; hasMore: boolean }> {
-    const params = new URLSearchParams()
-    if (filters?.limit) params.append('limit', filters.limit.toString())
-    if (filters?.offset) params.append('offset', filters.offset.toString())
-
-    const query = params.toString() ? `?${params.toString()}` : ''
+    const query = filters ? buildQueryParams(filters) : ''
     return fetchAPI(`/users/me/reviews${query}`)
   },
 
@@ -852,11 +810,7 @@ export const photosAPI = {
     limit?: number
     offset?: number
   }): Promise<{ photos: ReviewPhoto[]; total: number; hasMore: boolean }> {
-    const params = new URLSearchParams()
-    if (filters?.limit) params.append('limit', filters.limit.toString())
-    if (filters?.offset) params.append('offset', filters.offset.toString())
-
-    const query = params.toString() ? `?${params.toString()}` : ''
+    const query = filters ? buildQueryParams(filters) : ''
     return fetchAPI(`/cafes/${cafeId}/photos${query}`)
   },
 
@@ -867,11 +821,7 @@ export const photosAPI = {
     limit?: number
     offset?: number
   }): Promise<{ photos: ReviewPhoto[]; total: number; hasMore: boolean }> {
-    const params = new URLSearchParams()
-    if (filters?.limit) params.append('limit', filters.limit.toString())
-    if (filters?.offset) params.append('offset', filters.offset.toString())
-
-    const query = params.toString() ? `?${params.toString()}` : ''
+    const query = filters ? buildQueryParams(filters) : ''
     return fetchAPI(`/users/me/photos${query}`)
   },
 

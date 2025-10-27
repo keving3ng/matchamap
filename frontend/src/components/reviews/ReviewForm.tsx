@@ -271,7 +271,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ cafeId, onSuccess, onCan
       {error && (
         <AlertDialog
           variant="error"
-          title="Error"
+          title={COPY.common.error}
           message={error}
           primaryAction={{ 
             label: COPY.common.retry, 
