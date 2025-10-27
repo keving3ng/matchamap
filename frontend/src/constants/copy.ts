@@ -234,11 +234,6 @@ export const COPY = {
     title: 'Settings',
     preferences: 'Preferences',
     account: 'Account',
-    theme: 'Theme',
-    themeLight: 'Light',
-    themeDark: 'Dark',
-    themeSystem: 'System',
-    themeDescription: 'Choose your preferred color scheme',
   },
 
   // Coming Soon
