@@ -463,6 +463,39 @@ export interface FavoritesResponse {
 }
 
 // ============================================================================
+// WAITLIST TYPES
+// ============================================================================
+
+export interface Waitlist {
+  id: number
+  email: string
+  referralSource?: string | null
+  converted: boolean
+  userId?: number | null
+  isFlaggedFraud: boolean
+  fraudScore: number
+  fraudReason?: string | null
+  signupIp?: string | null
+  createdAt: string
+  convertedAt?: string | null
+}
+
+export interface WaitlistAnalytics {
+  totalSignups: number
+  dailySignups: number
+  weeklySignups: number
+  conversionRate: number
+  suspectedFraud: number
+}
+
+export interface WaitlistResponse {
+  waitlist: Waitlist[]
+  total: number
+  hasMore: boolean
+  analytics: WaitlistAnalytics
+}
+
+// ============================================================================
 // ANALYTICS TYPES
 // ============================================================================
 

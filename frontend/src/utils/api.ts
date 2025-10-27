@@ -5,7 +5,7 @@
 
 import { useAuthStore } from '../stores/authStore'
 import { useSessionExpiry } from '../hooks/useSessionExpiry'
-import type { Cafe, Drink, Event, PublicUserProfile, UpdateProfileRequest, UserProfile, CityWithCount, User, UserFavorite, FavoritesResponse, AddFavoriteRequest, UpdateFavoriteNotesRequest, UserReview, ReviewPhoto, ReviewComment, BadgesResponse, BadgeCheckResponse, BadgeProgressResponse, BadgeDefinitionsResponse, FollowersResponse, FollowingResponse, FollowStatusResponse, FollowActionResponse } from '../../../shared/types'
+import type { Cafe, Drink, Event, PublicUserProfile, UpdateProfileRequest, UserProfile, CityWithCount, User, UserFavorite, FavoritesResponse, AddFavoriteRequest, UpdateFavoriteNotesRequest, UserReview, ReviewPhoto, ReviewComment, BadgesResponse, BadgeCheckResponse, BadgeProgressResponse, BadgeDefinitionsResponse, FollowersResponse, FollowingResponse, FollowStatusResponse, FollowActionResponse, WaitlistResponse } from '../../../shared/types'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -374,25 +374,7 @@ export const waitlistAPI = {
     offset?: number
     sortBy?: 'email' | 'created_at'
     sortOrder?: 'asc' | 'desc'
-  }): Promise<{
-    waitlist: Array<{
-      id: number
-      email: string
-      referralSource?: string
-      converted: boolean
-      userId?: number
-      createdAt: string
-      convertedAt?: string
-    }>
-    total: number
-    hasMore: boolean
-    analytics: {
-      totalSignups: number
-      dailySignups: number
-      weeklySignups: number
-      conversionRate: number
-    }
-  }> {
+  }): Promise<WaitlistResponse> {
     const query = filters ? buildQueryParams(filters) : ''
     return fetchAPI(`/admin/waitlist${query}`)
   },

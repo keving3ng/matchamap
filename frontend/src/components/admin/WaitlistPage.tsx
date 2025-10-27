@@ -5,38 +5,13 @@ import { COPY } from '../../constants/copy'
 import { PrimaryButton, SecondaryButton, StatusBadge } from '../ui'
 import { Skeleton } from '../ui'
 import { formatDate, formatDateForCSV } from '../../utils/dateFormatter'
-
-interface WaitlistEntry {
-  id: number
-  email: string
-  referralSource?: string
-  converted: boolean
-  userId?: number
-  createdAt: string
-  convertedAt?: string
-  isFlaggedFraud?: boolean
-  fraudScore?: number
-  fraudReason?: string
-}
-
-interface WaitlistData {
-  waitlist: WaitlistEntry[]
-  total: number
-  hasMore: boolean
-  analytics: {
-    totalSignups: number
-    dailySignups: number
-    weeklySignups: number
-    conversionRate: number
-    suspectedFraud: number
-  }
-}
+import type { WaitlistResponse } from '../../../../shared/types'
 
 type SortField = 'email' | 'created_at'
 type SortOrder = 'asc' | 'desc'
 
 export const WaitlistPage: React.FC = () => {
-  const [data, setData] = useState<WaitlistData | null>(null)
+  const [data, setData] = useState<WaitlistResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState<string | null>(null)
