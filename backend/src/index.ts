@@ -21,6 +21,7 @@ import { createReview, getCafeReviews, updateReview, deleteReview, markHelpful, 
 import { getMyFavorites, addFavorite, removeFavorite, updateFavoriteNotes } from './routes/favorites';
 import { getMyBadges, checkAndAwardBadges, getBadgeDefinitions, getBadgeProgress } from './routes/badges';
 import { followUser, unfollowUser, getUserFollowers, getUserFollowing, getFollowStatus } from './routes/following';
+import { getPassportLeaderboard, getReviewerLeaderboard, getContributorLeaderboard, getUserRank } from './routes/leaderboards';
 import { requireAuth, requireAdminAuth } from './middleware/auth';
 import { authRateLimit, publicRateLimit, writeRateLimit } from './middleware/rateLimit';
 import { requireHTTPS } from './middleware/httpsOnly';
@@ -118,6 +119,12 @@ router.get('/api/users/me/badges', authRateLimit(), requireAuth(), getMyBadges);
 router.post('/api/users/me/badges/check', writeRateLimit(), requireAuth(), checkAndAwardBadges);
 router.get('/api/users/me/badges/progress', authRateLimit(), requireAuth(), getBadgeProgress);
 router.get('/api/badges/definitions', publicRateLimit(), getBadgeDefinitions);
+
+// Leaderboard endpoints
+router.get('/api/leaderboard/passport', publicRateLimit(), getPassportLeaderboard);
+router.get('/api/leaderboard/reviewers', publicRateLimit(), getReviewerLeaderboard);
+router.get('/api/leaderboard/contributors', publicRateLimit(), getContributorLeaderboard);
+router.get('/api/leaderboard/rank', authRateLimit(), requireAuth(), getUserRank);
 
 // Review endpoints
 router.post('/api/cafes/:id/reviews', writeRateLimit(), requireAuth(), createReview);

@@ -16,6 +16,7 @@ const ContactPage = React.lazy(() => import('./ContactPage'))
 const AboutPage = React.lazy(() => import('./AboutPage'))
 const StorePage = React.lazy(() => import('./StorePage'))
 const SettingsPage = React.lazy(() => import('./SettingsPage'))
+const LeaderboardPage = React.lazy(() => import('./leaderboards/LeaderboardPage').then(m => ({ default: m.LeaderboardPage })))
 
 // Lazy load admin components for better performance
 const AdminLayout = React.lazy(() => import('./admin/AdminLayout'))
@@ -280,6 +281,14 @@ export const AppRoutes: React.FC = () => {
         <Route path="/settings" element={
           <Suspense fallback={<PageLoadingFallback />}>
             <SettingsPage />
+          </Suspense>
+        } />
+      )}
+      {/* Leaderboards route - only if social features enabled */}
+      {useFeatureToggle('ENABLE_USER_SOCIAL') && (
+        <Route path="/leaderboards" element={
+          <Suspense fallback={<PageLoadingFallback />}>
+            <LeaderboardPage />
           </Suspense>
         } />
       )}

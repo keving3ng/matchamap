@@ -834,6 +834,73 @@ export const COPY = {
       special: 'You\'re part of the MatchaMap family!',
     },
   },
+
+  // Leaderboards (Phase 2D)
+  leaderboard: {
+    title: 'Leaderboards',
+    subtitle: 'Discover the top community members',
+    
+    // Tab Labels
+    passport: 'Passport',
+    reviewers: 'Reviewers',
+    contributors: 'Contributors',
+    
+    // Period Filters
+    allTime: 'All Time',
+    monthly: 'This Month',
+    
+    // City Filter
+    allCities: 'All Cities',
+    filterByCity: 'Filter by city',
+    
+    // Headers
+    rank: 'Rank',
+    user: 'User',
+    stats: 'Stats',
+    
+    // Passport Leaderboard
+    passportTitle: 'Top Explorers',
+    passportDescription: 'Members who have visited the most cafes',
+    checkinsCount: (count: number) => `${count} check-ins`,
+    passportProgress: (percent: number) => `${percent}% complete`,
+    
+    // Reviewer Leaderboard
+    reviewerTitle: 'Top Reviewers',
+    reviewerDescription: 'Members who have written the most helpful reviews',
+    reviewsCount: (count: number) => `${count} reviews`,
+    reputationScore: (score: number) => `${score} reputation`,
+    
+    // Contributor Leaderboard
+    contributorTitle: 'Top Contributors',
+    contributorDescription: 'Members with the most community contributions',
+    contributionsCount: (count: number) => `${count} contributions`,
+    contributionBreakdown: (reviews: number, photos: number, favorites: number) => 
+      `${reviews} reviews, ${photos} photos, ${favorites} favorites`,
+    
+    // User Rank
+    yourRank: 'Your Rank',
+    yourRankDescription: (rank: number, type: string) => `You are ranked #${rank} in ${type}`,
+    notRanked: 'Not ranked yet',
+    notRankedDescription: 'Start contributing to appear on the leaderboard',
+    
+    // Empty States
+    noData: 'No data available',
+    noDataDescription: 'Be the first to appear on this leaderboard!',
+    
+    // Loading States
+    loading: 'Loading leaderboard...',
+    loadingRank: 'Loading your rank...',
+    
+    // Error States
+    errorTitle: 'Unable to load leaderboard',
+    errorDescription: 'Please try again later',
+    retry: 'Retry',
+    
+    // Accessibility
+    leaderboardTable: 'Leaderboard rankings table',
+    userAvatar: (username: string) => `${username}'s avatar`,
+    sortByRank: 'Sorted by rank',
+  },
 } as const
 
 // Type helper to ensure type safety when accessing COPY
