@@ -35,19 +35,17 @@ export const PrimaryButton: React.FC<BaseButtonProps> = ({
       disabled={disabled || loading}
       className={`
         bg-gradient-to-r from-green-600 to-green-500
-        dark:from-dark-matcha-600 dark:to-dark-matcha-500
         text-white
         py-3 px-6
         rounded-xl
         font-semibold
         shadow-md
         hover:from-green-700 hover:to-green-600
-        dark:hover:from-dark-matcha-700 dark:hover:to-dark-matcha-600
         active:scale-[0.98]
         transition-all duration-200 ease-out
         disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100
         flex items-center justify-center gap-2
-        focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-dark-matcha-500 focus:ring-offset-2 dark:focus:ring-offset-dark-bg-primary
+        focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2
         min-h-[44px]
         ${fullWidth ? 'w-full' : ''}
         ${loading ? 'cursor-wait' : ''}
@@ -88,18 +86,18 @@ export const SecondaryButton: React.FC<BaseButtonProps> = ({
       onClick={onClick}
       disabled={disabled || loading}
       className={`
-        bg-white dark:bg-dark-bg-elevated
-        border-2 border-green-300 dark:border-dark-border-accent
-        text-green-600 dark:text-dark-matcha-600
+        bg-white
+        border-2 border-green-300
+        text-green-600
         py-3 px-6
         rounded-xl
         font-semibold
-        hover:bg-green-50 dark:hover:bg-dark-bg-tertiary
+        hover:bg-green-50
         active:scale-[0.98]
         transition-all duration-200 ease-out
         disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100
         flex items-center justify-center gap-2
-        focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-dark-matcha-500 focus:ring-offset-2 dark:focus:ring-offset-dark-bg-primary
+        focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2
         min-h-[44px]
         ${fullWidth ? 'w-full' : ''}
         ${loading ? 'cursor-wait' : ''}
@@ -107,7 +105,7 @@ export const SecondaryButton: React.FC<BaseButtonProps> = ({
       `}
     >
       {loading ? (
-        <div className="animate-spin rounded-full h-5 w-5 border-2 border-green-600 dark:border-dark-matcha-600 border-t-transparent" />
+        <div className="animate-spin rounded-full h-5 w-5 border-2 border-green-600 border-t-transparent" />
       ) : (
         <>
           {Icon && iconPosition === 'left' && <Icon size={20} />}
@@ -140,17 +138,17 @@ export const TertiaryButton: React.FC<BaseButtonProps> = ({
       onClick={onClick}
       disabled={disabled || loading}
       className={`
-        bg-gray-100 dark:bg-dark-bg-tertiary
-        text-gray-700 dark:text-dark-text-primary
+        bg-gray-100
+        text-gray-700
         py-3 px-6
         rounded-xl
         font-semibold
-        hover:bg-gray-200 dark:hover:bg-dark-border-primary
+        hover:bg-gray-200
         active:scale-[0.98]
         transition-all duration-200 ease-out
         disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100
         flex items-center justify-center gap-2
-        focus:outline-none focus:ring-2 focus:ring-gray-500 dark:focus:ring-dark-border-accent focus:ring-offset-2 dark:focus:ring-offset-dark-bg-primary
+        focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2
         min-h-[44px]
         ${fullWidth ? 'w-full' : ''}
         ${loading ? 'cursor-wait' : ''}
@@ -158,7 +156,7 @@ export const TertiaryButton: React.FC<BaseButtonProps> = ({
       `}
     >
       {loading ? (
-        <div className="animate-spin rounded-full h-5 w-5 border-2 border-gray-700 dark:border-dark-text-primary border-t-transparent" />
+        <div className="animate-spin rounded-full h-5 w-5 border-2 border-gray-700 border-t-transparent" />
       ) : (
         <>
           {Icon && iconPosition === 'left' && <Icon size={20} />}
@@ -198,10 +196,10 @@ export const IconButton: React.FC<IconButtonProps> = ({
   shape = 'circle'
 }) => {
   const variantStyles = {
-    primary: 'bg-green-600 dark:bg-dark-matcha-600 text-white hover:bg-green-700 dark:hover:bg-dark-matcha-700',
-    secondary: 'bg-green-100 dark:bg-dark-bg-tertiary text-green-700 dark:text-dark-matcha-700 hover:bg-green-200 dark:hover:bg-dark-border-primary',
-    ghost: 'bg-white/95 dark:bg-dark-bg-elevated/95 backdrop-blur-sm text-green-700 dark:text-dark-matcha-700 hover:bg-white dark:hover:bg-dark-bg-elevated shadow-lg',
-    danger: 'bg-red-100 dark:bg-red-950/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-950/50'
+    primary: 'bg-green-600 text-white hover:bg-green-700',
+    secondary: 'bg-green-100 text-green-700 hover:bg-green-200',
+    ghost: 'bg-white/95 backdrop-blur-sm text-green-700 hover:bg-white shadow-lg',
+    danger: 'bg-red-100 text-red-600 hover:bg-red-200'
   }
 
   const shapeStyles = {
@@ -222,7 +220,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
         active:scale-95
         transition-all duration-200 ease-out
         disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100
-        focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-dark-matcha-500 focus:ring-offset-2 dark:focus:ring-offset-dark-bg-primary
+        focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2
         ${variantStyles[variant]}
         ${loading ? 'cursor-wait' : ''}
         ${className}
@@ -277,8 +275,8 @@ export const FilterButton: React.FC<FilterButtonProps> = ({
         flex items-center justify-center sm:justify-start gap-1.5
         min-h-[44px] min-w-[44px]
         ${active
-          ? 'bg-green-600 dark:bg-dark-matcha-600 text-white shadow-md'
-          : 'bg-green-100 dark:bg-dark-bg-tertiary text-green-700 dark:text-dark-matcha-700 hover:bg-green-200 dark:hover:bg-dark-border-primary'
+          ? 'bg-green-600 text-white shadow-md'
+          : 'bg-green-100 text-green-700 hover:bg-green-200'
         }
         ${loading ? 'cursor-wait opacity-75' : ''}
         ${className}

@@ -3,13 +3,9 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { SettingsPage } from '../SettingsPage'
 
-// Mock the feature toggle hook to enable dark mode
+// Mock the feature toggle hook
 vi.mock('../../hooks/useFeatureToggle', () => ({
-  useFeatureToggle: (flag: string) => {
-    // Enable dark mode for theme toggle tests
-    if (flag === 'ENABLE_DARK_MODE') return true
-    return false
-  },
+  useFeatureToggle: () => false,
 }))
 
 describe('SettingsPage', () => {
@@ -38,7 +34,6 @@ describe('SettingsPage', () => {
     expect(screen.getByText('Preferences')).toBeInTheDocument()
     expect(screen.getByText('Notifications')).toBeInTheDocument()
     expect(screen.getByText('Location Services')).toBeInTheDocument()
-    expect(screen.getByText('Theme')).toBeInTheDocument()
   })
 
   it('should toggle notifications setting', async () => {

@@ -93,11 +93,6 @@ export { Wrench } from 'lucide-react'
 export { Bell } from 'lucide-react'
 export { Palette } from 'lucide-react'
 
-// Theme icons
-export { Sun } from 'lucide-react'
-export { Moon } from 'lucide-react'
-export { Monitor } from 'lucide-react'
-
 // Data/Analytics icons
 export { TrendingUp } from 'lucide-react'
 export { ArrowUpDown } from 'lucide-react'
