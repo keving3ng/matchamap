@@ -102,3 +102,5 @@ test-results/
 # Cloudflare Workers
 .wrangler/
 .dev.vars
+
+docs/PARALLEL_EXECUTION_PLAN.md
