@@ -8,7 +8,7 @@ import { COPY } from '../constants/copy'
 import { PrimaryButton, SecondaryButton, Skeleton } from './ui'
 import { BadgeGrid, BadgeNotification } from './badges'
 import { useBadges } from '../hooks/useBadges'
-import type { UserBadge, BadgeCategory } from '../../../shared/types'
+import type { BadgeCategory } from '../../../shared/types'
 
 interface BadgesPageProps {
   className?: string
@@ -47,18 +47,9 @@ export const BadgesPage: React.FC<BadgesPageProps> = ({
   }
 
   // Filter badges by category
-  const filteredBadges = selectedCategory === 'all' 
-    ? badges 
+  const filteredBadges = selectedCategory === 'all'
+    ? badges
     : badges.filter(badge => badge.badgeCategory === selectedCategory)
-
-  // Group progress by category
-  const progressByCategory = progress.reduce((acc, item) => {
-    if (!acc[item.badge.category]) {
-      acc[item.badge.category] = []
-    }
-    acc[item.badge.category].push(item)
-    return acc
-  }, {} as Record<BadgeCategory, typeof progress>)
 
   if (error) {
     return (

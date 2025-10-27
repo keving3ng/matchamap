@@ -31,7 +31,7 @@ export async function getMyBadges(request: AuthenticatedRequest, env: Env): Prom
     }
 
     const db = getDb(env.DB);
-    const userId = request.user.id;
+    const userId = request.user.userId;
 
     // Fetch user's badges with join for sorting
     const earnedBadges = await db
@@ -55,7 +55,7 @@ export async function getMyBadges(request: AuthenticatedRequest, env: Env): Prom
       };
     }).filter(badge => badge.definition); // Filter out any badges with missing definitions
 
-    return jsonResponse({ badges: enrichedBadges }, request as Request, env);
+    return jsonResponse({ badges: enrichedBadges }, HTTP_STATUS.OK, request as Request, env);
   } catch (error) {
     console.error('Error fetching user badges:', error);
     return errorResponse('Failed to fetch badges', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
@@ -73,7 +73,7 @@ export async function checkAndAwardBadges(request: AuthenticatedRequest, env: En
     }
 
     const db = getDb(env.DB);
-    const userId = request.user.id;
+    const userId = request.user.userId;
 
     // Get user's current stats
     const userStats = await getUserStats(db, userId);
@@ -119,10 +119,10 @@ export async function checkAndAwardBadges(request: AuthenticatedRequest, env: En
       }
     }
 
-    return jsonResponse({ 
+    return jsonResponse({
       newBadges: awardedBadges,
       totalEarned: earnedKeys.size + awardedBadges.length
-    }, request as Request, env);
+    }, HTTP_STATUS.OK, request as Request, env);
   } catch (error) {
     console.error('Error checking badges:', error);
     return errorResponse('Failed to check badges', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
@@ -145,10 +145,10 @@ export async function getBadgeDefinitions(request: IRequest, env: Env): Promise<
       [BADGE_CATEGORIES.SPECIAL]: getBadgesByCategory(BADGE_CATEGORIES.SPECIAL),
     };
 
-    return jsonResponse({ 
+    return jsonResponse({
       allBadges,
-      byCategory: badgesByCategory 
-    }, request as Request, env);
+      byCategory: badgesByCategory
+    }, HTTP_STATUS.OK, request as Request, env);
   } catch (error) {
     console.error('Error fetching badge definitions:', error);
     return errorResponse('Failed to fetch badge definitions', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
@@ -166,7 +166,7 @@ export async function getBadgeProgress(request: AuthenticatedRequest, env: Env):
     }
 
     const db = getDb(env.DB);
-    const userId = request.user.id;
+    const userId = request.user.userId;
 
     const userStats = await getUserStats(db, userId);
     if (!userStats) {
@@ -210,7 +210,7 @@ export async function getBadgeProgress(request: AuthenticatedRequest, env: Env):
       }
     }
 
-    return jsonResponse({ progress }, request as Request, env);
+    return jsonResponse({ progress }, HTTP_STATUS.OK, request as Request, env);
   } catch (error) {
     console.error('Error fetching badge progress:', error);
     return errorResponse('Failed to fetch badge progress', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
