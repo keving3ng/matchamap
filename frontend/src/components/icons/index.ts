@@ -97,6 +97,8 @@ export { Palette } from 'lucide-react'
 export { TrendingUp } from 'lucide-react'
 export { ArrowUpDown } from 'lucide-react'
 export { Users } from 'lucide-react'
+export { UserPlus } from 'lucide-react'
+export { UserMinus } from 'lucide-react'
 export { Activity } from 'lucide-react'
 export { Percent } from 'lucide-react'
 

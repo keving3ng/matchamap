@@ -493,6 +493,38 @@ export interface BadgeDefinitionsResponse {
 }
 
 // ============================================================================
+// FOLLOWING SYSTEM TYPES (Phase 2D)
+// ============================================================================
+
+export interface FollowUser {
+  id: number
+  username: string
+  displayName: string
+  avatarUrl?: string | null
+  followedAt: string
+}
+
+export interface FollowersResponse {
+  followers: FollowUser[]
+  total: number
+}
+
+export interface FollowingResponse {
+  following: FollowUser[]
+  total: number
+}
+
+export interface FollowStatusResponse {
+  isFollowing: boolean
+  canFollow: boolean
+}
+
+export interface FollowActionResponse {
+  success: boolean
+  message: string
+}
+
+// ============================================================================
 // API RESPONSE TYPES
 // ============================================================================
 

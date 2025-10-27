@@ -718,6 +718,37 @@ export const COPY = {
     networkError: 'Check your internet connection and try again',
   },
 
+  // Social Features (Phase 2D)
+  social: {
+    // Follow Actions
+    follow: 'Follow',
+    following: 'Following',
+    unfollow: 'Unfollow',
+    followUser: (username: string) => `Follow ${username}`,
+    unfollowUser: (username: string) => `Unfollow ${username}`,
+    
+    // Follow Lists
+    followers: 'Followers',
+    followersTitle: (username: string) => `${username}'s Followers`,
+    followingTitle: (username: string) => `Following`,
+    followersCount: (count: number) => `${count} ${count === 1 ? 'follower' : 'followers'}`,
+    followingCount: (count: number) => `${count} following`,
+    
+    // Empty States
+    noFollowers: 'No followers yet',
+    noFollowing: 'Not following anyone yet',
+    noFollowersDescription: 'When people follow this user, they\'ll appear here.',
+    noFollowingDescription: 'When this user starts following people, they\'ll appear here.',
+    
+    // Loading States
+    loadingUsers: 'Loading users...',
+    
+    // Follow Status
+    followingYou: 'Follows you',
+    mutualFollow: 'You follow each other',
+    followBack: 'Follow back',
+  },
+
   // Badges & Achievements (Phase 2C)
   badges: {
     // Main Badge Interface

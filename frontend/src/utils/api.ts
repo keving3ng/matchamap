@@ -5,7 +5,7 @@
 
 import { useAuthStore } from '../stores/authStore'
 import { useSessionExpiry } from '../hooks/useSessionExpiry'
-import type { Cafe, Drink, Event, PublicUserProfile, UpdateProfileRequest, UserProfile, CityWithCount, User, UserFavorite, FavoritesResponse, AddFavoriteRequest, UpdateFavoriteNotesRequest, UserReview, ReviewPhoto, BadgesResponse, BadgeCheckResponse, BadgeProgressResponse, BadgeDefinitionsResponse } from '../../../shared/types'
+import type { Cafe, Drink, Event, PublicUserProfile, UpdateProfileRequest, UserProfile, CityWithCount, User, UserFavorite, FavoritesResponse, AddFavoriteRequest, UpdateFavoriteNotesRequest, UserReview, ReviewPhoto, BadgesResponse, BadgeCheckResponse, BadgeProgressResponse, BadgeDefinitionsResponse, FollowersResponse, FollowingResponse, FollowStatusResponse, FollowActionResponse } from '../../../shared/types'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -921,6 +921,50 @@ export const badgesAPI = {
 }
 
 /**
+ * Following API endpoints (Phase 2D)
+ */
+export const followingAPI = {
+  /**
+   * Follow a user (authenticated)
+   */
+  async followUser(username: string): Promise<FollowActionResponse> {
+    return fetchAPI(`/users/${username}/follow`, {
+      method: 'POST',
+    })
+  },
+
+  /**
+   * Unfollow a user (authenticated)
+   */
+  async unfollowUser(username: string): Promise<FollowActionResponse> {
+    return fetchAPI(`/users/${username}/follow`, {
+      method: 'DELETE',
+    })
+  },
+
+  /**
+   * Get user's followers (public, respects privacy settings)
+   */
+  async getFollowers(username: string): Promise<FollowersResponse> {
+    return fetchAPI(`/users/${username}/followers`)
+  },
+
+  /**
+   * Get users that user is following (public, respects privacy settings)
+   */
+  async getFollowing(username: string): Promise<FollowingResponse> {
+    return fetchAPI(`/users/${username}/following`)
+  },
+
+  /**
+   * Get follow status for a user (authenticated)
+   */
+  async getFollowStatus(username: string): Promise<FollowStatusResponse> {
+    return fetchAPI(`/users/${username}/follow-status`)
+  },
+}
+
+/**
  * Export all APIs
  */
 export const api = {
@@ -939,6 +983,7 @@ export const api = {
   reviews: reviewsAPI,
   photos: photosAPI,
   badges: badgesAPI,
+  following: followingAPI,
 }
 
 export default api

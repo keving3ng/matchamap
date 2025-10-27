@@ -374,6 +374,20 @@ export const userBadges = sqliteTable('user_badges', {
   uniqueUserBadge: unique().on(table.userId, table.badgeKey),
 }));
 
+// User follows table (Phase 2D - Social Features)
+export const userFollows = sqliteTable('user_follows', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  followerId: integer('follower_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  followingId: integer('following_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: text('created_at').default(sql`datetime('now')`),
+}, (table) => ({
+  followerIdx: index('user_follows_follower_idx').on(table.followerId),
+  followingIdx: index('user_follows_following_idx').on(table.followingId),
+  createdAtIdx: index('user_follows_created_at_idx').on(table.createdAt),
+  relationshipIdx: index('user_follows_relationship_idx').on(table.followerId, table.followingId),
+  uniqueFollow: unique().on(table.followerId, table.followingId),
+}));
+
 // Type exports for use in the application
 export type Cafe = typeof cafes.$inferSelect;
 export type NewCafe = typeof cafes.$inferInsert;
@@ -403,3 +417,5 @@ export type UserFavorite = typeof userFavorites.$inferSelect;
 export type NewUserFavorite = typeof userFavorites.$inferInsert;
 export type UserBadge = typeof userBadges.$inferSelect;
 export type NewUserBadge = typeof userBadges.$inferInsert;
+export type UserFollow = typeof userFollows.$inferSelect;
+export type NewUserFollow = typeof userFollows.$inferInsert;

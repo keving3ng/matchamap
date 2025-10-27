@@ -20,6 +20,7 @@ import { uploadPhoto, getCafePhotos, deletePhoto, getMyPhotos, getPhotosForModer
 import { createReview, getCafeReviews, updateReview, deleteReview, markHelpful, removeHelpful, getUserReviews, getAdminCafeReviews, getAdminCafeReviewsCount, moderateReview } from './routes/reviews';
 import { getMyFavorites, addFavorite, removeFavorite, updateFavoriteNotes } from './routes/favorites';
 import { getMyBadges, checkAndAwardBadges, getBadgeDefinitions, getBadgeProgress } from './routes/badges';
+import { followUser, unfollowUser, getUserFollowers, getUserFollowing, getFollowStatus } from './routes/following';
 import { requireAuth, requireAdminAuth } from './middleware/auth';
 import { authRateLimit, publicRateLimit, writeRateLimit } from './middleware/rateLimit';
 import { requireHTTPS } from './middleware/httpsOnly';
@@ -98,6 +99,13 @@ router.put('/api/users/me/profile', writeRateLimit(), requireAuth(), updateMyPro
 router.put('/api/users/me/privacy', writeRateLimit(), requireAuth(), updatePrivacySettings);
 router.post('/api/users/me/avatar', writeRateLimit(), requireAuth(), uploadAvatar);
 router.get('/api/users/:username/profile', publicRateLimit(), getUserProfile);
+
+// User following endpoints
+router.post('/api/users/:username/follow', writeRateLimit(), requireAuth(), followUser);
+router.delete('/api/users/:username/follow', writeRateLimit(), requireAuth(), unfollowUser);
+router.get('/api/users/:username/followers', publicRateLimit(), getUserFollowers);
+router.get('/api/users/:username/following', publicRateLimit(), getUserFollowing);
+router.get('/api/users/:username/follow-status', authRateLimit(), requireAuth(), getFollowStatus);
 
 // User favorites endpoints
 router.get('/api/users/me/favorites', authRateLimit(), requireAuth(), getMyFavorites);
