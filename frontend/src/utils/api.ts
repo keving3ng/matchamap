@@ -611,6 +611,57 @@ export const statsAPI = {
   }> }> {
     return fetchAPI('/users/me/checkins')
   },
+
+  /**
+   * Get my passport (detailed statistics and achievements)
+   */
+  async getMyPassport(): Promise<{ passport: {
+    stats: {
+      totalCafes: number
+      visitedCafes: number
+      completionPercentage: number
+      visitedCafeIds: number[]
+    }
+    achievements: {
+      milestones: Array<{
+        threshold: number
+        name: string
+        achieved: boolean
+      }>
+      nextMilestone: {
+        name: string
+        threshold: number
+        progress: number
+        remaining: number
+      } | null
+    }
+    cityBreakdown: Record<string, number>
+    recentCheckins: Array<{
+      id: number
+      cafeId: number
+      visitedAt: string
+      notes: string | null
+      cafe: {
+        id: number
+        name: string
+        slug: string
+        city: string
+      } | null
+    }>
+    lastUpdated: string
+  } }> {
+    return fetchAPI('/users/me/passport')
+  },
+
+  /**
+   * Get my passport (simplified - just visited cafe IDs)
+   */
+  async getMyPassportSimple(): Promise<{ 
+    visitedCafeIds: number[]
+    visitedCount: number 
+  }> {
+    return fetchAPI('/users/me/passport/simple')
+  },
 }
 
 /**

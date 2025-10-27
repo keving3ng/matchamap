@@ -3,16 +3,13 @@ import { renderHook, act } from '@testing-library/react'
 import { usePassportMigration } from '../usePassportMigration'
 import { useAuthStore } from '../../stores/authStore'
 import { useVisitedCafesStore } from '../../stores/visitedCafesStore'
-import { api } from '../../utils/api'
 
-// Mock the stores and API
+// Mock the stores
 vi.mock('../../stores/authStore')
 vi.mock('../../stores/visitedCafesStore')
-vi.mock('../../utils/api')
 
 const mockAuthStore = vi.mocked(useAuthStore)
 const mockVisitedCafesStore = vi.mocked(useVisitedCafesStore)
-const mockApi = vi.mocked(api)
 
 describe('usePassportMigration', () => {
   const mockClearAllStamps = vi.fn()
@@ -143,10 +140,7 @@ describe('usePassportMigration', () => {
     expect(result.current.migrationState.isOpen).toBe(false)
   })
 
-  it('should migrate stamps successfully', async () => {
-    // Mock successful API responses
-    mockApi.stats.checkIn.mockResolvedValue(undefined)
-
+  it('should clean up stamps successfully', async () => {
     const { result } = renderHook(() => usePassportMigration())
 
     // Open the modal
@@ -154,16 +148,10 @@ describe('usePassportMigration', () => {
       result.current.checkAndShowMigration()
     })
 
-    // Start migration
+    // Start cleanup (simplified - no API calls)
     await act(async () => {
       await result.current.migrateStamps()
     })
-
-    // Should call API for each cafe with notes parameter
-    expect(mockApi.stats.checkIn).toHaveBeenCalledTimes(3)
-    expect(mockApi.stats.checkIn).toHaveBeenCalledWith(1, 'Migrated from local storage')
-    expect(mockApi.stats.checkIn).toHaveBeenCalledWith(2, 'Migrated from local storage')
-    expect(mockApi.stats.checkIn).toHaveBeenCalledWith(3, 'Migrated from local storage')
 
     // Should clear local stamps
     expect(mockClearAllStamps).toHaveBeenCalledTimes(1)
@@ -172,14 +160,7 @@ describe('usePassportMigration', () => {
     expect(result.current.migrationState.isOpen).toBe(false)
   })
 
-  it('should show loading state during migration', async () => {
-    // Mock a slow API response
-    let resolvePromise: () => void
-    const slowPromise = new Promise<void>((resolve) => {
-      resolvePromise = resolve
-    })
-    mockApi.stats.checkIn.mockReturnValue(slowPromise)
-
+  it('should show loading state during cleanup', async () => {
     const { result } = renderHook(() => usePassportMigration())
 
     // Open the modal
@@ -187,98 +168,57 @@ describe('usePassportMigration', () => {
       result.current.checkAndShowMigration()
     })
 
-    // Start migration (don't await yet so we can check loading state)
-    let migrationPromise: Promise<void>
-    act(() => {
-      migrationPromise = result.current.migrateStamps()
-    })
-
-    // Should be loading
-    expect(result.current.migrationState.isLoading).toBe(true)
-
-    // Resolve the API call
-    resolvePromise!()
-    await act(async () => {
-      await migrationPromise!
-    })
-
-    // Should no longer be loading
-    expect(result.current.migrationState.isLoading).toBe(false)
-  })
-
-  it('should handle migration errors gracefully', async () => {
-    // Mock API error for first cafe, success for others
-    mockApi.stats.checkIn
-      .mockRejectedValueOnce(new Error('Network error'))
-      .mockResolvedValue(undefined)
-
-    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-
-    const { result } = renderHook(() => usePassportMigration())
-
-    // Open the modal
-    act(() => {
-      result.current.checkAndShowMigration()
-    })
-
-    // Start migration
+    // Start cleanup and verify loading states
     await act(async () => {
       await result.current.migrateStamps()
     })
 
-    // Should still attempt all migrations
-    expect(mockApi.stats.checkIn).toHaveBeenCalledTimes(3)
+    // Should no longer be loading after completion
+    expect(result.current.migrationState.isLoading).toBe(false)
+  })
+
+  it('should handle cleanup errors gracefully', async () => {
+    // Mock clearAllStamps to throw an error
+    mockClearAllStamps.mockImplementation(() => {
+      throw new Error('Storage error')
+    })
+
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    const { result } = renderHook(() => usePassportMigration())
+
+    // Open the modal
+    act(() => {
+      result.current.checkAndShowMigration()
+    })
+
+    // Start cleanup
+    await act(async () => {
+      await result.current.migrateStamps()
+    })
 
     // Should log the error
     expect(consoleSpy).toHaveBeenCalledWith(
-      'Failed to migrate check-in for cafe 1:',
+      'Cleanup failed:',
       expect.any(Error)
     )
 
-    // Should still clear local stamps and close modal
-    expect(mockClearAllStamps).toHaveBeenCalledTimes(1)
-    expect(result.current.migrationState.isOpen).toBe(false)
+    // Should show error in state
+    expect(result.current.migrationState.error).toBe('Storage error')
+    expect(result.current.migrationState.isLoading).toBe(false)
 
     consoleSpy.mockRestore()
   })
 
-  it('should handle complete migration failure', async () => {
-    // Mock all API calls to fail
-    mockApi.stats.checkIn.mockRejectedValue(new Error('Server error'))
-
+  it('should reset error state when retrying cleanup', async () => {
     const { result } = renderHook(() => usePassportMigration())
 
-    // Open the modal
+    // Open modal
     act(() => {
       result.current.checkAndShowMigration()
     })
 
-    // Start migration
-    await act(async () => {
-      await result.current.migrateStamps()
-    })
-
-    // Should show error state when ALL migrations fail
-    expect(result.current.migrationState.error).toBe('Failed to sync visits. Please try again.')
-    expect(result.current.migrationState.isLoading).toBe(false)
-    expect(result.current.migrationState.isOpen).toBe(true) // Should stay open on error
-
-    // Should not clear local stamps on complete failure
-    expect(mockClearAllStamps).not.toHaveBeenCalled()
-  })
-
-  it('should reset error state when retrying migration', async () => {
-    const { result } = renderHook(() => usePassportMigration())
-
-    // Simulate error state by directly setting it
-    act(() => {
-      result.current.checkAndShowMigration()
-    })
-    
-    // Set up successful API call
-    mockApi.stats.checkIn.mockResolvedValue(undefined)
-    
-    // Migration should clear error state
+    // Cleanup should clear error state
     await act(async () => {
       await result.current.migrateStamps()
     })

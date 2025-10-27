@@ -40,24 +40,24 @@ export const PassportMigrationModal: React.FC<PassportMigrationModalProps> = ({
             🎫
           </div>
           <h2 className="text-xl font-bold text-gray-800 mb-2">
-            {COPY.passport.migrationModal.title}
+            Clean Up Local Data
           </h2>
           <p className="text-gray-600 text-sm">
-            {COPY.passport.migrationModal.description}
+            Your passport is now built from your check-in history. Would you like to clean up the old local data?
           </p>
         </div>
 
-        <div className="bg-green-50 rounded-xl p-4 mb-6">
+        <div className="bg-blue-50 rounded-xl p-4 mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-              <span className="text-sm">📍</span>
+            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+              <span className="text-sm">🧹</span>
             </div>
             <div>
-              <p className="font-semibold text-green-800">
+              <p className="font-semibold text-blue-800">
                 {COPY.passport.migrationModal.localVisits(localVisitCount)}
               </p>
-              <p className="text-sm text-green-600">
-                These will be synced to your account
+              <p className="text-sm text-blue-600">
+                This old data can be safely removed
               </p>
             </div>
           </div>
@@ -77,7 +77,7 @@ export const PassportMigrationModal: React.FC<PassportMigrationModalProps> = ({
             disabled={isLoading}
             className="flex-1"
           >
-            {COPY.passport.migrationModal.skip}
+            Keep Data
           </SecondaryButton>
           <PrimaryButton
             onClick={onMigrate}
@@ -85,8 +85,8 @@ export const PassportMigrationModal: React.FC<PassportMigrationModalProps> = ({
             className="flex-1"
           >
             {isLoading 
-              ? COPY.passport.migrationModal.migrating 
-              : COPY.passport.migrationModal.migrate
+              ? "Cleaning..." 
+              : "Clean Up"
             }
           </PrimaryButton>
         </div>
