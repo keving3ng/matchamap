@@ -965,6 +965,151 @@ export const followingAPI = {
 }
 
 /**
+ * Leaderboard API endpoints
+ */
+export const leaderboardAPI = {
+  /**
+   * Get passport leaderboard (most cafes visited)
+   */
+  async getPassportLeaderboard(params?: {
+    period?: 'all' | 'monthly'
+    city?: string
+    limit?: number
+  }): Promise<{
+    leaderboard: Array<{
+      rank: number
+      userId: number
+      username: string
+      displayName?: string | null
+      avatarUrl?: string | null
+      totalCheckins: number
+      passportCompletion: number
+      location?: string | null
+    }>
+    metadata: {
+      type: 'passport'
+      period: string
+      city: string
+      limit: number
+      generatedAt: string
+    }
+  }> {
+    const query = new URLSearchParams()
+    if (params?.period) query.append('period', params.period)
+    if (params?.city) query.append('city', params.city)
+    if (params?.limit) query.append('limit', params.limit.toString())
+
+    const queryString = query.toString() ? `?${query.toString()}` : ''
+    return fetchAPI(`/leaderboard/passport${queryString}`)
+  },
+
+  /**
+   * Get reviewer leaderboard (most helpful reviews)
+   */
+  async getReviewerLeaderboard(params?: {
+    period?: 'all' | 'monthly'
+    city?: string
+    limit?: number
+  }): Promise<{
+    leaderboard: Array<{
+      rank: number
+      userId: number
+      username: string
+      displayName?: string | null
+      avatarUrl?: string | null
+      totalReviews: number
+      reputationScore: number
+      location?: string | null
+    }>
+    metadata: {
+      type: 'reviewers'
+      period: string
+      city: string
+      limit: number
+      generatedAt: string
+    }
+  }> {
+    const query = new URLSearchParams()
+    if (params?.period) query.append('period', params.period)
+    if (params?.city) query.append('city', params.city)
+    if (params?.limit) query.append('limit', params.limit.toString())
+
+    const queryString = query.toString() ? `?${query.toString()}` : ''
+    return fetchAPI(`/leaderboard/reviewers${queryString}`)
+  },
+
+  /**
+   * Get contributor leaderboard (total contributions)
+   */
+  async getContributorLeaderboard(params?: {
+    period?: 'all' | 'monthly'
+    city?: string
+    limit?: number
+  }): Promise<{
+    leaderboard: Array<{
+      rank: number
+      userId: number
+      username: string
+      displayName?: string | null
+      avatarUrl?: string | null
+      totalReviews: number
+      totalPhotos: number
+      totalFavorites: number
+      totalContributions: number
+      reputationScore: number
+      location?: string | null
+    }>
+    metadata: {
+      type: 'contributors'
+      period: string
+      city: string
+      limit: number
+      generatedAt: string
+    }
+  }> {
+    const query = new URLSearchParams()
+    if (params?.period) query.append('period', params.period)
+    if (params?.city) query.append('city', params.city)
+    if (params?.limit) query.append('limit', params.limit.toString())
+
+    const queryString = query.toString() ? `?${query.toString()}` : ''
+    return fetchAPI(`/leaderboard/contributors${queryString}`)
+  },
+
+  /**
+   * Get user's rank in specified leaderboard
+   */
+  async getUserRank(params: {
+    type: 'passport' | 'reviewers' | 'contributors'
+    period?: 'all' | 'monthly'
+    city?: string
+  }): Promise<{
+    userRank: {
+      rank: number
+      userId: number
+      totalCheckins?: number
+      totalReviews?: number
+      reputationScore?: number
+      totalContributions?: number
+    } | null
+    metadata: {
+      type: string
+      period: string
+      city: string
+      userId: number
+      generatedAt: string
+    }
+  }> {
+    const query = new URLSearchParams()
+    query.append('type', params.type)
+    if (params?.period) query.append('period', params.period)
+    if (params?.city) query.append('city', params.city)
+
+    return fetchAPI(`/leaderboard/rank?${query.toString()}`)
+  },
+}
+
+/**
  * Export all APIs
  */
 export const api = {
@@ -984,6 +1129,7 @@ export const api = {
   photos: photosAPI,
   badges: badgesAPI,
   following: followingAPI,
+  leaderboard: leaderboardAPI,
 }
 
 export default api
