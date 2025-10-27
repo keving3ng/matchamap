@@ -37,8 +37,8 @@ export const spacing = {
   tooltipPadding: '0.75rem',  // 12px - Vertical padding (py-3)
   tooltipPaddingX: '1rem',    // 16px - Horizontal padding (px-4)
   tooltipOffset: '0.25rem',   // 4px - Distance from trigger element
-  tooltipMaxWidth: '480px',   // Maximum width for large tooltips
-  tooltipMinWidth: '280px',   // Minimum width for content
+  tooltipMaxWidth: '30rem',   // Maximum width for large tooltips (480px)
+  tooltipMinWidth: '17.5rem', // Minimum width for content (280px)
   tooltipArrowSize: '4px',    // Border width for tooltip arrows
   tooltipPositionThreshold: '120px', // Space needed above for upward positioning
 } as const
