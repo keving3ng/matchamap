@@ -33,13 +33,30 @@ export const spacing = {
   touchPadding: '0.75rem',    // 12px - Min padding for touch targets
   minTouchTarget: '44px',     // WCAG minimum touch target
 
-  // Tooltip-specific
+  // Tooltip Design System
+  // Provides consistent spacing for tooltip components across the application
+  // Designed for optimal readability with balanced padding and positioning
+  // 
+  // Base padding: 12px vertical, 16px horizontal for comfortable text reading
+  // Example usage:
+  //   paddingTop: spacing.tooltipPadding,    // py-3 equivalent
+  //   paddingBottom: spacing.tooltipPadding,
+  //   paddingLeft: spacing.tooltipPaddingX,  // px-4 equivalent
+  //   paddingRight: spacing.tooltipPaddingX,
   tooltipPadding: '0.75rem',  // 12px - Vertical padding (py-3)
   tooltipPaddingX: '1rem',    // 16px - Horizontal padding (px-4)
+  
+  // Positioning tokens for consistent tooltip placement
+  // Offset: distance between tooltip and trigger element for visual separation
+  // Example: top: `calc(100% + ${spacing.tooltipOffset})`
   tooltipOffset: '0.25rem',   // 4px - Distance from trigger element
   tooltipMaxWidth: '30rem',   // Maximum width for large tooltips (480px)
   tooltipMinWidth: '17.5rem', // Minimum width for content (280px)
   tooltipArrowSize: '4px',    // Border width for tooltip arrows
+  
+  // Dynamic positioning logic threshold
+  // Used to determine when to flip tooltip direction (up vs down)
+  // Example: if (spaceAbove > spacing.tooltipPositionThreshold) showAbove()
   tooltipPositionThreshold: '120px', // Space needed above for upward positioning
   tooltipTriggerSize: '20px', // Size for small tooltip trigger buttons
 } as const
