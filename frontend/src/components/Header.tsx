@@ -45,7 +45,7 @@ export const Header: React.FC = () => {
     : 'map'
 
   return (
-    <div className="bg-gradient-to-r from-matcha-600 to-matcha-500 text-white px-4 py-3 shadow-lg">
+    <div className="bg-gradient-to-r from-matcha-600 to-matcha-500 dark:from-dark-matcha-600 dark:to-dark-matcha-500 text-white px-4 py-3 shadow-lg transition-colors duration-300">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           {currentView === 'detail' && (
@@ -60,7 +60,7 @@ export const Header: React.FC = () => {
                   navigate(-1)
                 }
               }}
-              className="p-2 hover:bg-matcha-700 rounded-lg transition"
+              className="p-2 hover:bg-matcha-700 dark:hover:bg-dark-matcha-700 rounded-lg transition-colors duration-200"
               aria-label={COPY.map.backToMap}
             >
               <ArrowLeft size={24} />
@@ -68,10 +68,10 @@ export const Header: React.FC = () => {
           )}
           <button
             onClick={() => navigate('/')}
-            className="flex items-center gap-2 hover:bg-matcha-700 rounded-lg px-2 py-1 transition"
+            className="flex items-center gap-2 hover:bg-matcha-700 dark:hover:bg-dark-matcha-700 rounded-lg px-2 py-1 transition-colors duration-200"
           >
-            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-              <span className="text-matcha-600 text-xl">🍵</span>
+            <div className="w-8 h-8 bg-white dark:bg-dark-bg-elevated rounded-full flex items-center justify-center">
+              <span className="text-matcha-600 dark:text-dark-matcha-600 text-xl">🍵</span>
             </div>
             <h1 className="text-xl font-bold tracking-wide hidden sm:block font-caveat">{COPY.header.title}</h1>
           </button>
@@ -82,7 +82,7 @@ export const Header: React.FC = () => {
             href="https://www.instagram.com/vivisual.diary"
             target="_blank"
             rel="noopener noreferrer"
-            className="p-2 hover:bg-green-700 rounded-lg transition flex items-center justify-center"
+            className="p-2 hover:bg-green-700 dark:hover:bg-dark-matcha-700 rounded-lg transition-colors duration-200 flex items-center justify-center"
             aria-label={COPY.header.instagramAriaLabel}
           >
             <Instagram size={20} />
@@ -91,7 +91,7 @@ export const Header: React.FC = () => {
             href="https://www.tiktok.com/@vivisual.diary"
             target="_blank"
             rel="noopener noreferrer"
-            className="p-2 hover:bg-green-700 rounded-lg transition flex items-center justify-center"
+            className="p-2 hover:bg-green-700 dark:hover:bg-dark-matcha-700 rounded-lg transition-colors duration-200 flex items-center justify-center"
             aria-label={COPY.header.tiktokAriaLabel}
           >
             <svg
@@ -112,14 +112,14 @@ export const Header: React.FC = () => {
             <div ref={menuRef} className="relative">
               <button
                 onClick={() => setShowMenu(!showMenu)}
-                className="p-2 hover:bg-matcha-700 rounded-lg transition"
+                className="p-2 hover:bg-matcha-700 dark:hover:bg-dark-matcha-700 rounded-lg transition-colors duration-200"
               >
                 <Menu size={24} />
               </button>
 
               {/* Dropdown Menu */}
               {showMenu && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-[9999]">
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-dark-bg-elevated rounded-lg shadow-lg dark:shadow-dark-bg-primary/20 py-2 z-[9999] transition-colors duration-300">
                   {/* Login/Logout */}
                   {isUserAccountsEnabled && (
                     isAuthenticated ? (
@@ -131,7 +131,7 @@ export const Header: React.FC = () => {
                               navigate(`/profile/${user?.username}`)
                               setShowMenu(false)
                             }}
-                            className="w-full px-4 py-2 text-left text-gray-700 hover:bg-green-50 flex items-center gap-2 transition"
+                            className="w-full px-4 py-2 text-left text-gray-700 dark:text-dark-text-primary hover:bg-green-50 dark:hover:bg-dark-bg-tertiary flex items-center gap-2 transition-colors duration-200"
                           >
                             <User size={18} />
                             <span>{COPY.menu.myProfile}</span>

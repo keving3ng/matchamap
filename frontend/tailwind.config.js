@@ -4,6 +4,7 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -41,6 +42,37 @@ export default {
         },
         accent: {
           pink: '#f8bbd9', // Accent Pink
+        },
+        // Dark mode color scheme
+        dark: {
+          bg: {
+            primary: '#0a0e0b',    // Very dark green-black
+            secondary: '#1a2420',  // Dark matcha background
+            tertiary: '#2a3830',   // Lighter dark green
+            elevated: '#1f2d24',   // Elevated surfaces
+          },
+          text: {
+            primary: '#f0f4f1',    // Light cream for primary text
+            secondary: '#c5d3c9',  // Muted light green for secondary text
+            tertiary: '#9aa89e',   // More muted for tertiary text
+          },
+          matcha: {
+            50: '#1b3a23',   // Dark matcha (flipped)
+            100: '#295435',  // 
+            200: '#356e44',  //
+            300: '#418853',  //
+            400: '#51aa63',  // Primary (same)
+            500: '#66ba7b',  // 
+            600: '#82ca94',  //
+            700: '#ade3ba',  //
+            800: '#d1ebd7',  //
+            900: '#e8f5eb',  // Light matcha (flipped)
+          },
+          border: {
+            primary: '#374531',    // Dark green border
+            secondary: '#4a5748',  // Lighter dark border
+            accent: '#5a6b58',     // Accent border
+          }
         }
       },
       fontFamily: {
