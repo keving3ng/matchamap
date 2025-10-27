@@ -10,27 +10,27 @@ export const useUserProfile = (username: string) => {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      setIsLoading(true)
-      setError(null)
+  const fetchProfile = async () => {
+    setIsLoading(true)
+    setError(null)
 
-      try {
-        const data = await api.profile.getUserProfile(username)
-        setProfile(data)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load profile')
-      } finally {
-        setIsLoading(false)
-      }
+    try {
+      const data = await api.profile.getUserProfile(username)
+      setProfile(data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load profile')
+    } finally {
+      setIsLoading(false)
     }
+  }
 
+  useEffect(() => {
     if (username) {
       fetchProfile()
     }
   }, [username])
 
-  return { profile, isLoading, error }
+  return { profile, isLoading, error, refetch: fetchProfile }
 }
 
 /**

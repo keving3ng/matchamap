@@ -730,7 +730,7 @@ export const COPY = {
     // Follow Lists
     followers: 'Followers',
     followersTitle: (username: string) => `${username}'s Followers`,
-    followingTitle: (username: string) => `Following`,
+    followingTitle: () => `Following`,
     followersCount: (count: number) => `${count} ${count === 1 ? 'follower' : 'followers'}`,
     followingCount: (count: number) => `${count} following`,
     
