@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import '@testing-library/jest-dom'
 import { BrowserRouter } from 'react-router-dom'
 import { DetailView } from '../DetailView'
 import { api } from '../../utils/api'
@@ -115,7 +116,7 @@ vi.mock('../reviews/ReviewForm', () => ({
 
 // Mock checkin components
 vi.mock('../checkin', () => ({
-  CheckInButton: ({ cafe, isCheckedIn, onCheckInSuccess }: any) => (
+  CheckInButton: ({ onCheckInSuccess }: any) => (
     <div data-testid="check-in-button">
       <button onClick={onCheckInSuccess}>Check In</button>
     </div>
@@ -209,9 +210,11 @@ const mockCafe: CafeWithDistance = {
   tiktokPostLink: 'https://tiktok.com/@test/video/123',
   hours: 'Mon-Fri: 8:00-18:00; Sat-Sun: 9:00-19:00',
   distanceInfo: {
-    km: 0.5,
+    kilometers: 0.5,
     formattedKm: '0.5 km',
     walkTime: '6 min',
+    miles: 0,
+    formattedMiles: ''
   },
   drinks: [
     {
@@ -347,7 +350,6 @@ describe('DetailView', () => {
   })
 
   it('should handle get directions click', async () => {
-    const user = userEvent.setup()
     renderWithRouter(
       <DetailView
         cafe={mockCafe}
@@ -428,10 +430,10 @@ describe('DetailView', () => {
     )
 
     expect(screen.getByText('Our Reviews')).toBeInTheDocument()
-    
+
     const instagramReelLink = screen.getByText('See Instagram Reel').closest('a')
     expect(instagramReelLink).toHaveAttribute('href', mockCafe.instagramPostLink)
-    
+
     const tiktokLink = screen.getByText('See TikTok Review').closest('a')
     expect(tiktokLink).toHaveAttribute('href', mockCafe.tiktokPostLink)
   })
