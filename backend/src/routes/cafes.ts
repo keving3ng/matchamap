@@ -1,5 +1,5 @@
 import { IRequest } from 'itty-router';
-import { eq, isNull, and, gte, lte, sql, like, or } from 'drizzle-orm';
+import { eq, isNull, and, gte, lte, sql, like, or, inArray } from 'drizzle-orm';
 import { Env } from '../types';
 import { getDb, cafes, drinks, userReviews } from '../db';
 import {
@@ -54,11 +54,17 @@ export async function listCafes(request: IRequest, env: Env): Promise<Response> 
       }
     }
 
-    let results;
-    
+    let results: typeof cafes.$inferSelect[] = [];
+
     // If search query provided, perform enhanced search
     if (search && search.trim().length > 0) {
-      const searchTerm = `%${search.trim().toLowerCase()}%`;
+      // Sanitize search query
+      const MAX_SEARCH_LENGTH = 100;
+      const sanitizedSearch = search.trim().substring(0, MAX_SEARCH_LENGTH);
+
+      // Escape SQL wildcards to prevent abuse
+      const escapedSearch = sanitizedSearch.replace(/[%_]/g, '\\$&');
+      const searchTerm = `%${escapedSearch.toLowerCase()}%`;
       
       // Get cafe IDs that match search criteria
       const searchResults = await db
@@ -106,16 +112,17 @@ export async function listCafes(request: IRequest, env: Env): Promise<Response> 
 
       // Extract cafe IDs and fetch full cafe data
       const cafeIds = searchResults.map(r => r.cafeId);
-      
+
       if (cafeIds.length === 0) {
         results = [];
       } else {
+        // Use inArray for safe SQL injection prevention
         results = await db
           .select()
           .from(cafes)
-          .where(sql`${cafes.id} IN (${sql.join(cafeIds.map(id => sql`${id}`), sql`, `)})`)
+          .where(inArray(cafes.id, cafeIds))
           .orderBy(sql`
-            CASE ${cafes.id} 
+            CASE ${cafes.id}
               ${sql.join(
                 cafeIds.map((id, index) => sql`WHEN ${id} THEN ${index}`),
                 sql` `
@@ -136,66 +143,111 @@ export async function listCafes(request: IRequest, env: Env): Promise<Response> 
     const hasMore = results.length > limit;
     const cafesList = hasMore ? results.slice(0, limit) : results;
 
-    // Fetch drinks and review snippets for all cafes
-    const cafesWithScores = await Promise.all(
-      cafesList.map(async (cafe) => {
-        const cafeDrinks = await db
+    // Batch fetch drinks for all cafes (fix N+1 query problem)
+    const cafeIds = cafesList.map(cafe => cafe.id);
+    const allDrinks = cafeIds.length > 0
+      ? await db
           .select()
           .from(drinks)
-          .where(eq(drinks.cafeId, cafe.id));
+          .where(inArray(drinks.cafeId, cafeIds))
+      : [];
 
-        // Calculate display score: default drink OR highest score
-        let displayScore: number | null = null;
-        if (cafeDrinks.length > 0) {
-          const defaultDrink = cafeDrinks.find(d => d.isDefault);
-          if (defaultDrink) {
-            displayScore = defaultDrink.score;
-          } else {
-            displayScore = Math.max(...cafeDrinks.map(d => d.score));
+    // Group drinks by cafe ID
+    const drinksByCafeId = new Map<number, typeof allDrinks>();
+    for (const drink of allDrinks) {
+      if (!drinksByCafeId.has(drink.cafeId)) {
+        drinksByCafeId.set(drink.cafeId, []);
+      }
+      drinksByCafeId.get(drink.cafeId)!.push(drink);
+    }
+
+    // Batch fetch review snippets if search was performed
+    let reviewSnippetsByCafeId = new Map<number, any[]>();
+    if (search && search.trim().length > 0 && cafeIds.length > 0) {
+      // Sanitize search query (reuse same logic)
+      const MAX_SEARCH_LENGTH = 100;
+      const sanitizedSearch = search.trim().substring(0, MAX_SEARCH_LENGTH);
+      const escapedSearch = sanitizedSearch.replace(/[%_]/g, '\\$&');
+      const searchTerm = `%${escapedSearch.toLowerCase()}%`;
+
+      const allReviewSnippets = await db
+        .select({
+          cafeId: userReviews.cafeId,
+          id: userReviews.id,
+          content: userReviews.content,
+          tags: userReviews.tags,
+          overallRating: userReviews.overallRating,
+          createdAt: userReviews.createdAt
+        })
+        .from(userReviews)
+        .where(and(
+          inArray(userReviews.cafeId, cafeIds),
+          eq(userReviews.moderationStatus, 'approved'),
+          eq(userReviews.isPublic, true),
+          or(
+            like(sql`LOWER(${userReviews.content})`, searchTerm),
+            like(sql`LOWER(${userReviews.tags})`, searchTerm)
+          )
+        ))
+        .orderBy(sql`${userReviews.overallRating} DESC`);
+
+      // Group snippets by cafe ID (limit to 2 per cafe)
+      for (const snippet of allReviewSnippets) {
+        if (!reviewSnippetsByCafeId.has(snippet.cafeId)) {
+          reviewSnippetsByCafeId.set(snippet.cafeId, []);
+        }
+        const cafeSnippets = reviewSnippetsByCafeId.get(snippet.cafeId)!;
+        if (cafeSnippets.length < 2) {
+          cafeSnippets.push(snippet);
+        }
+      }
+    }
+
+    // Build cafe data with drinks and review snippets
+    const cafesWithScores = cafesList.map((cafe) => {
+      const cafeDrinks = drinksByCafeId.get(cafe.id) || [];
+
+      // Calculate display score: default drink OR highest score
+      let displayScore: number | null = null;
+      if (cafeDrinks.length > 0) {
+        const defaultDrink = cafeDrinks.find(d => d.isDefault);
+        if (defaultDrink) {
+          displayScore = defaultDrink.score;
+        } else {
+          displayScore = Math.max(...cafeDrinks.map(d => d.score));
+        }
+      }
+
+      const reviewSnippets = reviewSnippetsByCafeId.get(cafe.id) || [];
+
+      return {
+        ...cafe,
+        displayScore,
+        drinks: cafeDrinks,
+        reviewSnippets: reviewSnippets.map(snippet => {
+          try {
+            return {
+              ...snippet,
+              tags: snippet.tags ? JSON.parse(snippet.tags) : null,
+              // Truncate content for snippet display
+              content: snippet.content.length > 150
+                ? snippet.content.substring(0, 150) + '...'
+                : snippet.content
+            };
+          } catch (error) {
+            // Handle JSON.parse errors gracefully
+            console.error(`Failed to parse tags for review ${snippet.id}:`, error);
+            return {
+              ...snippet,
+              tags: null,
+              content: snippet.content.length > 150
+                ? snippet.content.substring(0, 150) + '...'
+                : snippet.content
+            };
           }
-        }
-
-        // If search was performed, fetch matching review snippets
-        let reviewSnippets: any[] = [];
-        if (search && search.trim().length > 0) {
-          const searchTerm = `%${search.trim().toLowerCase()}%`;
-          reviewSnippets = await db
-            .select({
-              id: userReviews.id,
-              content: userReviews.content,
-              tags: userReviews.tags,
-              overallRating: userReviews.overallRating,
-              createdAt: userReviews.createdAt
-            })
-            .from(userReviews)
-            .where(and(
-              eq(userReviews.cafeId, cafe.id),
-              eq(userReviews.moderationStatus, 'approved'),
-              eq(userReviews.isPublic, true),
-              or(
-                like(sql`LOWER(${userReviews.content})`, searchTerm),
-                like(sql`LOWER(${userReviews.tags})`, searchTerm)
-              )
-            ))
-            .orderBy(sql`${userReviews.overallRating} DESC`)
-            .limit(2); // Limit to 2 most relevant review snippets per cafe
-        }
-
-        return {
-          ...cafe,
-          displayScore,
-          drinks: cafeDrinks,
-          reviewSnippets: reviewSnippets.map(snippet => ({
-            ...snippet,
-            tags: snippet.tags ? JSON.parse(snippet.tags) : null,
-            // Truncate content for snippet display
-            content: snippet.content.length > 150 
-              ? snippet.content.substring(0, 150) + '...'
-              : snippet.content
-          }))
-        };
-      })
-    );
+        })
+      };
+    });
 
     // Get total count for this filter
     const countResult = await db

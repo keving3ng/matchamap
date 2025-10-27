@@ -140,7 +140,7 @@ export const useDataStore = create<DataStore>((set, get) => ({
   fetchAll: async (city?: string, bustCache = false) => {
     const { fetchCafes, fetchEvents } = get()
     await Promise.all([
-      fetchCafes(city, bustCache),
+      fetchCafes(city ? { city } : undefined, bustCache),
       fetchEvents(bustCache),
     ])
   },

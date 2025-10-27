@@ -229,7 +229,16 @@ describe('dataStore', () => {
       })
 
       expect(vi.mocked(api.cafes.getAll)).toHaveBeenCalledWith(
-        { city: undefined, limit: 500 },
+        {
+          city: undefined,
+          search: undefined,
+          userMinRating: undefined,
+          userMaxRating: undefined,
+          minScore: undefined,
+          maxPrice: undefined,
+          limit: 500,
+          offset: 0
+        },
         true
       )
     })

@@ -94,10 +94,6 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
     setFilters(prev => ({ ...prev, userMinRating: rating }))
   }
 
-  const setUserMaxRating = (rating: number | null) => {
-    setFilters(prev => ({ ...prev, userMaxRating: rating }))
-  }
-
   const setMaxDistance = (distance: number | null) => {
     setFilters(prev => ({ ...prev, maxDistance: distance }))
   }
@@ -442,6 +438,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                   {[7, 8, 9].map(rating => (
                     <button
                       key={rating}
+                      data-testid={`admin-rating-${rating}`}
                       onClick={() => setMinRating(filters.minRating === rating ? null : rating)}
                       className={`px-4 py-2 rounded-full text-sm font-bold transition-all shadow-md ${
                         filters.minRating === rating
@@ -462,6 +459,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                   {[6, 7, 8, 9].map(rating => (
                     <button
                       key={rating}
+                      data-testid={`user-rating-${rating}`}
                       onClick={() => setUserMinRating(filters.userMinRating === rating ? null : rating)}
                       className={`px-4 py-2 rounded-full text-sm font-bold transition-all shadow-md ${
                         filters.userMinRating === rating
