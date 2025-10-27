@@ -78,6 +78,11 @@ vi.mock('../../constants/copy', () => ({
   },
 }))
 
+// Mock check-in components
+vi.mock('../checkin', () => ({
+  CheckInButton: () => <div data-testid="check-in-button">Check In Button</div>,
+}))
+
 // Mock review components to simplify testing
 vi.mock('../reviews/AggregatedRating', () => ({
   AggregatedRating: ({ expertScore, userScore, reviewCount }: any) => (

@@ -72,8 +72,8 @@ ENABLE_USER_PROFILES:
 # Includes: check-ins, reviews, ratings, photos, following, activity feed, badges, leaderboards, favorites, lists
 # This is a master toggle for all user-generated content and social features
 ENABLE_USER_SOCIAL:
-  dev: false
-  prod: false
+  dev: true
+  prod: true
 
 # Contact Us Page
 # Contact form and information for users to reach out

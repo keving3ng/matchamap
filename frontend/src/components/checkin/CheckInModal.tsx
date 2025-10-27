@@ -1,9 +1,8 @@
 import React, { useState, useRef, useCallback } from 'react'
-import { X, Star, Camera, Trash2, CheckCircle, AlertCircle } from '@/components/icons'
+import { X, Star, Camera, Trash2, AlertCircle } from '@/components/icons'
 import { COPY } from '../../constants/copy'
 import { PrimaryButton, SecondaryButton, AlertDialog } from '../ui'
 import { api } from '../../utils/api'
-import { spacing } from '../../styles/spacing'
 import type { Cafe } from '../../../../shared/types'
 
 interface CheckInModalProps {
