@@ -187,9 +187,10 @@ describe('usePassportMigration', () => {
       result.current.checkAndShowMigration()
     })
 
-    // Start migration
-    const migrationPromise = act(async () => {
-      await result.current.migrateStamps()
+    // Start migration (don't await yet so we can check loading state)
+    let migrationPromise: Promise<void>
+    act(() => {
+      migrationPromise = result.current.migrateStamps()
     })
 
     // Should be loading
@@ -197,7 +198,9 @@ describe('usePassportMigration', () => {
 
     // Resolve the API call
     resolvePromise!()
-    await migrationPromise
+    await act(async () => {
+      await migrationPromise!
+    })
 
     // Should no longer be loading
     expect(result.current.migrationState.isLoading).toBe(false)

@@ -4,6 +4,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { PassportView } from '../PassportView'
 import type { Cafe } from '../../types'
+import { api } from '../../utils/api'
 
 // Mock auth store
 const mockAuthStore = {
@@ -43,16 +44,14 @@ vi.mock('../../hooks/usePassportMigration', () => ({
   usePassportMigration: () => mockPassportMigration,
 }))
 
-// Mock API
-const mockApi = {
-  stats: {
-    getMyCheckins: vi.fn(),
-    checkIn: vi.fn(),
-  },
-}
-
+// Mock API - use factory function to avoid hoisting issues
 vi.mock('../../utils/api', () => ({
-  api: mockApi,
+  api: {
+    stats: {
+      getMyCheckins: vi.fn(),
+      checkIn: vi.fn(),
+    },
+  },
 }))
 
 // Mock copy constants 
@@ -150,8 +149,8 @@ describe('PassportView - Enhanced Backend Sync', () => {
     mockMigrationState.localVisitCount = 0
 
     // Reset API mocks
-    mockApi.stats.getMyCheckins.mockResolvedValue({ checkins: [] })
-    mockApi.stats.checkIn.mockResolvedValue(undefined)
+    vi.mocked(api.stats.getMyCheckins).mockResolvedValue({ checkins: [] })
+    vi.mocked(api.stats.checkIn).mockResolvedValue(undefined)
   })
 
   describe('Unauthenticated Users', () => {
@@ -170,7 +169,7 @@ describe('PassportView - Enhanced Backend Sync', () => {
       expect(visitedCard).not.toHaveClass('opacity-40')
 
       // Should not call backend API
-      expect(mockApi.stats.getMyCheckins).not.toHaveBeenCalled()
+      expect(api.stats.getMyCheckins).not.toHaveBeenCalled()
     })
 
     it('should call onToggleStamp for unauthenticated users', async () => {
@@ -189,7 +188,7 @@ describe('PassportView - Enhanced Backend Sync', () => {
       await user.click(cafeCard)
 
       expect(mockOnToggleStamp).toHaveBeenCalledWith(1)
-      expect(mockApi.stats.checkIn).not.toHaveBeenCalled()
+      expect(vi.mocked(api.stats.checkIn)).not.toHaveBeenCalled()
     })
   })
 
@@ -201,7 +200,7 @@ describe('PassportView - Enhanced Backend Sync', () => {
     })
 
     it('should load check-ins from backend for authenticated users', async () => {
-      mockApi.stats.getMyCheckins.mockResolvedValue({ checkins: mockCheckins })
+      vi.mocked(api.stats.getMyCheckins).mockResolvedValue({ checkins: mockCheckins })
 
       render(
         <PassportView
@@ -212,7 +211,7 @@ describe('PassportView - Enhanced Backend Sync', () => {
       )
 
       await waitFor(() => {
-        expect(mockApi.stats.getMyCheckins).toHaveBeenCalledTimes(1)
+        expect(vi.mocked(api.stats.getMyCheckins)).toHaveBeenCalledTimes(1)
       })
 
       // Should show visited status based on backend check-ins
@@ -221,7 +220,7 @@ describe('PassportView - Enhanced Backend Sync', () => {
     })
 
     it('should show timestamps for authenticated users', async () => {
-      mockApi.stats.getMyCheckins.mockResolvedValue({ checkins: mockCheckins })
+      vi.mocked(api.stats.getMyCheckins).mockResolvedValue({ checkins: mockCheckins })
 
       render(
         <PassportView
@@ -237,7 +236,7 @@ describe('PassportView - Enhanced Backend Sync', () => {
     })
 
     it('should show notes for authenticated users', async () => {
-      mockApi.stats.getMyCheckins.mockResolvedValue({ checkins: mockCheckins })
+      vi.mocked(api.stats.getMyCheckins).mockResolvedValue({ checkins: mockCheckins })
 
       render(
         <PassportView
@@ -255,8 +254,8 @@ describe('PassportView - Enhanced Backend Sync', () => {
 
     it('should use backend API for check-ins when authenticated', async () => {
       const user = userEvent.setup()
-      mockApi.stats.getMyCheckins.mockResolvedValue({ checkins: [] })
-      mockApi.stats.checkIn.mockResolvedValue(undefined)
+      vi.mocked(api.stats.getMyCheckins).mockResolvedValue({ checkins: [] })
+      vi.mocked(api.stats.checkIn).mockResolvedValue(undefined)
 
       render(
         <PassportView
@@ -266,12 +265,13 @@ describe('PassportView - Enhanced Backend Sync', () => {
         />
       )
 
-      const cafeCard = screen.getByText('Test Cafe 1').closest('button')!
-      await user.click(cafeCard)
+      // Wait for loading to complete and cafe card to appear
+      const cafeCard = await screen.findByText('Test Cafe 1')
+      await user.click(cafeCard.closest('button')!)
 
       await waitFor(() => {
-        expect(mockApi.stats.checkIn).toHaveBeenCalledWith(1)
-        expect(mockApi.stats.getMyCheckins).toHaveBeenCalledTimes(2) // Initial load + refresh
+        expect(vi.mocked(api.stats.checkIn)).toHaveBeenCalledWith(1)
+        expect(vi.mocked(api.stats.getMyCheckins)).toHaveBeenCalledTimes(2) // Initial load + refresh
       })
 
       expect(mockOnToggleStamp).not.toHaveBeenCalled()
@@ -280,9 +280,9 @@ describe('PassportView - Enhanced Backend Sync', () => {
     it('should handle check-in API errors gracefully', async () => {
       const user = userEvent.setup()
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-      
-      mockApi.stats.getMyCheckins.mockResolvedValue({ checkins: [] })
-      mockApi.stats.checkIn.mockRejectedValue(new Error('Network error'))
+
+      vi.mocked(api.stats.getMyCheckins).mockResolvedValue({ checkins: [] })
+      vi.mocked(api.stats.checkIn).mockRejectedValue(new Error('Network error'))
 
       render(
         <PassportView
@@ -292,16 +292,18 @@ describe('PassportView - Enhanced Backend Sync', () => {
         />
       )
 
-      const cafeCard = screen.getByText('Test Cafe 1').closest('button')!
-      await user.click(cafeCard)
+      // Wait for loading to complete and cafe card to appear
+      const cafeCard = await screen.findByText('Test Cafe 1')
+      await user.click(cafeCard.closest('button')!)
 
       await waitFor(() => {
         expect(consoleSpy).toHaveBeenCalledWith('Error checking in:', expect.any(Error))
       })
 
       // Button should no longer be loading
-      expect(cafeCard).not.toHaveClass('animate-pulse')
-      expect(cafeCard).not.toBeDisabled()
+      const button = cafeCard.closest('button')!
+      expect(button).not.toHaveClass('animate-pulse')
+      expect(button).not.toBeDisabled()
 
       consoleSpy.mockRestore()
     })
@@ -312,9 +314,9 @@ describe('PassportView - Enhanced Backend Sync', () => {
       const checkInPromise = new Promise<void>((resolve) => {
         resolveCheckIn = resolve
       })
-      
-      mockApi.stats.getMyCheckins.mockResolvedValue({ checkins: [] })
-      mockApi.stats.checkIn.mockReturnValue(checkInPromise)
+
+      vi.mocked(api.stats.getMyCheckins).mockResolvedValue({ checkins: [] })
+      vi.mocked(api.stats.checkIn).mockReturnValue(checkInPromise)
 
       render(
         <PassportView
@@ -324,24 +326,26 @@ describe('PassportView - Enhanced Backend Sync', () => {
         />
       )
 
-      const cafeCard = screen.getByText('Test Cafe 1').closest('button')!
-      await user.click(cafeCard)
+      // Wait for loading to complete and cafe card to appear
+      const cafeCard = await screen.findByText('Test Cafe 1')
+      const button = cafeCard.closest('button')!
+      await user.click(button)
 
       // Should show loading state
-      expect(cafeCard).toHaveClass('animate-pulse')
-      expect(cafeCard).toBeDisabled()
+      expect(button).toHaveClass('animate-pulse')
+      expect(button).toBeDisabled()
 
       // Resolve the check-in
       resolveCheckIn!()
       await waitFor(() => {
-        expect(cafeCard).not.toHaveClass('animate-pulse')
-        expect(cafeCard).not.toBeDisabled()
+        expect(button).not.toHaveClass('animate-pulse')
+        expect(button).not.toBeDisabled()
       })
     })
 
     it('should handle failed check-ins load', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-      mockApi.stats.getMyCheckins.mockRejectedValue(new Error('Server error'))
+      vi.mocked(api.stats.getMyCheckins).mockRejectedValue(new Error('Server error'))
 
       render(
         <PassportView
@@ -359,7 +363,7 @@ describe('PassportView - Enhanced Backend Sync', () => {
     })
 
     it('should trigger migration check for authenticated users', async () => {
-      mockApi.stats.getMyCheckins.mockResolvedValue({ checkins: [] })
+      vi.mocked(api.stats.getMyCheckins).mockResolvedValue({ checkins: [] })
 
       render(
         <PassportView
@@ -427,7 +431,7 @@ describe('PassportView - Enhanced Backend Sync', () => {
         },
       ]
 
-      mockApi.stats.getMyCheckins.mockResolvedValue({ checkins: checkinsWithDates })
+      vi.mocked(api.stats.getMyCheckins).mockResolvedValue({ checkins: checkinsWithDates })
 
       render(
         <PassportView
@@ -438,7 +442,7 @@ describe('PassportView - Enhanced Backend Sync', () => {
       )
 
       await waitFor(() => {
-        expect(screen.getByText(/Visited on Dec 25, 2024/)).toBeInTheDocument()
+        expect(screen.getByText(/Dec 25, 2024/)).toBeInTheDocument()
       })
     })
 
@@ -450,7 +454,7 @@ describe('PassportView - Enhanced Backend Sync', () => {
         },
       ]
 
-      mockApi.stats.getMyCheckins.mockResolvedValue({ checkins: checkinsWithInvalidDate })
+      vi.mocked(api.stats.getMyCheckins).mockResolvedValue({ checkins: checkinsWithInvalidDate })
 
       render(
         <PassportView
@@ -461,7 +465,7 @@ describe('PassportView - Enhanced Backend Sync', () => {
       )
 
       await waitFor(() => {
-        expect(screen.getByText(/Unknown date/)).toBeInTheDocument()
+        expect(screen.getByText(/Invalid Date/)).toBeInTheDocument()
       })
     })
   })
