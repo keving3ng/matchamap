@@ -11,7 +11,8 @@ interface MigrationState {
 }
 
 /**
- * Hook for managing passport migration from localStorage to backend
+ * Hook for managing passport sync from localStorage to backend
+ * Simplified to only handle initial localStorage cleanup for existing users
  */
 export const usePassportMigration = () => {
   const [state, setState] = useState<MigrationState>({
@@ -25,10 +26,11 @@ export const usePassportMigration = () => {
   const { stampedCafeIds, clearAllStamps } = useVisitedCafesStore()
 
   /**
-   * Check if migration is needed and show modal
+   * Check if cleanup is needed and show modal
+   * Now only shows for users with localStorage data to offer cleanup
    */
   const checkAndShowMigration = useCallback(() => {
-    // Only show migration for authenticated users with local stamps
+    // Only show for authenticated users with local stamps to offer cleanup
     if (isAuthenticated && stampedCafeIds.length > 0) {
       setState(prev => ({
         ...prev,
@@ -40,7 +42,7 @@ export const usePassportMigration = () => {
   }, [isAuthenticated, stampedCafeIds.length])
 
   /**
-   * Close migration modal
+   * Close modal
    */
   const closeMigration = useCallback(() => {
     setState(prev => ({
@@ -51,40 +53,13 @@ export const usePassportMigration = () => {
   }, [])
 
   /**
-   * Migrate local stamps to backend
+   * Clear localStorage data (simplified - no migration needed)
    */
   const migrateStamps = useCallback(async () => {
-    if (!isAuthenticated || stampedCafeIds.length === 0) {
-      return
-    }
-
     setState(prev => ({ ...prev, isLoading: true, error: null }))
 
     try {
-      let failureCount = 0
-      
-      // Check-in to each cafe found in localStorage
-      for (const cafeId of stampedCafeIds) {
-        try {
-          await api.stats.checkIn(cafeId, 'Migrated from local storage')
-        } catch (error) {
-          failureCount++
-          console.warn(`Failed to migrate check-in for cafe ${cafeId}:`, error)
-          // Continue with other cafes even if one fails
-        }
-      }
-
-      // If all migrations failed, show error
-      if (failureCount === stampedCafeIds.length) {
-        setState(prev => ({
-          ...prev,
-          isLoading: false,
-          error: 'Failed to sync visits. Please try again.',
-        }))
-        return
-      }
-
-      // Clear local storage after successful migration (even if some failed)
+      // Simply clear local storage since passport is now built from check-ins
       clearAllStamps()
 
       setState(prev => ({
@@ -94,17 +69,17 @@ export const usePassportMigration = () => {
         error: null,
       }))
     } catch (error) {
-      console.error('Migration failed:', error)
+      console.error('Cleanup failed:', error)
       setState(prev => ({
         ...prev,
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Migration failed',
+        error: error instanceof Error ? error.message : 'Cleanup failed',
       }))
     }
-  }, [isAuthenticated, stampedCafeIds, clearAllStamps])
+  }, [clearAllStamps])
 
   /**
-   * Skip migration and clear local storage
+   * Skip cleanup and clear local storage
    */
   const skipMigration = useCallback(() => {
     clearAllStamps()
