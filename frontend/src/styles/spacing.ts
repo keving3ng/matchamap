@@ -50,17 +50,8 @@ export const spacing = {
   // Offset: distance between tooltip and trigger element for visual separation
   // Example: top: `calc(100% + ${spacing.tooltipOffset})`
   tooltipOffset: '0.25rem',   // 4px - Distance from trigger element
-  
-  // Width constraints for responsive tooltip sizing
-  // MaxWidth: prevents tooltips from becoming too wide on large screens
-  // MinWidth: ensures enough space for readable content on mobile
-  // Example: maxWidth: spacing.tooltipMaxWidth, minWidth: spacing.tooltipMinWidth
-  tooltipMaxWidth: '480px',   // Maximum width for large tooltips
-  tooltipMinWidth: '280px',   // Minimum width for content
-  
-  // Arrow styling for tooltip directional indicators
-  // ArrowSize: controls the visual size of tooltip arrows/pointers
-  // Example: borderWidth: spacing.tooltipArrowSize
+  tooltipMaxWidth: '30rem',   // Maximum width for large tooltips (480px)
+  tooltipMinWidth: '17.5rem', // Minimum width for content (280px)
   tooltipArrowSize: '4px',    // Border width for tooltip arrows
   
   // Dynamic positioning logic threshold
