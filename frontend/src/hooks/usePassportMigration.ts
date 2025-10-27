@@ -61,17 +61,30 @@ export const usePassportMigration = () => {
     setState(prev => ({ ...prev, isLoading: true, error: null }))
 
     try {
+      let failureCount = 0
+      
       // Check-in to each cafe found in localStorage
       for (const cafeId of stampedCafeIds) {
         try {
           await api.stats.checkIn(cafeId, 'Migrated from local storage')
         } catch (error) {
+          failureCount++
           console.warn(`Failed to migrate check-in for cafe ${cafeId}:`, error)
           // Continue with other cafes even if one fails
         }
       }
 
-      // Clear local storage after successful migration
+      // If all migrations failed, show error
+      if (failureCount === stampedCafeIds.length) {
+        setState(prev => ({
+          ...prev,
+          isLoading: false,
+          error: 'Failed to sync visits. Please try again.',
+        }))
+        return
+      }
+
+      // Clear local storage after successful migration (even if some failed)
       clearAllStamps()
 
       setState(prev => ({
