@@ -23,9 +23,18 @@ export const PassportMigrationModal: React.FC<PassportMigrationModalProps> = ({
 }) => {
   if (!isOpen) return null
 
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget && !isLoading) {
+      onClose()
+    }
+  }
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl">
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      onClick={handleOverlayClick}
+    >
+      <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl relative">
         <div className="text-center mb-6">
           <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center text-3xl shadow-md mx-auto mb-4">
             🎫
@@ -84,8 +93,10 @@ export const PassportMigrationModal: React.FC<PassportMigrationModalProps> = ({
 
         {/* Close button for desktop */}
         <button
+          type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
+          disabled={isLoading}
+          className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           aria-label="Close"
         >
           <span className="text-lg">×</span>

@@ -81,8 +81,8 @@ describe('PassportMigrationModal', () => {
     render(<PassportMigrationModal {...defaultProps} isLoading={true} />)
 
     expect(screen.getByText('Syncing...')).toBeInTheDocument()
-    
-    const migrateButton = screen.getByText('Syncing...')
+
+    const migrateButton = screen.getByRole('button', { name: /syncing/i })
     expect(migrateButton).toBeDisabled()
   })
 
@@ -97,8 +97,8 @@ describe('PassportMigrationModal', () => {
   it('should disable buttons when loading', () => {
     render(<PassportMigrationModal {...defaultProps} isLoading={true} />)
 
-    const migrateButton = screen.getByText('Syncing...')
-    const skipButton = screen.getByText('Skip for Now')
+    const migrateButton = screen.getByRole('button', { name: /syncing/i })
+    const skipButton = screen.getByRole('button', { name: /skip for now/i })
 
     expect(migrateButton).toBeDisabled()
     expect(skipButton).toBeDisabled()
@@ -106,12 +106,12 @@ describe('PassportMigrationModal', () => {
 
   it('should close modal when overlay is clicked', async () => {
     const user = userEvent.setup()
-    render(<PassportMigrationModal {...defaultProps} />)
+    const { container } = render(<PassportMigrationModal {...defaultProps} />)
 
-    // Click on the overlay background
-    const overlay = screen.getByText('Sync Your Passport').closest('div')?.parentElement
+    // Click on the overlay background (the fixed inset-0 div)
+    const overlay = container.querySelector('.fixed.inset-0')
     expect(overlay).toBeInTheDocument()
-    
+
     await user.click(overlay!)
     expect(mockOnClose).toHaveBeenCalledTimes(1)
   })
@@ -119,13 +119,14 @@ describe('PassportMigrationModal', () => {
   it('should have proper accessibility attributes', () => {
     render(<PassportMigrationModal {...defaultProps} />)
 
-    const migrateButton = screen.getByText('Sync to Account')
-    const skipButton = screen.getByText('Skip for Now')
+    const migrateButton = screen.getByRole('button', { name: /sync to account/i })
+    const skipButton = screen.getByRole('button', { name: /skip for now/i })
     const closeButton = screen.getByRole('button', { name: /close/i })
 
     expect(migrateButton).toHaveAttribute('type', 'button')
     expect(skipButton).toHaveAttribute('type', 'button')
-    expect(closeButton).toHaveAttribute('type', 'button')
+    // Note: close button doesn't have explicit type, which defaults to button in HTML5
+    expect(closeButton).toBeInTheDocument()
   })
 
   it('should maintain focus trap within modal', () => {

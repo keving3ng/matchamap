@@ -58,7 +58,7 @@ describe('PassportView', () => {
     )
 
     expect(screen.getByText('Matcha Passport')).toBeInTheDocument()
-    expect(screen.getByText('Collect stamps from every location')).toBeInTheDocument()
+    expect(screen.getByText('Track your matcha journey across Toronto')).toBeInTheDocument()
     expect(screen.getByText('🎫')).toBeInTheDocument()
   })
 
