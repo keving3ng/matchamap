@@ -104,3 +104,9 @@ ENABLE_SETTINGS:
 ENABLE_ROUTE_DISPLAY:
   dev: false
   prod: false
+
+# Dark Mode
+# Toggle between light and dark themes with system preference detection
+ENABLE_DARK_MODE:
+  dev: true
+  prod: true

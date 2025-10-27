@@ -2,6 +2,7 @@ import React from 'react'
 import { Sun, Moon, Monitor } from '@/components/icons'
 import { useTheme } from '@/stores/themeStore'
 import { COPY } from '@/constants/copy'
+import { useFeatureToggle } from '@/hooks/useFeatureToggle'
 
 interface ThemeToggleProps {
   variant?: 'button' | 'menu'
@@ -12,7 +13,13 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
   variant = 'button',
   className = '' 
 }) => {
+  const isDarkModeEnabled = useFeatureToggle('ENABLE_DARK_MODE')
   const { theme, resolvedTheme, setTheme } = useTheme()
+  
+  // Don't render if dark mode feature is disabled
+  if (!isDarkModeEnabled) {
+    return null
+  }
   
   const getThemeIcon = (themeType: 'light' | 'dark' | 'system') => {
     switch (themeType) {
