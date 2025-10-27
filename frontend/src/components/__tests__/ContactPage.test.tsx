@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ContactPage } from '../ContactPage'
 
@@ -43,11 +43,14 @@ describe('ContactPage', () => {
     await user.type(screen.getByPlaceholderText(/Tell us more.../), 'Test message')
 
     const submitButton = screen.getByText(/Send Message/i)
-    await user.click(submitButton)
+
+    await act(async () => {
+      await user.click(submitButton)
+    })
 
     await waitFor(() => {
       expect(screen.getByText(/Message Sent!/)).toBeInTheDocument()
-    })
+    }, { timeout: 1000 })
 
     consoleSpy.mockRestore()
   })
@@ -63,12 +66,15 @@ describe('ContactPage', () => {
     await user.type(screen.getByPlaceholderText(/Tell us more.../), 'Test message')
 
     const submitButton = screen.getByText(/Send Message/i)
-    await user.click(submitButton)
+
+    await act(async () => {
+      await user.click(submitButton)
+    })
 
     // Currently the component doesn't have loading state, it immediately shows success
     await waitFor(() => {
       expect(screen.getByText(/Message Sent!/)).toBeInTheDocument()
-    })
+    }, { timeout: 1000 })
   })
 
   it('should handle form validation', async () => {
