@@ -68,6 +68,9 @@ export const CafeManagementPage: React.FC = () => {
     const missingFields = getMissingFields(cafe)
     const isTooltipOpen = openTooltip === cafe.id
     
+    // Memoize the parseInt call for tooltip positioning threshold
+    const threshold = useMemo(() => parseInt(spacing.tooltipPositionThreshold, 10), [])
+    
     if (missingFields.length === 0) {
       return null
     }
@@ -81,7 +84,6 @@ export const CafeManagementPage: React.FC = () => {
       const spaceBelow = window.innerHeight - rect.bottom
       
       // If not enough space above (< threshold for tooltip), position below
-      const threshold = parseInt(spacing.tooltipPositionThreshold, 10)
       return spaceAbove < threshold && spaceBelow > threshold ? 'top-full mt-2' : 'bottom-full mb-2'
     }
 
