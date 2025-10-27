@@ -83,12 +83,15 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit & { bustCache
  */
 export const cafeAPI = {
   /**
-   * Get all cafes with optional filtering
+   * Get all cafes with optional filtering and search
    */
   async getAll(filters?: {
     city?: string
     minScore?: number
     maxPrice?: number
+    search?: string
+    userMinRating?: number
+    userMaxRating?: number
     limit?: number
     offset?: number
   }, bustCache = false): Promise<{ cafes: Cafe[]; total: number; hasMore: boolean }> {

@@ -1,7 +1,7 @@
 import { IRequest } from 'itty-router';
-import { eq, isNull, and, gte, lte, sql } from 'drizzle-orm';
+import { eq, isNull, and, gte, lte, sql, like, or } from 'drizzle-orm';
 import { Env } from '../types';
-import { getDb, cafes, drinks } from '../db';
+import { getDb, cafes, drinks, userReviews } from '../db';
 import {
   jsonResponse,
   errorResponse,
@@ -13,19 +13,22 @@ import { logAdminAction, generateChangesSummary } from '../utils/auditLog';
 import { AuthenticatedRequest } from '../middleware/auth';
 import { VALID_CITY_KEYS } from '../../../shared/types';
 
-// GET /api/cafes - List cafes with optional filtering
+// GET /api/cafes - List cafes with optional filtering and search
 export async function listCafes(request: IRequest, env: Env): Promise<Response> {
   try {
     const url = new URL(request.url);
     const city = url.searchParams.get('city'); // Optional - no default
     const minScore = url.searchParams.get('minScore');
     const maxPrice = url.searchParams.get('maxPrice');
+    const search = url.searchParams.get('search'); // New search parameter
+    const userMinRating = url.searchParams.get('userMinRating'); // User rating filter
+    const userMaxRating = url.searchParams.get('userMaxRating'); // User rating filter
     const limit = Math.min(parseInt(url.searchParams.get('limit') || PAGINATION_CONSTANTS.CAFES_DEFAULT_LIMIT.toString()), PAGINATION_CONSTANTS.CAFES_MAX_LIMIT);
     const offset = parseInt(url.searchParams.get('offset') || PAGINATION_CONSTANTS.DEFAULT_OFFSET.toString());
 
     const db = getDb(env.DB);
 
-    // Build query conditions - only exclude deleted
+    // Build base query conditions - only exclude deleted
     const conditions = [isNull(cafes.deletedAt)];
 
     // Add optional city filter if provided
@@ -36,21 +39,104 @@ export async function listCafes(request: IRequest, env: Env): Promise<Response> 
       conditions.push(eq(cafes.city, city));
     }
 
-    // Note: Score and price filters removed - these are now at drink level, not cafe level
-    // TODO: Implement filtering by drink scores/prices if needed
+    // Add user rating filters if provided
+    if (userMinRating) {
+      const minRating = parseFloat(userMinRating);
+      if (!isNaN(minRating) && minRating >= 0 && minRating <= 10) {
+        conditions.push(gte(cafes.userRatingAvg, minRating));
+      }
+    }
 
-    // Execute query with pagination
-    const results = await db
-      .select()
-      .from(cafes)
-      .where(and(...conditions))
-      .limit(limit + 1) // Fetch one extra to check if there are more
-      .offset(offset);
+    if (userMaxRating) {
+      const maxRating = parseFloat(userMaxRating);
+      if (!isNaN(maxRating) && maxRating >= 0 && maxRating <= 10) {
+        conditions.push(lte(cafes.userRatingAvg, maxRating));
+      }
+    }
+
+    let results;
+    
+    // If search query provided, perform enhanced search
+    if (search && search.trim().length > 0) {
+      const searchTerm = `%${search.trim().toLowerCase()}%`;
+      
+      // Get cafe IDs that match search criteria
+      const searchResults = await db
+        .select({ 
+          cafeId: sql<number>`DISTINCT ${cafes.id}`,
+          relevanceScore: sql<number>`
+            CASE 
+              WHEN LOWER(${cafes.name}) LIKE ${searchTerm} THEN 3
+              WHEN LOWER(${cafes.quickNote}) LIKE ${searchTerm} THEN 2
+              WHEN LOWER(${cafes.address}) LIKE ${searchTerm} THEN 1
+              ELSE 0
+            END +
+            CASE 
+              WHEN ${userReviews.content} IS NOT NULL AND LOWER(${userReviews.content}) LIKE ${searchTerm} THEN 2
+              WHEN ${userReviews.tags} IS NOT NULL AND LOWER(${userReviews.tags}) LIKE ${searchTerm} THEN 1
+              ELSE 0
+            END
+          `
+        })
+        .from(cafes)
+        .leftJoin(userReviews, and(
+          eq(userReviews.cafeId, cafes.id),
+          eq(userReviews.moderationStatus, 'approved'),
+          eq(userReviews.isPublic, true)
+        ))
+        .where(and(
+          ...conditions,
+          or(
+            like(sql`LOWER(${cafes.name})`, searchTerm),
+            like(sql`LOWER(${cafes.quickNote})`, searchTerm),
+            like(sql`LOWER(${cafes.address})`, searchTerm),
+            and(
+              sql`${userReviews.content} IS NOT NULL`,
+              like(sql`LOWER(${userReviews.content})`, searchTerm)
+            ),
+            and(
+              sql`${userReviews.tags} IS NOT NULL`,
+              like(sql`LOWER(${userReviews.tags})`, searchTerm)
+            )
+          )
+        ))
+        .orderBy(sql`relevanceScore DESC`)
+        .limit(limit + 1)
+        .offset(offset);
+
+      // Extract cafe IDs and fetch full cafe data
+      const cafeIds = searchResults.map(r => r.cafeId);
+      
+      if (cafeIds.length === 0) {
+        results = [];
+      } else {
+        results = await db
+          .select()
+          .from(cafes)
+          .where(sql`${cafes.id} IN (${sql.join(cafeIds.map(id => sql`${id}`), sql`, `)})`)
+          .orderBy(sql`
+            CASE ${cafes.id} 
+              ${sql.join(
+                cafeIds.map((id, index) => sql`WHEN ${id} THEN ${index}`),
+                sql` `
+              )}
+            END
+          `);
+      }
+    } else {
+      // Regular query without search
+      results = await db
+        .select()
+        .from(cafes)
+        .where(and(...conditions))
+        .limit(limit + 1)
+        .offset(offset);
+    }
 
     const hasMore = results.length > limit;
     const cafesList = hasMore ? results.slice(0, limit) : results;
 
-    // Fetch drinks for all cafes and calculate display scores
+    // Fetch drinks and review snippets for all cafes
     const cafesWithScores = await Promise.all(
       cafesList.map(async (cafe) => {
         const cafeDrinks = await db
@@ -69,10 +155,44 @@ export async function listCafes(request: IRequest, env: Env): Promise<Response> 
           }
         }
 
+        // If search was performed, fetch matching review snippets
+        let reviewSnippets: any[] = [];
+        if (search && search.trim().length > 0) {
+          const searchTerm = `%${search.trim().toLowerCase()}%`;
+          reviewSnippets = await db
+            .select({
+              id: userReviews.id,
+              content: userReviews.content,
+              tags: userReviews.tags,
+              overallRating: userReviews.overallRating,
+              createdAt: userReviews.createdAt
+            })
+            .from(userReviews)
+            .where(and(
+              eq(userReviews.cafeId, cafe.id),
+              eq(userReviews.moderationStatus, 'approved'),
+              eq(userReviews.isPublic, true),
+              or(
+                like(sql`LOWER(${userReviews.content})`, searchTerm),
+                like(sql`LOWER(${userReviews.tags})`, searchTerm)
+              )
+            ))
+            .orderBy(sql`${userReviews.overallRating} DESC`)
+            .limit(2); // Limit to 2 most relevant review snippets per cafe
+        }
+
         return {
           ...cafe,
           displayScore,
           drinks: cafeDrinks,
+          reviewSnippets: reviewSnippets.map(snippet => ({
+            ...snippet,
+            tags: snippet.tags ? JSON.parse(snippet.tags) : null,
+            // Truncate content for snippet display
+            content: snippet.content.length > 150 
+              ? snippet.content.substring(0, 150) + '...'
+              : snippet.content
+          }))
         };
       })
     );

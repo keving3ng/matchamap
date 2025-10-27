@@ -34,6 +34,14 @@ export interface DrinkItem {
   updatedAt?: string
 }
 
+export interface ReviewSnippet {
+  id: number
+  content: string
+  tags: string[] | null
+  overallRating: number
+  createdAt: string
+}
+
 export interface Cafe {
   // Core identification
   id: number
@@ -63,6 +71,7 @@ export interface Cafe {
   quickNote: string // Short tagline/summary
   review?: string | null // Full review text
   source?: string | null // Source of cafe info
+  reviewSnippets?: ReviewSnippet[] // Search result snippets (only when search is performed)
 
   // Contact & Info
   instagram?: string | null
