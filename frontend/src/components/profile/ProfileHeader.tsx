@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { MapPin, Instagram, Globe, Edit2 } from '@/components/icons'
 import { SecondaryButton } from '../ui'
+import { FollowButton, FollowerList } from '../social'
 import { COPY } from '../../constants/copy'
 import type { PublicUserProfile } from '../../../../shared/types'
 
@@ -8,13 +9,17 @@ interface ProfileHeaderProps {
   profile: PublicUserProfile['user']
   isOwnProfile?: boolean
   onEditClick?: () => void
+  onFollowChange?: () => void
 }
 
 export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   profile,
   isOwnProfile = false,
   onEditClick,
+  onFollowChange,
 }) => {
+  const [showFollowerList, setShowFollowerList] = useState(false)
+  const [followerListType, setFollowerListType] = useState<'followers' | 'following'>('followers')
   const displayName = profile.displayName || profile.username
   const avatarUrl = profile.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&size=200&background=7cb342&color=fff`
 
@@ -48,11 +53,48 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                 <span className="text-sm">{profile.location}</span>
               </div>
             )}
+
+            {/* Follower/Following Counts */}
+            <div className="flex items-center gap-4 mt-2">
+              <button
+                onClick={() => {
+                  setFollowerListType('followers')
+                  setShowFollowerList(true)
+                }}
+                className="text-sm text-gray-600 hover:text-matcha-600 transition-colors"
+              >
+                <span className="font-semibold text-gray-900">
+                  {profile.stats?.followerCount || 0}
+                </span>{' '}
+                {COPY.social.followers}
+              </button>
+              <button
+                onClick={() => {
+                  setFollowerListType('following')
+                  setShowFollowerList(true)
+                }}
+                className="text-sm text-gray-600 hover:text-matcha-600 transition-colors"
+              >
+                <span className="font-semibold text-gray-900">
+                  {profile.stats?.followingCount || 0}
+                </span>{' '}
+                {COPY.social.followingCount(profile.stats?.followingCount || 0).split(' ')[1]}
+              </button>
+            </div>
           </div>
 
-          {/* Edit Button (Own Profile Only) */}
-          {isOwnProfile && (
-            <div className="flex-shrink-0">
+          {/* Action Buttons */}
+          <div className="flex-shrink-0 flex flex-col gap-2">
+            {/* Follow Button (Other Profiles Only) */}
+            {!isOwnProfile && (
+              <FollowButton
+                username={profile.username}
+                onFollowChange={onFollowChange}
+              />
+            )}
+
+            {/* Edit Button (Own Profile Only) */}
+            {isOwnProfile && (
               <SecondaryButton
                 icon={Edit2}
                 onClick={onEditClick}
@@ -60,8 +102,8 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               >
                 <span className="hidden sm:inline">{COPY.profile.edit}</span>
               </SecondaryButton>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* Bio */}
@@ -107,6 +149,15 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           })}
         </div>
       </div>
+
+      {/* Follower/Following List Modal */}
+      {showFollowerList && (
+        <FollowerList
+          username={profile.username}
+          type={followerListType}
+          onClose={() => setShowFollowerList(false)}
+        />
+      )}
     </div>
   )
 }

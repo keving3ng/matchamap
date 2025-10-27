@@ -109,6 +109,12 @@ export const UserProfilePage: React.FC = () => {
         profile={profileData}
         isOwnProfile={isOwnProfile}
         onEditClick={() => setIsEditModalOpen(true)}
+        onFollowChange={() => {
+          // Refresh profile data when follow status changes to update counts
+          if (!isOwnProfile) {
+            publicProfile.refetch?.()
+          }
+        }}
       />
 
       {/* Profile Stats */}
