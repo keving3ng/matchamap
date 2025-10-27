@@ -18,6 +18,7 @@ import { trackCafeStat, trackEventClick, handleCheckIn, getUserCheckins } from '
 import { getUserPassport, getUserPassportSimple } from './routes/passport';
 import { uploadPhoto, getCafePhotos, deletePhoto, getMyPhotos, getPhotosForModeration, moderatePhoto, servePhoto, getAdminCafePhotos } from './routes/photos';
 import { createReview, getCafeReviews, updateReview, deleteReview, markHelpful, removeHelpful, getUserReviews, getAdminCafeReviews, getAdminCafeReviewsCount, moderateReview } from './routes/reviews';
+import { getReviewComments, createComment, updateComment, deleteComment, likeComment, unlikeComment, moderateComment } from './routes/comments';
 import { getMyFavorites, addFavorite, removeFavorite, updateFavoriteNotes } from './routes/favorites';
 import { getMyBadges, checkAndAwardBadges, getBadgeDefinitions, getBadgeProgress } from './routes/badges';
 import { followUser, unfollowUser, getUserFollowers, getUserFollowing, getFollowStatus } from './routes/following';
@@ -135,6 +136,14 @@ router.post('/api/reviews/:id/helpful', writeRateLimit(), requireAuth(), markHel
 router.delete('/api/reviews/:id/helpful', writeRateLimit(), requireAuth(), removeHelpful);
 router.get('/api/users/:username/reviews', publicRateLimit(), getUserReviews);
 
+// Comment endpoints
+router.get('/api/reviews/:id/comments', publicRateLimit(), getReviewComments);
+router.post('/api/reviews/:id/comments', writeRateLimit(), requireAuth(), createComment);
+router.put('/api/comments/:id', writeRateLimit(), requireAuth(), updateComment);
+router.delete('/api/comments/:id', writeRateLimit(), requireAuth(), deleteComment);
+router.post('/api/comments/:id/like', writeRateLimit(), requireAuth(), likeComment);
+router.delete('/api/comments/:id/like', writeRateLimit(), requireAuth(), unlikeComment);
+
 // Admin API endpoints (protected by JWT authentication + rate limiting)
 router.post('/api/admin/cafes', writeRateLimit(), requireAdminAuth(), createCafe);
 router.put('/api/admin/cafes/:id', writeRateLimit(), requireAdminAuth(), updateCafe);
@@ -179,6 +188,7 @@ router.get('/api/admin/cafes/:id/photos', publicRateLimit(), requireAdminAuth(),
 router.get('/api/admin/cafes/:id/reviews', publicRateLimit(), requireAdminAuth(), getAdminCafeReviews);
 router.get('/api/admin/cafes/:id/reviews/count', publicRateLimit(), requireAdminAuth(), getAdminCafeReviewsCount);
 router.put('/api/admin/reviews/:id/moderate', writeRateLimit(), requireAdminAuth(), moderateReview);
+router.put('/api/admin/comments/:id/moderate', writeRateLimit(), requireAdminAuth(), moderateComment);
 
 // Photo serving endpoints (for local dev with local R2)
 router.get('/photos/*', servePhoto);

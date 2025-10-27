@@ -5,7 +5,7 @@
 
 import { useAuthStore } from '../stores/authStore'
 import { useSessionExpiry } from '../hooks/useSessionExpiry'
-import type { Cafe, Drink, Event, PublicUserProfile, UpdateProfileRequest, UserProfile, CityWithCount, User, UserFavorite, FavoritesResponse, AddFavoriteRequest, UpdateFavoriteNotesRequest, UserReview, ReviewPhoto, BadgesResponse, BadgeCheckResponse, BadgeProgressResponse, BadgeDefinitionsResponse, FollowersResponse, FollowingResponse, FollowStatusResponse, FollowActionResponse } from '../../../shared/types'
+import type { Cafe, Drink, Event, PublicUserProfile, UpdateProfileRequest, UserProfile, CityWithCount, User, UserFavorite, FavoritesResponse, AddFavoriteRequest, UpdateFavoriteNotesRequest, UserReview, ReviewPhoto, ReviewComment, BadgesResponse, BadgeCheckResponse, BadgeProgressResponse, BadgeDefinitionsResponse, FollowersResponse, FollowingResponse, FollowStatusResponse, FollowActionResponse } from '../../../shared/types'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -815,6 +815,89 @@ export const reviewsAPI = {
 }
 
 /**
+ * Request/Response types for comments
+ */
+interface CreateCommentRequest {
+  content: string
+  parentCommentId?: number
+}
+
+interface UpdateCommentRequest {
+  content: string
+}
+
+/**
+ * Comments API endpoints (Phase 2F)
+ */
+export const commentsAPI = {
+  /**
+   * Get comments for a review
+   */
+  async getForReview(reviewId: number, filters?: {
+    limit?: number
+    offset?: number
+    sortBy?: 'recent' | 'likes'
+    sortOrder?: 'asc' | 'desc'
+  }): Promise<{ comments: ReviewComment[]; total: number; hasMore: boolean }> {
+    const params = new URLSearchParams()
+    if (filters?.limit) params.append('limit', filters.limit.toString())
+    if (filters?.offset) params.append('offset', filters.offset.toString())
+    if (filters?.sortBy) params.append('sortBy', filters.sortBy)
+    if (filters?.sortOrder) params.append('sortOrder', filters.sortOrder)
+
+    const query = params.toString() ? `?${params.toString()}` : ''
+    return fetchAPI(`/reviews/${reviewId}/comments${query}`)
+  },
+
+  /**
+   * Create a new comment on a review
+   */
+  async create(reviewId: number, data: CreateCommentRequest): Promise<{ comment: ReviewComment }> {
+    return fetchAPI(`/reviews/${reviewId}/comments`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  },
+
+  /**
+   * Update a comment (user's own)
+   */
+  async update(commentId: number, data: UpdateCommentRequest): Promise<{ success: boolean }> {
+    return fetchAPI(`/comments/${commentId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+  },
+
+  /**
+   * Delete a comment (user's own)
+   */
+  async delete(commentId: number): Promise<{ success: boolean }> {
+    return fetchAPI(`/comments/${commentId}`, {
+      method: 'DELETE',
+    })
+  },
+
+  /**
+   * Like a comment
+   */
+  async like(commentId: number): Promise<{ success: boolean }> {
+    return fetchAPI(`/comments/${commentId}/like`, {
+      method: 'POST',
+    })
+  },
+
+  /**
+   * Unlike a comment
+   */
+  async unlike(commentId: number): Promise<{ success: boolean }> {
+    return fetchAPI(`/comments/${commentId}/like`, {
+      method: 'DELETE',
+    })
+  },
+}
+
+/**
  * Photos API endpoints (Phase 2C)
  */
 export const photosAPI = {
@@ -1126,6 +1209,7 @@ export const api = {
   stats: statsAPI,
   favorites: favoritesAPI,
   reviews: reviewsAPI,
+  comments: commentsAPI,
   photos: photosAPI,
   badges: badgesAPI,
   following: followingAPI,

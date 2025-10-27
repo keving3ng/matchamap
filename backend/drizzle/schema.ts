@@ -374,6 +374,50 @@ export const userBadges = sqliteTable('user_badges', {
   uniqueUserBadge: unique().on(table.userId, table.badgeKey),
 }));
 
+// Review comments table (Phase 2F - Comments on reviews)
+export const reviewComments = sqliteTable('review_comments', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  reviewId: integer('review_id').notNull().references(() => userReviews.id, { onDelete: 'cascade' }),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  parentCommentId: integer('parent_comment_id').references(() => reviewComments.id, { onDelete: 'cascade' }),
+
+  // Comment content
+  content: text('content').notNull(),
+
+  // Engagement metrics
+  likeCount: integer('like_count').default(0).notNull(),
+
+  // Moderation
+  moderationStatus: text('moderation_status', {
+    enum: ['pending', 'approved', 'rejected', 'flagged']
+  }).notNull().default('approved'),
+  moderatedAt: text('moderated_at'),
+  moderatedBy: integer('moderated_by').references(() => users.id),
+  moderationNotes: text('moderation_notes'),
+
+  // Timestamps
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+  reviewIdIdx: index('review_comments_review_id_idx').on(table.reviewId),
+  userIdIdx: index('review_comments_user_id_idx').on(table.userId),
+  parentCommentIdIdx: index('review_comments_parent_comment_id_idx').on(table.parentCommentId),
+  moderationStatusIdx: index('review_comments_moderation_status_idx').on(table.moderationStatus),
+  createdAtIdx: index('review_comments_created_at_idx').on(table.createdAt),
+}));
+
+// Review comment likes table (Phase 2F - Like/upvote comments)
+export const reviewCommentLikes = sqliteTable('review_comment_likes', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  commentId: integer('comment_id').notNull().references(() => reviewComments.id, { onDelete: 'cascade' }),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+  commentIdIdx: index('review_comment_likes_comment_id_idx').on(table.commentId),
+  userIdIdx: index('review_comment_likes_user_id_idx').on(table.userId),
+  uniqueCommentUser: unique().on(table.commentId, table.userId),
+}));
+
 // User follows table (Phase 2D - Social Features)
 export const userFollows = sqliteTable('user_follows', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -417,5 +461,9 @@ export type UserFavorite = typeof userFavorites.$inferSelect;
 export type NewUserFavorite = typeof userFavorites.$inferInsert;
 export type UserBadge = typeof userBadges.$inferSelect;
 export type NewUserBadge = typeof userBadges.$inferInsert;
+export type ReviewComment = typeof reviewComments.$inferSelect;
+export type NewReviewComment = typeof reviewComments.$inferInsert;
+export type ReviewCommentLike = typeof reviewCommentLikes.$inferSelect;
+export type NewReviewCommentLike = typeof reviewCommentLikes.$inferInsert;
 export type UserFollow = typeof userFollows.$inferSelect;
 export type NewUserFollow = typeof userFollows.$inferInsert;
