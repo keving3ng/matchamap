@@ -6,6 +6,7 @@ import { drizzle } from 'drizzle-orm/d1';
 import { waitlist } from '../../drizzle/schema';
 import { safeValidate, waitlistSchema } from '../validators';
 import { HTTP_STATUS } from '../constants';
+import { detectWaitlistFraud, formatFraudReasons } from '../utils/fraudDetection';
 
 export async function joinWaitlist(request: IRequest, env: Env): Promise<Response> {
   try {
@@ -42,10 +43,20 @@ export async function joinWaitlist(request: IRequest, env: Env): Promise<Respons
       );
     }
 
-    // Insert new waitlist entry
+    // Get IP address for fraud detection
+    const ip = request.headers.get('CF-Connecting-IP') || undefined;
+
+    // Apply fraud detection
+    const fraudResult = detectWaitlistFraud(normalizedEmail, ip, referralSource);
+
+    // Insert new waitlist entry with fraud detection data
     await db.insert(waitlist).values({
       email: normalizedEmail,
       referralSource: referralSource || null,
+      isFlaggedFraud: fraudResult.isFlagged,
+      fraudScore: fraudResult.score,
+      fraudReason: fraudResult.reasons.length > 0 ? formatFraudReasons(fraudResult.reasons) : null,
+      signupIp: ip,
     });
 
     return jsonResponse(
@@ -130,11 +141,19 @@ export async function getWaitlistAdmin(request: IRequest, env: Env): Promise<Res
       .where(gte(waitlist.createdAt, toSQLiteDateTime(sevenDaysAgo)))
       .get();
 
+    // Fraud analytics
+    const fraudCountResult = await db
+      .select({ count: count() })
+      .from(waitlist)
+      .where(eq(waitlist.isFlaggedFraud, true))
+      .get();
+
     const analytics = {
       totalSignups: total,
       dailySignups: dailySignupsResult?.count || 0,
       weeklySignups: weeklySignupsResult?.count || 0,
-      conversionRate: total > 0 ? Math.round((entries.filter(e => e.converted).length / total) * 100) : 0
+      conversionRate: total > 0 ? Math.round((entries.filter(e => e.converted).length / total) * 100) : 0,
+      suspectedFraud: fraudCountResult?.count || 0,
     };
 
     return jsonResponse(

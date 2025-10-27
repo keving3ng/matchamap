@@ -435,6 +435,17 @@ export const COPY = {
       entriesPerPage: (limit: number) => `Showing ${limit} entries per page`,
       loadMore: 'Load More',
       unknown: 'Unknown',
+      
+      // Fraud Detection
+      showFraudStats: 'Show Fraud Stats',
+      hideFraudStats: 'Hide Fraud Stats',
+      suspectedFraud: 'Suspected Fraud',
+      fraudReasons: 'Fraud Reasons:',
+      filterAll: 'All Signups',
+      filterClean: 'Clean Only', 
+      filterSuspected: 'Suspected Fraud',
+      fraudAnalytics: 'Fraud Analytics',
+      suspectedFraudCount: (count: number) => `${count} flagged`,
     },
 
     // Cafe Management
