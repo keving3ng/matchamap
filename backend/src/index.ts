@@ -18,6 +18,7 @@ import { trackCafeStat, trackEventClick, handleCheckIn, getUserCheckins } from '
 import { uploadPhoto, getCafePhotos, deletePhoto, getMyPhotos, getPhotosForModeration, moderatePhoto, servePhoto, getAdminCafePhotos } from './routes/photos';
 import { createReview, getCafeReviews, updateReview, deleteReview, markHelpful, removeHelpful, getUserReviews, getAdminCafeReviews, getAdminCafeReviewsCount, moderateReview } from './routes/reviews';
 import { getMyFavorites, addFavorite, removeFavorite, updateFavoriteNotes } from './routes/favorites';
+import { getMyBadges, checkAndAwardBadges, getBadgeDefinitions, getBadgeProgress } from './routes/badges';
 import { requireAuth, requireAdminAuth } from './middleware/auth';
 import { authRateLimit, publicRateLimit, writeRateLimit } from './middleware/rateLimit';
 import { requireHTTPS } from './middleware/httpsOnly';
@@ -98,6 +99,12 @@ router.get('/api/users/me/favorites', authRateLimit(), requireAuth(), getMyFavor
 router.post('/api/users/me/favorites', writeRateLimit(), requireAuth(), addFavorite);
 router.delete('/api/users/me/favorites/:cafeId', writeRateLimit(), requireAuth(), removeFavorite);
 router.put('/api/users/me/favorites/:cafeId/notes', writeRateLimit(), requireAuth(), updateFavoriteNotes);
+
+// User badges endpoints
+router.get('/api/users/me/badges', authRateLimit(), requireAuth(), getMyBadges);
+router.post('/api/users/me/badges/check', writeRateLimit(), requireAuth(), checkAndAwardBadges);
+router.get('/api/users/me/badges/progress', authRateLimit(), requireAuth(), getBadgeProgress);
+router.get('/api/badges/definitions', publicRateLimit(), getBadgeDefinitions);
 
 // Review endpoints
 router.post('/api/cafes/:id/reviews', writeRateLimit(), requireAuth(), createReview);

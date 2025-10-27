@@ -350,6 +350,30 @@ export const userFavorites = sqliteTable('user_favorites', {
   uniqueUserCafe: unique().on(table.userId, table.cafeId),
 }));
 
+// User badges table (Phase 2C - Badges & Achievements)
+export const userBadges = sqliteTable('user_badges', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+
+  // Badge identification
+  badgeKey: text('badge_key').notNull(), // e.g., 'passport_5', 'reviews_10', 'early_adopter'
+  badgeCategory: text('badge_category').notNull(), // e.g., 'passport', 'reviews', 'photos', 'special'
+
+  // Badge progress tracking
+  earnedAt: text('earned_at').default(sql`CURRENT_TIMESTAMP`),
+  progressValue: integer('progress_value'), // Optional: track progress that earned badge (e.g., 25 cafes)
+
+  // Metadata
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+  userIdIdx: index('user_badges_user_id_idx').on(table.userId),
+  categoryIdx: index('user_badges_category_idx').on(table.badgeCategory),
+  earnedAtIdx: index('user_badges_earned_at_idx').on(table.earnedAt),
+  keyIdx: index('user_badges_key_idx').on(table.badgeKey),
+  userCategoryIdx: index('user_badges_user_category_idx').on(table.userId, table.badgeCategory),
+  uniqueUserBadge: unique().on(table.userId, table.badgeKey),
+}));
+
 // Type exports for use in the application
 export type Cafe = typeof cafes.$inferSelect;
 export type NewCafe = typeof cafes.$inferInsert;
@@ -377,3 +401,5 @@ export type ReviewHelpful = typeof reviewHelpful.$inferSelect;
 export type NewReviewHelpful = typeof reviewHelpful.$inferInsert;
 export type UserFavorite = typeof userFavorites.$inferSelect;
 export type NewUserFavorite = typeof userFavorites.$inferInsert;
+export type UserBadge = typeof userBadges.$inferSelect;
+export type NewUserBadge = typeof userBadges.$inferInsert;
