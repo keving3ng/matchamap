@@ -12,19 +12,19 @@ const API_BASE_URL = import.meta.env.VITE_API_URL;
 /**
  * Helper to build query parameters from filters
  * Consolidates duplicate pagination and filtering logic across API endpoints
- * 
+ *
  * @param filters - Object containing filter parameters
  * @returns Query string with leading '?' or empty string if no params
  */
-function buildQueryParams(filters: Record<string, any>): string {
+function buildQueryParams(filters: Record<string, string | number | boolean | undefined | null>): string {
   const params = new URLSearchParams()
-  
+
   Object.entries(filters).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== '') {
       params.append(key, value.toString())
     }
   })
-  
+
   return params.toString() ? `?${params.toString()}` : ''
 }
 
