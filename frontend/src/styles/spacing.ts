@@ -32,6 +32,15 @@ export const spacing = {
   // Mobile-specific
   touchPadding: '0.75rem',    // 12px - Min padding for touch targets
   minTouchTarget: '44px',     // WCAG minimum touch target
+
+  // Tooltip-specific
+  tooltipPadding: '0.75rem',  // 12px - Vertical padding (py-3)
+  tooltipPaddingX: '1rem',    // 16px - Horizontal padding (px-4)
+  tooltipOffset: '0.25rem',   // 4px - Distance from trigger element
+  tooltipMaxWidth: '480px',   // Maximum width for large tooltips
+  tooltipMinWidth: '280px',   // Minimum width for content
+  tooltipArrowSize: '4px',    // Border width for tooltip arrows
+  tooltipPositionThreshold: '120px', // Space needed above for upward positioning
 } as const
 
 /**

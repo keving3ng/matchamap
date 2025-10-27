@@ -31,7 +31,7 @@ export const CheckInButton: React.FC<CheckInButtonProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false)
   const { isUserCheckinsEnabled } = useUserFeatures()
 
-  // Don't render if user check-in features are disabled
+  // Don't render if user social features are disabled
   if (!isUserCheckinsEnabled) {
     return null
   }
