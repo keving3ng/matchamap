@@ -39,11 +39,11 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit & { bustCache
       if (response.status === 401 || response.status === 403) {
         // Clear expired tokens from auth store
         useAuthStore.getState().clearAuth()
-        
+
         // Show session expired dialog with current path for redirect
         const currentPath = window.location.pathname + window.location.search
         useSessionExpiry.getState().showSessionExpiredDialog(currentPath)
-        
+
         // Return a specific error for auth failures
         throw new Error('Authentication required')
       }
@@ -656,9 +656,9 @@ export const statsAPI = {
   /**
    * Get my passport (simplified - just visited cafe IDs)
    */
-  async getMyPassportSimple(): Promise<{ 
+  async getMyPassportSimple(): Promise<{
     visitedCafeIds: number[]
-    visitedCount: number 
+    visitedCount: number
   }> {
     return fetchAPI('/users/me/passport/simple')
   },
