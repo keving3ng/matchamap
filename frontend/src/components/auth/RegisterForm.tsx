@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useAuthStore } from '../../stores/authStore'
 import { sanitizeText } from '../../utils/sanitize'
 import { COPY } from '../../constants/copy'
-import { PrimaryButton } from '../ui'
+import { PrimaryButton, AlertDialog } from '../ui'
 
 interface RegisterFormProps {
   onSuccess?: () => void
@@ -144,9 +144,11 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchT
 
       {/* Error Display */}
       {displayError && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-sm text-red-600">{displayError}</p>
-        </div>
+        <AlertDialog
+          variant="error"
+          title={COPY.common.error}
+          message={displayError}
+        />
       )}
 
       {/* Submit Button */}
