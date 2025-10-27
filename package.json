@@ -23,6 +23,12 @@
     "test:ci": "npm run test:ci --workspace=frontend",
     "test:all": "npm run test:ci --workspaces --if-present",
     "test:coverage": "npm run test:coverage --workspaces --if-present",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:integration": "vitest run tests/integration",
+    "test:integration:watch": "vitest tests/integration",
+    "test:all-comprehensive": "npm run test:all && npm run test:integration && npm run test:e2e",
     "lint": "npm run lint --workspace=frontend",
     "lint:ci": "npm run lint:ci --workspace=frontend || true",
     "db:generate": "drizzle-kit generate",
@@ -33,6 +39,7 @@
   },
   "devDependencies": {
     "@codecov/vite-plugin": "^1.9.1",
+    "@playwright/test": "^1.40.1",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.4",
     "typescript": "^5.2.2"
