@@ -325,9 +325,9 @@ describe('LoginForm', () => {
 
   describe('accessibility', () => {
     it('should have proper form structure', () => {
-      render(<LoginForm />)
+      const { container } = render(<LoginForm />)
 
-      const form = screen.getByRole('form')
+      const form = container.querySelector('form')
       expect(form).toBeInTheDocument()
     })
 

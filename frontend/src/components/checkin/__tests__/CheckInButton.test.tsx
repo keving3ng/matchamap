@@ -29,7 +29,7 @@ vi.mock('../CheckInModal', () => ({
 // Mock user features hook
 const { mockUseUserFeatures } = vi.hoisted(() => ({
   mockUseUserFeatures: vi.fn(() => ({
-    hasUserSocial: true,
+    isUserCheckinsEnabled: true,
   })),
 }))
 
@@ -89,7 +89,7 @@ describe('CheckInButton', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     // Reset useUserFeatures mock to default
-    mockUseUserFeatures.mockReturnValue({ hasUserSocial: true })
+    mockUseUserFeatures.mockReturnValue({ isUserCheckinsEnabled: true })
   })
 
   it('renders check-in button when not checked in', () => {
@@ -150,7 +150,7 @@ describe('CheckInButton', () => {
   })
 
   it('does not render when user social features are disabled', () => {
-    mockUseUserFeatures.mockReturnValue({ hasUserSocial: false })
+    mockUseUserFeatures.mockReturnValue({ isUserCheckinsEnabled: false })
 
     const { container } = render(
       <CheckInButton

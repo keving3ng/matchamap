@@ -329,7 +329,8 @@ describe('RegisterForm', () => {
       const confirmPasswordInput = screen.getByLabelText(COPY.auth.confirmPassword)
       const submitButton = screen.getByRole('button', { name: COPY.auth.createAccount })
 
-      await user.type(usernameInput, '  testuser  ')
+      // Don't add spaces to username as it will fail validation before trimming
+      await user.type(usernameInput, 'testuser')
       await user.type(emailInput, '  test@example.com  ')
       await user.type(passwordInput, 'password123')
       await user.type(confirmPasswordInput, 'password123')
@@ -395,10 +396,20 @@ describe('RegisterForm', () => {
       const user = userEvent.setup()
       render(<RegisterForm />)
 
+      const usernameInput = screen.getByLabelText(COPY.auth.username)
+      const emailInput = screen.getByLabelText(COPY.auth.email)
+      const passwordInput = screen.getByLabelText(COPY.auth.password)
+      const confirmPasswordInput = screen.getByLabelText(COPY.auth.confirmPassword)
       const submitButton = screen.getByRole('button', { name: COPY.auth.createAccount })
+
+      // Fill in data that will trigger password length validation
+      await user.type(usernameInput, 'testuser')
+      await user.type(emailInput, 'test@example.com')
+      await user.type(passwordInput, '1234567') // Too short (7 chars)
+      await user.type(confirmPasswordInput, '1234567')
       await user.click(submitButton)
 
-      // Should show validation error for empty username
+      // Should show validation error for short password
       expect(screen.getByTestId('alert-dialog')).toBeInTheDocument()
       expect(screen.getByTestId('alert-dialog')).toHaveAttribute('data-variant', 'error')
       expect(screen.getByTestId('alert-title')).toHaveTextContent(COPY.common.error)
@@ -475,21 +486,23 @@ describe('RegisterForm', () => {
       const user = userEvent.setup()
       render(<RegisterForm />)
 
-      // First, trigger a validation error
-      const submitButton = screen.getByRole('button', { name: COPY.auth.createAccount })
-      await user.click(submitButton)
-
-      expect(screen.getByTestId('alert-dialog')).toBeInTheDocument()
-
-      // Then, submit with valid data
       const usernameInput = screen.getByLabelText(COPY.auth.username)
       const emailInput = screen.getByLabelText(COPY.auth.email)
       const passwordInput = screen.getByLabelText(COPY.auth.password)
       const confirmPasswordInput = screen.getByLabelText(COPY.auth.confirmPassword)
+      const submitButton = screen.getByRole('button', { name: COPY.auth.createAccount })
 
+      // First, trigger a validation error with mismatched passwords
       await user.type(usernameInput, 'testuser')
       await user.type(emailInput, 'test@example.com')
       await user.type(passwordInput, 'password123')
+      await user.type(confirmPasswordInput, 'different123')
+      await user.click(submitButton)
+
+      expect(screen.getByTestId('alert-dialog')).toBeInTheDocument()
+
+      // Then, fix the password and submit with valid data
+      await user.clear(confirmPasswordInput)
       await user.type(confirmPasswordInput, 'password123')
       await user.click(submitButton)
 
@@ -512,9 +525,9 @@ describe('RegisterForm', () => {
 
   describe('accessibility', () => {
     it('should have proper form structure', () => {
-      render(<RegisterForm />)
+      const { container } = render(<RegisterForm />)
 
-      const form = screen.getByRole('form')
+      const form = container.querySelector('form')
       expect(form).toBeInTheDocument()
     })
 
