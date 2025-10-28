@@ -43,8 +43,35 @@ export async function listCafes(request: IRequest, env: Env): Promise<Response> 
     const maxPrice = url.searchParams.get('maxPrice');
     const search = url.searchParams.get('search'); // New search parameter
     const userMinRating = url.searchParams.get('userMinRating'); // User rating filter
-    const limit = Math.min(parseInt(url.searchParams.get('limit') || PAGINATION_CONSTANTS.CAFES_DEFAULT_LIMIT.toString()), PAGINATION_CONSTANTS.CAFES_MAX_LIMIT);
-    const offset = parseInt(url.searchParams.get('offset') || PAGINATION_CONSTANTS.DEFAULT_OFFSET.toString());
+
+    // Validate and parse pagination parameters
+    const limitParam = url.searchParams.get('limit');
+    const offsetParam = url.searchParams.get('offset');
+
+    const limit = limitParam
+      ? Math.min(Math.max(1, parseInt(limitParam)), PAGINATION_CONSTANTS.CAFES_MAX_LIMIT)
+      : PAGINATION_CONSTANTS.CAFES_DEFAULT_LIMIT;
+
+    const offset = offsetParam
+      ? Math.max(0, parseInt(offsetParam))
+      : PAGINATION_CONSTANTS.DEFAULT_OFFSET;
+
+    // Validate limit and offset are valid numbers
+    if (limitParam && (isNaN(limit) || limit < 1)) {
+      return badRequestResponse('Invalid limit parameter. Must be a positive integer.', request as Request, env);
+    }
+    if (offsetParam && (isNaN(offset) || offset < 0)) {
+      return badRequestResponse('Invalid offset parameter. Must be a non-negative integer.', request as Request, env);
+    }
+
+    // Validate search query length
+    if (search && search.length > SEARCH_CONSTANTS.MAX_SEARCH_LENGTH) {
+      return badRequestResponse(
+        `Search query too long. Maximum length is ${SEARCH_CONSTANTS.MAX_SEARCH_LENGTH} characters.`,
+        request as Request,
+        env
+      );
+    }
 
     const db = getDb(env.DB);
 
@@ -121,6 +148,18 @@ export async function listCafes(request: IRequest, env: Env): Promise<Response> 
       // Extract cafe IDs and fetch full cafe data
       const cafeIds = searchResults.map(r => r.cafeId);
 
+      // Validate that all cafeIds are valid numbers
+      const invalidIds = cafeIds.filter(id => !Number.isInteger(id) || id <= 0);
+      if (invalidIds.length > 0) {
+        console.error('Invalid cafe IDs found in search results:', invalidIds);
+        return errorResponse(
+          'Invalid data in search results',
+          HTTP_STATUS.INTERNAL_SERVER_ERROR,
+          request as Request,
+          env
+        );
+      }
+
       if (cafeIds.length === 0) {
         results = [];
       } else {
@@ -152,7 +191,8 @@ export async function listCafes(request: IRequest, env: Env): Promise<Response> 
     const cafesList = hasMore ? results.slice(0, limit) : results;
 
     // Batch fetch drinks for all cafes (fix N+1 query problem)
-    const cafeIds = cafesList.map(cafe => cafe.id);
+    // Note: cafeIds come from database results, so they're already validated
+    const cafeIds = cafesList.map(cafe => cafe.id).filter(id => Number.isInteger(id) && id > 0);
     const allDrinks = cafeIds.length > 0
       ? await db
           .select()
@@ -197,7 +237,7 @@ export async function listCafes(request: IRequest, env: Env): Promise<Response> 
         .orderBy(sql`${userReviews.overallRating} DESC`);
 
       // Group snippets by cafe ID (limit to MAX_SNIPPETS_PER_CAFE per cafe)
-      // Parse tags from JSON string to array
+      // Parse tags from JSON string to array with error handling
       for (const snippet of allReviewSnippets) {
         if (!reviewSnippetsByCafeId.has(snippet.cafeId)) {
           reviewSnippetsByCafeId.set(snippet.cafeId, []);
@@ -205,10 +245,25 @@ export async function listCafes(request: IRequest, env: Env): Promise<Response> 
         const cafeSnippets = reviewSnippetsByCafeId.get(snippet.cafeId)!;
         if (cafeSnippets.length < SEARCH_CONSTANTS.MAX_SNIPPETS_PER_CAFE) {
           // Parse tags from JSON string to match ReviewSnippet type
+          let parsedTags: string[] | null = null;
+          if (snippet.tags) {
+            try {
+              parsedTags = JSON.parse(snippet.tags);
+              // Validate that parsed tags is an array
+              if (!Array.isArray(parsedTags)) {
+                console.error(`Invalid tags format for review ${snippet.id}: expected array, got ${typeof parsedTags}`);
+                parsedTags = null;
+              }
+            } catch (error) {
+              console.error(`Failed to parse tags for review ${snippet.id}:`, error);
+              parsedTags = null;
+            }
+          }
+
           const parsedSnippet: ReviewSnippet = {
             id: snippet.id,
             content: snippet.content,
-            tags: snippet.tags ? JSON.parse(snippet.tags) : null,
+            tags: parsedTags,
             overallRating: snippet.overallRating,
             createdAt: snippet.createdAt || new Date().toISOString(),
           };
