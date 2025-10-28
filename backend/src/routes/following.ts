@@ -166,8 +166,9 @@ export async function unfollowUser(request: AuthenticatedRequest, env: Env): Pro
       )
       .run();
 
-    // Note: D1Result from .run() doesn't include changes count
-    // We'll rely on the follow status check before attempting delete
+    if ((result.meta.changes || 0) === 0) {
+      return badRequestResponse('Not following this user', request as Request, env);
+    }
 
     // Update counts for both users
     await Promise.all([

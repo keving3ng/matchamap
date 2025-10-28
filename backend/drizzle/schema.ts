@@ -383,11 +383,13 @@ export const userBadges = sqliteTable('user_badges', {
 }));
 
 // Review comments table (Phase 2F - Comments on reviews)
-export const reviewComments: any = sqliteTable('review_comments', {
+// @ts-expect-error - Circular reference to self for parent comment
+export const reviewComments = sqliteTable('review_comments', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   reviewId: integer('review_id').notNull().references(() => userReviews.id, { onDelete: 'cascade' }),
   userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  parentCommentId: integer('parent_comment_id').references((): any => reviewComments.id, { onDelete: 'cascade' }),
+  // @ts-expect-error - Circular reference to self for parent comment
+  parentCommentId: integer('parent_comment_id').references(() => reviewComments.id, { onDelete: 'cascade' }),
 
   // Comment content
   content: text('content').notNull(),

@@ -25,7 +25,7 @@ export async function getPassportLeaderboard(
     const limit = Math.min(parseInt(url.searchParams.get('limit') || `${DEFAULT_LIMIT}`), MAX_LIMIT);
 
     // Validate city parameter if provided
-    if (city && !validateCityKey(city)) {
+    if (city && !VALID_CITY_KEYS.includes(city as any)) {
       return errorResponse('Invalid city parameter', 400, request as Request, env);
     }
 
@@ -98,14 +98,14 @@ export async function getReviewerLeaderboard(
     const city = url.searchParams.get('city');
     const limit = Math.min(parseInt(url.searchParams.get('limit') || `${DEFAULT_LIMIT}`), MAX_LIMIT);
 
-    if (city && !validateCityKey(city)) {
+    if (city && !VALID_CITY_KEYS.includes(city as any)) {
       return errorResponse('Invalid city parameter', 400, request as Request, env);
     }
 
     const db = getDb(env.DB);
-    
+
     const conditions = [];
-    
+
     if (period === 'monthly') {
       const monthStart = new Date();
       monthStart.setDate(1);
@@ -168,14 +168,14 @@ export async function getContributorLeaderboard(
     const city = url.searchParams.get('city');
     const limit = Math.min(parseInt(url.searchParams.get('limit') || `${DEFAULT_LIMIT}`), MAX_LIMIT);
 
-    if (city && !validateCityKey(city)) {
+    if (city && !VALID_CITY_KEYS.includes(city as any)) {
       return errorResponse('Invalid city parameter', 400, request as Request, env);
     }
 
     const db = getDb(env.DB);
-    
+
     const conditions = [];
-    
+
     if (period === 'monthly') {
       const monthStart = new Date();
       monthStart.setDate(1);
@@ -246,7 +246,7 @@ export async function getUserRank(
     const period = url.searchParams.get('period') || 'all';
     const city = url.searchParams.get('city');
 
-    if (city && !validateCityKey(city)) {
+    if (city && !VALID_CITY_KEYS.includes(city as any)) {
       return errorResponse('Invalid city parameter', 400, request as Request, env);
     }
 
