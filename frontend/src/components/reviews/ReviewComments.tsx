@@ -192,10 +192,10 @@ export const ReviewComments: React.FC<ReviewCommentsProps> = React.memo(({
         <div className="flex space-x-3">
           {/* Avatar */}
           <div className="flex-shrink-0">
-            {comment.user?.user?.avatarUrl ? (
+            {comment.user?.avatarUrl ? (
               <img
-                src={comment.user.user.avatarUrl}
-                alt={comment.user.user.displayName || comment.user.user.username}
+                src={comment.user.avatarUrl}
+                alt={comment.user.displayName || comment.user.username}
                 className="w-8 h-8 rounded-full"
               />
             ) : (
@@ -210,7 +210,7 @@ export const ReviewComments: React.FC<ReviewCommentsProps> = React.memo(({
             <div className="bg-gray-50 rounded-lg px-3 py-2">
               <div className="flex items-center space-x-2 mb-1">
                 <span className="font-medium text-sm text-gray-900">
-                  {comment.user?.user?.displayName || comment.user?.user?.username || 'Anonymous'}
+                  {comment.user?.displayName || comment.user?.username || 'Anonymous'}
                 </span>
                 <span className="text-xs text-gray-500">
                   {formatTimeAgo(comment.createdAt)}
@@ -337,8 +337,8 @@ export const ReviewComments: React.FC<ReviewCommentsProps> = React.memo(({
             {replyingToComment && (
               <p className="text-sm text-gray-600 mb-2">
                 {COPY.reviews.replyTo(
-                  comments.find(c => c.id === replyingToComment)?.user?.user?.displayName ||
-                  comments.find(c => c.id === replyingToComment)?.user?.user?.username ||
+                  comments.find(c => c.id === replyingToComment)?.user?.displayName ||
+                  comments.find(c => c.id === replyingToComment)?.user?.username ||
                   'comment'
                 )}
               </p>

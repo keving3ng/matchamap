@@ -47,7 +47,7 @@ export async function joinWaitlist(request: IRequest, env: Env): Promise<Respons
     const ip = request.headers.get('CF-Connecting-IP') || undefined;
 
     // Apply fraud detection
-    const fraudResult = detectWaitlistFraud(normalizedEmail, ip, referralSource);
+    const fraudResult = detectWaitlistFraud(normalizedEmail, ip, referralSource || undefined);
 
     // Insert new waitlist entry with fraud detection data
     await db.insert(waitlist).values({

@@ -339,7 +339,7 @@ export const WaitlistPage: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         {entry.isFlaggedFraud && (
                           <div className="space-y-1">
-                            <StatusBadge variant="error" size="sm">
+                            <StatusBadge variant="error">
                               {COPY.admin.waitlist.suspectedFraud}
                             </StatusBadge>
                             {entry.fraudReason && (
