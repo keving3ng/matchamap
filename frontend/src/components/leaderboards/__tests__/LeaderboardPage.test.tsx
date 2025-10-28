@@ -134,16 +134,9 @@ describe.skip('LeaderboardPage', () => {
 
     // Default mock implementations
     vi.mocked(useUserFeatures).mockReturnValue({
-      isUserAccountsEnabled: true,
-      isUserProfilesEnabled: true,
+      hasUserAccounts: true,
+      hasUserProfiles: true,
       isUserSocialEnabled: true,
-      isUserCheckinsEnabled: true,
-      isUserReviewsEnabled: true,
-      isUserPhotosEnabled: true,
-      isUserFollowingEnabled: true,
-      isUserFavoritesEnabled: true,
-      isUserListsEnabled: true,
-      hasAnyUserFeatures: true,
     })
     
     vi.mocked(useAuthStore).mockReturnValue({
@@ -166,16 +159,9 @@ describe.skip('LeaderboardPage', () => {
   describe('Feature Flag Control', () => {
     it('does not render when social features are disabled', () => {
       vi.mocked(useUserFeatures).mockReturnValue({
-        isUserAccountsEnabled: true,
-        isUserProfilesEnabled: true,
+        hasUserAccounts: true,
+        hasUserProfiles: true,
         isUserSocialEnabled: false,
-        isUserCheckinsEnabled: true,
-        isUserReviewsEnabled: true,
-        isUserPhotosEnabled: true,
-        isUserFollowingEnabled: true,
-        isUserFavoritesEnabled: true,
-        isUserListsEnabled: true,
-        hasAnyUserFeatures: true,
       })
 
       const { container } = renderLeaderboardPage()
