@@ -166,7 +166,7 @@ export async function unfollowUser(request: AuthenticatedRequest, env: Env): Pro
       )
       .run();
 
-    if (result.changes === 0) {
+    if ((result.meta.changes || 0) === 0) {
       return badRequestResponse('Not following this user', request as Request, env);
     }
 

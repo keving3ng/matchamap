@@ -3,7 +3,7 @@ import { desc, sql, eq, and, gte } from 'drizzle-orm';
 import { Env } from '../types';
 import { getDb, userProfiles, users, cafes } from '../db';
 import { jsonResponse, errorResponse } from '../utils/response';
-import { validateCityKey } from '../utils/validation';
+import { VALID_CITY_KEYS } from '../../../shared/types';
 
 // Constants
 const DEFAULT_LIMIT = 50;
@@ -25,11 +25,11 @@ export async function getPassportLeaderboard(
     const limit = Math.min(parseInt(url.searchParams.get('limit') || `${DEFAULT_LIMIT}`), MAX_LIMIT);
 
     // Validate city parameter if provided
-    if (city && !validateCityKey(city)) {
-      return errorResponse('Invalid city parameter', 400);
+    if (city && !VALID_CITY_KEYS.includes(city as any)) {
+      return errorResponse('Invalid city parameter', 400, request as Request, env);
     }
 
-    const db = getDb(env);
+    const db = getDb(env.DB);
     
     // Build query conditions
     const conditions = [];
@@ -76,13 +76,11 @@ export async function getPassportLeaderboard(
         limit,
         generatedAt: new Date().toISOString(),
       },
-    }, {
-      'Cache-Control': `public, max-age=${CACHE_TTL}`,
-    });
+    }, 200, request as Request, env, `public, max-age=`);
 
   } catch (error) {
     console.error('Error fetching passport leaderboard:', error);
-    return errorResponse('Internal server error', 500);
+    return errorResponse('Internal server error', 500, request as Request, env);
   }
 }
 
@@ -100,11 +98,11 @@ export async function getReviewerLeaderboard(
     const city = url.searchParams.get('city');
     const limit = Math.min(parseInt(url.searchParams.get('limit') || `${DEFAULT_LIMIT}`), MAX_LIMIT);
 
-    if (city && !validateCityKey(city)) {
-      return errorResponse('Invalid city parameter', 400);
+    if (city && !VALID_CITY_KEYS.includes(city as any)) {
+      return errorResponse('Invalid city parameter', 400, request as Request, env);
     }
 
-    const db = getDb(env);
+    const db = getDb(env.DB);
     
     const conditions = [];
     
@@ -148,13 +146,11 @@ export async function getReviewerLeaderboard(
         limit,
         generatedAt: new Date().toISOString(),
       },
-    }, {
-      'Cache-Control': `public, max-age=${CACHE_TTL}`,
-    });
+    }, 200, request as Request, env, `public, max-age=`);
 
   } catch (error) {
     console.error('Error fetching reviewer leaderboard:', error);
-    return errorResponse('Internal server error', 500);
+    return errorResponse('Internal server error', 500, request as Request, env);
   }
 }
 
@@ -172,11 +168,11 @@ export async function getContributorLeaderboard(
     const city = url.searchParams.get('city');
     const limit = Math.min(parseInt(url.searchParams.get('limit') || `${DEFAULT_LIMIT}`), MAX_LIMIT);
 
-    if (city && !validateCityKey(city)) {
-      return errorResponse('Invalid city parameter', 400);
+    if (city && !VALID_CITY_KEYS.includes(city as any)) {
+      return errorResponse('Invalid city parameter', 400, request as Request, env);
     }
 
-    const db = getDb(env);
+    const db = getDb(env.DB);
     
     const conditions = [];
     
@@ -223,13 +219,11 @@ export async function getContributorLeaderboard(
         limit,
         generatedAt: new Date().toISOString(),
       },
-    }, {
-      'Cache-Control': `public, max-age=${CACHE_TTL}`,
-    });
+    }, 200, request as Request, env, `public, max-age=`);
 
   } catch (error) {
     console.error('Error fetching contributor leaderboard:', error);
-    return errorResponse('Internal server error', 500);
+    return errorResponse('Internal server error', 500, request as Request, env);
   }
 }
 
@@ -244,7 +238,7 @@ export async function getUserRank(
 ): Promise<Response> {
   try {
     if (!userId) {
-      return errorResponse('Authentication required', 401);
+      return errorResponse('Authentication required', 401, request as Request, env);
     }
 
     const url = new URL(request.url);
@@ -252,15 +246,15 @@ export async function getUserRank(
     const period = url.searchParams.get('period') || 'all';
     const city = url.searchParams.get('city');
 
-    if (city && !validateCityKey(city)) {
-      return errorResponse('Invalid city parameter', 400);
+    if (city && !VALID_CITY_KEYS.includes(city as any)) {
+      return errorResponse('Invalid city parameter', 400, request as Request, env);
     }
 
     if (!['passport', 'reviewers', 'contributors'].includes(type)) {
-      return errorResponse('Invalid leaderboard type', 400);
+      return errorResponse('Invalid leaderboard type', 400, request as Request, env);
     }
 
-    const db = getDb(env);
+    const db = getDb(env.DB);
     
     const conditions = [];
     
@@ -337,12 +331,10 @@ export async function getUserRank(
         userId,
         generatedAt: new Date().toISOString(),
       },
-    }, {
-      'Cache-Control': `public, max-age=${CACHE_TTL}`,
-    });
+    }, 200, request as Request, env, `public, max-age=`);
 
   } catch (error) {
     console.error('Error fetching user rank:', error);
-    return errorResponse('Internal server error', 500);
+    return errorResponse('Internal server error', 500, request as Request, env);
   }
 }

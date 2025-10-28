@@ -3,7 +3,7 @@ import { UserPlus, UserMinus, Loader2 } from '@/components/icons'
 import { api } from '../../utils/api'
 import { useAuthStore } from '../../stores/authStore'
 import { COPY } from '../../constants/copy'
-import type { FollowStatusResponse, FollowActionResponse } from '../../../../shared/types'
+import type { FollowStatusResponse } from '../../../../shared/types'
 
 interface FollowButtonProps {
   username: string
