@@ -87,6 +87,7 @@ jobs:
   # ============================================================================
   frontend-tests:
     name: Frontend Tests (Shard ${{ matrix.shard }})
+    needs: [typecheck]  # Ensure TypeScript compiles before running tests
     runs-on: self-hosted
     timeout-minutes: 5
     strategy:
@@ -132,6 +133,7 @@ jobs:
   # ============================================================================
   backend-tests:
     name: Backend Tests
+    needs: [typecheck]  # Ensure TypeScript compiles before running tests
     runs-on: self-hosted
     timeout-minutes: 10
 
