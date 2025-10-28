@@ -383,12 +383,13 @@ export const userBadges = sqliteTable('user_badges', {
 }));
 
 // Review comments table (Phase 2F - Comments on reviews)
-// Note: Self-referencing table requires forward declaration for TypeScript
+// Note: parentCommentId self-reference omits .references() to avoid TypeScript circular dependency
+// Foreign key constraint is enforced at the database level via migration
 export const reviewComments = sqliteTable('review_comments', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   reviewId: integer('review_id').notNull().references(() => userReviews.id, { onDelete: 'cascade' }),
   userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  parentCommentId: integer('parent_comment_id').references(() => reviewComments.id, { onDelete: 'cascade' }),
+  parentCommentId: integer('parent_comment_id'), // Self-reference handled in migration
 
   // Comment content
   content: text('content').notNull(),
