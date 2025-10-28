@@ -17,7 +17,6 @@ interface DataStore {
     city?: string
     search?: string
     userMinRating?: number
-    userMaxRating?: number
     minScore?: number
     maxPrice?: number
     limit?: number

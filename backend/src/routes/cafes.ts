@@ -11,7 +11,7 @@ import {
 import { HTTP_STATUS, PAGINATION_CONSTANTS, CACHE_CONSTANTS } from '../constants';
 import { logAdminAction, generateChangesSummary } from '../utils/auditLog';
 import { AuthenticatedRequest } from '../middleware/auth';
-import { VALID_CITY_KEYS } from '../../../shared/types';
+import { VALID_CITY_KEYS, ReviewSnippet } from '../../../shared/types';
 
 // Search constants
 const SEARCH_CONSTANTS = {
@@ -19,6 +19,20 @@ const SEARCH_CONSTANTS = {
   SNIPPET_TRUNCATE_LENGTH: 150, // Characters to show in review snippet
   MAX_SNIPPETS_PER_CAFE: 2, // Maximum review snippets to return per cafe
 } as const;
+
+/**
+ * Sanitize search query to prevent SQL injection and wildcard abuse
+ * @param search - Raw search query from user
+ * @returns Sanitized search term ready for SQL LIKE queries
+ */
+function sanitizeSearchQuery(search: string): string {
+  // Trim and limit length
+  const sanitized = search.trim().substring(0, SEARCH_CONSTANTS.MAX_SEARCH_LENGTH);
+  // Escape SQL wildcards to prevent abuse
+  const escaped = sanitized.replace(/[%_]/g, '\\$&');
+  // Return lowercase with SQL LIKE wildcards
+  return `%${escaped.toLowerCase()}%`;
+}
 
 // GET /api/cafes - List cafes with optional filtering and search
 export async function listCafes(request: IRequest, env: Env): Promise<Response> {
@@ -57,12 +71,8 @@ export async function listCafes(request: IRequest, env: Env): Promise<Response> 
 
     // If search query provided, perform enhanced search
     if (search && search.trim().length > 0) {
-      // Sanitize search query
-      const sanitizedSearch = search.trim().substring(0, SEARCH_CONSTANTS.MAX_SEARCH_LENGTH);
-
-      // Escape SQL wildcards to prevent abuse
-      const escapedSearch = sanitizedSearch.replace(/[%_]/g, '\\$&');
-      const searchTerm = `%${escapedSearch.toLowerCase()}%`;
+      // Sanitize search query using centralized helper
+      const searchTerm = sanitizeSearchQuery(search);
       
       // Get cafe IDs that match search criteria
       const searchResults = await db
@@ -160,12 +170,10 @@ export async function listCafes(request: IRequest, env: Env): Promise<Response> 
     }
 
     // Batch fetch review snippets if search was performed
-    let reviewSnippetsByCafeId = new Map<number, any[]>();
+    let reviewSnippetsByCafeId = new Map<number, ReviewSnippet[]>();
     if (search && search.trim().length > 0 && cafeIds.length > 0) {
-      // Sanitize search query (reuse same logic)
-      const sanitizedSearch = search.trim().substring(0, SEARCH_CONSTANTS.MAX_SEARCH_LENGTH);
-      const escapedSearch = sanitizedSearch.replace(/[%_]/g, '\\$&');
-      const searchTerm = `%${escapedSearch.toLowerCase()}%`;
+      // Sanitize search query using centralized helper
+      const searchTerm = sanitizeSearchQuery(search);
 
       const allReviewSnippets = await db
         .select({
@@ -189,13 +197,22 @@ export async function listCafes(request: IRequest, env: Env): Promise<Response> 
         .orderBy(sql`${userReviews.overallRating} DESC`);
 
       // Group snippets by cafe ID (limit to MAX_SNIPPETS_PER_CAFE per cafe)
+      // Parse tags from JSON string to array
       for (const snippet of allReviewSnippets) {
         if (!reviewSnippetsByCafeId.has(snippet.cafeId)) {
           reviewSnippetsByCafeId.set(snippet.cafeId, []);
         }
         const cafeSnippets = reviewSnippetsByCafeId.get(snippet.cafeId)!;
         if (cafeSnippets.length < SEARCH_CONSTANTS.MAX_SNIPPETS_PER_CAFE) {
-          cafeSnippets.push(snippet);
+          // Parse tags from JSON string to match ReviewSnippet type
+          const parsedSnippet: ReviewSnippet = {
+            id: snippet.id,
+            content: snippet.content,
+            tags: snippet.tags ? JSON.parse(snippet.tags) : null,
+            overallRating: snippet.overallRating,
+            createdAt: snippet.createdAt || new Date().toISOString(),
+          };
+          cafeSnippets.push(parsedSnippet);
         }
       }
     }
@@ -221,28 +238,13 @@ export async function listCafes(request: IRequest, env: Env): Promise<Response> 
         ...cafe,
         displayScore,
         drinks: cafeDrinks,
-        reviewSnippets: reviewSnippets.map(snippet => {
-          try {
-            return {
-              ...snippet,
-              tags: snippet.tags ? JSON.parse(snippet.tags) : null,
-              // Truncate content for snippet display
-              content: snippet.content.length > SEARCH_CONSTANTS.SNIPPET_TRUNCATE_LENGTH
-                ? snippet.content.substring(0, SEARCH_CONSTANTS.SNIPPET_TRUNCATE_LENGTH) + '...'
-                : snippet.content
-            };
-          } catch (error) {
-            // Handle JSON.parse errors gracefully
-            console.error(`Failed to parse tags for review ${snippet.id}:`, error);
-            return {
-              ...snippet,
-              tags: null,
-              content: snippet.content.length > SEARCH_CONSTANTS.SNIPPET_TRUNCATE_LENGTH
-                ? snippet.content.substring(0, SEARCH_CONSTANTS.SNIPPET_TRUNCATE_LENGTH) + '...'
-                : snippet.content
-            };
-          }
-        })
+        // Truncate snippets for display (tags already parsed earlier)
+        reviewSnippets: reviewSnippets.map(snippet => ({
+          ...snippet,
+          content: snippet.content.length > SEARCH_CONSTANTS.SNIPPET_TRUNCATE_LENGTH
+            ? snippet.content.substring(0, SEARCH_CONSTANTS.SNIPPET_TRUNCATE_LENGTH) + '...'
+            : snippet.content
+        }))
       };
     });
 

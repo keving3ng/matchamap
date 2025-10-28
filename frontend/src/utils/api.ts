@@ -91,7 +91,6 @@ export const cafeAPI = {
     maxPrice?: number
     search?: string
     userMinRating?: number
-    userMaxRating?: number
     limit?: number
     offset?: number
   }, bustCache = false): Promise<{ cafes: Cafe[]; total: number; hasMore: boolean }> {
