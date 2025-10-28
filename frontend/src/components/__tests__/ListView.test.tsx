@@ -255,8 +255,8 @@ describe('ListView', () => {
       const filterButton = screen.getByRole('button', { name: 'Filter' })
       fireEvent.click(filterButton)
 
-      // Click on 9+ rating filter
-      const ratingButton = screen.getByRole('button', { name: '9+' })
+      // Click on 9+ rating filter (admin rating)
+      const ratingButton = screen.getByTestId('admin-rating-9')
       fireEvent.click(ratingButton)
 
       // Should only show cafe with rating >= 9 (B with 9.2)
@@ -278,8 +278,8 @@ describe('ListView', () => {
       const filterButton = screen.getByRole('button', { name: 'Filter' })
       fireEvent.click(filterButton)
 
-      // Click on 8+ rating filter
-      const rating8Button = screen.getByRole('button', { name: '8+' })
+      // Click on 8+ rating filter (admin rating)
+      const rating8Button = screen.getByTestId('admin-rating-8')
       fireEvent.click(rating8Button)
 
       // Should show cafes A (8.5) and B (9.2), but not C (7.8)
@@ -301,8 +301,8 @@ describe('ListView', () => {
       const filterButton = screen.getByRole('button', { name: 'Filter' })
       fireEvent.click(filterButton)
 
-      // Click on 7+ rating filter
-      const rating7Button = screen.getByRole('button', { name: '7+' })
+      // Click on 7+ rating filter (admin rating)
+      const rating7Button = screen.getByTestId('admin-rating-7')
       fireEvent.click(rating7Button)
 
       // All cafes should be visible (all are >= 7)
@@ -324,8 +324,8 @@ describe('ListView', () => {
       const filterButton = screen.getByRole('button', { name: 'Filter' })
       fireEvent.click(filterButton)
 
-      // Apply a rating filter
-      const rating9Button = screen.getByRole('button', { name: '9+' })
+      // Apply a rating filter (admin rating)
+      const rating9Button = screen.getByTestId('admin-rating-9')
       fireEvent.click(rating9Button)
 
       // Verify filter is working (only Cafe B visible)
@@ -355,8 +355,8 @@ describe('ListView', () => {
       const filterButton = screen.getByRole('button', { name: 'Filter' })
       fireEvent.click(filterButton)
 
-      // Apply a rating filter
-      const rating8Button = screen.getByRole('button', { name: '8+' })
+      // Apply a rating filter (admin rating)
+      const rating8Button = screen.getByTestId('admin-rating-8')
       fireEvent.click(rating8Button)
 
       // Close filter panel
@@ -578,7 +578,7 @@ describe('ListView', () => {
       const filterButton = screen.getByRole('button', { name: 'Filter' })
       fireEvent.click(filterButton)
 
-      const rating8Button = screen.getByRole('button', { name: '8+' })
+      const rating8Button = screen.getByTestId('admin-rating-8')
       fireEvent.click(rating8Button)
 
       // Should show only cafes with rating >= 8 that match search (A and B)
@@ -603,7 +603,7 @@ describe('ListView', () => {
       const searchInput = screen.getByPlaceholderText(/search cafes/i)
       fireEvent.change(searchInput, { target: { value: 'NonexistentCafe123' } })
 
-      expect(screen.getByText('No cafes match your filters')).toBeInTheDocument()
+      expect(screen.getByText('No cafes match your search or filters')).toBeInTheDocument()
     })
 
     it('real-time search updates as user types', () => {

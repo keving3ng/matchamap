@@ -13,7 +13,15 @@ interface DataStore {
   eventsFetched: boolean
 
   // Actions
-  fetchCafes: (city?: string, bustCache?: boolean) => Promise<void>
+  fetchCafes: (filters?: {
+    city?: string
+    search?: string
+    userMinRating?: number
+    minScore?: number
+    maxPrice?: number
+    limit?: number
+    offset?: number
+  }, bustCache?: boolean) => Promise<void>
   fetchEvents: (bustCache?: boolean) => Promise<void>
   fetchAll: (city?: string, bustCache?: boolean) => Promise<void>
 }
@@ -30,13 +38,32 @@ export const useDataStore = create<DataStore>((set, get) => ({
   cafesFetched: false,
   eventsFetched: false,
 
-  fetchCafes: async (city?: string, bustCache = false) => {
-    // Skip if already fetched (unless cache busting)
-    if (!bustCache && get().cafesFetched) return
+  fetchCafes: async (filters?: {
+    city?: string
+    search?: string
+    userMinRating?: number
+    minScore?: number
+    maxPrice?: number
+    limit?: number
+    offset?: number
+  } | string, bustCache = false) => {
+    // Handle legacy single string parameter (city)
+    const filterParams = typeof filters === 'string' ? { city: filters } : filters
+
+    // Skip if already fetched (unless cache busting) and no filters provided
+    if (!bustCache && get().cafesFetched && !filterParams?.search && !filterParams?.userMinRating) return
 
     try {
       set({ isLoading: true, error: null })
-      const response = await api.cafes.getAll({ city, limit: 500 }, bustCache)
+      const response = await api.cafes.getAll({
+        city: filterParams?.city,
+        search: filterParams?.search,
+        userMinRating: filterParams?.userMinRating,
+        minScore: filterParams?.minScore,
+        maxPrice: filterParams?.maxPrice,
+        limit: filterParams?.limit || 500,
+        offset: filterParams?.offset || 0
+      }, bustCache)
 
       // Transform API response to frontend format
       const cafes = response.cafes.map((cafe: any) => ({
@@ -52,11 +79,14 @@ export const useDataStore = create<DataStore>((set, get) => ({
         city: cafe.city,
         displayScore: cafe.displayScore, // Calculated from drinks
         ambianceScore: cafe.ambianceScore,
+        userRatingAvg: cafe.userRatingAvg, // User review average
+        userRatingCount: cafe.userRatingCount, // User review count
         drinks: cafe.drinks || [], // Include drinks from API
         chargeForAltMilk: cafe.chargeForAltMilk, // Number or null
         quickNote: cafe.quickNote || '',
         review: cafe.review || '',
         source: cafe.source || '',
+        reviewSnippets: cafe.reviewSnippets || [], // Search result snippets
         instagram: cafe.instagram || '',
         instagramPostLink: cafe.instagramPostLink || '',
         tiktokPostLink: cafe.tiktokPostLink || '',
@@ -107,7 +137,7 @@ export const useDataStore = create<DataStore>((set, get) => ({
   fetchAll: async (city?: string, bustCache = false) => {
     const { fetchCafes, fetchEvents } = get()
     await Promise.all([
-      fetchCafes(city, bustCache),
+      fetchCafes(city ? { city } : undefined, bustCache),
       fetchEvents(bustCache),
     ])
   },

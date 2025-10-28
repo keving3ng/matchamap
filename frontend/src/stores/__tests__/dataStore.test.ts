@@ -157,7 +157,16 @@ describe('dataStore', () => {
       expect(result.current.error).toBeNull()
 
       expect(vi.mocked(api.cafes.getAll)).toHaveBeenCalledWith(
-        { city: undefined, limit: 500 },
+        {
+          city: undefined,
+          search: undefined,
+          userMinRating: undefined,
+          userMaxRating: undefined,
+          minScore: undefined,
+          maxPrice: undefined,
+          limit: 500,
+          offset: 0
+        },
         false
       )
     })
@@ -174,7 +183,16 @@ describe('dataStore', () => {
       })
 
       expect(vi.mocked(api.cafes.getAll)).toHaveBeenCalledWith(
-        { city: 'toronto', limit: 500 },
+        {
+          city: 'toronto',
+          search: undefined,
+          userMinRating: undefined,
+          userMaxRating: undefined,
+          minScore: undefined,
+          maxPrice: undefined,
+          limit: 500,
+          offset: 0
+        },
         false
       )
     })
@@ -211,7 +229,16 @@ describe('dataStore', () => {
       })
 
       expect(vi.mocked(api.cafes.getAll)).toHaveBeenCalledWith(
-        { city: undefined, limit: 500 },
+        {
+          city: undefined,
+          search: undefined,
+          userMinRating: undefined,
+          userMaxRating: undefined,
+          minScore: undefined,
+          maxPrice: undefined,
+          limit: 500,
+          offset: 0
+        },
         true
       )
     })
@@ -462,7 +489,16 @@ describe('dataStore', () => {
       expect(result.current.eventsFetched).toBe(true)
 
       expect(vi.mocked(api.cafes.getAll)).toHaveBeenCalledWith(
-        { city: undefined, limit: 500 },
+        {
+          city: undefined,
+          search: undefined,
+          userMinRating: undefined,
+          userMaxRating: undefined,
+          minScore: undefined,
+          maxPrice: undefined,
+          limit: 500,
+          offset: 0
+        },
         false
       )
       expect(vi.mocked(api.events.getAll)).toHaveBeenCalledWith(
@@ -482,7 +518,16 @@ describe('dataStore', () => {
       })
 
       expect(vi.mocked(api.cafes.getAll)).toHaveBeenCalledWith(
-        { city: 'toronto', limit: 500 },
+        {
+          city: 'toronto',
+          search: undefined,
+          userMinRating: undefined,
+          userMaxRating: undefined,
+          minScore: undefined,
+          maxPrice: undefined,
+          limit: 500,
+          offset: 0
+        },
         true
       )
       expect(vi.mocked(api.events.getAll)).toHaveBeenCalledWith(

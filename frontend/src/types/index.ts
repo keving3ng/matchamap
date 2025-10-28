@@ -34,6 +34,10 @@ export interface DrinkItem {
   updatedAt?: string
 }
 
+// Re-export ReviewSnippet from shared types (must be before Cafe interface)
+export type { ReviewSnippet } from '../../../shared/types'
+import type { ReviewSnippet as ReviewSnippetType } from '../../../shared/types'
+
 export interface Cafe {
   // Core identification
   id: number
@@ -63,6 +67,7 @@ export interface Cafe {
   quickNote: string // Short tagline/summary
   review?: string | null // Full review text
   source?: string | null // Source of cafe info
+  reviewSnippets?: ReviewSnippetType[] // Search result snippets (only when search is performed)
 
   // Contact & Info
   instagram?: string | null

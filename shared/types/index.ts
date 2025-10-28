@@ -54,6 +54,7 @@ export interface Cafe {
   quickNote: string // Short tagline/summary - REQUIRED
   review?: string | null // Full review text
   source?: string | null // Source of cafe info (e.g., "Google", "Instagram", "Friend recommendation")
+  reviewSnippets?: ReviewSnippet[] // Search result snippets (only when search is performed)
 
   // Contact & Social
   instagram?: string | null
@@ -311,41 +312,50 @@ export interface UserReview {
   id: number
   userId: number
   cafeId: number
-  
+
   // Ratings (0-10 scale, matching expert system)
   overallRating: number
   matchaQualityRating?: number
   ambianceRating?: number
   serviceRating?: number
   valueRating?: number
-  
+
   // Content
   title?: string
   content: string
   tags?: string[] // Parsed from JSON
-  
+
   // Metadata
   visitDate?: string
   isPublic: boolean
   isFeatured: boolean
-  
+
   // Moderation
   moderationStatus: ReviewModerationStatus
   moderationNotes?: string
   moderatedBy?: number
   moderatedAt?: string
-  
+
   // Engagement
   helpfulCount: number
   flagCount: number
-  
+
   // Timestamps
   createdAt: string
   updatedAt: string
-  
+
   // Relations (populated by backend)
   user?: PublicUserProfile
   photos?: ReviewPhoto[]
+}
+
+// Review snippet for search results (truncated review data)
+export interface ReviewSnippet {
+  id: number
+  content: string
+  tags: string[] | null
+  overallRating: number
+  createdAt: string
 }
 
 export interface ReviewPhoto {

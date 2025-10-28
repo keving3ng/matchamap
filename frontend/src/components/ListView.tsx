@@ -15,6 +15,7 @@ type SortOption = 'rating' | 'distance'
 
 interface FilterState {
   minRating: number | null
+  userMinRating: number | null // User review rating filter
   maxDistance: number | null // in kilometers
   selectedCities: CityKey[] // multi-select cities
   openNow: boolean
@@ -30,6 +31,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
   const [showCityDropdown, setShowCityDropdown] = useState(false)
   const [filters, setFilters] = useState<FilterState>({
     minRating: null,
+    userMinRating: null,
     maxDistance: null,
     selectedCities: [],
     openNow: false
@@ -77,13 +79,17 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
   }, [cafes])
 
   // Check if any filters or search are active
-  const hasActiveFilters = filters.minRating !== null || filters.maxDistance !== null || filters.selectedCities.length > 0 || filters.openNow || selectedDrinkType !== null
+  const hasActiveFilters = filters.minRating !== null || filters.userMinRating !== null || filters.maxDistance !== null || filters.selectedCities.length > 0 || filters.openNow || selectedDrinkType !== null
 
   const hasActiveSearch = searchQuery.trim().length > 0
 
   // Toggle filter helpers
   const setMinRating = (rating: number | null) => {
     setFilters(prev => ({ ...prev, minRating: rating }))
+  }
+
+  const setUserMinRating = (rating: number | null) => {
+    setFilters(prev => ({ ...prev, userMinRating: rating }))
   }
 
   const setMaxDistance = (distance: number | null) => {
@@ -102,6 +108,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
   const clearFilters = () => {
     setFilters({
       minRating: null,
+      userMinRating: null,
       maxDistance: null,
       selectedCities: [],
       openNow: false
@@ -143,10 +150,18 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
 
     // Then apply filters
     filtered = filtered.filter(cafe => {
-      // Rating filter
+      // Admin rating filter (displayScore)
       if (filters.minRating !== null) {
         const cafeScore = cafe.displayScore ?? 0
         if (cafeScore < filters.minRating) {
+          return false
+        }
+      }
+
+      // User rating filter (userRatingAvg)
+      if (filters.userMinRating !== null) {
+        const userRating = cafe.userRatingAvg ?? 0
+        if (userRating < filters.userMinRating) {
           return false
         }
       }
@@ -428,10 +443,32 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                   {[7, 8, 9].map(rating => (
                     <button
                       key={rating}
+                      data-testid={`admin-rating-${rating}`}
                       onClick={() => setMinRating(filters.minRating === rating ? null : rating)}
                       className={`px-4 py-2 rounded-full text-sm font-bold transition-all shadow-md ${
                         filters.minRating === rating
                           ? 'bg-gradient-to-r from-matcha-600 to-matcha-500 text-white scale-105'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-105'
+                      }`}
+                    >
+                      {rating}+
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* User Rating Filter */}
+              <div>
+                <h4 className="text-sm font-bold text-charcoal-900 mb-3">{COPY.list.userRatingRange}</h4>
+                <div className="flex flex-wrap gap-2">
+                  {[6, 7, 8, 9].map(rating => (
+                    <button
+                      key={rating}
+                      data-testid={`user-rating-${rating}`}
+                      onClick={() => setUserMinRating(filters.userMinRating === rating ? null : rating)}
+                      className={`px-4 py-2 rounded-full text-sm font-bold transition-all shadow-md ${
+                        filters.userMinRating === rating
+                          ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white scale-105'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-105'
                       }`}
                     >
@@ -782,6 +819,49 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                               </div>
                             </div>
                           ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Review Snippets - Search results only */}
+                  {cafe.reviewSnippets && cafe.reviewSnippets.length > 0 && (
+                    <div className="pt-4 border-t border-gray-200">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-1.5 rounded-lg">
+                          <Star size={14} className="text-white fill-white" />
+                        </div>
+                        <span className="text-sm font-bold text-charcoal-900">{COPY.list.reviewSnippets}</span>
+                      </div>
+                      <div className="space-y-3">
+                        {cafe.reviewSnippets.map((snippet) => (
+                          <div key={snippet.id} className="bg-blue-50 rounded-xl p-3 border border-blue-200">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-1 bg-blue-100 px-2 py-1 rounded-lg">
+                                  <Star size={12} className="text-blue-600 fill-blue-600" />
+                                  <span className="text-xs font-bold text-blue-700">{snippet.overallRating.toFixed(1)}</span>
+                                </div>
+                                <span className="text-xs text-blue-600 font-medium">{COPY.list.fromReview}</span>
+                              </div>
+                              <span className="text-xs text-blue-500">
+                                {new Date(snippet.createdAt).toLocaleDateString()}
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-700 italic">"{snippet.content}"</p>
+                            {snippet.tags && snippet.tags.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mt-2">
+                                {snippet.tags.map((tag, tagIndex) => (
+                                  <span
+                                    key={tagIndex}
+                                    className="text-xs px-2 py-1 bg-blue-200 text-blue-700 rounded-full"
+                                  >
+                                    {tag}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))}
                       </div>
                     </div>
                   )}

@@ -1,7 +1,7 @@
 import { IRequest } from 'itty-router';
-import { eq, isNull, and, gte, lte, sql } from 'drizzle-orm';
+import { eq, isNull, and, gte, lte, sql, like, or, inArray } from 'drizzle-orm';
 import { Env } from '../types';
-import { getDb, cafes, drinks } from '../db';
+import { getDb, cafes, drinks, userReviews } from '../db';
 import {
   jsonResponse,
   errorResponse,
@@ -11,21 +11,71 @@ import {
 import { HTTP_STATUS, PAGINATION_CONSTANTS, CACHE_CONSTANTS } from '../constants';
 import { logAdminAction, generateChangesSummary } from '../utils/auditLog';
 import { AuthenticatedRequest } from '../middleware/auth';
-import { VALID_CITY_KEYS } from '../../../shared/types';
+import { VALID_CITY_KEYS, ReviewSnippet } from '../../../shared/types';
 
-// GET /api/cafes - List cafes with optional filtering
+// Search constants
+const SEARCH_CONSTANTS = {
+  MAX_SEARCH_LENGTH: 100, // Maximum length of search query
+  SNIPPET_TRUNCATE_LENGTH: 150, // Characters to show in review snippet
+  MAX_SNIPPETS_PER_CAFE: 2, // Maximum review snippets to return per cafe
+} as const;
+
+/**
+ * Sanitize search query to prevent SQL injection and wildcard abuse
+ * @param search - Raw search query from user
+ * @returns Sanitized search term ready for SQL LIKE queries
+ */
+function sanitizeSearchQuery(search: string): string {
+  // Trim and limit length
+  const sanitized = search.trim().substring(0, SEARCH_CONSTANTS.MAX_SEARCH_LENGTH);
+  // Escape SQL wildcards to prevent abuse
+  const escaped = sanitized.replace(/[%_]/g, '\\$&');
+  // Return lowercase with SQL LIKE wildcards
+  return `%${escaped.toLowerCase()}%`;
+}
+
+// GET /api/cafes - List cafes with optional filtering and search
 export async function listCafes(request: IRequest, env: Env): Promise<Response> {
   try {
     const url = new URL(request.url);
     const city = url.searchParams.get('city'); // Optional - no default
     const minScore = url.searchParams.get('minScore');
     const maxPrice = url.searchParams.get('maxPrice');
-    const limit = Math.min(parseInt(url.searchParams.get('limit') || PAGINATION_CONSTANTS.CAFES_DEFAULT_LIMIT.toString()), PAGINATION_CONSTANTS.CAFES_MAX_LIMIT);
-    const offset = parseInt(url.searchParams.get('offset') || PAGINATION_CONSTANTS.DEFAULT_OFFSET.toString());
+    const search = url.searchParams.get('search'); // New search parameter
+    const userMinRating = url.searchParams.get('userMinRating'); // User rating filter
+
+    // Validate and parse pagination parameters
+    const limitParam = url.searchParams.get('limit');
+    const offsetParam = url.searchParams.get('offset');
+
+    const limit = limitParam
+      ? Math.min(Math.max(1, parseInt(limitParam)), PAGINATION_CONSTANTS.CAFES_MAX_LIMIT)
+      : PAGINATION_CONSTANTS.CAFES_DEFAULT_LIMIT;
+
+    const offset = offsetParam
+      ? Math.max(0, parseInt(offsetParam))
+      : PAGINATION_CONSTANTS.DEFAULT_OFFSET;
+
+    // Validate limit and offset are valid numbers
+    if (limitParam && (isNaN(limit) || limit < 1)) {
+      return badRequestResponse('Invalid limit parameter. Must be a positive integer.', request as Request, env);
+    }
+    if (offsetParam && (isNaN(offset) || offset < 0)) {
+      return badRequestResponse('Invalid offset parameter. Must be a non-negative integer.', request as Request, env);
+    }
+
+    // Validate search query length
+    if (search && search.length > SEARCH_CONSTANTS.MAX_SEARCH_LENGTH) {
+      return badRequestResponse(
+        `Search query too long. Maximum length is ${SEARCH_CONSTANTS.MAX_SEARCH_LENGTH} characters.`,
+        request as Request,
+        env
+      );
+    }
 
     const db = getDb(env.DB);
 
-    // Build query conditions - only exclude deleted
+    // Build base query conditions - only exclude deleted
     const conditions = [isNull(cafes.deletedAt)];
 
     // Add optional city filter if provided
@@ -36,46 +86,222 @@ export async function listCafes(request: IRequest, env: Env): Promise<Response> 
       conditions.push(eq(cafes.city, city));
     }
 
-    // Note: Score and price filters removed - these are now at drink level, not cafe level
-    // TODO: Implement filtering by drink scores/prices if needed
+    // Add user rating filter if provided
+    if (userMinRating) {
+      const minRating = parseFloat(userMinRating);
+      if (!isNaN(minRating) && minRating >= 0 && minRating <= 10) {
+        conditions.push(gte(cafes.userRatingAvg, minRating));
+      }
+    }
 
-    // Execute query with pagination
-    const results = await db
-      .select()
-      .from(cafes)
-      .where(and(...conditions))
-      .limit(limit + 1) // Fetch one extra to check if there are more
-      .offset(offset);
+    let results: typeof cafes.$inferSelect[] = [];
+
+    // If search query provided, perform enhanced search
+    if (search && search.trim().length > 0) {
+      // Sanitize search query using centralized helper
+      const searchTerm = sanitizeSearchQuery(search);
+      
+      // Get cafe IDs that match search criteria
+      const searchResults = await db
+        .select({ 
+          cafeId: sql<number>`DISTINCT ${cafes.id}`,
+          relevanceScore: sql<number>`
+            CASE 
+              WHEN LOWER(${cafes.name}) LIKE ${searchTerm} THEN 3
+              WHEN LOWER(${cafes.quickNote}) LIKE ${searchTerm} THEN 2
+              WHEN LOWER(${cafes.address}) LIKE ${searchTerm} THEN 1
+              ELSE 0
+            END +
+            CASE 
+              WHEN ${userReviews.content} IS NOT NULL AND LOWER(${userReviews.content}) LIKE ${searchTerm} THEN 2
+              WHEN ${userReviews.tags} IS NOT NULL AND LOWER(${userReviews.tags}) LIKE ${searchTerm} THEN 1
+              ELSE 0
+            END
+          `
+        })
+        .from(cafes)
+        .leftJoin(userReviews, and(
+          eq(userReviews.cafeId, cafes.id),
+          eq(userReviews.moderationStatus, 'approved'),
+          eq(userReviews.isPublic, true)
+        ))
+        .where(and(
+          ...conditions,
+          or(
+            like(sql`LOWER(${cafes.name})`, searchTerm),
+            like(sql`LOWER(${cafes.quickNote})`, searchTerm),
+            like(sql`LOWER(${cafes.address})`, searchTerm),
+            and(
+              sql`${userReviews.content} IS NOT NULL`,
+              like(sql`LOWER(${userReviews.content})`, searchTerm)
+            ),
+            and(
+              sql`${userReviews.tags} IS NOT NULL`,
+              like(sql`LOWER(${userReviews.tags})`, searchTerm)
+            )
+          )
+        ))
+        .orderBy(sql`relevanceScore DESC`)
+        .limit(limit + 1)
+        .offset(offset);
+
+      // Extract cafe IDs and fetch full cafe data
+      const cafeIds = searchResults.map(r => r.cafeId);
+
+      // Validate that all cafeIds are valid numbers
+      const invalidIds = cafeIds.filter(id => !Number.isInteger(id) || id <= 0);
+      if (invalidIds.length > 0) {
+        console.error('Invalid cafe IDs found in search results:', invalidIds);
+        return errorResponse(
+          'Invalid data in search results',
+          HTTP_STATUS.INTERNAL_SERVER_ERROR,
+          request as Request,
+          env
+        );
+      }
+
+      if (cafeIds.length === 0) {
+        results = [];
+      } else {
+        // Use inArray for safe SQL injection prevention
+        results = await db
+          .select()
+          .from(cafes)
+          .where(inArray(cafes.id, cafeIds))
+          .orderBy(sql`
+            CASE ${cafes.id}
+              ${sql.join(
+                cafeIds.map((id, index) => sql`WHEN ${id} THEN ${index}`),
+                sql` `
+              )}
+            END
+          `);
+      }
+    } else {
+      // Regular query without search
+      results = await db
+        .select()
+        .from(cafes)
+        .where(and(...conditions))
+        .limit(limit + 1)
+        .offset(offset);
+    }
 
     const hasMore = results.length > limit;
     const cafesList = hasMore ? results.slice(0, limit) : results;
 
-    // Fetch drinks for all cafes and calculate display scores
-    const cafesWithScores = await Promise.all(
-      cafesList.map(async (cafe) => {
-        const cafeDrinks = await db
+    // Batch fetch drinks for all cafes (fix N+1 query problem)
+    // Note: cafeIds come from database results, so they're already validated
+    const cafeIds = cafesList.map(cafe => cafe.id).filter(id => Number.isInteger(id) && id > 0);
+    const allDrinks = cafeIds.length > 0
+      ? await db
           .select()
           .from(drinks)
-          .where(eq(drinks.cafeId, cafe.id));
+          .where(inArray(drinks.cafeId, cafeIds))
+      : [];
 
-        // Calculate display score: default drink OR highest score
-        let displayScore: number | null = null;
-        if (cafeDrinks.length > 0) {
-          const defaultDrink = cafeDrinks.find(d => d.isDefault);
-          if (defaultDrink) {
-            displayScore = defaultDrink.score;
-          } else {
-            displayScore = Math.max(...cafeDrinks.map(d => d.score));
-          }
+    // Group drinks by cafe ID
+    const drinksByCafeId = new Map<number, typeof allDrinks>();
+    for (const drink of allDrinks) {
+      if (!drinksByCafeId.has(drink.cafeId)) {
+        drinksByCafeId.set(drink.cafeId, []);
+      }
+      drinksByCafeId.get(drink.cafeId)!.push(drink);
+    }
+
+    // Batch fetch review snippets if search was performed
+    let reviewSnippetsByCafeId = new Map<number, ReviewSnippet[]>();
+    if (search && search.trim().length > 0 && cafeIds.length > 0) {
+      // Sanitize search query using centralized helper
+      const searchTerm = sanitizeSearchQuery(search);
+
+      const allReviewSnippets = await db
+        .select({
+          cafeId: userReviews.cafeId,
+          id: userReviews.id,
+          content: userReviews.content,
+          tags: userReviews.tags,
+          overallRating: userReviews.overallRating,
+          createdAt: userReviews.createdAt
+        })
+        .from(userReviews)
+        .where(and(
+          inArray(userReviews.cafeId, cafeIds),
+          eq(userReviews.moderationStatus, 'approved'),
+          eq(userReviews.isPublic, true),
+          or(
+            like(sql`LOWER(${userReviews.content})`, searchTerm),
+            like(sql`LOWER(${userReviews.tags})`, searchTerm)
+          )
+        ))
+        .orderBy(sql`${userReviews.overallRating} DESC`);
+
+      // Group snippets by cafe ID (limit to MAX_SNIPPETS_PER_CAFE per cafe)
+      // Parse tags from JSON string to array with error handling
+      for (const snippet of allReviewSnippets) {
+        if (!reviewSnippetsByCafeId.has(snippet.cafeId)) {
+          reviewSnippetsByCafeId.set(snippet.cafeId, []);
         }
+        const cafeSnippets = reviewSnippetsByCafeId.get(snippet.cafeId)!;
+        if (cafeSnippets.length < SEARCH_CONSTANTS.MAX_SNIPPETS_PER_CAFE) {
+          // Parse tags from JSON string to match ReviewSnippet type
+          let parsedTags: string[] | null = null;
+          if (snippet.tags) {
+            try {
+              parsedTags = JSON.parse(snippet.tags);
+              // Validate that parsed tags is an array
+              if (!Array.isArray(parsedTags)) {
+                console.error(`Invalid tags format for review ${snippet.id}: expected array, got ${typeof parsedTags}`);
+                parsedTags = null;
+              }
+            } catch (error) {
+              console.error(`Failed to parse tags for review ${snippet.id}:`, error);
+              parsedTags = null;
+            }
+          }
 
-        return {
-          ...cafe,
-          displayScore,
-          drinks: cafeDrinks,
-        };
-      })
-    );
+          const parsedSnippet: ReviewSnippet = {
+            id: snippet.id,
+            content: snippet.content,
+            tags: parsedTags,
+            overallRating: snippet.overallRating,
+            createdAt: snippet.createdAt || new Date().toISOString(),
+          };
+          cafeSnippets.push(parsedSnippet);
+        }
+      }
+    }
+
+    // Build cafe data with drinks and review snippets
+    const cafesWithScores = cafesList.map((cafe) => {
+      const cafeDrinks = drinksByCafeId.get(cafe.id) || [];
+
+      // Calculate display score: default drink OR highest score
+      let displayScore: number | null = null;
+      if (cafeDrinks.length > 0) {
+        const defaultDrink = cafeDrinks.find(d => d.isDefault);
+        if (defaultDrink) {
+          displayScore = defaultDrink.score;
+        } else {
+          displayScore = Math.max(...cafeDrinks.map(d => d.score));
+        }
+      }
+
+      const reviewSnippets = reviewSnippetsByCafeId.get(cafe.id) || [];
+
+      return {
+        ...cafe,
+        displayScore,
+        drinks: cafeDrinks,
+        // Truncate snippets for display (tags already parsed earlier)
+        reviewSnippets: reviewSnippets.map(snippet => ({
+          ...snippet,
+          content: snippet.content.length > SEARCH_CONSTANTS.SNIPPET_TRUNCATE_LENGTH
+            ? snippet.content.substring(0, SEARCH_CONSTANTS.SNIPPET_TRUNCATE_LENGTH) + '...'
+            : snippet.content
+        }))
+      };
+    });
 
     // Get total count for this filter
     const countResult = await db

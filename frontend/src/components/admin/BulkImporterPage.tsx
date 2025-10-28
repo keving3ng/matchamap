@@ -65,7 +65,7 @@ export const BulkImporterPage: React.FC = () => {
       ]
 
       // Call backend import endpoint
-      const response = await api.admin.bulkImportCafes({
+      const response = await api.cafes.import({
         cafes: cafesToImport as any // CsvCafe is compatible with Partial<Cafe> for import
       })
 
