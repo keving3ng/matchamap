@@ -480,7 +480,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
                 >
                   <div className="flex items-start gap-3">
                     {event.featured && (
-                      <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2 flex-shrink-0" title="Featured Event" />
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2 flex-shrink-0" title={COPY.events.featuredEvent} />
                     )}
                     <div className="flex-1">
                       <h4 className="font-bold text-gray-800 mb-1">{event.title}</h4>
