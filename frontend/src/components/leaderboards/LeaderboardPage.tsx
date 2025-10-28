@@ -3,7 +3,7 @@ import { COPY } from '../../constants/copy'
 import { api } from '../../utils/api'
 import { useAuthStore } from '../../stores/authStore'
 import { useUserFeatures } from '../../hooks/useUserFeatures'
-import { PrimaryButton, SecondaryButton, TertiaryButton } from '../ui'
+import { PrimaryButton } from '../ui'
 import { Skeleton } from '../ui'
 
 // Types for leaderboard data
@@ -16,23 +16,24 @@ interface LeaderboardEntry {
   location?: string | null
 }
 
-interface PassportEntry extends LeaderboardEntry {
-  totalCheckins: number
-  passportCompletion: number
-}
+// TODO: Implement leaderboard entry types when implementing leaderboard features
+// interface PassportEntry extends LeaderboardEntry {
+//   totalCheckins: number
+//   passportCompletion: number
+// }
 
-interface ReviewerEntry extends LeaderboardEntry {
-  totalReviews: number
-  reputationScore: number
-}
+// interface ReviewerEntry extends LeaderboardEntry {
+//   totalReviews: number
+//   reputationScore: number
+// }
 
-interface ContributorEntry extends LeaderboardEntry {
-  totalReviews: number
-  totalPhotos: number
-  totalFavorites: number
-  totalContributions: number
-  reputationScore: number
-}
+// interface ContributorEntry extends LeaderboardEntry {
+//   totalReviews: number
+//   totalPhotos: number
+//   totalFavorites: number
+//   totalContributions: number
+//   reputationScore: number
+// }
 
 type LeaderboardType = 'passport' | 'reviewers' | 'contributors'
 type TimePeriod = 'all' | 'monthly'
@@ -43,7 +44,7 @@ interface LeaderboardPageProps {
 
 export const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ className = '' }) => {
   const { isAuthenticated } = useAuthStore()
-  const { hasUserSocial } = useUserFeatures()
+  const { isUserSocialEnabled } = useUserFeatures()
   
   // State
   const [activeTab, setActiveTab] = useState<LeaderboardType>('passport')
@@ -107,14 +108,14 @@ export const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ className = ''
 
   // Effects
   useEffect(() => {
-    if (hasUserSocial) {
+    if (isUserSocialEnabled) {
       fetchLeaderboard()
       fetchUserRank()
     }
-  }, [activeTab, timePeriod, selectedCity, hasUserSocial])
+  }, [activeTab, timePeriod, selectedCity, isUserSocialEnabled])
 
   // Don't render if social features are disabled
-  if (!hasUserSocial) {
+  if (!isUserSocialEnabled) {
     return null
   }
 

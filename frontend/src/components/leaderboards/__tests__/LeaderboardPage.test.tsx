@@ -130,12 +130,19 @@ describe('LeaderboardPage', () => {
   beforeEach(() => {
     // Reset all mocks
     vi.clearAllMocks()
-    
+
     // Default mock implementations
     vi.mocked(useUserFeatures).mockReturnValue({
-      hasUserAccounts: true,
-      hasUserProfiles: true,
-      hasUserSocial: true,
+      isUserAccountsEnabled: true,
+      isUserProfilesEnabled: true,
+      isUserSocialEnabled: true,
+      isUserCheckinsEnabled: true,
+      isUserReviewsEnabled: true,
+      isUserPhotosEnabled: true,
+      isUserFollowingEnabled: true,
+      isUserFavoritesEnabled: true,
+      isUserListsEnabled: true,
+      hasAnyUserFeatures: true,
     })
     
     vi.mocked(useAuthStore).mockReturnValue({
