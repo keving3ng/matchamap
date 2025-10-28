@@ -25,7 +25,7 @@ export async function getPassportLeaderboard(
     const limit = Math.min(parseInt(url.searchParams.get('limit') || `${DEFAULT_LIMIT}`), MAX_LIMIT);
 
     // Validate city parameter if provided
-    if (city && !VALID_CITY_KEYS.includes(city as any)) {
+    if (city && !validateCityKey(city)) {
       return errorResponse('Invalid city parameter', 400, request as Request, env);
     }
 
@@ -76,7 +76,7 @@ export async function getPassportLeaderboard(
         limit,
         generatedAt: new Date().toISOString(),
       },
-    }, 200, request as Request, env, `public, max-age=`);
+    }, 200, request as Request, env, `public, max-age=${CACHE_TTL}`);
 
   } catch (error) {
     console.error('Error fetching passport leaderboard:', error);
@@ -98,7 +98,7 @@ export async function getReviewerLeaderboard(
     const city = url.searchParams.get('city');
     const limit = Math.min(parseInt(url.searchParams.get('limit') || `${DEFAULT_LIMIT}`), MAX_LIMIT);
 
-    if (city && !VALID_CITY_KEYS.includes(city as any)) {
+    if (city && !validateCityKey(city)) {
       return errorResponse('Invalid city parameter', 400, request as Request, env);
     }
 
@@ -146,7 +146,7 @@ export async function getReviewerLeaderboard(
         limit,
         generatedAt: new Date().toISOString(),
       },
-    }, 200, request as Request, env, `public, max-age=`);
+    }, 200, request as Request, env, `public, max-age=${CACHE_TTL}`);
 
   } catch (error) {
     console.error('Error fetching reviewer leaderboard:', error);
@@ -168,7 +168,7 @@ export async function getContributorLeaderboard(
     const city = url.searchParams.get('city');
     const limit = Math.min(parseInt(url.searchParams.get('limit') || `${DEFAULT_LIMIT}`), MAX_LIMIT);
 
-    if (city && !VALID_CITY_KEYS.includes(city as any)) {
+    if (city && !validateCityKey(city)) {
       return errorResponse('Invalid city parameter', 400, request as Request, env);
     }
 
@@ -219,7 +219,7 @@ export async function getContributorLeaderboard(
         limit,
         generatedAt: new Date().toISOString(),
       },
-    }, 200, request as Request, env, `public, max-age=`);
+    }, 200, request as Request, env, `public, max-age=${CACHE_TTL}`);
 
   } catch (error) {
     console.error('Error fetching contributor leaderboard:', error);
@@ -246,7 +246,7 @@ export async function getUserRank(
     const period = url.searchParams.get('period') || 'all';
     const city = url.searchParams.get('city');
 
-    if (city && !VALID_CITY_KEYS.includes(city as any)) {
+    if (city && !validateCityKey(city)) {
       return errorResponse('Invalid city parameter', 400, request as Request, env);
     }
 
@@ -331,7 +331,7 @@ export async function getUserRank(
         userId,
         generatedAt: new Date().toISOString(),
       },
-    }, 200, request as Request, env, `public, max-age=`);
+    }, 200, request as Request, env, `public, max-age=${CACHE_TTL}`);
 
   } catch (error) {
     console.error('Error fetching user rank:', error);

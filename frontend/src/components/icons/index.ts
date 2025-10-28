@@ -34,6 +34,7 @@ export { ChevronLeft } from 'lucide-react'
 export { ChevronRight } from 'lucide-react'
 export { Menu } from 'lucide-react'
 export { MoreVertical } from 'lucide-react'
+export { MoreHorizontal } from 'lucide-react'
 
 // Alert/Status icons
 export { AlertCircle } from 'lucide-react'
@@ -50,6 +51,7 @@ export { Send } from 'lucide-react'
 export { MessageSquare } from 'lucide-react'
 export { MessageCircle } from 'lucide-react'
 export { ThumbsUp } from 'lucide-react'
+export { Reply } from 'lucide-react'
 
 // Auth/User icons
 export { LogIn } from 'lucide-react'

@@ -134,16 +134,9 @@ describe.skip('LeaderboardPage', () => {
 
     // Default mock implementations
     vi.mocked(useUserFeatures).mockReturnValue({
-      isUserAccountsEnabled: true,
-      isUserProfilesEnabled: true,
+      hasUserAccounts: true,
+      hasUserProfiles: true,
       isUserSocialEnabled: true,
-      isUserCheckinsEnabled: true,
-      isUserReviewsEnabled: true,
-      isUserPhotosEnabled: true,
-      isUserFollowingEnabled: true,
-      isUserFavoritesEnabled: true,
-      isUserListsEnabled: true,
-      hasAnyUserFeatures: true,
     })
     
     vi.mocked(useAuthStore).mockReturnValue({
@@ -168,7 +161,7 @@ describe.skip('LeaderboardPage', () => {
       vi.mocked(useUserFeatures).mockReturnValue({
         hasUserAccounts: true,
         hasUserProfiles: true,
-        hasUserSocial: false,
+        isUserSocialEnabled: false,
       })
 
       const { container } = renderLeaderboardPage()
@@ -336,9 +329,12 @@ describe.skip('LeaderboardPage', () => {
 
       renderLeaderboardPage()
       
-      // Should show multiple skeleton loaders
-      const skeletons = screen.getAllByTestId(/skeleton|loading/)
-      expect(skeletons.length).toBeGreaterThan(0)
+      // Should show heading while loading
+      const heading = screen.getByRole('heading', { name: /leaderboards/i })
+      expect(heading).toBeInTheDocument()
+
+      // Data should not be present yet (still loading)
+      expect(screen.queryByText('matcha_master')).not.toBeInTheDocument()
     })
   })
 
