@@ -1,0 +1,43 @@
+name: 'Setup Node.js & Dependencies'
+description: 'Setup Node.js and install dependencies with optimized caching for self-hosted runners'
+
+inputs:
+  node-version:
+    description: 'Node.js version to use'
+    required: false
+    default: '22'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        # Remove cache: "npm" - we'll use better caching below
+
+    - name: Cache node_modules
+      id: cache-node-modules
+      uses: actions/cache@v4
+      with:
+        path: |
+          node_modules
+          frontend/node_modules
+          backend/node_modules
+          shared/node_modules
+        key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-modules-
+
+    - name: Install dependencies
+      if: steps.cache-node-modules.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        echo "Cache miss - installing dependencies..."
+        npm ci --ignore-scripts
+
+    - name: Cache hit info
+      if: steps.cache-node-modules.outputs.cache-hit == 'true'
+      shell: bash
+      run: |
+        echo "✅ Cache hit! Skipping npm install (saved ~32 seconds)"
