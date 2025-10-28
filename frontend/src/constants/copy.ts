@@ -598,6 +598,34 @@ export const COPY = {
     loadError: 'Failed to load reviews',
     tryAgain: 'Please try again',
     retry: 'Retry',
+
+    // Comments (Phase 2F)
+    comments: 'Comments',
+    addComment: 'Add a comment',
+    writeComment: 'Write a comment...',
+    reply: 'Reply',
+    replyTo: (username: string) => `Reply to ${username}`,
+    showReplies: (count: number) => `Show ${count} repl${count === 1 ? 'y' : 'ies'}`,
+    hideReplies: 'Hide replies',
+    edit: 'Edit',
+    delete: 'Delete',
+    like: 'Like',
+    unlike: 'Unlike',
+    likes: (count: number) => `${count} like${count === 1 ? '' : 's'}`,
+    noComments: 'No comments yet',
+    beFirstToComment: 'Be the first to comment!',
+    commenting: 'Commenting...',
+    commentAdded: 'Comment added successfully',
+    commentUpdated: 'Comment updated successfully',
+    commentDeleted: 'Comment deleted successfully',
+    commentError: 'Failed to post comment. Please try again.',
+    deleteConfirm: 'Are you sure you want to delete this comment?',
+    commentTooShort: 'Comment cannot be empty',
+    commentTooLong: (max: number) => `Comment must be less than ${max} characters`,
+    loadCommentsError: 'Failed to load comments',
+    postComment: 'Post Comment',
+    cancel: 'Cancel',
+    save: 'Save',
   },
 
   // Photos & Gallery (Phase 2C)
@@ -730,7 +758,7 @@ export const COPY = {
     // Follow Lists
     followers: 'Followers',
     followersTitle: (username: string) => `${username}'s Followers`,
-    followingTitle: () => `Following`,
+    followingTitle: (username: string) => `Following`,
     followersCount: (count: number) => `${count} ${count === 1 ? 'follower' : 'followers'}`,
     followingCount: (count: number) => `${count} following`,
     

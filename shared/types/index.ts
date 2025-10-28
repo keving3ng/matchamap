@@ -385,6 +385,44 @@ export interface ReviewHelpful {
 }
 
 // ============================================================================
+// REVIEW COMMENT TYPES (Phase 2F)
+// ============================================================================
+
+export interface ReviewComment {
+  id: number
+  reviewId: number
+  userId: number
+  parentCommentId?: number | null
+  
+  // Content
+  content: string
+  
+  // Engagement
+  likeCount: number
+  
+  // Moderation
+  moderationStatus: ReviewModerationStatus
+  moderatedBy?: number
+  moderatedAt?: string
+  moderationNotes?: string
+  
+  // Timestamps
+  createdAt: string
+  updatedAt: string
+  
+  // Relations (populated by backend)
+  user?: PublicUserProfile
+  replies?: ReviewComment[] // For nested display
+}
+
+export interface ReviewCommentLike {
+  id: number
+  commentId: number
+  userId: number
+  createdAt: string
+}
+
+// ============================================================================
 // USER FAVORITES TYPES (Phase 2A - Foundation)
 // ============================================================================
 

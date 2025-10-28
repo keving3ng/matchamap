@@ -155,24 +155,8 @@ export async function unfollowUser(request: AuthenticatedRequest, env: Env): Pro
       return errorResponse('User not found', HTTP_STATUS.NOT_FOUND, request as Request, env);
     }
 
-    // Check if follow relationship exists
-    const existingFollow = await db
-      .select()
-      .from(userFollows)
-      .where(
-        and(
-          eq(userFollows.followerId, request.user.userId),
-          eq(userFollows.followingId, targetUser.id)
-        )
-      )
-      .get();
-
-    if (!existingFollow) {
-      return badRequestResponse('Not following this user', request as Request, env);
-    }
-
     // Remove follow relationship
-    await db
+    const result = await db
       .delete(userFollows)
       .where(
         and(
@@ -181,6 +165,10 @@ export async function unfollowUser(request: AuthenticatedRequest, env: Env): Pro
         )
       )
       .run();
+
+    if (result.changes === 0) {
+      return badRequestResponse('Not following this user', request as Request, env);
+    }
 
     // Update counts for both users
     await Promise.all([

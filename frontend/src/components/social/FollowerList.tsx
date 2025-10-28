@@ -63,7 +63,7 @@ export const FollowerList: React.FC<FollowerListProps> = ({
 
   const title = type === 'followers'
     ? COPY.social.followersTitle(username)
-    : COPY.social.followingTitle()
+    : COPY.social.followingTitle(username)
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
