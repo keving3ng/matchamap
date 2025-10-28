@@ -179,11 +179,19 @@ export const waitlist = sqliteTable('waitlist', {
   referralSource: text('referral_source'), // Optional - how they found us
   converted: integer('converted', { mode: 'boolean' }).default(false), // Track if converted to user
   userId: integer('user_id').references(() => users.id), // Link to user if converted
+  
+  // Fraud detection fields
+  isFlaggedFraud: integer('is_flagged_fraud', { mode: 'boolean' }).default(false),
+  fraudScore: real('fraud_score').default(0.0), // 0-1 scale, where 1 is definitely fraud
+  fraudReason: text('fraud_reason'), // Comma-separated reasons
+  signupIp: text('signup_ip'), // IP address for rate limiting detection
+  
   createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
   convertedAt: text('converted_at'),
 }, (table) => ({
   emailIdx: index('waitlist_email_idx').on(table.email),
   convertedIdx: index('waitlist_converted_idx').on(table.converted),
+  fraudIdx: index('waitlist_fraud_idx').on(table.isFlaggedFraud),
 }));
 
 // User check-ins / passport tracking

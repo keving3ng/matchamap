@@ -1,44 +1,24 @@
 import React, { useState, useEffect } from 'react'
-import { Download, ArrowUpDown, Users, TrendingUp, Calendar, Percent } from '@/components/icons'
+import { Download, ArrowUpDown, Users, TrendingUp, Calendar, Percent, Eye, EyeOff, AlertTriangle } from '@/components/icons'
 import { api } from '../../utils/api'
 import { COPY } from '../../constants/copy'
 import { PrimaryButton, SecondaryButton, StatusBadge } from '../ui'
 import { Skeleton } from '../ui'
 import { formatDate, formatDateForCSV } from '../../utils/dateFormatter'
-
-interface WaitlistEntry {
-  id: number
-  email: string
-  referralSource?: string
-  converted: boolean
-  userId?: number
-  createdAt: string
-  convertedAt?: string
-}
-
-interface WaitlistData {
-  waitlist: WaitlistEntry[]
-  total: number
-  hasMore: boolean
-  analytics: {
-    totalSignups: number
-    dailySignups: number
-    weeklySignups: number
-    conversionRate: number
-  }
-}
+import type { WaitlistResponse } from '../../../../shared/types'
 
 type SortField = 'email' | 'created_at'
 type SortOrder = 'asc' | 'desc'
 
 export const WaitlistPage: React.FC = () => {
-  const [data, setData] = useState<WaitlistData | null>(null)
+  const [data, setData] = useState<WaitlistResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [sortField, setSortField] = useState<SortField>('created_at')
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc')
   const [offset, setOffset] = useState(0)
+  const [showFraudStats, setShowFraudStats] = useState(false)
 
   const LIMIT = 50
 
@@ -97,7 +77,7 @@ export const WaitlistPage: React.FC = () => {
   const handleExportCSV = () => {
     if (!data?.waitlist.length) return
 
-    const headers = ['Email', 'Signup Date', 'Referral Source', 'Status', 'Converted At']
+    const headers = ['Email', 'Signup Date', 'Referral Source', 'Status', 'Converted At', 'Fraud Flag', 'Fraud Score', 'Fraud Reasons']
     const csvContent = [
       headers.join(','),
       ...data.waitlist.map(entry => [
@@ -105,7 +85,10 @@ export const WaitlistPage: React.FC = () => {
         formatDateForCSV(entry.createdAt),
         entry.referralSource || '',
         entry.converted ? 'Converted' : 'Pending',
-        entry.convertedAt ? formatDateForCSV(entry.convertedAt) : ''
+        entry.convertedAt ? formatDateForCSV(entry.convertedAt) : '',
+        entry.isFlaggedFraud ? 'Yes' : 'No',
+        entry.fraudScore?.toFixed(2) || '0.00',
+        entry.fraudReason || ''
       ].map(field => `"${field}"`).join(','))
     ].join('\n')
 
@@ -174,13 +157,23 @@ export const WaitlistPage: React.FC = () => {
           </p>
         </div>
         
-        <PrimaryButton
-          icon={Download}
-          onClick={handleExportCSV}
-          disabled={!data?.waitlist.length}
-        >
-          {COPY.admin.waitlist.exportCsv}
-        </PrimaryButton>
+        <div className="flex gap-3">
+          <SecondaryButton
+            onClick={() => setShowFraudStats(!showFraudStats)}
+            className="text-sm"
+          >
+            {showFraudStats ? <EyeOff size={16} /> : <Eye size={16} />}
+            {showFraudStats ? COPY.admin.waitlist.hideFraudStats : COPY.admin.waitlist.showFraudStats}
+          </SecondaryButton>
+          
+          <PrimaryButton
+            icon={Download}
+            onClick={handleExportCSV}
+            disabled={!data?.waitlist.length}
+          >
+            {COPY.admin.waitlist.exportCsv}
+          </PrimaryButton>
+        </div>
       </div>
 
       {/* Analytics Cards */}
@@ -244,6 +237,23 @@ export const WaitlistPage: React.FC = () => {
         </div>
       )}
 
+      {/* Fraud Analytics Card - Only visible when toggle is on */}
+      {showFraudStats && data?.analytics.suspectedFraud !== undefined && data.analytics.suspectedFraud > 0 && (
+        <div className="bg-white rounded-lg border border-red-200 p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-red-100 rounded-lg">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">{COPY.admin.waitlist.suspectedFraud}</p>
+              <p className="text-xl font-semibold text-red-700">
+                {COPY.admin.waitlist.suspectedFraudCount(data.analytics.suspectedFraud)}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Waitlist Table */}
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         {/* Table Header */}
@@ -299,6 +309,11 @@ export const WaitlistPage: React.FC = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     {COPY.admin.waitlist.status}
                   </th>
+                  {showFraudStats && (
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Fraud
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -320,6 +335,22 @@ export const WaitlistPage: React.FC = () => {
                         {entry.converted ? COPY.admin.waitlist.converted : COPY.admin.waitlist.pending}
                       </StatusBadge>
                     </td>
+                    {showFraudStats && (
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {entry.isFlaggedFraud && (
+                          <div className="space-y-1">
+                            <StatusBadge variant="error" size="sm">
+                              {COPY.admin.waitlist.suspectedFraud}
+                            </StatusBadge>
+                            {entry.fraudReason && (
+                              <p className="text-xs text-gray-500">
+                                {entry.fraudReason}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
