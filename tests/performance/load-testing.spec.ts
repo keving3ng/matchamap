@@ -1,12 +1,10 @@
 import { test, expect } from '@playwright/test'
+import { setupAuthenticatedPage } from '../e2e/helpers/auth'
 
 test.describe('Performance & Load Testing', () => {
   test('activity feed performance with large dataset', async ({ page }) => {
     // Setup: login as user
-    await page.goto('/login')
-    await page.fill('[name="email"]', 'test@example.com')
-    await page.fill('[name="password"]', 'password123')
-    await page.click('button[type="submit"]')
+    await setupAuthenticatedPage(page, 'regular')
     
     // Navigate to activity feed
     await page.goto('/feed')
@@ -79,10 +77,7 @@ test.describe('Performance & Load Testing', () => {
 
   test('photo upload performance with large files', async ({ page }) => {
     // Login first
-    await page.goto('/login')
-    await page.fill('[name="email"]', 'test@example.com')
-    await page.fill('[name="password"]', 'password123')
-    await page.click('button[type="submit"]')
+    await setupAuthenticatedPage(page, 'regular')
     
     // Navigate to cafe to upload photo
     await page.goto('/cafes/1')
