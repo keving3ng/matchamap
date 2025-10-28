@@ -89,15 +89,44 @@ MatchaMap implements comprehensive security measures to protect user data and sy
 3. ✅ **Weak passwords**: Enhanced requirements and validation
 
 ### Outstanding Issues
+
+#### High Priority
 1. **Token Storage (High Priority)**: Tokens currently stored in sessionStorage (XSS vulnerable)
    - **Planned Fix**: Implement httpOnly cookies for token storage
-   - **Timeline**: Next sprint
+   - **Timeline**: Next sprint (BEFORE LAUNCH)
    - **Mitigation**: Strict CSP headers, XSS prevention measures
 
-2. **Rate Limiting (Medium Priority)**: In-memory store resets on Worker restart
+2. **Rate Limiting (High Priority)**: In-memory store resets on Worker restart
    - **Planned Fix**: Implement Cloudflare Durable Objects for persistence
    - **Timeline**: Q2 2025
    - **Mitigation**: Cloudflare's built-in DDoS protection
+
+#### Medium Priority
+3. **CSRF Protection**: No CSRF protection mechanism implemented
+   - **Planned Fix**: Implement CSRF tokens for state-changing operations
+   - **Timeline**: 1 week
+   - **Mitigation**: SameSite cookie attributes partially mitigate
+
+4. **Photo Content Validation**: Only MIME type and size validation
+   - **Planned Fix**: Add magic number validation and content inspection
+   - **Timeline**: 1 week
+   - **Mitigation**: R2 storage isolation, moderation queue
+
+5. **Information Disclosure**: Some error messages may leak system details
+   - **Planned Fix**: Sanitize all error messages for production
+   - **Timeline**: 2 weeks
+   - **Mitigation**: Detailed logging server-side only
+
+#### Low Priority
+6. **Timing Attacks**: User enumeration possible through login timing
+   - **Planned Fix**: Implement constant-time comparison
+   - **Timeline**: 1 month
+   - **Mitigation**: Rate limiting reduces attack effectiveness
+
+7. **Content Moderation**: Basic regex patterns easily bypassed
+   - **Planned Fix**: Implement advanced pattern matching or ML-based detection
+   - **Timeline**: 3 months
+   - **Mitigation**: Manual moderation queue, admin oversight
 
 ## Deployment Security Checklist
 
@@ -116,6 +145,45 @@ MatchaMap implements comprehensive security measures to protect user data and sy
 - [ ] Track rate limit violations
 - [ ] Alert on admin privilege escalations
 - [ ] Review audit logs weekly
+
+## Security Testing
+
+### Automated Security Testing
+Run these commands before any production deployment:
+
+```bash
+# Dependency vulnerability scan
+npm audit --audit-level=high
+
+# Type safety verification  
+npm run typecheck
+
+# Security-focused tests
+npm test                     # Includes security test suite
+cd backend && npm test       # Backend security tests
+
+# Bundle analysis (check for malicious dependencies)
+npm run build:analyze
+```
+
+### Manual Security Verification
+See `docs/security-testing-guide.md` for comprehensive testing procedures:
+
+- Authentication security tests
+- Authorization bypass tests  
+- File upload security tests
+- Input validation tests
+- Rate limiting verification
+- Privacy controls testing
+
+### Pre-Launch Security Checklist
+- [ ] All high-priority security issues resolved
+- [ ] Security test suite passing
+- [ ] Rate limiting properly configured
+- [ ] Admin panel access restricted
+- [ ] File upload validation working
+- [ ] Error messages sanitized for production
+- [ ] Audit logging enabled and tested
 
 ## Incident Response
 
