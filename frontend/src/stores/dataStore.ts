@@ -43,7 +43,6 @@ export const useDataStore = create<DataStore>((set, get) => ({
     city?: string
     search?: string
     userMinRating?: number
-    userMaxRating?: number
     minScore?: number
     maxPrice?: number
     limit?: number
@@ -53,7 +52,7 @@ export const useDataStore = create<DataStore>((set, get) => ({
     const filterParams = typeof filters === 'string' ? { city: filters } : filters
 
     // Skip if already fetched (unless cache busting) and no filters provided
-    if (!bustCache && get().cafesFetched && !filterParams?.search && !filterParams?.userMinRating && !filterParams?.userMaxRating) return
+    if (!bustCache && get().cafesFetched && !filterParams?.search && !filterParams?.userMinRating) return
 
     try {
       set({ isLoading: true, error: null })
@@ -61,7 +60,6 @@ export const useDataStore = create<DataStore>((set, get) => ({
         city: filterParams?.city,
         search: filterParams?.search,
         userMinRating: filterParams?.userMinRating,
-        userMaxRating: filterParams?.userMaxRating,
         minScore: filterParams?.minScore,
         maxPrice: filterParams?.maxPrice,
         limit: filterParams?.limit || 500,

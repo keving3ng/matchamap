@@ -16,7 +16,6 @@ type SortOption = 'rating' | 'distance'
 interface FilterState {
   minRating: number | null
   userMinRating: number | null // User review rating filter
-  userMaxRating: number | null // User review rating filter
   maxDistance: number | null // in kilometers
   selectedCities: CityKey[] // multi-select cities
   openNow: boolean
@@ -33,7 +32,6 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
   const [filters, setFilters] = useState<FilterState>({
     minRating: null,
     userMinRating: null,
-    userMaxRating: null,
     maxDistance: null,
     selectedCities: [],
     openNow: false
@@ -81,7 +79,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
   }, [cafes])
 
   // Check if any filters or search are active
-  const hasActiveFilters = filters.minRating !== null || filters.userMinRating !== null || filters.userMaxRating !== null || filters.maxDistance !== null || filters.selectedCities.length > 0 || filters.openNow || selectedDrinkType !== null
+  const hasActiveFilters = filters.minRating !== null || filters.userMinRating !== null || filters.maxDistance !== null || filters.selectedCities.length > 0 || filters.openNow || selectedDrinkType !== null
 
   const hasActiveSearch = searchQuery.trim().length > 0
 
@@ -111,7 +109,6 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
     setFilters({
       minRating: null,
       userMinRating: null,
-      userMaxRating: null,
       maxDistance: null,
       selectedCities: [],
       openNow: false
@@ -153,10 +150,18 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
 
     // Then apply filters
     filtered = filtered.filter(cafe => {
-      // Rating filter
+      // Admin rating filter (displayScore)
       if (filters.minRating !== null) {
         const cafeScore = cafe.displayScore ?? 0
         if (cafeScore < filters.minRating) {
+          return false
+        }
+      }
+
+      // User rating filter (userRatingAvg)
+      if (filters.userMinRating !== null) {
+        const userRating = cafe.userRatingAvg ?? 0
+        if (userRating < filters.userMinRating) {
           return false
         }
       }

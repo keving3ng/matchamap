@@ -13,6 +13,13 @@ import { logAdminAction, generateChangesSummary } from '../utils/auditLog';
 import { AuthenticatedRequest } from '../middleware/auth';
 import { VALID_CITY_KEYS } from '../../../shared/types';
 
+// Search constants
+const SEARCH_CONSTANTS = {
+  MAX_SEARCH_LENGTH: 100, // Maximum length of search query
+  SNIPPET_TRUNCATE_LENGTH: 150, // Characters to show in review snippet
+  MAX_SNIPPETS_PER_CAFE: 2, // Maximum review snippets to return per cafe
+} as const;
+
 // GET /api/cafes - List cafes with optional filtering and search
 export async function listCafes(request: IRequest, env: Env): Promise<Response> {
   try {
@@ -22,7 +29,6 @@ export async function listCafes(request: IRequest, env: Env): Promise<Response> 
     const maxPrice = url.searchParams.get('maxPrice');
     const search = url.searchParams.get('search'); // New search parameter
     const userMinRating = url.searchParams.get('userMinRating'); // User rating filter
-    const userMaxRating = url.searchParams.get('userMaxRating'); // User rating filter
     const limit = Math.min(parseInt(url.searchParams.get('limit') || PAGINATION_CONSTANTS.CAFES_DEFAULT_LIMIT.toString()), PAGINATION_CONSTANTS.CAFES_MAX_LIMIT);
     const offset = parseInt(url.searchParams.get('offset') || PAGINATION_CONSTANTS.DEFAULT_OFFSET.toString());
 
@@ -39,18 +45,11 @@ export async function listCafes(request: IRequest, env: Env): Promise<Response> 
       conditions.push(eq(cafes.city, city));
     }
 
-    // Add user rating filters if provided
+    // Add user rating filter if provided
     if (userMinRating) {
       const minRating = parseFloat(userMinRating);
       if (!isNaN(minRating) && minRating >= 0 && minRating <= 10) {
         conditions.push(gte(cafes.userRatingAvg, minRating));
-      }
-    }
-
-    if (userMaxRating) {
-      const maxRating = parseFloat(userMaxRating);
-      if (!isNaN(maxRating) && maxRating >= 0 && maxRating <= 10) {
-        conditions.push(lte(cafes.userRatingAvg, maxRating));
       }
     }
 
@@ -59,8 +58,7 @@ export async function listCafes(request: IRequest, env: Env): Promise<Response> 
     // If search query provided, perform enhanced search
     if (search && search.trim().length > 0) {
       // Sanitize search query
-      const MAX_SEARCH_LENGTH = 100;
-      const sanitizedSearch = search.trim().substring(0, MAX_SEARCH_LENGTH);
+      const sanitizedSearch = search.trim().substring(0, SEARCH_CONSTANTS.MAX_SEARCH_LENGTH);
 
       // Escape SQL wildcards to prevent abuse
       const escapedSearch = sanitizedSearch.replace(/[%_]/g, '\\$&');
@@ -165,8 +163,7 @@ export async function listCafes(request: IRequest, env: Env): Promise<Response> 
     let reviewSnippetsByCafeId = new Map<number, any[]>();
     if (search && search.trim().length > 0 && cafeIds.length > 0) {
       // Sanitize search query (reuse same logic)
-      const MAX_SEARCH_LENGTH = 100;
-      const sanitizedSearch = search.trim().substring(0, MAX_SEARCH_LENGTH);
+      const sanitizedSearch = search.trim().substring(0, SEARCH_CONSTANTS.MAX_SEARCH_LENGTH);
       const escapedSearch = sanitizedSearch.replace(/[%_]/g, '\\$&');
       const searchTerm = `%${escapedSearch.toLowerCase()}%`;
 
@@ -191,13 +188,13 @@ export async function listCafes(request: IRequest, env: Env): Promise<Response> 
         ))
         .orderBy(sql`${userReviews.overallRating} DESC`);
 
-      // Group snippets by cafe ID (limit to 2 per cafe)
+      // Group snippets by cafe ID (limit to MAX_SNIPPETS_PER_CAFE per cafe)
       for (const snippet of allReviewSnippets) {
         if (!reviewSnippetsByCafeId.has(snippet.cafeId)) {
           reviewSnippetsByCafeId.set(snippet.cafeId, []);
         }
         const cafeSnippets = reviewSnippetsByCafeId.get(snippet.cafeId)!;
-        if (cafeSnippets.length < 2) {
+        if (cafeSnippets.length < SEARCH_CONSTANTS.MAX_SNIPPETS_PER_CAFE) {
           cafeSnippets.push(snippet);
         }
       }
@@ -230,8 +227,8 @@ export async function listCafes(request: IRequest, env: Env): Promise<Response> 
               ...snippet,
               tags: snippet.tags ? JSON.parse(snippet.tags) : null,
               // Truncate content for snippet display
-              content: snippet.content.length > 150
-                ? snippet.content.substring(0, 150) + '...'
+              content: snippet.content.length > SEARCH_CONSTANTS.SNIPPET_TRUNCATE_LENGTH
+                ? snippet.content.substring(0, SEARCH_CONSTANTS.SNIPPET_TRUNCATE_LENGTH) + '...'
                 : snippet.content
             };
           } catch (error) {
@@ -240,8 +237,8 @@ export async function listCafes(request: IRequest, env: Env): Promise<Response> 
             return {
               ...snippet,
               tags: null,
-              content: snippet.content.length > 150
-                ? snippet.content.substring(0, 150) + '...'
+              content: snippet.content.length > SEARCH_CONSTANTS.SNIPPET_TRUNCATE_LENGTH
+                ? snippet.content.substring(0, SEARCH_CONSTANTS.SNIPPET_TRUNCATE_LENGTH) + '...'
                 : snippet.content
             };
           }
