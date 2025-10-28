@@ -9,11 +9,14 @@ on:
       - main
 
 jobs:
-  # Static analysis jobs that can run in parallel
-  static-analysis:
-    name: Static Analysis
+  # ============================================================================
+  # PHASE 1: PARALLEL CRITICAL CHECKS
+  # TypeScript type checking - critical path for build
+  # ============================================================================
+  typecheck:
+    name: TypeScript Type Checking
     runs-on: self-hosted
-    timeout-minutes: 5
+    timeout-minutes: 3
 
     steps:
       - name: Checkout code
@@ -31,19 +34,13 @@ jobs:
       - name: Run type checking
         run: npm run typecheck
 
-      - name: Run linter
-        run: npm run lint:ci
-        continue-on-error: true
-
-      - name: Run security audit
-        run: npm audit --audit-level=high --production
-        continue-on-error: true
-
-  # Frontend tests with coverage
-  frontend-tests:
-    name: Frontend Tests
+  # ============================================================================
+  # PARALLEL STATIC ANALYSIS (Non-blocking for build)
+  # ============================================================================
+  lint:
+    name: Linting
     runs-on: self-hosted
-    timeout-minutes: 10
+    timeout-minutes: 3
 
     steps:
       - name: Checkout code
@@ -58,15 +55,67 @@ jobs:
       - name: Install dependencies
         run: npm ci --ignore-scripts
 
-      - name: Run frontend tests with coverage
-        run: npm run test:coverage --workspace=frontend
+      - name: Run linter
+        run: npm run lint:ci
+        continue-on-error: true  # Don't block on lint warnings
+
+  security-audit:
+    name: Security Audit
+    runs-on: self-hosted
+    timeout-minutes: 2
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Run security audit
+        run: npm audit --audit-level=high --production
+        continue-on-error: true  # Don't block on audit findings
+
+  # ============================================================================
+  # FRONTEND TESTS (Chunked for parallel execution)
+  # 1079 tests split into 4 shards for ~4-5 min time savings
+  # ============================================================================
+  frontend-tests:
+    name: Frontend Tests (Shard ${{ matrix.shard }})
+    runs-on: self-hosted
+    timeout-minutes: 5
+    strategy:
+      matrix:
+        shard: [1, 2, 3, 4]
+      fail-fast: false  # Run all shards even if one fails
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Run frontend tests (shard ${{ matrix.shard }}/4)
+        run: npm run test:coverage --workspace=frontend -- --shard=${{ matrix.shard }}/4
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         if: always()
         with:
           files: ./frontend/coverage/coverage-final.json
-          flags: frontend
+          flags: frontend-shard-${{ matrix.shard }}
           token: ${{ secrets.CODECOV_TOKEN }}
         continue-on-error: true
 
@@ -77,7 +126,10 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
         continue-on-error: true
 
-  # Backend tests
+  # ============================================================================
+  # BACKEND TESTS
+  # Fixed: removed continue-on-error to properly fail CI on test failures
+  # ============================================================================
   backend-tests:
     name: Backend Tests
     runs-on: self-hosted
@@ -98,13 +150,16 @@ jobs:
 
       - name: Run backend tests
         run: npm run test:ci --workspace=backend
-        continue-on-error: true
+        # Removed continue-on-error - backend tests should now fail CI if they fail
 
-  # Build job (depends on static-analysis passing)
+  # ============================================================================
+  # BUILD (Only depends on typecheck, not lint/audit)
+  # Starts ~2-3 minutes earlier than before
+  # ============================================================================
   build:
     name: Build
     runs-on: self-hosted
-    needs: [static-analysis]
+    needs: [typecheck]  # Only needs typecheck to pass!
     timeout-minutes: 10
 
     steps:
@@ -123,26 +178,8 @@ jobs:
       - name: Run build
         run: npm run build
 
-  # Summary job to ensure all required jobs passed
-  ci-success:
-    name: CI Success
-    runs-on: self-hosted
-    needs: [static-analysis, frontend-tests, build]
-    if: always()
-
-    steps:
-      - name: Check all jobs status
-        run: |
-          if [ "${{ needs.static-analysis.result }}" != "success" ]; then
-            echo "❌ Static analysis failed"
-            exit 1
-          fi
-          if [ "${{ needs.frontend-tests.result }}" != "success" ]; then
-            echo "❌ Frontend tests failed"
-            exit 1
-          fi
-          if [ "${{ needs.build.result }}" != "success" ]; then
-            echo "❌ Build failed"
-            exit 1
-          fi
-          echo "✅ All required checks passed!"
+  # ============================================================================
+  # NOTE: ci-success job removed
+  # GitHub's native status checks are sufficient - configure branch protection
+  # to require: typecheck, lint, security-audit, frontend-tests, backend-tests, build
+  # ============================================================================
