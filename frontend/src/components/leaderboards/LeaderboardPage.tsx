@@ -16,7 +16,7 @@ interface LeaderboardEntry {
   location?: string | null
 }
 
-// TODO: Implement leaderboard entry types when implementing leaderboard features
+// Unused types commented out - will be needed when leaderboard data fetching is implemented
 // interface PassportEntry extends LeaderboardEntry {
 //   totalCheckins: number
 //   passportCompletion: number

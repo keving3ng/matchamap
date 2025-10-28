@@ -421,7 +421,12 @@ export interface ReviewComment {
   updatedAt: string
   
   // Relations (populated by backend)
-  user?: PublicUserProfile
+  user?: {
+    id: number
+    username: string
+    displayName?: string | null
+    avatarUrl?: string | null
+  }
   replies?: ReviewComment[] // For nested display
 }
 

@@ -6,6 +6,21 @@ export const DEFAULT_DRINK_NAME = 'Iced Matcha Latte'
 export const DEFAULT_CITY = 'toronto'
 
 /**
+ * Validate city key against allowed values
+ */
+export function validateCityKey(city: string): boolean {
+  const VALID_CITY_KEYS = [
+    'toronto',
+    'montreal',
+    'new york',
+    'mississauga',
+    'scarborough',
+    'tokyo',
+  ]
+  return VALID_CITY_KEYS.includes(city.toLowerCase())
+}
+
+/**
  * Validation schema for drink data
  */
 export const drinkSchema = z.object({

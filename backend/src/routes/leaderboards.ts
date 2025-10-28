@@ -76,7 +76,7 @@ export async function getPassportLeaderboard(
         limit,
         generatedAt: new Date().toISOString(),
       },
-    }, 200, request as Request, env, `public, max-age=`);
+    }, 200, request as Request, env, `public, max-age=${CACHE_TTL}`);
 
   } catch (error) {
     console.error('Error fetching passport leaderboard:', error);
@@ -103,9 +103,9 @@ export async function getReviewerLeaderboard(
     }
 
     const db = getDb(env.DB);
-    
+
     const conditions = [];
-    
+
     if (period === 'monthly') {
       const monthStart = new Date();
       monthStart.setDate(1);
@@ -146,7 +146,7 @@ export async function getReviewerLeaderboard(
         limit,
         generatedAt: new Date().toISOString(),
       },
-    }, 200, request as Request, env, `public, max-age=`);
+    }, 200, request as Request, env, `public, max-age=${CACHE_TTL}`);
 
   } catch (error) {
     console.error('Error fetching reviewer leaderboard:', error);
@@ -173,9 +173,9 @@ export async function getContributorLeaderboard(
     }
 
     const db = getDb(env.DB);
-    
+
     const conditions = [];
-    
+
     if (period === 'monthly') {
       const monthStart = new Date();
       monthStart.setDate(1);
@@ -219,7 +219,7 @@ export async function getContributorLeaderboard(
         limit,
         generatedAt: new Date().toISOString(),
       },
-    }, 200, request as Request, env, `public, max-age=`);
+    }, 200, request as Request, env, `public, max-age=${CACHE_TTL}`);
 
   } catch (error) {
     console.error('Error fetching contributor leaderboard:', error);
@@ -331,7 +331,7 @@ export async function getUserRank(
         userId,
         generatedAt: new Date().toISOString(),
       },
-    }, 200, request as Request, env, `public, max-age=`);
+    }, 200, request as Request, env, `public, max-age=${CACHE_TTL}`);
 
   } catch (error) {
     console.error('Error fetching user rank:', error);

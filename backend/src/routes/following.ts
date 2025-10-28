@@ -156,7 +156,7 @@ export async function unfollowUser(request: AuthenticatedRequest, env: Env): Pro
     }
 
     // Remove follow relationship
-    const result = await db
+    await db
       .delete(userFollows)
       .where(
         and(
@@ -166,8 +166,20 @@ export async function unfollowUser(request: AuthenticatedRequest, env: Env): Pro
       )
       .run();
 
-    if ((result.meta.changes || 0) === 0) {
-      return badRequestResponse('Not following this user', request as Request, env);
+    // Verify the relationship was actually deleted
+    const stillFollowing = await db
+      .select()
+      .from(userFollows)
+      .where(
+        and(
+          eq(userFollows.followerId, request.user.userId),
+          eq(userFollows.followingId, targetUser.id)
+        )
+      )
+      .get();
+
+    if (stillFollowing) {
+      return errorResponse('Failed to remove follow relationship', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
     }
 
     // Update counts for both users
