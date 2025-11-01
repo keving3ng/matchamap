@@ -158,6 +158,7 @@ export function createMultipartRequest(
 export async function cleanupTestData(env: any) {
   // Clean up in reverse dependency order
   // Note: feed_items table was removed in migration 0015
+  // Note: cities table never existed - city is a column in cafes table
   try {
     await env.DB.exec('DELETE FROM review_helpful');
     await env.DB.exec('DELETE FROM user_reviews');
@@ -171,7 +172,6 @@ export async function cleanupTestData(env: any) {
     await env.DB.exec('DELETE FROM events');
     await env.DB.exec('DELETE FROM sessions');
     await env.DB.exec('DELETE FROM users');
-    await env.DB.exec('DELETE FROM cities');
     await env.DB.exec('DELETE FROM waitlist');
   } catch (error) {
     // Ignore errors for tables that don't exist in test environment
@@ -180,20 +180,8 @@ export async function cleanupTestData(env: any) {
 }
 
 export async function seedTestData(env: any) {
-  // Insert test city
-  await env.DB.prepare(`
-    INSERT INTO cities (id, name, key, displayName, lat, lng, zoom, isActive) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `).bind(
-    mockCity.id,
-    mockCity.name,
-    mockCity.key,
-    mockCity.displayName,
-    mockCity.lat,
-    mockCity.lng,
-    mockCity.zoom,
-    mockCity.isActive
-  ).run();
+  // Note: No cities table - city is a column in cafes table
+  // The mockCity data is still available for tests to create cafes with city values
 
   // Insert test users
   await env.DB.prepare(`
