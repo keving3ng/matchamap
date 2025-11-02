@@ -945,6 +945,74 @@ export const COPY = {
     userAvatar: (username: string) => `${username}'s avatar`,
     sortByRank: 'Sorted by rank',
   },
+
+  // Cafe Suggestions
+  suggestions: {
+    // Form
+    title: 'Suggest a Cafe',
+    description: 'Know a great matcha spot we should add? Share it with us!',
+    nameLabel: 'Cafe Name',
+    namePlaceholder: 'Enter cafe name',
+    addressLabel: 'Address',
+    addressPlaceholder: 'Street address, city, province',
+    cityLabel: 'City',
+    cityPlaceholder: 'Select a city',
+    neighborhoodLabel: 'Neighborhood (optional)',
+    neighborhoodPlaceholder: 'e.g., Queen West, Little Italy',
+    descriptionLabel: 'Description (optional)',
+    descriptionPlaceholder: 'Tell us what makes this cafe special...',
+    googleMapsLabel: 'Google Maps URL (optional)',
+    googleMapsPlaceholder: 'https://maps.google.com/...',
+    instagramLabel: 'Instagram Handle (optional)',
+    instagramPlaceholder: '@cafename',
+    websiteLabel: 'Website (optional)',
+    websitePlaceholder: 'https://example.com',
+    submitButton: 'Submit Suggestion',
+    submitting: 'Submitting...',
+    cancelButton: 'Cancel',
+
+    // Validation
+    nameRequired: 'Cafe name is required',
+    nameMinLength: 'Cafe name must be at least 2 characters',
+    nameMaxLength: 'Cafe name must be less than 200 characters',
+    addressRequired: 'Address is required',
+    addressMinLength: 'Address must be at least 5 characters',
+    addressMaxLength: 'Address must be less than 500 characters',
+    cityRequired: 'City is required',
+    descriptionMinLength: 'Description must be at least 10 characters if provided',
+    descriptionMaxLength: 'Description must be less than 1000 characters',
+
+    // Success/Error
+    successTitle: 'Suggestion Submitted!',
+    successMessage: 'Thanks for your suggestion! We\'ll review it and add it to the map if it\'s a good fit.',
+    errorTitle: 'Submission Failed',
+    errorMessage: 'Unable to submit your suggestion. Please try again.',
+
+    // My Suggestions
+    mySuggestionsTitle: 'My Suggestions',
+    mySuggestionsEmpty: 'You haven\'t suggested any cafes yet',
+    statusPending: 'Pending Review',
+    statusApproved: 'Approved',
+    statusRejected: 'Rejected',
+    submittedOn: (date: string) => `Submitted on ${date}`,
+
+    // Admin
+    adminTitle: 'Pending Cafe Suggestions',
+    adminEmpty: 'No pending suggestions',
+    adminDescription: 'Review and moderate user-submitted cafe suggestions',
+    approveButton: 'Approve',
+    rejectButton: 'Reject',
+    adminNotesLabel: 'Admin Notes (optional)',
+    adminNotesPlaceholder: 'Internal notes about this suggestion...',
+    cafeIdLabel: 'Link to Cafe (optional)',
+    cafeIdPlaceholder: 'Enter cafe ID if already created',
+    approving: 'Approving...',
+    rejecting: 'Rejecting...',
+    approvedSuccess: 'Suggestion approved!',
+    rejectedSuccess: 'Suggestion rejected',
+    moderatedBy: (username: string) => `Moderated by ${username}`,
+    suggestedBy: (username: string) => `Suggested by ${username}`,
+  },
 } as const
 
 // Type helper to ensure type safety when accessing COPY
