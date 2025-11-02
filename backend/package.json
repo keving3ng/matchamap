@@ -28,7 +28,7 @@
     "test:coverage": "vitest --coverage"
   },
   "dependencies": {
-    "drizzle-orm": "^0.44.6",
+    "drizzle-orm": "^0.44.7",
     "itty-router": "^5.0.18",
     "jose": "^6.1.0",
     "zod": "^3.22.3"
