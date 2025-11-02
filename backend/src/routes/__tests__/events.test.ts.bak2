@@ -42,17 +42,7 @@ describe('Events Routes', () => {
       ];
 
       for (const event of events) {
-        await env.DB.prepare(`
-          INSERT INTO events (title, description, date, link, location, featured) 
-          VALUES (?, ?, ?, ?, ?, ?)
-        `).bind(
-          event.title,
-          event.description,
-          event.date,
-          event.link,
-          event.location,
-          event.featured
-        ).run();
+        await insertTestEvent(env, event);
       }
 
       const request = createTestRequest('/api/events');
@@ -76,7 +66,7 @@ describe('Events Routes', () => {
       // Insert multiple events
       for (let i = 1; i <= 5; i++) {
         await env.DB.prepare(`
-          INSERT INTO events (title, description, date, link, location, featured) 
+          INSERT INTO events (title, description, date, time, venue, link, location, featured) 
           VALUES (?, ?, ?, ?, ?, ?)
         `).bind(
           `Event ${i}`,
@@ -114,12 +104,12 @@ describe('Events Routes', () => {
     it('should filter by featured events only', async () => {
       // Insert regular and priority events
       await env.DB.prepare(`
-        INSERT INTO events (title, description, date, link, location, featured) 
+        INSERT INTO events (title, description, date, time, venue, link, location, featured) 
         VALUES (?, ?, ?, ?, ?, ?)
       `).bind('Regular Event', 'Regular description', '2024-12-01', 'https://example.com', 'Location', false).run();
 
       await env.DB.prepare(`
-        INSERT INTO events (title, description, date, link, location, featured) 
+        INSERT INTO events (title, description, date, time, venue, link, location, featured) 
         VALUES (?, ?, ?, ?, ?, ?)
       `).bind('Featured Event', 'Featured description', '2024-12-02', 'https://example.com', 'Location', true).run();
 
@@ -146,7 +136,7 @@ describe('Events Routes', () => {
 
       for (const event of events) {
         await env.DB.prepare(`
-          INSERT INTO events (title, description, date, link, location, featured) 
+          INSERT INTO events (title, description, date, time, venue, link, location, featured) 
           VALUES (?, ?, ?, ?, ?, ?)
         `).bind(event.title, 'Description', event.date, 'https://example.com', 'Location', false).run();
       }
@@ -187,7 +177,7 @@ describe('Events Routes', () => {
 
     it('should return events with all required fields', async () => {
       await env.DB.prepare(`
-        INSERT INTO events (title, description, date, link, location, featured) 
+        INSERT INTO events (title, description, date, time, venue, link, location, featured) 
         VALUES (?, ?, ?, ?, ?, ?)
       `).bind(
         mockEvent.title,
@@ -234,7 +224,7 @@ describe('Events Routes', () => {
       const futureDateStr = futureDate.toISOString().split('T')[0];
 
       await env.DB.prepare(`
-        INSERT INTO events (title, description, date, link, location, featured) 
+        INSERT INTO events (title, description, date, time, venue, link, location, featured) 
         VALUES (?, ?, ?, ?, ?, ?)
       `).bind('Future Event', 'Future description', futureDateStr, 'https://example.com', 'Location', false).run();
 
