@@ -23,6 +23,7 @@ import { getMyFavorites, addFavorite, removeFavorite, updateFavoriteNotes } from
 import { getMyBadges, checkAndAwardBadges, getBadgeDefinitions, getBadgeProgress } from './routes/badges';
 import { followUser, unfollowUser, getUserFollowers, getUserFollowing, getFollowStatus } from './routes/following';
 import { getPassportLeaderboard, getReviewerLeaderboard, getContributorLeaderboard, getUserRank } from './routes/leaderboards';
+import { handleAdminCafeStats, handleUserActivitySummary, handleFeedStats, handleEventStats } from './routes/admin-stats';
 import { requireAuth, requireAdminAuth } from './middleware/auth';
 import { authRateLimit, publicRateLimit, writeRateLimit } from './middleware/rateLimit';
 import { requireHTTPS } from './middleware/httpsOnly';
@@ -189,6 +190,12 @@ router.get('/api/admin/cafes/:id/reviews', publicRateLimit(), requireAdminAuth()
 router.get('/api/admin/cafes/:id/reviews/count', publicRateLimit(), requireAdminAuth(), getAdminCafeReviewsCount);
 router.put('/api/admin/reviews/:id/moderate', writeRateLimit(), requireAdminAuth(), moderateReview);
 router.put('/api/admin/comments/:id/moderate', writeRateLimit(), requireAdminAuth(), moderateComment);
+
+// Admin analytics endpoints
+router.get('/api/admin/cafe-stats', publicRateLimit(), requireAdminAuth(), handleAdminCafeStats);
+router.get('/api/admin/user-activity-summary', publicRateLimit(), requireAdminAuth(), handleUserActivitySummary);
+router.get('/api/admin/feed-stats', publicRateLimit(), requireAdminAuth(), handleFeedStats);
+router.get('/api/admin/event-stats', publicRateLimit(), requireAdminAuth(), handleEventStats);
 
 // Photo serving endpoints (for local dev with local R2)
 router.get('/photos/*', servePhoto);
