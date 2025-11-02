@@ -57,6 +57,7 @@ export { Reply } from 'lucide-react'
 export { LogIn } from 'lucide-react'
 export { LogOut } from 'lucide-react'
 export { Shield } from 'lucide-react'
+export { ShieldCheck } from 'lucide-react'
 export { Eye } from 'lucide-react'
 export { EyeOff } from 'lucide-react'
 
@@ -121,6 +122,7 @@ export { Sparkles } from 'lucide-react'
 export { Loader2 } from 'lucide-react'
 export { RotateCcw } from 'lucide-react'
 export { Power } from 'lucide-react'
+export { Lightbulb } from 'lucide-react'
 
 // Type export for LucideIcon
 export { type LucideIcon } from 'lucide-react'
