@@ -1,6 +1,6 @@
 # MatchaMap Documentation Guide
 
-**Last Updated:** 2025-10-14
+**Last Updated:** 2025-11-02
 
 This guide helps you navigate the MatchaMap documentation and find exactly what you need for your task.
 
@@ -10,24 +10,39 @@ This guide helps you navigate the MatchaMap documentation and find exactly what 
 
 | I want to... | Read this |
 |-------------|-----------|
-| **Understand the project basics** | `../CLAUDE.md` (start here!) |
+| **Understand the project basics** | `../CLAUDE.md` (start here!) ⭐ |
+| **Contribute to the project** | `../CONTRIBUTING.md` ⭐ NEW |
 | **Set up the backend locally** | `QUICKSTART_BACKEND.md` |
 | **Deploy to production** | `DEPLOYMENT.md` |
-| **Understand the full architecture** | `TECH_SPEC.md` |
+| **Understand the full architecture** | `architecture/system-overview.md` ⭐ NEW |
+| **View API endpoints** | `api/api-reference.md` ⭐ NEW |
+| **View database schema** | `api/database-schema.md` ⭐ NEW |
 
 ---
 
 ## 📋 By Task Type
+
+### New to MatchaMap?
+
+| Task | Document |
+|------|----------|
+| **First time contributing** | `../CONTRIBUTING.md` ⭐ |
+| **Understand development patterns** | `../CLAUDE.md` ⭐ |
+| **Local development setup** | `QUICKSTART_BACKEND.md` |
+| **Run tests** | `TESTING.md` |
 
 ### Backend Development
 
 | Task | Document |
 |------|----------|
 | Set up backend locally | `QUICKSTART_BACKEND.md` |
-| Understand backend architecture | `backend-prd.md` |
-| Database schema reference | `TECH_SPEC.md` → Database Schema section |
-| API endpoints reference | `TECH_SPEC.md` → API Architecture section |
+| Understand system architecture | `architecture/system-overview.md` ⭐ |
+| Database schema reference | `api/database-schema.md` ⭐ (Complete - 15 tables) |
+| API endpoints reference | `api/api-reference.md` ⭐ (60+ endpoints) |
+| Authentication system | `architecture/auth-flow.md` ⭐ (JWT details) |
+| Photo upload system | `architecture/photo-upload-flow.md` ⭐ |
 | Add/modify database tables | `TECH_SPEC.md` + Drizzle migrations |
+| Backend architecture (legacy) | `backend-prd.md` |
 
 ### Frontend Development
 
@@ -49,7 +64,7 @@ This guide helps you navigate the MatchaMap documentation and find exactly what 
 | Track analytics/metrics | `metrics-tracking-prd.md` |
 | Add a new city | `adding-new-cities.md` |
 | Integrate Google Places | `GOOGLE_PLACES_SETUP.md` |
-| Implement photo uploads | `photo-upload-guide.md` ⭐ NEW |
+| Implement photo uploads | `photo-upload-guide.md` ⭐ |
 
 ### Deployment & Operations
 
@@ -61,6 +76,23 @@ This guide helps you navigate the MatchaMap documentation and find exactly what 
 | Set up custom domains | `DEPLOYMENT.md` → Custom Domain Setup |
 | Monitor performance | `DEPLOYMENT.md` → Monitoring & Analytics |
 | Rollback a deployment | `DEPLOYMENT.md` → Rollback Procedures |
+
+### User Guides
+
+| Task | Document |
+|------|----------|
+| Getting started as a user | `user-guide/getting-started.md` ⭐ |
+| Writing reviews | `user-guide/reviews.md` (planned) |
+| Using Matcha Passport | `user-guide/passport.md` (planned) |
+| Social features | `user-guide/social.md` (planned) |
+
+### Admin Guides
+
+| Task | Document |
+|------|----------|
+| Moderate content | `admin/moderation.md` ⭐ |
+| Manage users | `admin/user-management.md` (planned) |
+| View analytics | `admin/dashboard.md` (planned) |
 
 ### Technical Reference
 
@@ -74,6 +106,117 @@ This guide helps you navigate the MatchaMap documentation and find exactly what 
 ---
 
 ## 📚 Document Descriptions
+
+### 🆕 New Documentation (2025-11-02)
+
+#### `api/api-reference.md` ⭐ NEW
+**Purpose:** Complete API endpoint documentation
+**Contents:**
+- 60+ documented endpoints with examples
+- Request/response formats for all endpoints
+- Authentication requirements
+- Error codes and handling
+- Rate limiting policies
+- CORS configuration
+
+**When to use:** Integrating with API, understanding endpoints, debugging API calls
+
+---
+
+#### `api/database-schema.md` ⭐ NEW
+**Purpose:** Comprehensive database schema reference
+**Contents:**
+- Complete documentation of all 15 tables
+- Column descriptions and data types
+- Foreign key relationships
+- Index strategy
+- Migration history
+- ER diagrams
+
+**When to use:** Understanding data model, writing queries, adding tables
+
+---
+
+#### `architecture/system-overview.md` ⭐ NEW
+**Purpose:** High-level system architecture
+**Contents:**
+- Technology stack breakdown
+- Component architecture diagrams
+- Data flow explanations
+- Scalability considerations
+- Performance targets
+- Security architecture
+
+**When to use:** Understanding overall system, onboarding, architecture decisions
+
+---
+
+#### `architecture/auth-flow.md` ⭐ NEW
+**Purpose:** JWT authentication system details
+**Contents:**
+- Registration/login/logout flows
+- Token refresh mechanism
+- Session management
+- Security considerations
+- Implementation details with code examples
+
+**When to use:** Implementing auth features, debugging auth issues, security reviews
+
+---
+
+#### `architecture/photo-upload-flow.md` ⭐ NEW
+**Purpose:** Photo upload architecture
+**Contents:**
+- Upload flow step-by-step
+- R2 storage structure
+- Moderation workflow
+- Validation rules
+- Performance optimization
+
+**When to use:** Implementing photo features, understanding R2 storage
+
+---
+
+#### `user-guide/getting-started.md` ⭐ NEW
+**Purpose:** User onboarding guide
+**Contents:**
+- Creating an account
+- Exploring cafes
+- First check-in
+- Writing reviews
+- Using Matcha Passport
+- Profile customization
+
+**When to use:** Understanding user experience, onboarding new users
+
+---
+
+#### `admin/moderation.md` ⭐ NEW
+**Purpose:** Content moderation guide for admins
+**Contents:**
+- Moderation queue workflow
+- Photo moderation guidelines
+- Review moderation
+- Common scenarios
+- Best practices
+
+**When to use:** Admin moderation tasks, understanding moderation policy
+
+---
+
+#### `CONTRIBUTING.md` ⭐ NEW
+**Purpose:** Contributor guide
+**Contents:**
+- Code of Conduct
+- Development workflow
+- Code standards
+- Testing requirements
+- Pull request process
+- Community resources
+
+**When to use:** First-time contributing, understanding contribution process
+
+---
 
 ### Core Documents
 
@@ -94,23 +237,24 @@ This guide helps you navigate the MatchaMap documentation and find exactly what 
 
 #### `TECH_SPEC.md` (Technical Specifications)
 **Location:** `docs/`
-**Purpose:** Authoritative source for database schema and API endpoints
+**Purpose:** Authoritative source for technical details
 **Contents:**
 - System architecture diagrams
-- Complete database schema (source of truth)
-- API endpoint specifications (source of truth)
+- Complete database schema (legacy - see api/database-schema.md instead)
+- API endpoint specifications (legacy - see api/api-reference.md instead)
 - Component architecture
 - Performance specifications
 - Security guidelines
 
 **When to read:** Backend development, API integration, schema changes
 
+**Note:** For database and API docs, prefer the new dedicated files in `api/` directory.
+
 ---
 
 ### Backend Documents
 
 #### `backend-prd.md` (Backend Implementation PRD)
-**Location:** `docs/`
 **Purpose:** Backend architecture and design decisions
 **Contents:**
 - Goals and success metrics
@@ -124,7 +268,6 @@ This guide helps you navigate the MatchaMap documentation and find exactly what 
 ---
 
 #### `QUICKSTART_BACKEND.md` (Backend Quick Start)
-**Location:** `docs/`
 **Purpose:** Get backend running locally in 10 minutes
 **Contents:**
 - 5-step setup process
@@ -139,7 +282,6 @@ This guide helps you navigate the MatchaMap documentation and find exactly what 
 ### Feature Documents
 
 #### `social-features-guide.md` (Social Features)
-**Location:** `docs/`
 **Purpose:** Comprehensive guide to social features
 **Contents:**
 - User profiles, check-ins, reviews, ratings
@@ -154,7 +296,6 @@ This guide helps you navigate the MatchaMap documentation and find exactly what 
 ---
 
 #### `feature-flags-guide.md` (Feature Flags)
-**Location:** `docs/`
 **Purpose:** How to enable/disable features
 **Contents:**
 - All available feature flags
@@ -167,7 +308,6 @@ This guide helps you navigate the MatchaMap documentation and find exactly what 
 ---
 
 #### `metrics-tracking-prd.md` (Analytics)
-**Location:** `docs/`
 **Purpose:** Simple counter-based metrics
 **Contents:**
 - What we track (views, clicks, passport usage)
@@ -180,7 +320,6 @@ This guide helps you navigate the MatchaMap documentation and find exactly what 
 ---
 
 #### `adding-new-cities.md` (City Management)
-**Location:** `docs/`
 **Purpose:** How to add new cities to MatchaMap
 **Contents:**
 - City key rules
@@ -192,8 +331,7 @@ This guide helps you navigate the MatchaMap documentation and find exactly what 
 
 ---
 
-#### `photo-upload-guide.md` ⭐ NEW (Photo Upload System)
-**Location:** `docs/`
+#### `photo-upload-guide.md` ⭐ (Photo Upload System)
 **Purpose:** Technical guide for photo upload infrastructure
 **Contents:**
 - Architecture overview (R2 + D1 integration)
@@ -212,7 +350,6 @@ This guide helps you navigate the MatchaMap documentation and find exactly what 
 ### Deployment Documents
 
 #### `DEPLOYMENT.md` (Deployment Guide)
-**Location:** `docs/`
 **Purpose:** Complete deployment reference
 **Contents:**
 - Local development setup
@@ -230,7 +367,6 @@ This guide helps you navigate the MatchaMap documentation and find exactly what 
 ---
 
 #### `GOOGLE_PLACES_SETUP.md` (Google Places Integration)
-**Location:** `docs/`
 **Purpose:** Set up Google Places API
 **Contents:**
 - API key generation
@@ -241,56 +377,157 @@ This guide helps you navigate the MatchaMap documentation and find exactly what 
 
 ---
 
-## 🗂️ Archive
+### Testing Documentation
 
-Historical documents for reference:
+#### `TESTING.md` (Testing Guide)
+**Purpose:** Comprehensive testing guide
+**Contents:**
+- Testing philosophy
+- Test structure and organization
+- Store testing patterns
+- Component testing best practices
+- Mocking strategies
+- Troubleshooting common issues
 
-- `archive/UI_POLISH_SUMMARY.md` - UI/UX polish work summary (completed)
+**When to read:** Writing tests, debugging test failures
+
+---
+
+#### `E2E_TESTING_GUIDE.md` (E2E Testing)
+**Purpose:** End-to-end testing with Playwright
+**Contents:**
+- E2E test setup
+- Writing E2E tests
+- Running E2E tests locally and in CI
+
+**When to read:** Writing E2E tests
+
+---
+
+#### `security-testing-guide.md` (Security Testing)
+**Purpose:** Security testing procedures
+**Contents:**
+- Security testing checklist
+- Common vulnerabilities to test
+- Security best practices
+
+**When to read:** Security audits, penetration testing
+
+---
+
+## 🗂️ Directory Structure
+
+```
+docs/
+├── README.md                          # ⭐ This file
+├── CLAUDE.md                          # Main development guide (in root)
+├── CONTRIBUTING.md                    # ⭐ Contributor guide (in root)
+│
+├── api/                               # ⭐ NEW: API Documentation
+│   ├── api-reference.md               # Complete API endpoint docs (60+ endpoints)
+│   └── database-schema.md             # Complete database schema (15 tables)
+│
+├── architecture/                      # ⭐ NEW: Architecture Documentation
+│   ├── system-overview.md             # High-level system architecture
+│   ├── auth-flow.md                   # JWT authentication details
+│   └── photo-upload-flow.md           # Photo upload architecture
+│
+├── user-guide/                        # ⭐ NEW: User Documentation
+│   └── getting-started.md             # User onboarding guide
+│
+├── admin/                             # ⭐ NEW: Admin Documentation
+│   └── moderation.md                  # Content moderation guide
+│
+├── development/                       # Development guides (planned)
+├── operations/                        # Operations guides (planned)
+├── migrations/                        # Migration guides (planned)
+│
+├── TECH_SPEC.md                       # Legacy technical spec
+├── DEPLOYMENT.md                      # Deployment guide
+├── TESTING.md                         # Testing guide
+├── E2E_TESTING_GUIDE.md              # E2E testing guide
+├── QUICKSTART_BACKEND.md             # Backend quick start
+├── backend-prd.md                     # Backend PRD
+├── feature-flags-guide.md            # Feature flags
+├── social-features-guide.md          # Social features
+├── photo-upload-guide.md             # Photo upload technical guide
+├── metrics-tracking-prd.md           # Analytics tracking
+├── adding-new-cities.md              # City management
+├── GOOGLE_PLACES_SETUP.md            # Google Places setup
+├── security-testing-guide.md         # Security testing
+│
+└── archive/                          # Historical documents
+    └── UI_POLISH_SUMMARY.md          # UI polish summary (completed)
+```
 
 ---
 
 ## 📖 Reading Paths
 
 ### New Developer Onboarding
-1. Read `../CLAUDE.md` (understand patterns and principles)
-2. Read `QUICKSTART_BACKEND.md` (set up backend locally)
-3. Skim `TECH_SPEC.md` (understand architecture)
-4. Reference other docs as needed
+
+1. **Read `CONTRIBUTING.md`** - Understand how to contribute ⭐
+2. **Read `../CLAUDE.md`** - Learn patterns and principles ⭐
+3. **Read `architecture/system-overview.md`** - Understand system architecture ⭐
+4. **Read `QUICKSTART_BACKEND.md`** - Set up backend locally
+5. **Skim `api/database-schema.md`** - Understand data model ⭐
+6. **Skim `api/api-reference.md`** - Familiarize with API ⭐
+7. **Reference other docs as needed**
 
 ### Implementing a New Feature
-1. Check `feature-flags-guide.md` (add feature flag)
-2. Reference `TECH_SPEC.md` (schema/API patterns)
-3. Follow `../CLAUDE.md` patterns (copy constants, API client, shared UI)
-4. Add analytics via `metrics-tracking-prd.md` (if needed)
+
+1. **Check `feature-flags-guide.md`** - Add feature flag
+2. **Review `architecture/system-overview.md`** - Understand system
+3. **Reference `api/database-schema.md`** - Check data model
+4. **Reference `api/api-reference.md`** - Use API patterns
+5. **Follow `../CLAUDE.md` patterns** - Copy constants, API client, shared UI
+6. **Write tests per `TESTING.md`**
+7. **Add analytics via `metrics-tracking-prd.md`** (if needed)
 
 ### Deploying to Production
-1. Read `DEPLOYMENT.md` completely
-2. Follow deployment checklist
-3. Test endpoints
-4. Monitor via dashboard
+
+1. **Read `DEPLOYMENT.md` completely**
+2. **Follow deployment checklist**
+3. **Test endpoints**
+4. **Monitor via dashboard**
 
 ### Adding Social Features
-1. Read `social-features-guide.md` completely
-2. Follow implementation phases
-3. Update feature flags via `feature-flags-guide.md`
-4. Deploy via `DEPLOYMENT.md`
+
+1. **Read `social-features-guide.md` completely**
+2. **Follow implementation phases**
+3. **Update feature flags via `feature-flags-guide.md`**
+4. **Deploy via `DEPLOYMENT.md`**
 
 ### Implementing Photo Uploads
-1. Read `photo-upload-guide.md` (backend implementation)
-2. Set up R2 buckets via `DEPLOYMENT.md` (R2 Bucket Setup section)
-3. Run database migrations (0012_add_user_reviews_tables.sql)
-4. Test endpoints via curl/Postman
-5. Implement frontend UI components
+
+1. **Read `photo-upload-guide.md`** - Backend implementation
+2. **Read `architecture/photo-upload-flow.md`** - Architecture overview ⭐
+3. **Set up R2 buckets via `DEPLOYMENT.md`** (R2 Bucket Setup section)
+4. **Run database migrations** (0012_add_user_reviews_tables.sql)
+5. **Test endpoints via curl/Postman**
+6. **Implement frontend UI components**
+
+### Understanding Authentication
+
+1. **Read `architecture/auth-flow.md`** - JWT implementation ⭐
+2. **Review `api/api-reference.md`** - Auth endpoints ⭐
+3. **Check `api/database-schema.md`** - Users and sessions tables ⭐
 
 ---
 
 ## 🔍 Finding Specific Information
 
 ### Database Schema
-→ `TECH_SPEC.md` (Database Schema section) - **Authoritative source**
+→ **`api/database-schema.md`** ⭐ - Complete documentation of all 15 tables
 
 ### API Endpoints
-→ `TECH_SPEC.md` (API Architecture section) - **Authoritative source**
+→ **`api/api-reference.md`** ⭐ - 60+ endpoints with examples
+
+### System Architecture
+→ **`architecture/system-overview.md`** ⭐ - Technology stack, data flow, scaling
+
+### Authentication Details
+→ **`architecture/auth-flow.md`** ⭐ - JWT implementation, session management
 
 ### Copy Constants
 → `../CLAUDE.md` (Copy & Internationalization section)
@@ -311,28 +548,33 @@ Historical documents for reference:
 → `metrics-tracking-prd.md`
 
 ### Photo Upload System
-→ `photo-upload-guide.md`
+→ `photo-upload-guide.md` + `architecture/photo-upload-flow.md` ⭐
+
+### Contributing Guidelines
+→ **`../CONTRIBUTING.md`** ⭐
 
 ---
 
 ## ✨ Tips
 
-1. **Start with CLAUDE.md** - It contains the patterns you'll use daily
-2. **Use TECH_SPEC.md as reference** - Don't memorize schemas, look them up
-3. **Keep docs open** - Reference frequently instead of guessing
-4. **Update as you go** - Found outdated info? Update the doc!
-5. **Follow the patterns** - CLAUDE.md patterns are battle-tested
+1. **Start with CONTRIBUTING.md** - Essential for new contributors ⭐
+2. **Use CLAUDE.md daily** - Contains patterns you'll use every day
+3. **Use new API/DB docs as reference** - Don't memorize, look them up ⭐
+4. **Keep docs open** - Reference frequently instead of guessing
+5. **Update as you go** - Found outdated info? Update the doc!
+6. **Follow the patterns** - CLAUDE.md patterns are battle-tested
 
 ---
 
 ## 📝 Documentation Principles
 
-- **Single source of truth** - Database schema and API endpoints live in `TECH_SPEC.md` only
+- **Single source of truth** - Database schema and API endpoints in dedicated files
 - **Minimal duplication** - Docs reference each other instead of duplicating content
 - **Task-oriented** - Organized by what you're trying to accomplish
 - **Quick reference** - Fast lookups for common tasks
 - **Examples included** - Show, don't just tell
+- **Keep updated** - Documentation is code - keep it current
 
 ---
 
-**Need help?** Check the main `CLAUDE.md` for common commands and troubleshooting.
+**Need help?** Check the main `CLAUDE.md` for common commands and troubleshooting, or see `CONTRIBUTING.md` for getting help from the community.
