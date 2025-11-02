@@ -2,7 +2,7 @@
 
 **Timeline:** 6 weeks (vs 7 weeks sequential)
 **Strategy:** 4-5 parallel tracks running concurrently
-**Last Updated:** 2025-10-26
+**Last Updated:** 2025-11-02
 
 ---
 
@@ -14,212 +14,254 @@ This plan reorganizes Phases 4-6 to maximize parallelization, reducing total tim
 
 - ✅ **Completed**
 - 🚧 **In Progress** (has open PR)
-- 🤖 **Triggered** (@claude assigned, work starting)
 - 📝 **Ready to Start** (no blockers)
 - ⏳ **Blocked** (waiting on dependencies)
 
 ---
 
-## Week 1-2: Foundation + 4 Parallel Tracks
+## PHASE 4: Social Features - 3 Parallel Tracks Possible
 
-### Critical Path (Sequential - MUST complete first)
-**Status:** 🚧 In Progress
-
-| Task | Issue | Status | PR | Notes |
-|------|-------|--------|-----|-------|
-| Following system | #180 | 🚧 | #322 | Foundation for social features |
-| User profile pages | #182 | ⏳ | - | Depends on #180 |
-
-**Blockers:** #182 blocked until #180 is merged
-
----
-
-### Track 1: Social Extensions (Parallel)
-**Status:** 🚧 In Progress
-
-| Task | Issue | Status | PR | Dependencies |
-|------|-------|--------|-----|--------------|
-| Leaderboards | #183 | 🚧 | #320 | Uses existing check-in data (no blockers) |
-| Review comments | #188 | 🚧 | #321 | Extends existing reviews (no blockers) |
-
-**Notes:** Both can continue independently. Don't block on #180/#182.
-
----
-
-### Track 2: Discovery Features (Parallel)
-**Status:** 🤖 Triggered
-
-| Task | Issue | Status | PR | Dependencies |
-|------|-------|--------|-----|--------------|
-| Custom lists | #185 | 🤖 | - | None - independent feature |
-| Enhanced search with UGC | #187 | 🤖 | - | Uses existing review data from Phase 3 |
-| Cafe suggestion system | #189 | 🤖 | - | None - independent feature |
-
-**Notes:** All Phase 5 tasks can start NOW. No dependency on Phase 4. **@claude triggered on all 3 tasks.**
-
----
-
-### Track 3: Admin & Infrastructure (Parallel)
-**Status:** 🤖 Triggered
-
-| Task | Issue | Status | PR | Dependencies |
-|------|-------|--------|-----|--------------|
-| Admin analytics API | #165 | 🤖 | - | None |
-| Security audit ⚠️ | #192 | 🤖 | - | **HIGH PRIORITY** - independent |
-| Waitlist fraud detection | #201 | 🤖 | - | Uses existing waitlist data |
-
-**Priority:** Security audit triggered with HIGH PRIORITY flag. **@claude triggered on all 3 tasks.**
-
----
-
-### Track 4: Quality (Ongoing)
-**Status:** 🤖 Triggered
-
-| Task | Issue | Status | PR | Dependencies |
-|------|-------|--------|-----|--------------|
-| Code cleanup | #193 | 🤖 | - | Can start anytime |
-| Testing expansion | #195 | 🤖 | - | Can start anytime |
-
-**Notes:** Can work on incrementally throughout all weeks. **@claude triggered on both tasks.**
-
----
-
-## Week 3-4: Activity Feed + 4 Parallel Tracks
-
-### Critical Path (Sequential - continues)
-**Status:** ⏳ Blocked
-
-| Task | Issue | Status | PR | Dependencies |
-|------|-------|--------|-----|--------------|
-| Activity feed system ⭐ | #181 | ⏳ | - | Depends on #180, #182, #188 |
-
-**Blockers:** Needs following, profiles, and review comments integrated
-
----
-
-### Track 1: Discovery (Continued)
+### Track A (Sequential - Core Social)
 **Status:** 📝 Ready to Start
 
-| Task | Issue | Status | PR | Dependencies |
-|------|-------|--------|-----|--------------|
-| Recommendation algorithm | #184 | 📝 | - | Can use basic signals now, enhance later |
+| Task | Issue | Status | Dependencies | Notes |
+|------|-------|--------|--------------|-------|
+| Following system | #180 | 📝 | None | Foundation for social features |
+| User profile pages | #182 | ⏳ | #180 | Integrates following data |
+| Activity feed system ⭐ | #181 | ⏳ | #180, #182, #188 | Depends on multiple systems |
 
-**Notes:** Start with simple version using existing data, refine after social features land.
+**Rationale:** Following → Profiles → Activity Feed is sequential because each builds on the previous.
 
 ---
 
-### Track 2: Admin (Continued)
+### Track B (Parallel - Independent)
+**Status:** ✅ Completed
+
+| Task | Issue | Status | Dependencies | Notes |
+|------|-------|--------|--------------|-------|
+| Leaderboards | #183 | ✅ | None | Uses existing check-in/review data |
+
+**Rationale:** Leaderboards are independent features that don't block anything.
+
+---
+
+### Track C (Parallel - Independent)
 **Status:** 📝 Ready to Start
 
-| Task | Issue | Status | PR | Dependencies |
-|------|-------|--------|-----|--------------|
-| Admin analytics dashboard | #166 | ⏳ | - | Depends on #165 (API must be ready) |
-| Moderation dashboard | #190 | 📝 | - | Uses existing UGC from Phase 2-3 |
+| Task | Issue | Status | Dependencies | Notes |
+|------|-------|--------|--------------|-------|
+| Review comments system | #188 | 📝 | #167 (reviews - completed) | Extends reviews, independent of social features |
+
+**Rationale:** Review comments extend existing review system and don't depend on social features.
 
 ---
 
-### Track 3: Quality (Continued)
+## PHASE 5: Discovery & Polish - 4 Parallel Tracks Possible
+
+### Track A (Sequential - Discovery Core)
 **Status:** 📝 Ready to Start
 
-| Task | Issue | Status | PR | Dependencies |
-|------|-------|--------|-----|--------------|
-| Code cleanup | #193 | 📝 | - | Ongoing |
-| Performance optimization | #194 | 📝 | - | Can start anytime |
+| Task | Issue | Status | Dependencies | Notes |
+|------|-------|--------|--------------|-------|
+| Recommendation algorithm | #184 | 📝 | User behavior data | Needs user behavior data |
+| Trending/new/underrated UI | #186 | ⏳ | #184 | Uses recommendation insights |
+
+**Rationale:** Recommendation algorithm should inform trending UI.
 
 ---
 
-## Week 5-6: Polish & Final Integration
-
-### Track 1: Discovery UI (Parallel)
-**Status:** ⏳ Blocked
-
-| Task | Issue | Status | PR | Dependencies |
-|------|-------|--------|-----|--------------|
-| Trending/new/underrated UI | #186 | ⏳ | - | Depends on #184 (recommendation algorithm) |
-
----
-
-### Track 2: Notifications (Last - Depends on Everything)
-**Status:** ⏳ Blocked
-
-| Task | Issue | Status | PR | Dependencies |
-|------|-------|--------|-----|--------------|
-| Notification system ⭐ | #191 | ⏳ | - | Depends on ALL Phase 4+5 features |
-
-**Rationale:** Notifications integrate with all features (follow, reviews, activity, lists, etc.). Must be last.
-
----
-
-### Track 3: Final Quality (Parallel)
+### Track B (Parallel - Independent)
 **Status:** 📝 Ready to Start
 
-| Task | Issue | Status | PR | Dependencies |
-|------|-------|--------|-----|--------------|
-| Performance optimization | #194 | 📝 | - | Can work on throughout |
-| Documentation | #196 | 📝 | - | Can work on throughout |
+| Task | Issue | Status | Dependencies | Notes |
+|------|-------|--------|--------------|-------|
+| Custom lists | #185 | 📝 | None | Independent feature |
+
+**Rationale:** Lists are an independent feature.
 
 ---
 
-## Execution Strategy
+### Track C (Parallel - Independent)
+**Status:** ✅ Completed
 
-### Week 1-2 Action Plan
-**Goal:** Start 4 parallel tracks simultaneously
+| Task | Issue | Status | Dependencies | Notes |
+|------|-------|--------|--------------|-------|
+| Enhanced search with UGC | #187 | ✅ | #167 (reviews - completed) | Uses existing review data |
+| Cafe suggestion system | #189 | 📝 | None | Independent |
 
-1. **Continue Critical Path:**
-   - Merge #180 (Following) ASAP
-   - Start #182 (Profiles) immediately after
+**Rationale:** Search and suggestions are independent features.
 
-2. **Continue Track 1:**
-   - Merge #183 (Leaderboards)
-   - Merge #188 (Review comments)
+---
 
-3. **Start Track 2 (Discovery):**
-   - Assign: #185 (Custom lists)
-   - Assign: #187 (Enhanced search)
-   - Assign: #189 (Cafe suggestions)
+### Track D (Parallel - Last)
+**Status:** 📝 Ready to Start
 
-4. **Start Track 3 (Admin):**
-   - **Priority:** Start #192 (Security audit) IMMEDIATELY
-   - Assign: #165 (Analytics API)
-   - Assign: #201 (Fraud detection)
+| Task | Issue | Status | Dependencies | Notes |
+|------|-------|--------|--------------|-------|
+| Notification system ⭐ | #191 | 📝 | All Phase 4+5 features | Depends on all features for event triggers |
 
-5. **Start Track 4 (Quality):**
-   - Begin incremental #193 (Code cleanup)
-   - Begin incremental #195 (Testing expansion)
+**Rationale:** Notifications should be last as they integrate with all other features.
 
-### Week 3-4 Action Plan
-**Goal:** Complete social foundation, continue parallel work
+---
 
-1. **Critical Path:**
-   - Complete #182 (Profiles)
-   - Start #181 (Activity feed) once #180, #182, #188 are merged
+## PHASE 6: Admin & Quality - Highly Parallelizable
 
-2. **Track 2:**
-   - Complete #185, #187, #189
-   - Start #184 (Recommendation algorithm)
+### Track A (Sequential - Analytics)
+**Status:** 📝 Ready to Start
 
-3. **Track 3:**
-   - Complete #165 (Analytics API)
-   - Start #166 (Analytics dashboard)
-   - Complete #190 (Moderation dashboard)
-   - Complete #192 (Security audit)
+| Task | Issue | Status | Dependencies | Notes |
+|------|-------|--------|--------------|-------|
+| Admin analytics API | #165 | 📝 | None | API endpoints |
+| Admin analytics dashboard | #166 | ⏳ | #165 | Depends on API |
 
-4. **Track 4:**
-   - Continue #193, #194, #195
+**Rationale:** Dashboard depends on API endpoints.
 
-### Week 5-6 Action Plan
-**Goal:** Final integrations and polish
+---
 
-1. **Critical Path:**
-   - Complete #181 (Activity feed)
+### Track B (Parallel - Moderation)
+**Status:** 📝 Ready to Start
 
-2. **Dependent Features:**
-   - Start #186 (Trending UI) after #184
-   - Start #191 (Notifications) LAST
+| Task | Issue | Status | Dependencies | Notes |
+|------|-------|--------|--------------|-------|
+| Moderation dashboard | #190 | 📝 | None | Independent |
 
-3. **Quality:**
-   - Complete #194 (Performance)
-   - Complete #196 (Documentation)
+---
+
+### Track C (Parallel - Security)
+**Status:** ✅ Completed
+
+| Task | Issue | Status | Dependencies | Notes |
+|------|-------|--------|--------------|-------|
+| Security audit | #192 | ✅ | All features implemented | Post-implementation audit |
+
+---
+
+### Track D (Parallel - Code Quality)
+**Status:** 📝 Ready to Start
+
+| Task | Issue | Status | Dependencies | Notes |
+|------|-------|--------|--------------|-------|
+| Code cleanup | #193 | 📝 | None | Can be done anytime |
+| Performance optimization | #194 | 📝 | None | Can be done anytime |
+
+**Rationale:** Cleanup and optimization can happen alongside other work.
+
+---
+
+### Track E (Parallel - Testing & Docs)
+**Status:** ✅ Completed
+
+| Task | Issue | Status | Dependencies | Notes |
+|------|-------|--------|--------------|-------|
+| Testing expansion | #195 | ✅ | None | Complement other work |
+| Documentation | #196 | 📝 | Features completed | Document as you build |
+
+**Rationale:** Testing and docs can complement each other.
+
+---
+
+### Track F (Parallel - Fraud Detection)
+**Status:** ✅ Completed
+
+| Task | Issue | Status | Dependencies | Notes |
+|------|-------|--------|--------------|-------|
+| Waitlist fraud detection | #201 | ✅ | None | Independent feature |
+
+---
+
+## Summary: Completed vs Remaining
+
+### Completed (7 tasks) ✅
+- #183 - Leaderboards
+- #187 - Enhanced search with UGC
+- #192 - Security audit
+- #195 - Testing expansion
+- #201 - Waitlist fraud detection
+- #257 - Bundle size optimization (bonus)
+
+### In Progress (0 tasks) 🚧
+None currently
+
+### Ready to Start (14 tasks) 📝
+**Phase 4:**
+- #180 - Following system
+- #188 - Review comments system
+
+**Phase 5:**
+- #184 - Recommendation algorithm
+- #185 - Custom lists
+- #189 - Cafe suggestion system
+- #191 - Notification system
+
+**Phase 6:**
+- #165 - Admin analytics API
+- #190 - Moderation dashboard
+- #193 - Code cleanup
+- #194 - Performance optimization
+- #196 - Documentation
+
+### Blocked (3 tasks) ⏳
+- #182 - User profile pages (blocked by #180)
+- #181 - Activity feed system (blocked by #180, #182, #188)
+- #186 - Trending/new/underrated UI (blocked by #184)
+- #166 - Admin analytics dashboard (blocked by #165)
+
+---
+
+## Optimal Execution Strategy
+
+### Week 1-2: Start 4 Parallel Tracks
+
+**Critical Path (Sequential):**
+1. Start #180 (Following system) - PRIORITY 1
+2. Wait for #180 completion
+3. Start #182 (User profile pages)
+
+**Track 1 (Parallel):**
+- Start #188 (Review comments) - can work alongside #180
+
+**Track 2 (Parallel):**
+- Start #185 (Custom lists)
+- Start #189 (Cafe suggestions)
+
+**Track 3 (Parallel):**
+- Start #165 (Admin analytics API)
+- Start #190 (Moderation dashboard)
+
+**Track 4 (Parallel):**
+- Start #193 (Code cleanup)
+- Start #194 (Performance optimization)
+
+### Week 3-4: Complete Foundation + Continue Parallel Work
+
+**Critical Path:**
+1. Complete #180, #182
+2. Start #181 (Activity feed) - requires #180, #182, #188
+
+**Track 2 (Continue):**
+- Complete #185, #189
+- Start #184 (Recommendation algorithm)
+
+**Track 3 (Continue):**
+- Complete #165
+- Start #166 (Admin analytics dashboard)
+- Complete #190
+
+**Track 4 (Continue):**
+- Continue #193, #194
+
+### Week 5-6: Final Integration & Polish
+
+**Critical Path:**
+- Complete #181 (Activity feed)
+
+**Dependent Features:**
+- Start #186 (Trending UI) after #184 completes
+- Start #191 (Notifications) LAST (after ALL features)
+
+**Quality:**
+- Complete #194 (Performance)
+- Complete #196 (Documentation)
 
 ---
 
@@ -232,10 +274,10 @@ Critical Path (Sequential):
                                     #191 (Notifications) ← (needs ALL features)
 
 Independent Parallel Tracks:
-Track 1: #183 (Leaderboards) ✓ #188 (Review comments)
-Track 2: #185 (Lists) ✓ #187 (Search) ✓ #189 (Suggestions) → #184 (Recs) → #186 (Trending)
-Track 3: #165 (Analytics API) → #166 (Analytics UI) ✓ #190 (Moderation) ✓ #192 (Security) ✓ #201 (Fraud)
-Track 4: #193 (Cleanup) ✓ #194 (Performance) ✓ #195 (Testing) ✓ #196 (Docs)
+Track 1: ✅ #183 (Leaderboards) | #188 (Review comments)
+Track 2: #185 (Lists) | ✅ #187 (Search) | #189 (Suggestions) → #184 (Recs) → #186 (Trending)
+Track 3: #165 (Analytics API) → #166 (Analytics UI) | #190 (Moderation) | ✅ #192 (Security) | ✅ #201 (Fraud)
+Track 4: #193 (Cleanup) | #194 (Performance) | ✅ #195 (Testing) | #196 (Docs)
 ```
 
 ---
@@ -243,16 +285,16 @@ Track 4: #193 (Cleanup) ✓ #194 (Performance) ✓ #195 (Testing) ✓ #196 (Docs
 ## Risk Mitigation
 
 ### Critical Path Bottleneck
-**Risk:** Activity feed (#181) blocks notifications (#191)
-**Mitigation:** Prioritize #180, #182, #188 merges in Weeks 1-2
+**Risk:** Activity feed (#181) is blocked by 3 dependencies
+**Mitigation:** Prioritize #180, #182, #188 in parallel where possible
 
 ### Resource Constraints
 **Risk:** Too many parallel tracks
 **Mitigation:** Prioritize by track:
 1. Critical Path (always #1)
-2. Track 3 (Security audit HIGH priority)
+2. Track 3 (Admin features - high business value)
 3. Track 2 (Discovery features - high user value)
-4. Track 1 (Social extensions - nice-to-have)
+4. Track 1 (Social extensions)
 5. Track 4 (Quality - ongoing)
 
 ### Merge Conflicts
@@ -267,75 +309,36 @@ Track 4: #193 (Cleanup) ✓ #194 (Performance) ✓ #195 (Testing) ✓ #196 (Docs
 ## Success Metrics
 
 **Week 2 Checkpoint:**
-- ✅ #180 merged (Following)
-- ✅ #183 merged (Leaderboards)
-- ✅ #188 merged (Review comments)
-- ✅ #192 started (Security audit)
-- ✅ At least 2 Track 2 tasks started
+- ✅ #180 completed or in final review
+- ✅ At least 2 parallel tracks active
+- ✅ #188 in progress
 
 **Week 4 Checkpoint:**
-- ✅ #182 merged (Profiles)
-- ✅ #181 in progress (Activity feed)
-- ✅ Track 2 (Discovery) 75% complete
-- ✅ #165, #166 complete (Analytics)
-- ✅ #192 complete (Security audit)
+- ✅ #180, #182 merged
+- ✅ #181 in progress
+- ✅ Track 2 (Discovery) 50%+ complete
+- ✅ Track 3 (Admin) 50%+ complete
 
 **Week 6 Completion:**
-- ✅ All 39 tasks complete
-- ✅ All PRs merged
-- ✅ Security audit passed
+- ✅ All critical path features complete
+- ✅ All parallel tracks complete
 - ✅ Performance targets met
 - ✅ Documentation updated
-
----
-
-## CLI Quick Reference
-
-### Check Current Status
-```bash
-# View all open PRs
-gh pr list
-
-# View specific issue
-gh issue view <number>
-
-# Check PR status
-gh pr view <number>
-```
-
-### Start New Task
-```bash
-# Create branch for issue
-git checkout -b claude/issue-<number>-$(date +%Y%m%d)
-
-# Link to issue when creating PR
-gh pr create --title "feat: ..." --body "Closes #<number>"
-```
-
-### Track Progress
-```bash
-# Update this document
-vim docs/PARALLEL_EXECUTION_PLAN.md
-
-# Commit progress
-git add docs/PARALLEL_EXECUTION_PLAN.md
-git commit -m "docs: update parallel execution plan progress"
-```
 
 ---
 
 ## Notes
 
 - **Feature Flags:** All new features should be behind feature flags
-- **Testing:** Maintain 100% test pass rate (969/969)
+- **Testing:** Maintain 100% test pass rate (969/969 as of last run)
 - **Mobile-First:** All UI work must start at 320px
-- **Bundle Size:** Keep < 100KB per page
+- **Bundle Size:** Keep < 100KB per page (currently optimized)
 - **API Design:** Follow existing patterns in `frontend/src/utils/api.ts`
 
 ---
 
-**Last Updated:** 2025-10-27
+**Last Updated:** 2025-11-02
 **Timeline:** 6 weeks
-**Parallel Tracks:** 4-5 active at peak
-**Total Tasks:** 39 (Phases 4-6)
-**Currently Active:** 11 tasks (3 in progress, 8 triggered)
+**Parallel Tracks:** 4 active tracks at peak
+**Total Tasks:** 21 (14 remaining + 7 completed)
+**Completion:** 33% (7/21 tasks completed)
