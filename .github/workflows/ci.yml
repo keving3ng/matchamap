@@ -10,11 +10,31 @@ on:
 
 jobs:
   # ============================================================================
+  # SHARED SETUP JOB
+  # Install dependencies once and cache for all subsequent jobs
+  # Saves ~5-6 minutes per workflow run by eliminating repeated npm installs
+  # ============================================================================
+  setup:
+    name: Setup & Install Dependencies
+    runs-on: self-hosted
+    timeout-minutes: 3
+    outputs:
+      cache-hit: ${{ steps.cache-node-modules.outputs.cache-hit }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node & Dependencies
+        uses: ./.github/actions/setup-node-deps
+
+  # ============================================================================
   # PHASE 1: PARALLEL CRITICAL CHECKS
   # TypeScript type checking - critical path for build
   # ============================================================================
   typecheck:
     name: TypeScript Type Checking
+    needs: [setup]
     runs-on: self-hosted
     timeout-minutes: 3
 
@@ -22,14 +42,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: "npm"
-
-      - name: Install dependencies
-        run: npm ci --ignore-scripts
+      - name: Setup Node & Dependencies
+        uses: ./.github/actions/setup-node-deps
 
       - name: Run type checking
         run: npm run typecheck
@@ -39,6 +53,7 @@ jobs:
   # ============================================================================
   lint:
     name: Linting
+    needs: [setup]
     runs-on: self-hosted
     timeout-minutes: 3
 
@@ -46,14 +61,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: "npm"
-
-      - name: Install dependencies
-        run: npm ci --ignore-scripts
+      - name: Setup Node & Dependencies
+        uses: ./.github/actions/setup-node-deps
 
       - name: Run linter
         run: npm run lint:ci
@@ -61,6 +70,7 @@ jobs:
 
   security-audit:
     name: Security Audit
+    needs: [setup]
     runs-on: self-hosted
     timeout-minutes: 2
 
@@ -68,14 +78,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: "npm"
-
-      - name: Install dependencies
-        run: npm ci --ignore-scripts
+      - name: Setup Node & Dependencies
+        uses: ./.github/actions/setup-node-deps
 
       - name: Run security audit
         run: npm audit --audit-level=high --production
@@ -87,7 +91,7 @@ jobs:
   # ============================================================================
   frontend-tests:
     name: Frontend Tests (Shard ${{ matrix.shard }})
-    needs: [typecheck]  # Ensure TypeScript compiles before running tests
+    needs: [setup, typecheck]  # Ensure dependencies are installed and TypeScript compiles
     runs-on: self-hosted
     timeout-minutes: 5
     strategy:
@@ -99,14 +103,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: "npm"
-
-      - name: Install dependencies
-        run: npm ci --ignore-scripts
+      - name: Setup Node & Dependencies
+        uses: ./.github/actions/setup-node-deps
 
       - name: Run frontend tests (shard ${{ matrix.shard }}/4)
         run: npm run test:coverage --workspace=frontend -- --shard=${{ matrix.shard }}/4
@@ -133,7 +131,7 @@ jobs:
   # ============================================================================
   backend-tests:
     name: Backend Tests
-    needs: [typecheck]  # Ensure TypeScript compiles before running tests
+    needs: [setup, typecheck]  # Ensure dependencies are installed and TypeScript compiles
     runs-on: self-hosted
     timeout-minutes: 10
 
@@ -141,14 +139,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: "npm"
-
-      - name: Install dependencies
-        run: npm ci --ignore-scripts
+      - name: Setup Node & Dependencies
+        uses: ./.github/actions/setup-node-deps
 
       - name: Run backend tests
         run: npm run test:ci --workspace=backend
@@ -161,21 +153,15 @@ jobs:
   build:
     name: Build
     runs-on: self-hosted
-    needs: [typecheck]  # Only needs typecheck to pass!
+    needs: [setup, typecheck]  # Ensure dependencies are installed and typecheck passes
     timeout-minutes: 10
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: "npm"
-
-      - name: Install dependencies
-        run: npm ci --ignore-scripts
+      - name: Setup Node & Dependencies
+        uses: ./.github/actions/setup-node-deps
 
       - name: Run build
         run: npm run build

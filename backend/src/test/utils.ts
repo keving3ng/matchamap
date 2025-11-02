@@ -1,5 +1,6 @@
 import { SignJWT } from 'jose';
 import { expect, describe, beforeEach } from 'vitest';
+import { TEST_SCHEMA } from './schema';
 
 // Test data factories
 export const mockCafe = {
@@ -69,8 +70,11 @@ export const mockEvent = {
   title: 'Test Event',
   description: 'A test event',
   date: '2024-12-01',
+  time: '19:00',
+  venue: 'Test Venue',
   link: 'https://example.com/event',
   location: 'Test Location',
+  price: '$10',
   featured: false,
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T00:00:00Z',
@@ -89,8 +93,8 @@ export const mockCity = {
   updatedAt: '2024-01-01T00:00:00Z',
 };
 
-// JWT secret for testing (this should match your test environment)
-const TEST_JWT_SECRET = new TextEncoder().encode('test-jwt-secret-key-for-testing-only');
+// JWT secret for testing (must match .dev.vars JWT_SECRET)
+const TEST_JWT_SECRET = new TextEncoder().encode('dev-secret-change-in-production-use-wrangler-secret');
 
 // Helper to create JWT tokens for testing
 export async function createTestToken(user: typeof mockUser | typeof mockAdminUser): Promise<string> {
@@ -130,7 +134,7 @@ export function createAuthenticatedRequest(
   return createTestRequest(url, {
     ...options,
     headers: {
-      'Authorization': `Bearer ${token}`,
+      'Cookie': `access_token=${token}`,
       ...options.headers,
     },
   });
@@ -144,9 +148,9 @@ export function createMultipartRequest(
 ): Request {
   const headers: Record<string, string> = {};
   if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+    headers['Cookie'] = `access_token=${token}`;
   }
-  
+
   return new Request(`https://api.matchamap.com${url}`, {
     method: 'POST',
     headers,
@@ -155,70 +159,201 @@ export function createMultipartRequest(
 }
 
 // Database test helpers
+
+export async function initTestDatabase(env: any) {
+  // Check if database is already initialized by checking for users table
+  try {
+    const result = await env.DB.prepare('SELECT name FROM sqlite_master WHERE type="table" AND name="users"').first();
+    if (result) {
+      // Database already initialized
+      return;
+    }
+  } catch (error: any) {
+    // If check fails, proceed with initialization
+    console.log('Database check failed, initializing...');
+  }
+
+  // Split schema into individual statements
+  // Split by semicolon, but keep multiline statements together
+  const statements = TEST_SCHEMA
+    .split(';')
+    .map(stmt => stmt.trim())
+    .filter(stmt => stmt.length > 0 && !stmt.startsWith('--'))
+    .map(stmt => stmt + ';'); // Re-add semicolon
+
+  // Execute statements sequentially to ensure proper table creation
+  for (const statement of statements) {
+    if (!statement || statement === ';') continue;
+
+    try {
+      await env.DB.prepare(statement).run();
+    } catch (execError: any) {
+      // Ignore "already exists" and "duplicate" errors
+      if (!execError.message?.includes('already exists') &&
+          !execError.message?.includes('duplicate column') &&
+          !execError.message?.includes('duplicate table') &&
+          !execError.message?.includes('duplicate index')) {
+        console.error('Schema init error:', execError.message, '\nStatement:', statement.substring(0, 150));
+        // Don't throw, continue with next statement
+      }
+    }
+  }
+}
+
 export async function cleanupTestData(env: any) {
+  // Initialize database schema if not already done
+  await initTestDatabase(env);
+
   // Clean up in reverse dependency order
   // Note: feed_items table was removed in migration 0015
-  try {
-    await env.DB.exec('DELETE FROM review_helpful');
-    await env.DB.exec('DELETE FROM user_reviews');
-    await env.DB.exec('DELETE FROM user_favorites');
-    await env.DB.exec('DELETE FROM user_photos');
-    await env.DB.exec('DELETE FROM drinks');
-    await env.DB.exec('DELETE FROM check_ins');
-    await env.DB.exec('DELETE FROM page_views');
-    await env.DB.exec('DELETE FROM search_queries');
-    await env.DB.exec('DELETE FROM cafes');
-    await env.DB.exec('DELETE FROM events');
-    await env.DB.exec('DELETE FROM sessions');
-    await env.DB.exec('DELETE FROM users');
-    await env.DB.exec('DELETE FROM cities');
-    await env.DB.exec('DELETE FROM waitlist');
-  } catch (error) {
-    // Ignore errors for tables that don't exist in test environment
-    console.warn('Cleanup warning:', error);
+  // Note: cities table never existed - city is a column in cafes table
+
+  // List of tables to clean in dependency order (children first, parents last)
+  const tables = [
+    'review_comment_likes',
+    'review_comments',
+    'review_helpful',
+    'user_reviews',
+    'user_follows',
+    'user_badges',
+    'user_favorites',
+    'review_photos',
+    'user_activity_stats',
+    'drinks',
+    'cafe_stats',
+    'event_stats',
+    'cafes',
+    'events',
+    'sessions',
+    'user_profiles',
+    'admin_audit_log',
+    'users',
+    'waitlist',
+  ];
+
+  for (const table of tables) {
+    try {
+      await env.DB.exec(`DELETE FROM ${table}`);
+    } catch (error: any) {
+      // Silently ignore "no such table" errors
+      if (!error.message?.includes('no such table')) {
+        console.warn(`Cleanup warning for table ${table}:`, error.message);
+      }
+    }
   }
 }
 
 export async function seedTestData(env: any) {
-  // Insert test city
-  await env.DB.prepare(`
-    INSERT INTO cities (id, name, key, displayName, lat, lng, zoom, isActive) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `).bind(
-    mockCity.id,
-    mockCity.name,
-    mockCity.key,
-    mockCity.displayName,
-    mockCity.lat,
-    mockCity.lng,
-    mockCity.zoom,
-    mockCity.isActive
-  ).run();
+  // Note: No cities table - city is a column in cafes table
+  // The mockCity data is still available for tests to create cafes with city values
 
-  // Insert test users
+  // Insert test users (using snake_case column names to match schema)
   await env.DB.prepare(`
-    INSERT INTO users (id, email, hashedPassword, displayName, role, isEmailVerified) 
+    INSERT INTO users (id, email, username, password_hash, role, is_email_verified)
     VALUES (?, ?, ?, ?, ?, ?)
   `).bind(
     mockUser.id,
     mockUser.email,
+    'testuser', // username field is required in schema
     mockUser.hashedPassword,
-    mockUser.displayName,
     mockUser.role,
-    mockUser.isEmailVerified
+    mockUser.isEmailVerified ? 1 : 0 // Convert boolean to integer
   ).run();
 
   await env.DB.prepare(`
-    INSERT INTO users (id, email, hashedPassword, displayName, role, isEmailVerified) 
+    INSERT INTO users (id, email, username, password_hash, role, is_email_verified)
     VALUES (?, ?, ?, ?, ?, ?)
   `).bind(
     mockAdminUser.id,
     mockAdminUser.email,
+    'adminuser', // username field is required in schema
     mockAdminUser.hashedPassword,
-    mockAdminUser.displayName,
     mockAdminUser.role,
-    mockAdminUser.isEmailVerified
+    mockAdminUser.isEmailVerified ? 1 : 0 // Convert boolean to integer
   ).run();
+}
+
+// Helper function to insert a test cafe with proper column names
+export async function insertTestCafe(env: any, cafe: Partial<typeof mockCafe> = {}) {
+  const cafeData = { ...mockCafe, ...cafe };
+
+  const result = await env.DB.prepare(`
+    INSERT INTO cafes (
+      name, slug, link, address, latitude, longitude, city,
+      ambiance_score, charge_for_alt_milk, quick_note, review,
+      source, hours, instagram, instagram_post_link, tiktok_post_link,
+      images, deleted_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).bind(
+    cafeData.name,
+    cafeData.slug,
+    cafeData.link,
+    cafeData.address,
+    cafeData.latitude,
+    cafeData.longitude,
+    cafeData.city,
+    cafeData.ambianceScore,
+    cafeData.chargeForAltMilk,
+    cafeData.quickNote,
+    cafeData.review,
+    cafeData.source,
+    cafeData.hours,
+    cafeData.instagram,
+    cafeData.instagramPostLink,
+    cafeData.tiktokPostLink,
+    cafeData.images,
+    cafeData.deletedAt
+  ).run();
+
+  return result.meta.last_row_id;
+}
+
+// Helper function to insert a test drink with proper column names
+export async function insertTestDrink(env: any, cafeId: number, drink: Partial<typeof mockDrink> = {}) {
+  const drinkData = { ...mockDrink, ...drink };
+
+  const result = await env.DB.prepare(`
+    INSERT INTO drinks (
+      cafe_id, name, score, price_amount, price_currency,
+      grams_used, is_default, notes
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `).bind(
+    cafeId,
+    drinkData.name,
+    drinkData.score,
+    drinkData.priceAmount,
+    drinkData.priceCurrency,
+    drinkData.gramsUsed,
+    drinkData.isDefault ? 1 : 0,
+    drinkData.notes
+  ).run();
+
+  return result.meta.last_row_id;
+}
+
+// Helper function to insert a test event with proper column names
+export async function insertTestEvent(env: any, event: Partial<typeof mockEvent> = {}) {
+  const eventData = { ...mockEvent, ...event };
+
+  const result = await env.DB.prepare(`
+    INSERT INTO events (
+      title, description, date, time, venue, location, link,
+      price, featured, published
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).bind(
+    eventData.title,
+    eventData.description,
+    eventData.date,
+    eventData.time,
+    eventData.venue,
+    eventData.location,
+    eventData.link,
+    eventData.price || null,
+    eventData.featured ? 1 : 0,
+    1 // published defaults to true
+  ).run();
+
+  return result.meta.last_row_id;
 }
 
 // Response assertion helpers

@@ -43,7 +43,7 @@ describe('Cafe Routes', () => {
     it('should return all cafes with drinks and scores', async () => {
       // Insert test cafe
       const cafeResult = await env.DB.prepare(`
-        INSERT INTO cafes (name, slug, link, address, latitude, longitude, city, ambianceScore, quickNote) 
+        INSERT INTO cafes (name, slug, link, address, latitude, longitude, city, ambiance_score, quick_note)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).bind(
         mockCafe.name,
@@ -59,15 +59,15 @@ describe('Cafe Routes', () => {
 
       // Insert test drink
       await env.DB.prepare(`
-        INSERT INTO drinks (cafeId, name, description, score, price, isDefault) 
+        INSERT INTO drinks (cafe_id, name, score, price_amount, price_currency, is_default)
         VALUES (?, ?, ?, ?, ?, ?)
       `).bind(
-        cafeResult.lastInsertRowid,
+        cafeResult.meta.last_row_id,
         mockDrink.name,
-        mockDrink.description,
         mockDrink.score,
-        mockDrink.price,
-        mockDrink.isDefault
+        mockDrink.priceAmount,
+        mockDrink.priceCurrency,
+        mockDrink.isDefault ? 1 : 0
       ).run();
 
       const request = createTestRequest('/api/cafes');
@@ -89,7 +89,6 @@ describe('Cafe Routes', () => {
       expect(data.cafes[0].drinks[0]).toMatchObject({
         name: mockDrink.name,
         score: mockDrink.score,
-        price: mockDrink.price,
         isDefault: mockDrink.isDefault,
       });
     });
@@ -97,14 +96,14 @@ describe('Cafe Routes', () => {
     it('should filter cafes by city', async () => {
       // Insert cafes in different cities
       await env.DB.prepare(`
-        INSERT INTO cafes (name, slug, link, city, latitude, longitude) 
-        VALUES (?, ?, ?, ?, ?, ?)
-      `).bind('Toronto Cafe', 'toronto-cafe', 'https://example.com', 'toronto', 43.6532, -79.3832).run();
+        INSERT INTO cafes (name, slug, link, city, latitude, longitude, quick_note)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `).bind('Toronto Cafe', 'toronto-cafe', 'https://example.com', 'toronto', 43.6532, -79.3832, 'Toronto test cafe').run();
 
       await env.DB.prepare(`
-        INSERT INTO cafes (name, slug, link, city, latitude, longitude) 
-        VALUES (?, ?, ?, ?, ?, ?)
-      `).bind('Montreal Cafe', 'montreal-cafe', 'https://example.com', 'montreal', 45.5017, -73.5673).run();
+        INSERT INTO cafes (name, slug, link, city, latitude, longitude, quick_note)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `).bind('Montreal Cafe', 'montreal-cafe', 'https://example.com', 'montreal', 45.5017, -73.5673, 'Montreal test cafe').run();
 
       const request = createTestRequest('/api/cafes?city=toronto');
       
@@ -132,9 +131,9 @@ describe('Cafe Routes', () => {
       // Insert multiple cafes
       for (let i = 1; i <= 5; i++) {
         await env.DB.prepare(`
-          INSERT INTO cafes (name, slug, link, city, latitude, longitude) 
-          VALUES (?, ?, ?, ?, ?, ?)
-        `).bind(`Cafe ${i}`, `cafe-${i}`, 'https://example.com', 'toronto', 43.6532, -79.3832).run();
+          INSERT INTO cafes (name, slug, link, city, latitude, longitude, quick_note)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+        `).bind(`Cafe ${i}`, `cafe-${i}`, 'https://example.com', 'toronto', 43.6532, -79.3832, `Test cafe ${i}`).run();
       }
 
       const request = createTestRequest('/api/cafes?limit=3&offset=2');
@@ -173,13 +172,13 @@ describe('Cafe Routes', () => {
     it('should exclude soft-deleted cafes', async () => {
       // Insert cafe and then soft delete it
       const cafeResult = await env.DB.prepare(`
-        INSERT INTO cafes (name, slug, link, city, latitude, longitude) 
-        VALUES (?, ?, ?, ?, ?, ?)
-      `).bind('Deleted Cafe', 'deleted-cafe', 'https://example.com', 'toronto', 43.6532, -79.3832).run();
+        INSERT INTO cafes (name, slug, link, city, latitude, longitude, quick_note)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `).bind('Deleted Cafe', 'deleted-cafe', 'https://example.com', 'toronto', 43.6532, -79.3832, 'Test cafe').run();
 
       await env.DB.prepare(`
-        UPDATE cafes SET deletedAt = CURRENT_TIMESTAMP WHERE id = ?
-      `).bind(cafeResult.lastInsertRowid).run();
+        UPDATE cafes SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?
+      `).bind(cafeResult.meta.last_row_id).run();
 
       const request = createTestRequest('/api/cafes');
       
@@ -196,16 +195,16 @@ describe('Cafe Routes', () => {
   describe('GET /api/cafes/:id', () => {
     it('should return single cafe with drinks', async () => {
       const cafeResult = await env.DB.prepare(`
-        INSERT INTO cafes (name, slug, link, city, latitude, longitude) 
-        VALUES (?, ?, ?, ?, ?, ?)
-      `).bind(mockCafe.name, mockCafe.slug, mockCafe.link, mockCafe.city, mockCafe.latitude, mockCafe.longitude).run();
+        INSERT INTO cafes (name, slug, link, city, latitude, longitude, quick_note)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `).bind(mockCafe.name, mockCafe.slug, mockCafe.link, mockCafe.city, mockCafe.latitude, mockCafe.longitude, mockCafe.quickNote).run();
 
       await env.DB.prepare(`
-        INSERT INTO drinks (cafeId, name, score, price, isDefault) 
-        VALUES (?, ?, ?, ?, ?)
-      `).bind(cafeResult.lastInsertRowid, mockDrink.name, mockDrink.score, mockDrink.price, true).run();
+        INSERT INTO drinks (cafe_id, name, score, price_amount, price_currency, is_default)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `).bind(cafeResult.meta.last_row_id, mockDrink.name, mockDrink.score, mockDrink.priceAmount, mockDrink.priceCurrency, 1).run();
 
-      const request = createTestRequest(`/api/cafes/${cafeResult.lastInsertRowid}`);
+      const request = createTestRequest(`/api/cafes/${cafeResult.meta.last_row_id}`);
       
       const response = await worker.fetch(request, env);
       
@@ -238,11 +237,11 @@ describe('Cafe Routes', () => {
 
     it('should return 404 for soft-deleted cafe', async () => {
       const cafeResult = await env.DB.prepare(`
-        INSERT INTO cafes (name, slug, link, city, latitude, longitude, deletedAt) 
-        VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-      `).bind('Deleted Cafe', 'deleted-cafe', 'https://example.com', 'toronto', 43.6532, -79.3832).run();
+        INSERT INTO cafes (name, slug, link, city, latitude, longitude, quick_note, deleted_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      `).bind('Deleted Cafe', 'deleted-cafe', 'https://example.com', 'toronto', 43.6532, -79.3832, 'Test cafe').run();
 
-      const request = createTestRequest(`/api/cafes/${cafeResult.lastInsertRowid}`);
+      const request = createTestRequest(`/api/cafes/${cafeResult.meta.last_row_id}`);
       
       const response = await worker.fetch(request, env);
       
@@ -327,9 +326,9 @@ describe('Cafe Routes', () => {
     it('should return 409 for duplicate slug', async () => {
       // Insert existing cafe
       await env.DB.prepare(`
-        INSERT INTO cafes (name, slug, link, city, latitude, longitude) 
-        VALUES (?, ?, ?, ?, ?, ?)
-      `).bind('Existing Cafe', 'test-slug', 'https://example.com', 'toronto', 43.6532, -79.3832).run();
+        INSERT INTO cafes (name, slug, link, city, latitude, longitude, quick_note)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `).bind('Existing Cafe', 'test-slug', 'https://example.com', 'toronto', 43.6532, -79.3832, 'Test cafe').run();
 
       const newCafe = {
         name: 'New Cafe',
@@ -354,9 +353,9 @@ describe('Cafe Routes', () => {
     it('should restore and update soft-deleted cafe', async () => {
       // Insert soft-deleted cafe
       await env.DB.prepare(`
-        INSERT INTO cafes (name, slug, link, city, latitude, longitude, deletedAt) 
-        VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-      `).bind('Deleted Cafe', 'restored-cafe', 'https://example.com', 'toronto', 43.6532, -79.3832).run();
+        INSERT INTO cafes (name, slug, link, city, latitude, longitude, quick_note, deleted_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      `).bind('Deleted Cafe', 'restored-cafe', 'https://example.com', 'toronto', 43.6532, -79.3832, 'Test cafe').run();
 
       const newCafe = {
         name: 'Restored Cafe',
@@ -386,9 +385,9 @@ describe('Cafe Routes', () => {
   describe('PUT /api/admin/cafes/:id', () => {
     it('should update existing cafe', async () => {
       const cafeResult = await env.DB.prepare(`
-        INSERT INTO cafes (name, slug, link, city, latitude, longitude) 
-        VALUES (?, ?, ?, ?, ?, ?)
-      `).bind('Original Cafe', 'original-cafe', 'https://example.com', 'toronto', 43.6532, -79.3832).run();
+        INSERT INTO cafes (name, slug, link, city, latitude, longitude, quick_note)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `).bind('Original Cafe', 'original-cafe', 'https://example.com', 'toronto', 43.6532, -79.3832, 'Original note').run();
 
       const updates = {
         name: 'Updated Cafe',
@@ -396,7 +395,7 @@ describe('Cafe Routes', () => {
         ambianceScore: 9.0,
       };
 
-      const request = createAuthenticatedRequest(`/api/admin/cafes/${cafeResult.lastInsertRowid}`, adminToken, {
+      const request = createAuthenticatedRequest(`/api/admin/cafes/${cafeResult.meta.last_row_id}`, adminToken, {
         method: 'PUT',
         body: JSON.stringify(updates),
       });
@@ -440,11 +439,11 @@ describe('Cafe Routes', () => {
   describe('DELETE /api/admin/cafes/:id', () => {
     it('should soft delete cafe', async () => {
       const cafeResult = await env.DB.prepare(`
-        INSERT INTO cafes (name, slug, link, city, latitude, longitude) 
-        VALUES (?, ?, ?, ?, ?, ?)
-      `).bind('To Delete Cafe', 'to-delete-cafe', 'https://example.com', 'toronto', 43.6532, -79.3832).run();
+        INSERT INTO cafes (name, slug, link, city, latitude, longitude, quick_note)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `).bind('To Delete Cafe', 'to-delete-cafe', 'https://example.com', 'toronto', 43.6532, -79.3832, 'Test cafe').run();
 
-      const request = createAuthenticatedRequest(`/api/admin/cafes/${cafeResult.lastInsertRowid}`, adminToken, {
+      const request = createAuthenticatedRequest(`/api/admin/cafes/${cafeResult.meta.last_row_id}`, adminToken, {
         method: 'DELETE',
       });
       
@@ -459,9 +458,9 @@ describe('Cafe Routes', () => {
       // Verify cafe is soft deleted
       const deletedCafe = await env.DB.prepare(`
         SELECT * FROM cafes WHERE id = ?
-      `).bind(cafeResult.lastInsertRowid).first();
-      
-      expect(deletedCafe.deletedAt).not.toBeNull();
+      `).bind(cafeResult.meta.last_row_id).first();
+
+      expect(deletedCafe.deleted_at).not.toBeNull();
     });
 
     it('should return 404 for non-existent cafe', async () => {
