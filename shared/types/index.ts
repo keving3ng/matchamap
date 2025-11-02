@@ -663,6 +663,63 @@ export interface RejectSuggestionRequest {
 }
 
 // ============================================================================
+// USER LISTS TYPES (Phase 2E)
+// ============================================================================
+
+export interface UserList {
+  id: number
+  userId: number
+  name: string
+  description?: string | null
+  isPublic: boolean
+  createdAt: string
+  updatedAt: string
+
+  // Populated by backend
+  itemCount?: number
+  items?: UserListItem[]
+  user?: PublicUserProfile
+}
+
+export interface UserListItem {
+  id: number
+  listId: number
+  cafeId: number
+  notes?: string | null
+  createdAt: string
+
+  // Populated by backend
+  cafe?: Cafe
+}
+
+export interface CreateListRequest {
+  name: string
+  description?: string
+  isPublic?: boolean
+}
+
+export interface UpdateListRequest {
+  name?: string
+  description?: string
+  isPublic?: boolean
+}
+
+export interface AddListItemRequest {
+  cafeId: number
+  notes?: string
+}
+
+export interface ListsResponse {
+  lists: UserList[]
+  total: number
+}
+
+export interface ListDetailResponse {
+  list: UserList
+  items: (UserListItem & { cafe: Cafe })[]
+}
+
+// ============================================================================
 // API RESPONSE TYPES
 // ============================================================================
 

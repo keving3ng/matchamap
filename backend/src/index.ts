@@ -26,6 +26,7 @@ import { followUser, unfollowUser, getUserFollowers, getUserFollowing, getFollow
 import { getPassportLeaderboard, getReviewerLeaderboard, getContributorLeaderboard, getUserRank } from './routes/leaderboards';
 import { handleAdminCafeStats, handleUserActivitySummary, handleFeedStats, handleEventStats } from './routes/admin-stats';
 import { createSuggestion, getMySuggestions, getPendingSuggestions, approveSuggestion, rejectSuggestion } from './routes/suggestions';
+import { getMyLists, createList, getListById, updateList, deleteList, addListItem, removeListItem } from './routes/lists';
 import { requireAuth, requireAdminAuth } from './middleware/auth';
 import { authRateLimit, publicRateLimit, writeRateLimit } from './middleware/rateLimit';
 import { requireHTTPS } from './middleware/httpsOnly';
@@ -121,6 +122,15 @@ router.put('/api/users/me/favorites/:cafeId/notes', writeRateLimit(), requireAut
 // Cafe suggestions endpoints
 router.post('/api/cafe-suggestions', writeRateLimit(), requireAuth(), createSuggestion);
 router.get('/api/users/me/suggestions', authRateLimit(), requireAuth(), getMySuggestions);
+
+// User lists endpoints
+router.get('/api/lists/me', authRateLimit(), requireAuth(), getMyLists);
+router.post('/api/lists', writeRateLimit(), requireAuth(), createList);
+router.get('/api/lists/:id', publicRateLimit(), getListById);
+router.put('/api/lists/:id', writeRateLimit(), requireAuth(), updateList);
+router.delete('/api/lists/:id', writeRateLimit(), requireAuth(), deleteList);
+router.post('/api/lists/:id/items', writeRateLimit(), requireAuth(), addListItem);
+router.delete('/api/lists/:id/items/:cafeId', writeRateLimit(), requireAuth(), removeListItem);
 
 // User badges endpoints
 router.get('/api/users/me/badges', authRateLimit(), requireAuth(), getMyBadges);

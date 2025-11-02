@@ -5,7 +5,7 @@
 
 import { useAuthStore } from '../stores/authStore'
 import { useSessionExpiry } from '../hooks/useSessionExpiry'
-import type { Cafe, Drink, Event, PublicUserProfile, UpdateProfileRequest, UserProfile, CityWithCount, User, UserFavorite, FavoritesResponse, AddFavoriteRequest, UpdateFavoriteNotesRequest, UserReview, ReviewPhoto, ReviewComment, BadgesResponse, BadgeCheckResponse, BadgeProgressResponse, BadgeDefinitionsResponse, FollowersResponse, FollowingResponse, FollowStatusResponse, FollowActionResponse, WaitlistResponse, CafeSuggestion, CreateSuggestionRequest, SuggestionsResponse, ApproveSuggestionRequest, RejectSuggestionRequest } from '../../../shared/types'
+import type { Cafe, Drink, Event, PublicUserProfile, UpdateProfileRequest, UserProfile, CityWithCount, User, UserFavorite, FavoritesResponse, AddFavoriteRequest, UpdateFavoriteNotesRequest, UserReview, ReviewPhoto, ReviewComment, BadgesResponse, BadgeCheckResponse, BadgeProgressResponse, BadgeDefinitionsResponse, FollowersResponse, FollowingResponse, FollowStatusResponse, FollowActionResponse, WaitlistResponse, CafeSuggestion, CreateSuggestionRequest, SuggestionsResponse, ApproveSuggestionRequest, RejectSuggestionRequest, UserList, UserListItem, CreateListRequest, UpdateListRequest, AddListItemRequest, ListsResponse, ListDetailResponse } from '../../../shared/types'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -711,6 +711,73 @@ export const favoritesAPI = {
 }
 
 /**
+ * Lists API endpoints (Phase 2E)
+ */
+export const listsAPI = {
+  /**
+   * Get my lists
+   */
+  async getMyLists(): Promise<ListsResponse> {
+    return fetchAPI('/lists/me')
+  },
+
+  /**
+   * Create a new list
+   */
+  async createList(data: CreateListRequest): Promise<{ list: UserList }> {
+    return fetchAPI('/lists', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  },
+
+  /**
+   * Get list details with items
+   */
+  async getListById(id: number): Promise<ListDetailResponse> {
+    return fetchAPI(`/lists/${id}`)
+  },
+
+  /**
+   * Update list
+   */
+  async updateList(id: number, data: UpdateListRequest): Promise<{ list: UserList }> {
+    return fetchAPI(`/lists/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+  },
+
+  /**
+   * Delete list
+   */
+  async deleteList(id: number): Promise<{ message: string }> {
+    return fetchAPI(`/lists/${id}`, {
+      method: 'DELETE',
+    })
+  },
+
+  /**
+   * Add cafe to list
+   */
+  async addListItem(listId: number, data: AddListItemRequest): Promise<{ item: UserListItem }> {
+    return fetchAPI(`/lists/${listId}/items`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  },
+
+  /**
+   * Remove cafe from list
+   */
+  async removeListItem(listId: number, cafeId: number): Promise<{ message: string }> {
+    return fetchAPI(`/lists/${listId}/items/${cafeId}`, {
+      method: 'DELETE',
+    })
+  },
+}
+
+/**
  * Reviews API endpoints (Phase 2B)
  */
 export interface CreateReviewRequest {
@@ -1241,6 +1308,7 @@ export const api = {
   userAdmin: userAdminAPI,
   stats: statsAPI,
   favorites: favoritesAPI,
+  lists: listsAPI,
   reviews: reviewsAPI,
   comments: commentsAPI,
   photos: photosAPI,

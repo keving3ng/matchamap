@@ -477,6 +477,33 @@ export const cafeSuggestions = sqliteTable('cafe_suggestions', {
   statusCreatedIdx: index('cafe_suggestions_status_created_idx').on(table.status, table.createdAt),
 }));
 
+// User lists table (Phase 2E - Custom Lists)
+export const userLists = sqliteTable('user_lists', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  description: text('description'),
+  isPublic: integer('is_public', { mode: 'boolean' }).default(false),
+  createdAt: text('created_at').default(sql`datetime('now')`),
+  updatedAt: text('updated_at').default(sql`datetime('now')`),
+}, (table) => ({
+  userIdIdx: index('user_lists_user_idx').on(table.userId),
+  isPublicIdx: index('user_lists_public_idx').on(table.isPublic),
+}));
+
+// User list items table (Phase 2E - Custom Lists)
+export const userListItems = sqliteTable('user_list_items', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  listId: integer('list_id').notNull().references(() => userLists.id, { onDelete: 'cascade' }),
+  cafeId: integer('cafe_id').notNull().references(() => cafes.id, { onDelete: 'cascade' }),
+  notes: text('notes'),
+  createdAt: text('created_at').default(sql`datetime('now')`),
+}, (table) => ({
+  listIdIdx: index('user_list_items_list_idx').on(table.listId),
+  cafeIdIdx: index('user_list_items_cafe_idx').on(table.cafeId),
+  uniqueListCafe: unique().on(table.listId, table.cafeId),
+}));
+
 // Type exports for use in the application
 export type Cafe = typeof cafes.$inferSelect;
 export type NewCafe = typeof cafes.$inferInsert;
@@ -514,3 +541,7 @@ export type UserFollow = typeof userFollows.$inferSelect;
 export type NewUserFollow = typeof userFollows.$inferInsert;
 export type CafeSuggestion = typeof cafeSuggestions.$inferSelect;
 export type NewCafeSuggestion = typeof cafeSuggestions.$inferInsert;
+export type UserList = typeof userLists.$inferSelect;
+export type NewUserList = typeof userLists.$inferInsert;
+export type UserListItem = typeof userListItems.$inferSelect;
+export type NewUserListItem = typeof userListItems.$inferInsert;
