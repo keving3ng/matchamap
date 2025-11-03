@@ -20,7 +20,7 @@ MatchaMap is a full-stack React application with Cloudflare edge infrastructure,
 │           Frontend (SPA)            │
 │  ┌─────────┐ ┌─────────┐ ┌────────┐ │
 │  │  React  │ │Tailwind │ │  Vite  │ │
-│  │  18.3+  │ │  CSS    │ │  Build │ │
+│  │  19.x   │ │ CSS 4.x │ │  Build │ │
 │  └─────────┘ └─────────┘ └────────┘ │
 └─────────────────────────────────────┘
               ↕ REST API
@@ -45,11 +45,11 @@ MatchaMap is a full-stack React application with Cloudflare edge infrastructure,
 
 ### Frontend
 
--   **Framework**: React 18.3+
+-   **Framework**: React 19.x
 -   **Build Tool**: Vite 5.x
 -   **Routing**: React Router 6.x
 -   **State**: Zustand (lightweight global state)
--   **Styling**: Tailwind CSS 3.x
+-   **Styling**: Tailwind CSS 4.x
 -   **Maps**: Leaflet 1.9.x
 -   **Language**: TypeScript (strict mode)
 
@@ -301,7 +301,7 @@ CLS (Cumulative Layout Shift): < 0.1
 -   Code splitting by route
 -   Lazy loading for map/heavy components
 -   Image optimization (WebP, proper sizing)
--   Tailwind CSS purging
+-   Tailwind CSS tree-shaking (v4 automatic optimization)
 -   Aggressive caching (1 year for assets)
 
 **Backend:**

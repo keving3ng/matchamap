@@ -371,13 +371,13 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
               <div className="flex flex-col sm:flex-row gap-2">
                 <button
                   onClick={requestLocation}
-                  className="px-4 py-2 bg-matcha-500 text-white rounded-lg text-sm font-medium hover:bg-matcha-600 transition focus:outline-none focus:ring-2 focus:ring-matcha-500 focus:ring-offset-2"
+                  className="px-4 py-2 bg-matcha-500 text-white rounded-lg text-sm font-medium hover:bg-matcha-600 transition focus:outline-hidden focus:ring-2 focus:ring-matcha-500 focus:ring-offset-2"
                 >
                   {COPY.location.permissionDenied.tryAgain}
                 </button>
                 <button
                   onClick={clearLocation}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition focus:outline-hidden focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                 >
                   {COPY.location.permissionDenied.skip}
                 </button>
@@ -401,7 +401,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
               </p>
               <button
                 onClick={clearLocation}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition focus:outline-hidden focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
               >
                 {COPY.location.loading.cancel}
               </button>
@@ -428,13 +428,13 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
               <div className="flex flex-col sm:flex-row gap-2">
                 <button
                   onClick={requestLocation}
-                  className="px-4 py-2 bg-matcha-500 text-white rounded-lg text-sm font-medium hover:bg-matcha-600 transition focus:outline-none focus:ring-2 focus:ring-matcha-500 focus:ring-offset-2"
+                  className="px-4 py-2 bg-matcha-500 text-white rounded-lg text-sm font-medium hover:bg-matcha-600 transition focus:outline-hidden focus:ring-2 focus:ring-matcha-500 focus:ring-offset-2"
                 >
                   {COPY.location.unavailable.tryAgain}
                 </button>
                 <button
                   onClick={clearLocation}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition focus:outline-hidden focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                 >
                   {COPY.location.unavailable.close}
                 </button>
@@ -449,7 +449,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
         <>
           {/* Backdrop overlay for mobile */}
           <div
-            className={`absolute inset-0 bg-black bg-opacity-20 backdrop-blur-sm z-[9998] md:hidden ${
+            className={`absolute inset-0 bg-black bg-opacity-20 backdrop-blur-xs z-[9998] md:hidden ${
               isClosing ? 'animate-fade-out' : 'animate-fade-in'
             }`}
             onClick={handleClosePopover}

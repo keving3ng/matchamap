@@ -131,7 +131,7 @@ export const CafeSuggestionForm: React.FC<CafeSuggestionFormProps> = ({
             value={formData.name}
             onChange={(e) => handleChange('name', e.target.value)}
             placeholder={COPY.suggestions.namePlaceholder}
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${
+            className={`w-full px-4 py-2 border rounded-lg focus:outline-hidden focus:ring-2 focus:ring-green-500 ${
               errors.name ? 'border-red-500' : 'border-gray-300'
             }`}
             disabled={isSubmitting}
@@ -150,7 +150,7 @@ export const CafeSuggestionForm: React.FC<CafeSuggestionFormProps> = ({
             value={formData.address}
             onChange={(e) => handleChange('address', e.target.value)}
             placeholder={COPY.suggestions.addressPlaceholder}
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${
+            className={`w-full px-4 py-2 border rounded-lg focus:outline-hidden focus:ring-2 focus:ring-green-500 ${
               errors.address ? 'border-red-500' : 'border-gray-300'
             }`}
             disabled={isSubmitting}
@@ -167,7 +167,7 @@ export const CafeSuggestionForm: React.FC<CafeSuggestionFormProps> = ({
             id="city"
             value={formData.city}
             onChange={(e) => handleChange('city', e.target.value)}
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${
+            className={`w-full px-4 py-2 border rounded-lg focus:outline-hidden focus:ring-2 focus:ring-green-500 ${
               errors.city ? 'border-red-500' : 'border-gray-300'
             }`}
             disabled={isSubmitting}
@@ -191,7 +191,7 @@ export const CafeSuggestionForm: React.FC<CafeSuggestionFormProps> = ({
             value={formData.neighborhood}
             onChange={(e) => handleChange('neighborhood', e.target.value)}
             placeholder={COPY.suggestions.neighborhoodPlaceholder}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-green-500"
             disabled={isSubmitting}
           />
         </div>
@@ -207,7 +207,7 @@ export const CafeSuggestionForm: React.FC<CafeSuggestionFormProps> = ({
             onChange={(e) => handleChange('description', e.target.value)}
             placeholder={COPY.suggestions.descriptionPlaceholder}
             rows={4}
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${
+            className={`w-full px-4 py-2 border rounded-lg focus:outline-hidden focus:ring-2 focus:ring-green-500 ${
               errors.description ? 'border-red-500' : 'border-gray-300'
             }`}
             disabled={isSubmitting}
@@ -228,7 +228,7 @@ export const CafeSuggestionForm: React.FC<CafeSuggestionFormProps> = ({
             value={formData.googleMapsUrl}
             onChange={(e) => handleChange('googleMapsUrl', e.target.value)}
             placeholder={COPY.suggestions.googleMapsPlaceholder}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-green-500"
             disabled={isSubmitting}
           />
         </div>
@@ -244,7 +244,7 @@ export const CafeSuggestionForm: React.FC<CafeSuggestionFormProps> = ({
             value={formData.instagram}
             onChange={(e) => handleChange('instagram', e.target.value)}
             placeholder={COPY.suggestions.instagramPlaceholder}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-green-500"
             disabled={isSubmitting}
           />
         </div>
@@ -260,7 +260,7 @@ export const CafeSuggestionForm: React.FC<CafeSuggestionFormProps> = ({
             value={formData.website}
             onChange={(e) => handleChange('website', e.target.value)}
             placeholder={COPY.suggestions.websitePlaceholder}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-green-500"
             disabled={isSubmitting}
           />
         </div>

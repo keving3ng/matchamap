@@ -45,7 +45,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToRegis
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full px-4 py-3 border border-matcha-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-matcha-500 focus:border-transparent"
+          className="w-full px-4 py-3 border border-matcha-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-matcha-500 focus:border-transparent"
           placeholder={COPY.auth.emailPlaceholder}
           disabled={isLoading}
         />
@@ -61,7 +61,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToRegis
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          className="w-full px-4 py-3 border border-matcha-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-matcha-500 focus:border-transparent"
+          className="w-full px-4 py-3 border border-matcha-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-matcha-500 focus:border-transparent"
           placeholder={COPY.auth.passwordPlaceholder}
           disabled={isLoading}
         />

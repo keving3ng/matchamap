@@ -202,7 +202,7 @@ export const CafeSuggestionsPage: React.FC = () => {
                       onChange={(e) => setAdminNotes(e.target.value)}
                       placeholder={COPY.suggestions.adminNotesPlaceholder}
                       rows={2}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-green-500 text-sm"
                     />
                   </div>
                   <div>
@@ -215,7 +215,7 @@ export const CafeSuggestionsPage: React.FC = () => {
                       value={cafeId}
                       onChange={(e) => setCafeId(e.target.value)}
                       placeholder={COPY.suggestions.cafeIdPlaceholder}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-green-500 text-sm"
                     />
                   </div>
                   <div className="flex gap-2">

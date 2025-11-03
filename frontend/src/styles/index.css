@@ -1,6 +1,162 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  /* Color palette */
+  --color-matcha-50: #e8f5eb;
+  --color-matcha-100: #d1ebd7;
+  --color-matcha-200: #ade3ba;
+  --color-matcha-300: #82ca94;
+  --color-matcha-400: #66ba7b;
+  --color-matcha-500: #51aa63;
+  --color-matcha-600: #418853;
+  --color-matcha-700: #356e44;
+  --color-matcha-800: #295435;
+  --color-matcha-900: #1b3a23;
+
+  --color-cream-50: #fefdfb;
+  --color-cream-100: #faf7f2;
+  --color-cream-200: #f5f0e8;
+  --color-cream-300: #ede4d3;
+  --color-cream-400: #e0d0b7;
+  --color-cream-500: #d4bc98;
+
+  --color-charcoal-50: #f7f7f7;
+  --color-charcoal-100: #e3e3e3;
+  --color-charcoal-200: #c8c8c8;
+  --color-charcoal-300: #a4a4a4;
+  --color-charcoal-400: #818181;
+  --color-charcoal-500: #666666;
+  --color-charcoal-600: #515151;
+  --color-charcoal-700: #434343;
+  --color-charcoal-800: #383838;
+  --color-charcoal-900: #2e2e2e;
+
+  --color-accent-pink: #f8bbd9;
+
+  /* Font families */
+  --font-sans: Inter, system-ui, sans-serif;
+  --font-pacifico: Pacifico, cursive;
+  --font-caveat: Caveat, cursive;
+  --font-satisfy: Satisfy, cursive;
+
+  /* Breakpoints */
+  --breakpoint-xs: 375px;
+
+  /* Animations */
+  --animate-slide-up: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-slide-down: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-slide-down-out: slideDownOut 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-slide-in-left: slideInLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-slide-in-right: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-fade-in: fadeIn 0.2s ease-out;
+  --animate-fade-out: fadeOut 0.2s ease-out;
+  --animate-scale-in: scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-bounce-subtle: bounceSubtle 0.5s ease-out;
+  --animate-shimmer: shimmer 2s infinite;
+
+  /* Keyframes */
+  @keyframes slideUp {
+    0% {
+      transform: translateY(100%) scale(0.95);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideDown {
+    0% {
+      transform: translateY(-20px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideDownOut {
+    0% {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(100%) scale(0.95);
+      opacity: 0;
+    }
+  }
+
+  @keyframes slideInLeft {
+    0% {
+      transform: translateX(-100%) scale(0.95);
+      opacity: 0;
+    }
+    100% {
+      transform: translateX(0) scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideInRight {
+    0% {
+      transform: translateX(100%) scale(0.95);
+      opacity: 0;
+    }
+    100% {
+      transform: translateX(0) scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fadeOut {
+    0% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes scaleIn {
+    0% {
+      transform: scale(0.95);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes bounceSubtle {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-4px);
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+}
 
 @layer base {
   html, body {
@@ -26,105 +182,84 @@
   }
 }
 
-@layer components {
-  /* Custom scrollbar for webkit browsers */
-  .custom-scrollbar::-webkit-scrollbar {
+/* Custom scrollbar utility */
+@utility custom-scrollbar {
+  &::-webkit-scrollbar {
     width: 6px;
   }
-  
-  .custom-scrollbar::-webkit-scrollbar-track {
+
+  &::-webkit-scrollbar-track {
     @apply bg-cream-200;
   }
-  
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-matcha-400 rounded;
+
+  &::-webkit-scrollbar-thumb {
+    @apply bg-matcha-400 rounded-sm;
   }
-  
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+
+  &::-webkit-scrollbar-thumb:hover {
     @apply bg-matcha-500;
   }
 }
 
-@layer utilities {
-  /* Focus styles for accessibility */
-  .focus-ring {
-    @apply focus:outline-none focus:ring-2 focus:ring-matcha-500 focus:ring-offset-2 focus:ring-offset-cream-100;
-  }
+/* Focus styles for accessibility */
+@utility focus-ring {
+  @apply focus:outline-hidden focus:ring-2 focus:ring-matcha-500 focus:ring-offset-2 focus:ring-offset-cream-100;
+}
 
-  /* Safe area padding for mobile devices */
-  .safe-area-inset {
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
-  }
+/* Safe area padding for mobile devices */
+@utility safe-area-inset {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
 
-  .safe-area-inset-top {
-    padding-top: env(safe-area-inset-top);
-  }
+@utility safe-area-inset-top {
+  padding-top: env(safe-area-inset-top);
+}
 
-  .safe-area-inset-bottom {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
+@utility safe-area-inset-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
 
-  /* Hide scrollbar for mobile-friendly UI */
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
+/* Hide scrollbar for mobile-friendly UI */
+@utility scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 
-  .scrollbar-hide::-webkit-scrollbar {
+  &::-webkit-scrollbar {
     display: none;
   }
+}
 
-  /* Leaflet map styles */
-  .matcha-marker {
-    background: transparent !important;
-    border: none !important;
-  }
-  
-  .custom-marker {
-    background: transparent !important;
-    border: none !important;
-  }
-  
-  /* Ensure Leaflet controls are above other elements but below our UI */
+/* Leaflet map styles */
+@utility matcha-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+@utility custom-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Leaflet control styles - these need to stay as regular CSS since they target external library classes */
+@layer base {
   .leaflet-control-container {
     z-index: 1000 !important;
   }
-  
-  /* Keep Leaflet map itself at a low z-index */
+
   .leaflet-container {
     z-index: 1 !important;
   }
-  
-  /* Fix Leaflet popup styles with Tailwind */
+
   .leaflet-popup-content-wrapper {
     @apply rounded-lg shadow-lg;
   }
-  
+
   .leaflet-popup-content {
     @apply text-sm;
   }
-  
-  /* Ensure our custom popover is always on top */
+
   .map-popover {
     z-index: 9999 !important;
-  }
-
-  /* Smooth slide down animation for search/filter panels */
-  @keyframes slide-down {
-    from {
-      opacity: 0;
-      max-height: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      max-height: 500px;
-      transform: translateY(0);
-    }
-  }
-
-  .animate-slide-down {
-    animation: slide-down 0.3s ease-out forwards;
   }
 }

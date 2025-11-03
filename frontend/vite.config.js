@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 import yaml from '@rollup/plugin-yaml'
 import { codecovVitePlugin } from '@codecov/vite-plugin'
 import { visualizer } from 'rollup-plugin-visualizer'
@@ -22,6 +23,7 @@ const httpsConfig = fs.existsSync('./localhost+2-key.pem') && fs.existsSync('./l
 export default defineConfig(({ command }) => ({
   plugins: [
     react(),
+    tailwindcss(),
     yaml(),
 
     // Gzip compression for production

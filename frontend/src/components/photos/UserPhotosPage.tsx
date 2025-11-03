@@ -206,7 +206,7 @@ const PhotoCard: React.FC<PhotoCardProps> = ({
   }
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-xs hover:shadow-md transition-shadow">
       <div className="p-4">
         <div className="flex gap-4">
           {/* Photo thumbnail */}

@@ -186,7 +186,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ cafeId, onSuccess, onCan
           placeholder={COPY.reviews.titlePlaceholder}
           className="
             w-full px-4 py-3 border border-gray-300 rounded-lg
-            focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent
+            focus:outline-hidden focus:ring-2 focus:ring-green-500 focus:border-transparent
             text-gray-900 placeholder-gray-500
           "
           maxLength={100}
@@ -204,7 +204,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ cafeId, onSuccess, onCan
           placeholder={COPY.reviews.contentPlaceholder}
           className="
             w-full px-4 py-3 border border-gray-300 rounded-lg h-32
-            focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent
+            focus:outline-hidden focus:ring-2 focus:ring-green-500 focus:border-transparent
             text-gray-900 placeholder-gray-500 resize-none
           "
           minLength={minChars}
@@ -244,7 +244,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ cafeId, onSuccess, onCan
           max={new Date().toISOString().split('T')[0]} // Can't be future date
           className="
             px-4 py-3 border border-gray-300 rounded-lg
-            focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent
+            focus:outline-hidden focus:ring-2 focus:ring-green-500 focus:border-transparent
             text-gray-900
           "
         />

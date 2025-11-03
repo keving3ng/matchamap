@@ -162,7 +162,7 @@ export const BadgeGrid: React.FC<BadgeGridProps> = ({
           badge={badge}
           size="md"
           onClick={onBadgeClick ? () => onBadgeClick(badge) : undefined}
-          className="p-3 rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all"
+          className="p-3 rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-xs transition-all"
         />
       ))}
     </div>

@@ -493,7 +493,7 @@ describe('AlertDialog Accessibility', () => {
     )
     
     const button = screen.getByText('Focus Me')
-    expect(button).toHaveClass('focus:outline-none', 'focus:ring-2')
+    expect(button).toHaveClass('focus:outline-hidden', 'focus:ring-2')
   })
 })
 

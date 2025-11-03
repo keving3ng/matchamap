@@ -244,7 +244,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortOption)}
-                className="w-full px-4 py-2.5 rounded-full text-sm font-bold bg-gradient-to-r from-matcha-600 to-matcha-500 text-white appearance-none cursor-pointer pr-8 focus:outline-none focus:ring-2 focus:ring-matcha-500 focus:ring-offset-2 shadow-md hover:from-matcha-700 hover:to-matcha-600 transition-all"
+                className="w-full px-4 py-2.5 rounded-full text-sm font-bold bg-gradient-to-r from-matcha-600 to-matcha-500 text-white appearance-none cursor-pointer pr-8 focus:outline-hidden focus:ring-2 focus:ring-matcha-500 focus:ring-offset-2 shadow-md hover:from-matcha-700 hover:to-matcha-600 transition-all"
               >
                 <option value="rating">{COPY.list.sortByRating}</option>
                 <option value="distance">{COPY.list.sortByDistance}</option>
@@ -396,7 +396,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={COPY.list.searchPlaceholder}
-                className="w-full pl-10 pr-10 py-3 bg-white border-2 border-matcha-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-matcha-500 focus:border-matcha-500 transition-all shadow-md"
+                className="w-full pl-10 pr-10 py-3 bg-white border-2 border-matcha-200 rounded-xl text-sm font-medium focus:outline-hidden focus:ring-2 focus:ring-matcha-500 focus:border-matcha-500 transition-all shadow-md"
                 autoFocus
               />
               {hasActiveSearch && (
@@ -423,7 +423,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                   <select
                     value={selectedDrinkType || ''}
                     onChange={(e) => setSelectedDrinkType(e.target.value || null)}
-                    className="w-full px-4 py-2.5 rounded-xl text-sm font-medium bg-white border-2 border-matcha-200 focus:outline-none focus:ring-2 focus:ring-matcha-500 focus:border-matcha-500 transition-all shadow-md appearance-none pr-10"
+                    className="w-full px-4 py-2.5 rounded-xl text-sm font-medium bg-white border-2 border-matcha-200 focus:outline-hidden focus:ring-2 focus:ring-matcha-500 focus:border-matcha-500 transition-all shadow-md appearance-none pr-10"
                   >
                     <option value="">{COPY.list.allDrinks}</option>
                     {availableDrinkTypes.map(drinkType => (
@@ -553,13 +553,13 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
               <div className="flex flex-col sm:flex-row gap-2">
                 <button
                   onClick={requestLocation}
-                  className="px-4 py-2 bg-matcha-500 text-white rounded-lg text-sm font-medium hover:bg-matcha-600 transition focus:outline-none focus:ring-2 focus:ring-matcha-500 focus:ring-offset-2"
+                  className="px-4 py-2 bg-matcha-500 text-white rounded-lg text-sm font-medium hover:bg-matcha-600 transition focus:outline-hidden focus:ring-2 focus:ring-matcha-500 focus:ring-offset-2"
                 >
                   {COPY.location.permissionDenied.tryAgain}
                 </button>
                 <button
                   onClick={clearLocation}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition focus:outline-hidden focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                 >
                   {COPY.location.permissionDenied.skip}
                 </button>
@@ -583,7 +583,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
               </p>
               <button
                 onClick={clearLocation}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition focus:outline-hidden focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
               >
                 {COPY.location.loading.cancel}
               </button>
@@ -610,13 +610,13 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
               <div className="flex flex-col sm:flex-row gap-2">
                 <button
                   onClick={requestLocation}
-                  className="px-4 py-2 bg-matcha-500 text-white rounded-lg text-sm font-medium hover:bg-matcha-600 transition focus:outline-none focus:ring-2 focus:ring-matcha-500 focus:ring-offset-2"
+                  className="px-4 py-2 bg-matcha-500 text-white rounded-lg text-sm font-medium hover:bg-matcha-600 transition focus:outline-hidden focus:ring-2 focus:ring-matcha-500 focus:ring-offset-2"
                 >
                   {COPY.location.unavailable.tryAgain}
                 </button>
                 <button
                   onClick={clearLocation}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition focus:outline-hidden focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                 >
                   {COPY.location.unavailable.close}
                 </button>

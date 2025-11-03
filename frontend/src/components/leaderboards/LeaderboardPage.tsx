@@ -273,7 +273,7 @@ export const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ className = ''
             onClick={() => setTimePeriod('all')}
             className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
               timePeriod === 'all'
-                ? 'bg-white text-green-600 shadow-sm'
+                ? 'bg-white text-green-600 shadow-xs'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
@@ -283,7 +283,7 @@ export const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ className = ''
             onClick={() => setTimePeriod('monthly')}
             className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
               timePeriod === 'monthly'
-                ? 'bg-white text-green-600 shadow-sm'
+                ? 'bg-white text-green-600 shadow-xs'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
@@ -297,7 +297,7 @@ export const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ className = ''
             onClick={() => setSelectedCity('all')}
             className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
               selectedCity === 'all'
-                ? 'bg-white text-green-600 shadow-sm'
+                ? 'bg-white text-green-600 shadow-xs'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
@@ -332,7 +332,7 @@ export const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ className = ''
       {loading ? (
         <div className="space-y-4">
           {Array.from({ length: 10 }).map((_, i) => (
-            <div key={i} className="bg-white rounded-xl p-4 shadow-sm">
+            <div key={i} className="bg-white rounded-xl p-4 shadow-xs">
               <div className="flex items-center gap-4">
                 <Skeleton className="w-8 h-8 rounded-full" />
                 <Skeleton className="w-10 h-10 rounded-full" />
@@ -374,7 +374,7 @@ export const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ className = ''
           {leaderboardData.map((entry) => (
             <div
               key={`${entry.userId}-${entry.rank}`}
-              className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow"
+              className="bg-white rounded-xl p-4 shadow-xs hover:shadow-md transition-shadow"
             >
               <div className="flex items-center gap-4">
                 {/* Rank */}
