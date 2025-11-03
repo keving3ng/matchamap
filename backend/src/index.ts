@@ -24,6 +24,7 @@ import { getMyFavorites, addFavorite, removeFavorite, updateFavoriteNotes } from
 import { getMyBadges, checkAndAwardBadges, getBadgeDefinitions, getBadgeProgress } from './routes/badges';
 import { followUser, unfollowUser, getUserFollowers, getUserFollowing, getFollowStatus } from './routes/following';
 import { getPassportLeaderboard, getReviewerLeaderboard, getContributorLeaderboard, getUserRank } from './routes/leaderboards';
+import { createSuggestion, getMySuggestions, getPendingSuggestions, approveSuggestion, rejectSuggestion } from './routes/suggestions';
 import { requireAuth, requireAdminAuth } from './middleware/auth';
 import { authRateLimit, publicRateLimit, writeRateLimit } from './middleware/rateLimit';
 import { requireHTTPS } from './middleware/httpsOnly';
@@ -116,6 +117,10 @@ router.post('/api/users/me/favorites', writeRateLimit(), requireAuth(), addFavor
 router.delete('/api/users/me/favorites/:cafeId', writeRateLimit(), requireAuth(), removeFavorite);
 router.put('/api/users/me/favorites/:cafeId/notes', writeRateLimit(), requireAuth(), updateFavoriteNotes);
 
+// Cafe suggestions endpoints
+router.post('/api/cafe-suggestions', writeRateLimit(), requireAuth(), createSuggestion);
+router.get('/api/users/me/suggestions', authRateLimit(), requireAuth(), getMySuggestions);
+
 // User badges endpoints
 router.get('/api/users/me/badges', authRateLimit(), requireAuth(), getMyBadges);
 router.post('/api/users/me/badges/check', writeRateLimit(), requireAuth(), checkAndAwardBadges);
@@ -191,6 +196,10 @@ router.get('/api/admin/cafes/:id/reviews/count', publicRateLimit(), requireAdmin
 router.put('/api/admin/reviews/:id/moderate', writeRateLimit(), requireAdminAuth(), moderateReview);
 router.put('/api/admin/comments/:id/moderate', writeRateLimit(), requireAdminAuth(), moderateComment);
 
+// Cafe suggestions admin endpoints
+router.get('/api/admin/cafe-suggestions', publicRateLimit(), requireAdminAuth(), getPendingSuggestions);
+router.put('/api/admin/cafe-suggestions/:id/approve', writeRateLimit(), requireAdminAuth(), approveSuggestion);
+router.put('/api/admin/cafe-suggestions/:id/reject', writeRateLimit(), requireAdminAuth(), rejectSuggestion);
 // Moderation dashboard admin endpoints
 router.get('/api/admin/moderation/queue', publicRateLimit(), requireAdminAuth(), getModerationQueue);
 router.post('/api/admin/moderation/bulk', writeRateLimit(), requireAdminAuth(), bulkModerate);

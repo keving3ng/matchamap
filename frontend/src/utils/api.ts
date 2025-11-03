@@ -5,7 +5,7 @@
 
 import { useAuthStore } from '../stores/authStore'
 import { useSessionExpiry } from '../hooks/useSessionExpiry'
-import type { Cafe, Drink, Event, PublicUserProfile, UpdateProfileRequest, UserProfile, CityWithCount, User, UserFavorite, FavoritesResponse, AddFavoriteRequest, UpdateFavoriteNotesRequest, UserReview, ReviewPhoto, ReviewComment, BadgesResponse, BadgeCheckResponse, BadgeProgressResponse, BadgeDefinitionsResponse, FollowersResponse, FollowingResponse, FollowStatusResponse, FollowActionResponse, WaitlistResponse } from '../../../shared/types'
+import type { Cafe, Drink, Event, PublicUserProfile, UpdateProfileRequest, UserProfile, CityWithCount, User, UserFavorite, FavoritesResponse, AddFavoriteRequest, UpdateFavoriteNotesRequest, UserReview, ReviewPhoto, ReviewComment, BadgesResponse, BadgeCheckResponse, BadgeProgressResponse, BadgeDefinitionsResponse, FollowersResponse, FollowingResponse, FollowStatusResponse, FollowActionResponse, WaitlistResponse, CafeSuggestion, CreateSuggestionRequest, SuggestionsResponse, ApproveSuggestionRequest, RejectSuggestionRequest } from '../../../shared/types'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -1177,6 +1177,55 @@ export const leaderboardAPI = {
 }
 
 /**
+ * Cafe Suggestions API endpoints
+ */
+export const suggestionsAPI = {
+  /**
+   * Submit a new cafe suggestion
+   */
+  async create(data: CreateSuggestionRequest): Promise<{ success: boolean; suggestion: CafeSuggestion }> {
+    return fetchAPI('/cafe-suggestions', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  },
+
+  /**
+   * Get current user's cafe suggestions
+   */
+  async getMySuggestions(): Promise<SuggestionsResponse> {
+    return fetchAPI('/users/me/suggestions')
+  },
+
+  /**
+   * Admin: Get all pending cafe suggestions
+   */
+  async getPendingSuggestions(): Promise<SuggestionsResponse> {
+    return fetchAPI('/admin/cafe-suggestions')
+  },
+
+  /**
+   * Admin: Approve a cafe suggestion
+   */
+  async approve(id: number, data: ApproveSuggestionRequest): Promise<{ success: boolean; suggestion: CafeSuggestion }> {
+    return fetchAPI(`/admin/cafe-suggestions/${id}/approve`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+  },
+
+  /**
+   * Admin: Reject a cafe suggestion
+   */
+  async reject(id: number, data: RejectSuggestionRequest): Promise<{ success: boolean; suggestion: CafeSuggestion }> {
+    return fetchAPI(`/admin/cafe-suggestions/${id}/reject`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+  },
+}
+
+/**
  * Export all APIs
  */
 export const api = {
@@ -1198,6 +1247,7 @@ export const api = {
   badges: badgesAPI,
   following: followingAPI,
   leaderboard: leaderboardAPI,
+  suggestions: suggestionsAPI,
 }
 
 export default api
