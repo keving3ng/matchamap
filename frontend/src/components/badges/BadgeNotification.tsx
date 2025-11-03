@@ -22,17 +22,16 @@ export const BadgeNotification: React.FC<BadgeNotificationProps> = ({
   onViewAllBadges,
 }) => {
   const [currentBadgeIndex, setCurrentBadgeIndex] = useState(0)
-  const [isVisible, setIsVisible] = useState(false)
 
-  // Show/hide animation
+  // Derive visibility from props
+  const isVisible = isOpen && badges.length > 0
+
+  // Reset badge index when opening
   useEffect(() => {
-    if (isOpen && badges.length > 0) {
-      setIsVisible(true)
+    if (isOpen) {
       setCurrentBadgeIndex(0)
-    } else {
-      setIsVisible(false)
     }
-  }, [isOpen, badges.length])
+  }, [isOpen])
 
   // Auto-advance through multiple badges
   useEffect(() => {

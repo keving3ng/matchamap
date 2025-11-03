@@ -302,6 +302,5 @@ export const useLeafletMap = ({
     drawRoute,
     clearRoute,
     refreshTiles,
-    map: mapRef.current,
   }
 }

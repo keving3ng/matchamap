@@ -14,7 +14,6 @@ export const UserProfilePage: React.FC = () => {
   const { user: currentUser } = useAuthStore()
   const navigate = useNavigate()
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [showWelcomeBanner, setShowWelcomeBanner] = useState(false)
 
   // Determine if this is the current user's own profile
   const isOwnProfile = currentUser?.username === username
@@ -23,15 +22,22 @@ export const UserProfilePage: React.FC = () => {
   const publicProfile = useUserProfile(username || '')
   const myProfile = useMyProfile()
 
-  // Check if this is a new user (no check-ins yet) and show welcome banner
+  // Lazy initialization: check localStorage once on mount
+  const [showWelcomeBanner, setShowWelcomeBanner] = useState(() => {
+    if (!isOwnProfile || !currentUser?.id) return false
+    const hasSeenWelcome = localStorage.getItem(`welcome_shown_${currentUser.id}`)
+    return !hasSeenWelcome
+  })
+
+  // Sync welcome banner state when profile loads (only check, don't force to false)
   useEffect(() => {
-    if (isOwnProfile && myProfile.profile && myProfile.profile.totalCheckins === 0) {
-      const hasSeenWelcome = localStorage.getItem(`welcome_shown_${currentUser?.id}`)
-      if (!hasSeenWelcome) {
+    if (isOwnProfile && myProfile.profile?.totalCheckins === 0 && currentUser?.id) {
+      const hasSeenWelcome = localStorage.getItem(`welcome_shown_${currentUser.id}`)
+      if (!hasSeenWelcome && !showWelcomeBanner) {
         setShowWelcomeBanner(true)
       }
     }
-  }, [isOwnProfile, myProfile.profile, currentUser?.id])
+  }, [isOwnProfile, myProfile.profile?.totalCheckins, currentUser?.id, showWelcomeBanner])
 
   // Select the appropriate profile data
   const profile = isOwnProfile ? myProfile.profile : publicProfile.profile

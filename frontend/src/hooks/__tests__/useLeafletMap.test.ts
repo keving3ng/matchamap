@@ -174,12 +174,6 @@ describe('useLeafletMap', () => {
       expect(typeof result.current.clearRoute).toBe('function')
       expect(typeof result.current.refreshTiles).toBe('function')
     })
-
-    it('should initialize with null map instance', () => {
-      const { result } = renderHook(() => useLeafletMap(defaultOptions))
-
-      expect(result.current.map).toBeNull()
-    })
   })
 
   describe('error handling', () => {

@@ -27,13 +27,24 @@ export const PhotoLightbox: React.FC<PhotoLightboxProps> = ({
 
   const currentPhoto = photos[currentIndex]
 
-  // Reset when photos change or lightbox opens
+  // Reset when lightbox opens
   useEffect(() => {
     if (isOpen) {
       setCurrentIndex(initialIndex)
       setIsImageLoading(true)
     }
   }, [isOpen, initialIndex])
+
+  // Navigation functions (defined before keyboard effect uses them)
+  const goToPrevious = useCallback(() => {
+    setCurrentIndex((prev) => (prev > 0 ? prev - 1 : photos.length - 1))
+    setIsImageLoading(true)
+  }, [photos.length])
+
+  const goToNext = useCallback(() => {
+    setCurrentIndex((prev) => (prev < photos.length - 1 ? prev + 1 : 0))
+    setIsImageLoading(true)
+  }, [photos.length])
 
   // Keyboard navigation
   useEffect(() => {
@@ -55,7 +66,7 @@ export const PhotoLightbox: React.FC<PhotoLightboxProps> = ({
 
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, currentIndex])
+  }, [isOpen, goToPrevious, goToNext, onClose])
 
   // Prevent body scroll when lightbox is open
   useEffect(() => {
@@ -91,16 +102,6 @@ export const PhotoLightbox: React.FC<PhotoLightboxProps> = ({
       preloadImage(photos[nextIndex].imageUrl)
     }
   }, [currentIndex, photos, isOpen])
-
-  const goToPrevious = useCallback(() => {
-    setCurrentIndex((prev) => (prev > 0 ? prev - 1 : photos.length - 1))
-    setIsImageLoading(true)
-  }, [photos.length])
-
-  const goToNext = useCallback(() => {
-    setCurrentIndex((prev) => (prev < photos.length - 1 ? prev + 1 : 0))
-    setIsImageLoading(true)
-  }, [photos.length])
 
   const handleImageLoad = () => {
     setIsImageLoading(false)
