@@ -73,6 +73,13 @@ jobs:
     needs: [setup]
     runs-on: self-hosted
     timeout-minutes: 2
+    # Only run on main branch or when dependencies change
+    if: |
+      github.ref == 'refs/heads/main' ||
+      contains(github.event.head_commit.modified, 'package.json') ||
+      contains(github.event.head_commit.modified, 'package-lock.json') ||
+      contains(github.event.head_commit.modified, 'backend/package.json') ||
+      contains(github.event.head_commit.modified, 'backend/package-lock.json')
 
     steps:
       - name: Checkout code
@@ -88,6 +95,8 @@ jobs:
   # ============================================================================
   # FRONTEND TESTS (Chunked for parallel execution)
   # 1079 tests split into 4 shards for ~4-5 min time savings
+  # PRs: run without coverage for speed
+  # Main: run with coverage for tracking
   # ============================================================================
   frontend-tests:
     name: Frontend Tests (Shard ${{ matrix.shard }})
@@ -106,7 +115,12 @@ jobs:
       - name: Setup Node & Dependencies
         uses: ./.github/actions/setup-node-deps
 
-      - name: Run frontend tests (shard ${{ matrix.shard }}/4)
+      - name: Run frontend tests (shard ${{ matrix.shard }}/4) - without coverage
+        if: github.ref != 'refs/heads/main'
+        run: npm test --workspace=frontend -- --shard=${{ matrix.shard }}/4
+
+      - name: Run frontend tests (shard ${{ matrix.shard }}/4) - with coverage
+        if: github.ref == 'refs/heads/main'
         run: npm run test:coverage --workspace=frontend -- --shard=${{ matrix.shard }}/4
 
       - name: Upload coverage to Codecov
@@ -149,7 +163,7 @@ jobs:
         # Removed continue-on-error - backend tests should now fail CI if they fail
 
   # ============================================================================
-  # BUILD (Only depends on typecheck, not lint/audit)
+  # BUILD (Only on main branch - verification before deployment)
   # Starts ~2-3 minutes earlier than before
   # ============================================================================
   build:
@@ -157,6 +171,8 @@ jobs:
     runs-on: self-hosted
     needs: [setup, typecheck]  # Ensure dependencies are installed and typecheck passes
     timeout-minutes: 10
+    # Only run on main branch pushes
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
       - name: Checkout code
@@ -167,6 +183,41 @@ jobs:
 
       - name: Run build
         run: npm run build
+
+  # ============================================================================
+  # DEPLOY BACKEND (Only on main branch after all checks pass)
+  # Consolidates deploy-backend.yml workflow to avoid duplicate checks
+  # ============================================================================
+  deploy-backend:
+    name: Deploy Backend to Production
+    runs-on: self-hosted
+    needs: [typecheck, backend-tests, build]  # Wait for all critical checks
+    timeout-minutes: 5
+    # Only deploy on main branch pushes (not PRs)
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node & Dependencies
+        uses: ./.github/actions/setup-node-deps
+
+      - name: Apply database migrations
+        run: cd backend && npm run db:migrate:prod
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Deploy to Cloudflare Workers
+        run: cd backend && npx wrangler deploy --env=""
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Deployment status
+        run: |
+          echo "✅ Database migrations applied successfully"
+          echo "✅ Backend successfully deployed to production"
+          echo "🔗 API URL: https://matchamap-api-production.keving3ng.workers.dev"
 
   # ============================================================================
   # NOTE: ci-success job removed
