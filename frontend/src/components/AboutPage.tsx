@@ -128,7 +128,7 @@ export const AboutPage: React.FC = () => {
                 </p>
                 <p className="text-gray-700 leading-relaxed">
                   All reviews are based on personal visits and reflect my honest opinions. I'm not affiliated
-                  with any of the cafes listed and don't accept payment for reviews.
+                  with any of the cafes listed and don&apos;t accept payment for reviews.
                 </p>
               </div>
             </div>

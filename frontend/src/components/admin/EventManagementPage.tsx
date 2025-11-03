@@ -74,7 +74,7 @@ export const EventManagementPage: React.FC = () => {
   const handleSave = async () => {
     try {
       // Only send fields that are part of the event data model (exclude metadata)
-      const { id, createdAt, updatedAt, ...editableFields } = formData
+      const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, ...editableFields } = formData
 
       if (editingEvent) {
         await api.events.update(editingEvent.id, editableFields)
@@ -165,7 +165,7 @@ export const EventManagementPage: React.FC = () => {
         const eventData = JSON.parse(text)
 
         // Remove metadata fields
-        const { id, createdAt, updatedAt, ...cleanData } = eventData
+        const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, ...cleanData } = eventData
 
         setFormData(cleanData)
         setEditingEvent(null)

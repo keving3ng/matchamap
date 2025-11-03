@@ -16,8 +16,7 @@ export const UserManagementPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   // Used for tracking update operations (not displayed in UI, but prevents duplicate requests)
-  // @ts-expect-error - Used to track state, intentionally not read
-  const [updatingUserId, setUpdatingUserId] = useState<number | null>(null)
+  const [_updatingUserId, setUpdatingUserId] = useState<number | null>(null)
   const [deletingUserId, setDeletingUserId] = useState<number | null>(null)
   const [confirmDialog, setConfirmDialog] = useState<{
     show: boolean

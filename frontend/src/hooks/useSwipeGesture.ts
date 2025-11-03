@@ -154,7 +154,9 @@ export const useLongPress = (
   }
 
   const clear = () => {
-    timeout.current && clearTimeout(timeout.current)
+    if (timeout.current) {
+      clearTimeout(timeout.current)
+    }
     target.current = null
   }
 

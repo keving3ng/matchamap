@@ -298,7 +298,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
       clearRouteVisual()
       clearRouteData()
     }
-  }, [selectedCafe?.id, clearRouteVisual, clearRouteData])
+  }, [selectedCafe, clearRouteVisual, clearRouteData])
 
   // Handle city transitions with smooth loading state
   React.useEffect(() => {

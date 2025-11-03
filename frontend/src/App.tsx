@@ -23,7 +23,7 @@ export const App: React.FC = () => {
     getCurrentUser().catch(() => {
       // Silently fail - user is just not logged in
     })
-  }, [])
+  }, [getCurrentUser])
 
   const handlePasswordCorrect = () => {
     sessionStorage.setItem(SESSION_KEY, 'true')

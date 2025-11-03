@@ -325,7 +325,7 @@ export async function validateImage(
       valid: true,
       dimensions,
     }
-  } catch (error) {
+  } catch {
     return {
       valid: false,
       error: 'Failed to load image',

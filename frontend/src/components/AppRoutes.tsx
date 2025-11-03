@@ -166,6 +166,8 @@ export const AppRoutes: React.FC = () => {
   const isAboutEnabled = useFeatureToggle('ENABLE_ABOUT')
   const isStoreEnabled = useFeatureToggle('ENABLE_STORE')
   const isSettingsEnabled = useFeatureToggle('ENABLE_SETTINGS')
+  const isUserAccountsEnabled = useFeatureToggle('ENABLE_USER_ACCOUNTS')
+  const isUserProfilesEnabled = useFeatureToggle('ENABLE_USER_PROFILES')
 
   const { eventItems, fetchCafes } = useDataStore()
   const { cafesWithDistance, selectedCafe } = useCafeStore()
@@ -177,7 +179,7 @@ export const AppRoutes: React.FC = () => {
   // Fetch only cafes on mount - feed/events lazy load when navigated to
   useEffect(() => {
     fetchCafes() // Only fetch cafes (70% of users only use map)
-  }, [])
+  }, [fetchCafes])
 
   // Handle navigation state for cafe selection (from event views)
   useEffect(() => {
@@ -242,7 +244,7 @@ export const AppRoutes: React.FC = () => {
         } />
       )}
       {/* Login route - only if user accounts enabled */}
-      {useFeatureToggle('ENABLE_USER_ACCOUNTS') && (
+      {isUserAccountsEnabled && (
         <Route path="/login" element={
           <Suspense fallback={<PageLoadingFallback />}>
             <LoginPage />
@@ -250,7 +252,7 @@ export const AppRoutes: React.FC = () => {
         } />
       )}
       {/* Profile route - only if user accounts AND profiles enabled */}
-      {useFeatureToggle('ENABLE_USER_ACCOUNTS') && useFeatureToggle('ENABLE_USER_PROFILES') && (
+      {isUserAccountsEnabled && isUserProfilesEnabled && (
         <Route path="/profile/:username" element={
           <Suspense fallback={<PageLoadingFallback />}>
             <UserProfilePage />

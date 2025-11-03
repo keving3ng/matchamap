@@ -32,50 +32,46 @@ function buildQueryParams(filters: Record<string, string | number | boolean | un
  * Generic fetch wrapper with error handling
  */
 async function fetchAPI<T>(endpoint: string, options?: RequestInit & { bustCache?: boolean }): Promise<T> {
-  try {
-    let url = `${API_BASE_URL}/api${endpoint}`
+  let url = `${API_BASE_URL}/api${endpoint}`
 
-    // Add cache-busting parameter for GET requests when bustCache is true
-    if (options?.bustCache && (!options?.method || options.method === 'GET')) {
-      const separator = url.includes('?') ? '&' : '?'
-      url += `${separator}_=${Date.now()}`
-    }
-
-    // Build headers
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      ...options?.headers as Record<string, string>,
-    }
-
-    const response = await fetch(url, {
-      ...options,
-      credentials: 'include', // Always include cookies
-      headers,
-    })
-
-    if (!response.ok) {
-      // Handle authentication errors (401/403)
-      if (response.status === 401 || response.status === 403) {
-        // Clear expired tokens from auth store
-        useAuthStore.getState().clearAuth()
-
-        // Show session expired dialog with current path for redirect
-        const currentPath = window.location.pathname + window.location.search
-        useSessionExpiry.getState().showSessionExpiredDialog(currentPath)
-
-        // Return a specific error for auth failures
-        throw new Error('Authentication required')
-      }
-
-      const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
-      throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`)
-    }
-
-    const data = await response.json()
-    return data
-  } catch (error) {
-    throw error
+  // Add cache-busting parameter for GET requests when bustCache is true
+  if (options?.bustCache && (!options?.method || options.method === 'GET')) {
+    const separator = url.includes('?') ? '&' : '?'
+    url += `${separator}_=${Date.now()}`
   }
+
+  // Build headers
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...options?.headers as Record<string, string>,
+  }
+
+  const response = await fetch(url, {
+    ...options,
+    credentials: 'include', // Always include cookies
+    headers,
+  })
+
+  if (!response.ok) {
+    // Handle authentication errors (401/403)
+    if (response.status === 401 || response.status === 403) {
+      // Clear expired tokens from auth store
+      useAuthStore.getState().clearAuth()
+
+      // Show session expired dialog with current path for redirect
+      const currentPath = window.location.pathname + window.location.search
+      useSessionExpiry.getState().showSessionExpiredDialog(currentPath)
+
+      // Return a specific error for auth failures
+      throw new Error('Authentication required')
+    }
+
+    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+    throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`)
+  }
+
+  const data = await response.json()
+  return data
 }
 
 /**

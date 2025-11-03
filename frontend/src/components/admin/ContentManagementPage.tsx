@@ -24,7 +24,7 @@ export const ContentManagementPage: React.FC = () => {
 
   useEffect(() => {
     fetchCafes(undefined, true) // Bust cache on mount for admin
-  }, [])
+  }, [fetchCafes])
 
   // Fetch photo and review counts for all cafes
   useEffect(() => {

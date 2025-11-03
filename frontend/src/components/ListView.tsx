@@ -230,7 +230,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
       default:
         return cafesCopy
     }
-  }, [cafes, sortBy, filters.minRating, filters.maxDistance, filters.selectedCities, filters.openNow, selectedDrinkType, searchQuery, hasActiveSearch])
+  }, [cafes, sortBy, filters.minRating, filters.userMinRating, filters.maxDistance, filters.selectedCities, filters.openNow, selectedDrinkType, searchQuery, hasActiveSearch])
 
   return (
     <div className="flex-1 overflow-y-auto pb-24 relative">

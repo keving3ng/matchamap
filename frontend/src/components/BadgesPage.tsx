@@ -3,7 +3,7 @@
  * Shows earned badges, progress toward unearned badges, and badge categories
  */
 
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react';
 import { COPY } from '../constants/copy'
 import { PrimaryButton, SecondaryButton, Skeleton } from './ui'
 import { BadgeGrid, BadgeNotification } from './badges'
@@ -31,18 +31,12 @@ export const BadgesPage: React.FC<BadgesPageProps> = ({
   } = useBadges()
 
   const [selectedCategory, setSelectedCategory] = useState<BadgeCategory | 'all'>('all')
-  const [showNotification, setShowNotification] = useState(false)
 
-  // Show notification when new badges are earned
-  useEffect(() => {
-    if (hasNewBadges) {
-      setShowNotification(true)
-    }
-  }, [hasNewBadges])
+  // Derive notification visibility from hasNewBadges
+  const showNotification = hasNewBadges
 
   // Handle notification close
   const handleNotificationClose = () => {
-    setShowNotification(false)
     dismissNewBadges()
   }
 
@@ -71,7 +65,7 @@ export const BadgesPage: React.FC<BadgesPageProps> = ({
             {COPY.badges.title}
           </h1>
           <p className="text-gray-600 mt-1">
-            {badges.length > 0 
+            {badges.length > 0
               ? `${badges.length} badge${badges.length !== 1 ? 's' : ''} earned`
               : COPY.badges.earnBadges
             }
@@ -143,8 +137,8 @@ export const BadgesPage: React.FC<BadgesPageProps> = ({
           <BadgeGrid
             badges={filteredBadges}
             emptyMessage={
-              selectedCategory === 'all' 
-                ? COPY.badges.noBadges 
+              selectedCategory === 'all'
+                ? COPY.badges.noBadges
                 : `No ${COPY.badges.categories[selectedCategory as BadgeCategory]?.toLowerCase()} badges yet`
             }
           />
@@ -157,7 +151,7 @@ export const BadgesPage: React.FC<BadgesPageProps> = ({
           <h2 className="text-lg font-semibold text-gray-900">
             {COPY.badges.badgeProgress}
           </h2>
-          
+
           {/* Progress Cards */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {progress

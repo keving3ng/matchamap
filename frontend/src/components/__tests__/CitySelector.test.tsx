@@ -68,7 +68,6 @@ describe('CitySelector', () => {
   })
 
   it('should close dropdown when clicking outside', async () => {
-    const user = userEvent.setup()
     render(<CitySelector />)
 
     // This test doesn't apply to <select> elements as they close automatically

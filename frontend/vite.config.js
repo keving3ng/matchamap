@@ -19,7 +19,7 @@ const httpsConfig = fs.existsSync('./localhost+2-key.pem') && fs.existsSync('./l
   }
   : undefined
 
-export default defineConfig(({ command }) => ({
+export default defineConfig(() => ({
   plugins: [
     react(),
     yaml(),

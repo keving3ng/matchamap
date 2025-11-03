@@ -45,7 +45,12 @@ export default tseslint.config(
         'warn',
         { allowConstantExport: true },
       ],
-      '@typescript-eslint/no-unused-vars': ['error'],
+      '@typescript-eslint/no-unused-vars': ['error', {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_',
+        destructuredArrayIgnorePattern: '^_'
+      }],
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
@@ -57,10 +62,19 @@ export default tseslint.config(
         },
       ],
       'react/no-unescaped-entities': 'warn',
+      'react/prop-types': 'off', // We use TypeScript for prop validation
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
       'prefer-const': 'error',
       'no-var': 'error',
+    },
+  },
+  // Relaxed rules for test files
+  {
+    files: ['**/__tests__/**/*.{ts,tsx}', '**/*.test.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-unused-vars': 'warn',
+      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
 );

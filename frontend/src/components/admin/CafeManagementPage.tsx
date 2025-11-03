@@ -25,7 +25,7 @@ export const CafeManagementPage: React.FC = () => {
 
   useEffect(() => {
     fetchCafes(undefined, true) // Bust cache on mount for admin
-  }, [])
+  }, [fetchCafes])
 
   // Memoized helper function to check for missing optional fields
   const getMissingFields = useMemo(() => {
@@ -161,16 +161,12 @@ export const CafeManagementPage: React.FC = () => {
   }
 
   const handleSaveCafe = async (cafeData: Partial<Cafe>) => {
-    try {
-      if (editingCafe) {
-        await api.cafes.update(editingCafe.id, cafeData)
-      } else {
-        await api.cafes.create(cafeData)
-      }
-      await fetchCafes(undefined, true) // Bust cache after save
-    } catch (error) {
-      throw error
+    if (editingCafe) {
+      await api.cafes.update(editingCafe.id, cafeData)
+    } else {
+      await api.cafes.create(cafeData)
     }
+    await fetchCafes(undefined, true) // Bust cache after save
   }
 
   const handleDeleteCafe = async (cafeId: number) => {
