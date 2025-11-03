@@ -6,6 +6,10 @@ import { visualizer } from 'rollup-plugin-visualizer'
 import viteCompression from 'vite-plugin-compression'
 import fs from 'fs'
 import path from 'path'
+import { fileURLToPath } from 'url'
+import process from 'node:process'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // Only load SSL certs if they exist (for local dev)
 const httpsConfig = fs.existsSync('./localhost+2-key.pem') && fs.existsSync('./localhost+2.pem')
@@ -15,23 +19,23 @@ const httpsConfig = fs.existsSync('./localhost+2-key.pem') && fs.existsSync('./l
   }
   : undefined
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [
     react(),
     yaml(),
-    
+
     // Gzip compression for production
     viteCompression({
       algorithm: 'gzip',
       ext: '.gz',
     }),
-    
+
     // Brotli compression for production (better than gzip)
     viteCompression({
       algorithm: 'brotliCompress',
       ext: '.br',
     }),
-    
+
     // Bundle analyzer (only in build mode with ANALYZE=true)
     process.env.ANALYZE === 'true' && visualizer({
       filename: './dist/stats.html',
@@ -40,7 +44,7 @@ export default defineConfig({
       brotliSize: true,
       template: 'treemap', // or 'sunburst', 'network'
     }),
-    
+
     // Put the Codecov vite plugin after all other plugins
     codecovVitePlugin({
       enableBundleAnalysis: process.env.CODECOV_TOKEN !== undefined,
@@ -48,52 +52,54 @@ export default defineConfig({
       uploadToken: process.env.CODECOV_TOKEN,
     }),
   ].filter(Boolean),
-  
+
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
   },
-  
+
+  // Configure esbuild for dropping console and debugger statements in production
+  // Note: esbuild.drop only applies during build minification, not during dev
+  esbuild: {
+    drop: command === 'build' ? ['console', 'debugger'] : [],
+  },
+
   build: {
     outDir: 'dist',
     sourcemap: true,
-    
+
     // Minification settings
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true, // Remove console.logs in production
-        drop_debugger: true,
-      },
-    },
-    
+    // Use esbuild (default, faster) instead of terser
+    // Console and debugger dropping is configured via esbuild option above
+    minify: 'esbuild',
+
     rollupOptions: {
       output: {
         manualChunks: {
           // Core React
           vendor: ['react', 'react-dom'],
-          
+
           // Router (already split)
           router: ['react-router', 'react-router-dom'],
-          
+
           // Maps (heavy dependency)
           maps: ['leaflet'],
-          
+
           // State management
           state: ['zustand'],
-          
+
           // Utils
           utils: ['dompurify'],
         },
-        
+
         // Better chunk naming for cache busting
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
       }
     },
-    
+
     // Chunk size warning threshold
     chunkSizeWarningLimit: 500, // warn if any chunk exceeds 500KB
   },
@@ -106,4 +112,4 @@ export default defineConfig({
   preview: {
     port: 4173
   }
-})
+}))
