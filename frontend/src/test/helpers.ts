@@ -18,19 +18,21 @@ import type { StateStorage } from 'zustand/middleware'
 /**
  * Mock a feature flag value for testing
  * @param flag - The feature flag key (e.g., 'ENABLE_USER_ACCOUNTS')
- * @param value - The value to set (true/false or object)
+ * @param value - The value to set (true/false)
  *
  * @example
  * mockFeatureFlag('ENABLE_USER_ACCOUNTS', true)
  * // Now all code will see ENABLE_USER_ACCOUNTS as enabled
  */
-export function mockFeatureFlag(flag: string, value: boolean | Record<string, any>) {
-  // This will be used to mock the features config
-  // The actual implementation depends on how features are loaded
+export function mockFeatureFlag(flag: string, value: boolean) {
+  // Set up the feature config structure that matches the YAML format
   if (!globalThis.__TEST_FEATURE_FLAGS__) {
     globalThis.__TEST_FEATURE_FLAGS__ = {}
   }
-  globalThis.__TEST_FEATURE_FLAGS__[flag] = value
+  globalThis.__TEST_FEATURE_FLAGS__[flag] = {
+    dev: value,
+    prod: value,
+  }
 }
 
 /**

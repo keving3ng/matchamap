@@ -376,6 +376,70 @@ export const COPY = {
     userActivityPlaceholder: (username: string) => `${username}'s recent activity will appear here.`,
   },
 
+  // Lists (Phase 2E)
+  lists: {
+    // Lists Overview
+    myLists: 'My Lists',
+    createList: 'Create List',
+    noLists: 'No lists yet',
+    noListsDescription: 'Create custom lists to organize your favorite cafes',
+    listCount: (count: number) => `${count} ${count === 1 ? 'cafe' : 'cafes'}`,
+
+    // Create/Edit List Modal
+    createNewList: 'Create New List',
+    editList: 'Edit List',
+    listName: 'List Name',
+    listNamePlaceholder: 'e.g., Weekend Spots, Study Cafes',
+    description: 'Description',
+    descriptionPlaceholder: 'Optional description...',
+    makePublic: 'Make this list public',
+    makePublicDescription: 'Anyone can view this list',
+    creating: 'Creating...',
+    create: 'Create',
+    saving: 'Saving...',
+    save: 'Save',
+    cancel: 'Cancel',
+
+    // List Detail
+    editListButton: 'Edit List',
+    deleteListButton: 'Delete List',
+    shareList: 'Share List',
+    backToLists: 'Back to Lists',
+    emptyList: 'No cafes in this list',
+    emptyListDescription: 'Add cafes from the map or list view',
+    removeCafe: 'Remove from list',
+    viewCafe: 'View Details',
+    publicBadge: 'Public',
+    privateBadge: 'Private',
+
+    // Add to List
+    addToList: 'Add to List',
+    addingToList: 'Adding...',
+    selectList: 'Select a list',
+    createNewListOption: '+ Create new list',
+    addNotes: 'Add notes (optional)',
+    notesPlaceholder: 'Notes about this cafe...',
+    add: 'Add',
+    alreadyInList: 'Already in this list',
+    addedToList: 'Added to list!',
+
+    // Delete Confirmation
+    deleteListTitle: 'Delete List?',
+    deleteListMessage: (name: string) => `Are you sure you want to delete "${name}"? This cannot be undone.`,
+    delete: 'Delete',
+    deleting: 'Deleting...',
+
+    // Errors
+    failedToCreate: 'Failed to create list',
+    failedToUpdate: 'Failed to update list',
+    failedToDelete: 'Failed to delete list',
+    failedToLoad: 'Failed to load lists',
+    failedToAddCafe: 'Failed to add cafe to list',
+    failedToRemoveCafe: 'Failed to remove cafe from list',
+    nameRequired: 'List name is required',
+    nameTooLong: 'List name must be 100 characters or less',
+  },
+
   // Admin (basic strings, admin has more specific copy in components)
   admin: {
     title: 'Admin Dashboard',

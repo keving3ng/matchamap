@@ -2,7 +2,6 @@ import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import { createMemoryRouter, RouterProvider } from 'react-router-dom'
 import { App } from '../../App'
 
 // Mock useAppFeatures
@@ -13,6 +12,16 @@ vi.mock('../../hooks/useAppFeatures', () => ({
     isPassportEnabled: true,
     isEventsEnabled: true,
     isStoreEnabled: true,
+    isMenuEnabled: true,
+    isCitySelectorEnabled: true,
+    isUserAccountsEnabled: true,
+    showUserProfiles: true,
+    showContact: true,
+    showAbout: true,
+    showStore: true,
+    showSettings: true,
+    isAdminPanelEnabled: true,
+    isUserSocialEnabled: true,
   }),
 }))
 

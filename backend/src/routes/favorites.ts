@@ -5,6 +5,7 @@ import { getDb, userFavorites, cafes } from '../db';
 import { jsonResponse, errorResponse, badRequestResponse } from '../utils/response';
 import { AuthenticatedRequest } from '../middleware/auth';
 import { HTTP_STATUS } from '../constants';
+import { cafeSelection, transformCafeSelection } from '../utils/selections';
 
 /**
  * GET /api/users/me/favorites
@@ -18,7 +19,7 @@ export async function getMyFavorites(request: AuthenticatedRequest, env: Env): P
 
     const db = getDb(env.DB);
 
-    // Get favorites with cafe details via JOIN
+    // Get favorites with cafe details via JOIN using standardized cafe selection
     const favoritesWithCafes = await db
       .select({
         id: userFavorites.id,
@@ -28,17 +29,9 @@ export async function getMyFavorites(request: AuthenticatedRequest, env: Env): P
         sortOrder: userFavorites.sortOrder,
         createdAt: userFavorites.createdAt,
         updatedAt: userFavorites.updatedAt,
-        
-        // Cafe details
-        cafeName: cafes.name,
-        cafeSlug: cafes.slug,
-        cafeCity: cafes.city,
-        cafeAmbianceScore: cafes.ambianceScore,
-        cafeQuickNote: cafes.quickNote,
-        cafeLatitude: cafes.latitude,
-        cafeLongitude: cafes.longitude,
-        cafeInstagram: cafes.instagram,
-        cafeImages: cafes.images,
+
+        // Cafe details using standardized selection
+        ...cafeSelection,
       })
       .from(userFavorites)
       .innerJoin(cafes, eq(userFavorites.cafeId, cafes.id))
@@ -46,7 +39,7 @@ export async function getMyFavorites(request: AuthenticatedRequest, env: Env): P
       .orderBy(userFavorites.sortOrder, desc(userFavorites.createdAt))
       .all();
 
-    // Transform to include nested cafe object
+    // Transform to include nested cafe object using standardized transformation
     const favorites = favoritesWithCafes.map((row) => ({
       id: row.id,
       userId: row.userId,
@@ -55,18 +48,7 @@ export async function getMyFavorites(request: AuthenticatedRequest, env: Env): P
       sortOrder: row.sortOrder,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
-      cafe: {
-        id: row.cafeId,
-        name: row.cafeName,
-        slug: row.cafeSlug,
-        city: row.cafeCity,
-        ambianceScore: row.cafeAmbianceScore,
-        quickNote: row.cafeQuickNote,
-        latitude: row.cafeLatitude,
-        longitude: row.cafeLongitude,
-        instagram: row.cafeInstagram,
-        images: row.cafeImages,
-      },
+      cafe: transformCafeSelection(row, row.cafeId),
     }));
 
     return jsonResponse({ favorites }, HTTP_STATUS.OK, request as Request, env);
@@ -123,9 +105,9 @@ export async function addFavorite(request: AuthenticatedRequest, env: Env): Prom
       RETURNING *
     `).bind(request.user.userId, cafeId, notes || null, notes || null).first();
 
-    return jsonResponse({ 
-      success: true, 
-      favorite: result 
+    return jsonResponse({
+      success: true,
+      favorite: result
     }, HTTP_STATUS.OK, request as Request, env);
   } catch (error) {
     console.error('Add favorite error:', error);
@@ -193,7 +175,7 @@ export async function updateFavoriteNotes(request: AuthenticatedRequest, env: En
 
     // Update notes (returns null if favorite doesn't exist)
     const result = await env.DB.prepare(`
-      UPDATE user_favorites 
+      UPDATE user_favorites
       SET notes = ?, updated_at = datetime('now')
       WHERE user_id = ? AND cafe_id = ?
       RETURNING *
@@ -203,9 +185,9 @@ export async function updateFavoriteNotes(request: AuthenticatedRequest, env: En
       return errorResponse('Favorite not found', HTTP_STATUS.NOT_FOUND, request as Request, env);
     }
 
-    return jsonResponse({ 
+    return jsonResponse({
       success: true,
-      favorite: result 
+      favorite: result
     }, HTTP_STATUS.OK, request as Request, env);
   } catch (error) {
     console.error('Update favorite notes error:', error);
