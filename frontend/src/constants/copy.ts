@@ -386,6 +386,7 @@ export const COPY = {
     stats: 'Analytics',
     users: 'Users',
     settings: 'Settings',
+    moderation: 'Moderation',
     // Error Boundaries
     errorBoundary: {
       title: 'Something went wrong in the admin panel',
@@ -495,6 +496,66 @@ export const COPY = {
       yesterday: 'Yesterday',
       daysAgo: (days: number) => `${days} days ago`,
       weeksAgo: (weeks: number) => `${weeks} weeks ago`,
+    },
+
+    // Moderation Dashboard
+    moderationDashboard: {
+      title: 'Moderation Dashboard',
+      subtitle: 'Review and moderate user-generated content',
+      tabs: {
+        reviews: 'Reviews',
+        photos: 'Photos',
+        comments: 'Comments',
+        suggestions: 'Suggestions',
+      },
+      bulkActions: {
+        title: 'Bulk Actions',
+        selected: (count: number) => `${count} selected`,
+        selectAll: 'Select All',
+        deselectAll: 'Deselect All',
+        approveSelected: 'Approve Selected',
+        rejectSelected: 'Reject Selected',
+        confirmApprove: (count: number) => `Approve ${count} item${count !== 1 ? 's' : ''}?`,
+        confirmReject: (count: number) => `Reject ${count} item${count !== 1 ? 's' : ''}?`,
+        success: (action: string, count: number) => `${action} ${count} item${count !== 1 ? 's' : ''} successfully`,
+        error: 'Failed to perform bulk action',
+        processing: 'Processing...',
+      },
+      stats: {
+        pending: (count: number) => `${count} pending`,
+        approved: (count: number) => `${count} approved`,
+        rejected: (count: number) => `${count} rejected`,
+        flagged: (count: number) => `${count} flagged`,
+        total: (count: number) => `${count} total`,
+      },
+      filters: {
+        all: 'All',
+        pending: 'Pending',
+        approved: 'Approved',
+        rejected: 'Rejected',
+        flagged: 'Flagged',
+        today: 'Today',
+        thisWeek: 'This Week',
+        thisMonth: 'This Month',
+      },
+      actions: {
+        approve: 'Approve',
+        reject: 'Reject',
+        flag: 'Flag',
+        view: 'View',
+        delete: 'Delete',
+      },
+      placeholders: {
+        noReviews: 'No reviews pending moderation',
+        noPhotos: 'No photos pending moderation',
+        noComments: 'No comments pending moderation',
+        noSuggestions: 'No cafe suggestions pending review',
+        allReviewed: 'All items have been reviewed',
+        comingSoon: 'This feature is coming soon',
+      },
+      loading: 'Loading moderation queue...',
+      error: 'Failed to load moderation queue',
+      retry: 'Retry',
     },
 
     // Date formatting

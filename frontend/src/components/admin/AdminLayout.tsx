@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router'
-import { Settings, Menu, X, Coffee, Calendar, Code, Users, Package, Wrench, Upload, Mail, FileText } from '@/components/icons'
+import { Settings, Menu, X, Coffee, Calendar, Code, Users, Package, Wrench, Upload, Mail, FileText, ShieldCheck } from '@/components/icons'
 
 interface AdminLayoutProps {
   children: React.ReactNode
@@ -26,6 +26,12 @@ const coreNavItems: NavItem[] = [
     label: 'Users',
     icon: <Users size={20} />,
     path: '/admin/users',
+  },
+  {
+    id: 'moderation',
+    label: 'Moderation',
+    icon: <ShieldCheck size={20} />,
+    path: '/admin/moderation',
   },
   {
     id: 'content',
