@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS user_list_items (
 );
 
 -- Indexes for query performance
-CREATE INDEX IF NOT EXISTS idx_user_lists_user ON user_lists(user_id);
-CREATE INDEX IF NOT EXISTS idx_user_lists_public ON user_lists(is_public);
-CREATE INDEX IF NOT EXISTS idx_user_list_items_list ON user_list_items(list_id);
-CREATE INDEX IF NOT EXISTS idx_user_list_items_cafe ON user_list_items(cafe_id);
+CREATE INDEX IF NOT EXISTS user_lists_user_idx ON user_lists(user_id);
+CREATE INDEX IF NOT EXISTS user_lists_public_idx ON user_lists(is_public);
+CREATE INDEX IF NOT EXISTS user_list_items_list_idx ON user_list_items(list_id);
+CREATE INDEX IF NOT EXISTS user_list_items_cafe_idx ON user_list_items(cafe_id);

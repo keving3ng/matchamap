@@ -79,7 +79,7 @@ export const useListsStore = create<ListsState>()(
         set((state) => ({
           lists: state.lists.map((list) =>
             list.id === listId
-              ? { ...list, itemCount: (list.itemCount || 0) + 1 }
+              ? { ...list, itemCount: (list.itemCount ?? 0) + 1 }
               : list
           ),
           currentListItems:
@@ -92,7 +92,7 @@ export const useListsStore = create<ListsState>()(
         set((state) => ({
           lists: state.lists.map((list) =>
             list.id === listId
-              ? { ...list, itemCount: Math.max(0, (list.itemCount || 0) - 1) }
+              ? { ...list, itemCount: Math.max(0, (list.itemCount ?? 0) - 1) }
               : list
           ),
           currentListItems:
