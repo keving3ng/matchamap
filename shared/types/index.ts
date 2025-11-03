@@ -691,3 +691,81 @@ export interface CafeFormData extends Omit<Cafe, 'id' | 'createdAt' | 'updatedAt
 export interface EventFormData extends Omit<Event, 'id' | 'createdAt' | 'updatedAt'> {
   id?: number
 }
+
+// ============================================================================
+// ADMIN ANALYTICS TYPES
+// ============================================================================
+
+/**
+ * Cafe performance statistics for admin analytics dashboard
+ * Combines anonymous metrics (cafe_stats) and authenticated check-ins
+ */
+export interface CafeStats {
+  id: number
+  name: string
+  city: string
+  slug: string
+  views: number
+  directions_clicks: number
+  anonymous_passport_marks: number
+  instagram_clicks: number
+  tiktok_clicks: number
+  authenticated_checkins: number
+}
+
+/**
+ * User activity summary for admin analytics dashboard
+ * Aggregated metrics about user engagement
+ */
+export interface UserActivitySummary {
+  total_users: number
+  active_users_7d: number
+  active_users_30d: number
+  total_checkins: number
+  repeat_visitors: number
+}
+
+/**
+ * Feed engagement statistics for admin analytics dashboard
+ */
+export interface FeedStats {
+  id: number
+  title: string
+  type: string
+  clicks: number
+  published_at: string | null
+}
+
+/**
+ * Event engagement statistics for admin analytics dashboard
+ */
+export interface EventStats {
+  id: number
+  name: string
+  date: string
+  clicks: number
+  featured: boolean
+}
+
+/**
+ * API response types for admin analytics endpoints
+ */
+export interface AdminCafeStatsResponse {
+  stats: CafeStats[]
+}
+
+export interface AdminUserActivityResponse {
+  total_users: number
+  active_users_7d: number
+  active_users_30d: number
+  total_checkins: number
+  repeat_visitors: number
+}
+
+export interface AdminFeedStatsResponse {
+  stats: FeedStats[]
+}
+
+export interface AdminEventStatsResponse {
+  stats: EventStats[]
+}

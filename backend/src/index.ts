@@ -24,6 +24,7 @@ import { getMyFavorites, addFavorite, removeFavorite, updateFavoriteNotes } from
 import { getMyBadges, checkAndAwardBadges, getBadgeDefinitions, getBadgeProgress } from './routes/badges';
 import { followUser, unfollowUser, getUserFollowers, getUserFollowing, getFollowStatus } from './routes/following';
 import { getPassportLeaderboard, getReviewerLeaderboard, getContributorLeaderboard, getUserRank } from './routes/leaderboards';
+import { handleAdminCafeStats, handleUserActivitySummary, handleFeedStats, handleEventStats } from './routes/admin-stats';
 import { createSuggestion, getMySuggestions, getPendingSuggestions, approveSuggestion, rejectSuggestion } from './routes/suggestions';
 import { requireAuth, requireAdminAuth } from './middleware/auth';
 import { authRateLimit, publicRateLimit, writeRateLimit } from './middleware/rateLimit';
@@ -196,6 +197,11 @@ router.get('/api/admin/cafes/:id/reviews/count', publicRateLimit(), requireAdmin
 router.put('/api/admin/reviews/:id/moderate', writeRateLimit(), requireAdminAuth(), moderateReview);
 router.put('/api/admin/comments/:id/moderate', writeRateLimit(), requireAdminAuth(), moderateComment);
 
+// Admin analytics endpoints
+router.get('/api/admin/cafe-stats', publicRateLimit(), requireAdminAuth(), handleAdminCafeStats);
+router.get('/api/admin/user-activity-summary', publicRateLimit(), requireAdminAuth(), handleUserActivitySummary);
+router.get('/api/admin/feed-stats', publicRateLimit(), requireAdminAuth(), handleFeedStats);
+router.get('/api/admin/event-stats', publicRateLimit(), requireAdminAuth(), handleEventStats);
 // Cafe suggestions admin endpoints
 router.get('/api/admin/cafe-suggestions', publicRateLimit(), requireAdminAuth(), getPendingSuggestions);
 router.put('/api/admin/cafe-suggestions/:id/approve', writeRateLimit(), requireAdminAuth(), approveSuggestion);
