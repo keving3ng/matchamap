@@ -101,6 +101,53 @@ export function requireAdmin() {
 }
 
 /**
+ * Middleware to optionally attach user if authenticated
+ * Unlike requireAuth(), this doesn't fail if no token is present
+ * Used for routes that should work for both authenticated and anonymous users
+ */
+export function optionalAuth() {
+  return async (request: AuthenticatedRequest, env: Env): Promise<Response | void> => {
+    // Extract token from httpOnly cookie
+    const cookieHeader = request.headers.get('Cookie');
+
+    if (!cookieHeader) {
+      // No cookie, continue without user
+      return undefined;
+    }
+
+    const cookies = cookieHeader.split(';').map(c => c.trim());
+    const tokenCookie = cookies.find(c => c.startsWith('access_token='));
+
+    if (!tokenCookie) {
+      // No access token cookie, continue without user
+      return undefined;
+    }
+
+    const token = tokenCookie.split('=')[1];
+
+    if (!token || !env.JWT_SECRET) {
+      // Invalid token or missing secret, continue without user
+      return undefined;
+    }
+
+    // Try to verify token, but don't fail if invalid
+    try {
+      const payload = await verifyToken(token, env.JWT_SECRET);
+      if (payload) {
+        // Attach user to request if token is valid
+        request.user = payload;
+      }
+    } catch (error) {
+      // Token invalid or expired, continue without user
+      // Don't log or return error for optional auth
+    }
+
+    // Always continue to next handler
+    return undefined;
+  };
+}
+
+/**
  * Combined middleware: require auth + admin
  */
 export function requireAdminAuth() {

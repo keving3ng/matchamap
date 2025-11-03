@@ -27,7 +27,7 @@ import { getPassportLeaderboard, getReviewerLeaderboard, getContributorLeaderboa
 import { handleAdminCafeStats, handleUserActivitySummary, handleFeedStats, handleEventStats } from './routes/admin-stats';
 import { createSuggestion, getMySuggestions, getPendingSuggestions, approveSuggestion, rejectSuggestion } from './routes/suggestions';
 import { getMyLists, createList, getListById, updateList, deleteList, addListItem, removeListItem } from './routes/lists';
-import { requireAuth, requireAdminAuth } from './middleware/auth';
+import { requireAuth, requireAdminAuth, optionalAuth } from './middleware/auth';
 import { authRateLimit, publicRateLimit, writeRateLimit } from './middleware/rateLimit';
 import { requireHTTPS } from './middleware/httpsOnly';
 import { notFoundResponse } from './utils/response';
@@ -43,14 +43,14 @@ function validateEnvironment(env: Env): void {
     { key: 'JWT_SECRET', description: 'JWT signing secret' },
     { key: 'GOOGLE_PLACES_API_KEY', description: 'Google Places API key' }
   ];
-  
+
   const missing = requiredSecrets.filter(({ key }) => !env[key as keyof Env]);
-  
+
   if (missing.length > 0) {
-    const errors = missing.map(({ key, description }) => 
+    const errors = missing.map(({ key, description }) =>
       `- ${key}: ${description}`
     ).join('\n');
-    
+
     throw new Error(
       `Missing required environment variables:\n${errors}\n\n` +
       `Set them via Wrangler CLI:\n` +
@@ -126,7 +126,7 @@ router.get('/api/users/me/suggestions', authRateLimit(), requireAuth(), getMySug
 // User lists endpoints
 router.get('/api/lists/me', authRateLimit(), requireAuth(), getMyLists);
 router.post('/api/lists', writeRateLimit(), requireAuth(), createList);
-router.get('/api/lists/:id', publicRateLimit(), getListById);
+router.get('/api/lists/:id', publicRateLimit(), optionalAuth(), getListById);
 router.put('/api/lists/:id', writeRateLimit(), requireAuth(), updateList);
 router.delete('/api/lists/:id', writeRateLimit(), requireAuth(), deleteList);
 router.post('/api/lists/:id/items', writeRateLimit(), requireAuth(), addListItem);
@@ -236,15 +236,15 @@ export default {
     try {
       // Validate environment variables on first request
       validateEnvironment(env);
-      
+
       const response = await router.fetch(request, env);
       return response || new Response('Not Found', { status: HTTP_STATUS.NOT_FOUND });
     } catch (error) {
       console.error('Unhandled error:', error);
-      
+
       // Return specific error for configuration issues
       if (error instanceof Error && error.message.includes('Missing required environment variables')) {
-        return new Response(JSON.stringify({ 
+        return new Response(JSON.stringify({
           error: 'Configuration Error',
           details: error.message
         }), {
@@ -252,7 +252,7 @@ export default {
           headers: { 'Content-Type': 'application/json' }
         });
       }
-      
+
       return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
         status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
         headers: { 'Content-Type': 'application/json' }
