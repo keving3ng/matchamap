@@ -63,9 +63,7 @@ setupSessionStorage()
 
 // Mock the features.yaml import
 vi.mock('../config/features.yaml', () => ({
-  default: () => {
-    return globalThis.__TEST_FEATURE_FLAGS__ || {}
-  },
+  default: globalThis.__TEST_FEATURE_FLAGS__ || {},
 }))
 
 // ==================== Global Test Lifecycle ====================

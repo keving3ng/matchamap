@@ -1,12 +1,14 @@
 /// <reference types="vitest" />
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
+import yaml from "@rollup/plugin-yaml";
 import path from "path";
 import { codecovVitePlugin } from "@codecov/vite-plugin";
 
 export default defineConfig({
     plugins: [
         react(),
+        yaml(),
         codecovVitePlugin({
             enableBundleAnalysis: process.env.CODECOV_TOKEN !== undefined,
             bundleName: "matchamap-frontend",

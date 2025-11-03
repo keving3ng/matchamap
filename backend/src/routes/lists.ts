@@ -6,6 +6,7 @@ import { jsonResponse, errorResponse, badRequestResponse } from '../utils/respon
 import { AuthenticatedRequest } from '../middleware/auth';
 import { HTTP_STATUS } from '../constants';
 import { sanitizeShortText, sanitizeTextInput } from '../utils/sanitize';
+import { cafeSelection, transformCafeSelection } from '../utils/selections';
 import type { CreateListRequest, UpdateListRequest, AddListItemRequest } from '../../../shared/types';
 
 /**
@@ -119,7 +120,7 @@ export async function getListById(request: AuthenticatedRequest, env: Env): Prom
       return errorResponse('Not authorized to view this list', HTTP_STATUS.FORBIDDEN, request as Request, env);
     }
 
-    // Get list items with cafe details
+    // Get list items with cafe details using standardized cafe selection
     const itemsWithCafes = await db
       .select({
         id: userListItems.id,
@@ -128,20 +129,8 @@ export async function getListById(request: AuthenticatedRequest, env: Env): Prom
         notes: userListItems.notes,
         createdAt: userListItems.createdAt,
 
-        // Cafe details
-        cafeName: cafes.name,
-        cafeSlug: cafes.slug,
-        cafeCity: cafes.city,
-        cafeLatitude: cafes.latitude,
-        cafeLongitude: cafes.longitude,
-        cafeAmbianceScore: cafes.ambianceScore,
-        cafeQuickNote: cafes.quickNote,
-        cafeInstagram: cafes.instagram,
-        cafeImages: cafes.images,
-        cafeLink: cafes.link,
-        cafeAddress: cafes.address,
-        cafeUserRatingAvg: cafes.userRatingAvg,
-        cafeUserRatingCount: cafes.userRatingCount,
+        // Cafe details using standardized selection
+        ...cafeSelection,
       })
       .from(userListItems)
       .innerJoin(cafes, eq(userListItems.cafeId, cafes.id))
@@ -149,29 +138,14 @@ export async function getListById(request: AuthenticatedRequest, env: Env): Prom
       .orderBy(desc(userListItems.createdAt))
       .all();
 
-    // Transform to include nested cafe object
+    // Transform to include nested cafe object using standardized transformation
     const items = itemsWithCafes.map((row) => ({
       id: row.id,
       listId: row.listId,
       cafeId: row.cafeId,
       notes: row.notes,
       createdAt: row.createdAt,
-      cafe: {
-        id: row.cafeId,
-        name: row.cafeName,
-        slug: row.cafeSlug,
-        city: row.cafeCity,
-        latitude: row.cafeLatitude,
-        longitude: row.cafeLongitude,
-        ambianceScore: row.cafeAmbianceScore,
-        quickNote: row.cafeQuickNote,
-        instagram: row.cafeInstagram,
-        images: row.cafeImages,
-        link: row.cafeLink,
-        address: row.cafeAddress,
-        userRatingAvg: row.cafeUserRatingAvg,
-        userRatingCount: row.cafeUserRatingCount,
-      },
+      cafe: transformCafeSelection(row, row.cafeId),
     }));
 
     return jsonResponse({ list, items }, HTTP_STATUS.OK, request as Request, env);
