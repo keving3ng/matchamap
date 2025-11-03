@@ -502,7 +502,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
 
             {/* Quick Note */}
             {selectedCafe.quickNote && (
-              <p className="text-sm text-gray-600 italic mb-1.5">"{selectedCafe.quickNote}"</p>
+              <p className="text-sm text-gray-600 italic mb-1.5">&quot;{selectedCafe.quickNote}&quot;</p>
             )}
 
             {/* Drinks List */}
@@ -690,7 +690,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
               {/* Quick Note */}
               {selectedCafe.quickNote && (
                 <div className="bg-green-50 rounded-lg p-3 border border-green-200">
-                  <p className="text-sm text-gray-700 italic">"{selectedCafe.quickNote}"</p>
+                  <p className="text-sm text-gray-700 italic">&quot;{selectedCafe.quickNote}&quot;</p>
                 </div>
               )}
 

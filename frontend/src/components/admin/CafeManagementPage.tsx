@@ -310,7 +310,7 @@ export const CafeManagementPage: React.FC = () => {
                       )}
                       <span className="text-sm text-gray-500 capitalize">{cafe.city}</span>
                     </div>
-                    <p className="text-sm text-gray-600 mb-1 italic">"{cafe.quickNote}"</p>
+                    <p className="text-sm text-gray-600 mb-1 italic">&quot;{cafe.quickNote}&quot;</p>
                     {cafe.review && (
                       <p className="text-sm text-gray-500 line-clamp-2">{cafe.review}</p>
                     )}

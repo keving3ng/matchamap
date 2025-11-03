@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
-import { useCityStore, CITIES, type City, type CityKey } from '../cityStore'
-import { waitForPersistence, createMockCity } from '../../test/helpers'
+import { useCityStore, CITIES, type CityKey } from '../cityStore'
+import { waitForPersistence } from '../../test/helpers'
 import type { CityWithCount } from '../../../../shared/types'
 import { api } from '../../utils/api'
 
@@ -524,8 +524,6 @@ describe('cityStore', () => {
   describe('edge cases', () => {
     it('should handle setting invalid city key', () => {
       const { result } = renderHook(() => useCityStore())
-
-      const initialCity = result.current.selectedCity
 
       // TypeScript would prevent this, but test runtime behavior
       act(() => {

@@ -264,7 +264,7 @@ const PhotoCard: React.FC<PhotoCardProps> = ({
             {/* Caption */}
             {photo.caption && (
               <p className="text-sm text-gray-700 line-clamp-2 mb-2">
-                "{photo.caption}"
+                &quot;{photo.caption}&quot;
               </p>
             )}
 

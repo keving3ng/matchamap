@@ -183,7 +183,7 @@ export const BulkImporterPage: React.FC = () => {
           <ul className="text-sm text-blue-700 space-y-1">
             <li>• <strong>Required headers:</strong> Name, Link (Google Maps URL), City, Quick Note, Drink Name, Score, Price</li>
             <li>• <strong>Optional headers:</strong> Ambiance, Review, Source, Instagram, IG Post Link, TikTok Post Link, Grams</li>
-            <li>• Headers are case-insensitive (e.g., "Name" or "name" both work)</li>
+            <li>• Headers are case-insensitive (e.g., &quot;Name&quot; or &quot;name&quot; both work)</li>
             <li>• Slug, latitude, longitude will be auto-generated from the Google Maps link</li>
             <li>• Currency is auto-detected from city (Toronto/Montreal=CAD, NYC=USD)</li>
             <li>• One drink per row - multiple rows for same cafe = multiple drinks</li>
@@ -193,7 +193,7 @@ export const BulkImporterPage: React.FC = () => {
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <h3 className="font-semibold text-blue-800 mb-2">JSON Format Instructions</h3>
           <ul className="text-sm text-blue-700 space-y-1">
-            <li>• Paste JSON array of cafes (same format as exported from "Export All Cafes")</li>
+            <li>• Paste JSON array of cafes (same format as exported from &quot;Export All Cafes&quot;)</li>
             <li>• Can be a plain array: <code className="bg-white px-1 rounded">{"[{...}, {...}]"}</code></li>
             <li>• Or wrapped: <code className="bg-white px-1 rounded">{'{cafes: [{...}, {...}]}'}</code></li>
             <li>• Each cafe must have: name, link, quickNote, and drinks array</li>

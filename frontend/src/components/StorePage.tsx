@@ -149,7 +149,7 @@ export const StorePage: React.FC = () => {
               🚧 Store Coming Soon
             </p>
             <p className="text-sm text-gray-600">
-              We're currently setting up our shop. Check back soon for matcha essentials and exclusive merch!
+              We&apos;re currently setting up our shop. Check back soon for matcha essentials and exclusive merch!
             </p>
           </div>
         </div>

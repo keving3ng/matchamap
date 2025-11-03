@@ -175,7 +175,7 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({ event }) => {
                   )}
                 </div>
                 {linkedCafe.quickNote && (
-                  <p className="text-sm text-gray-600 italic mb-3">"{linkedCafe.quickNote}"</p>
+                  <p className="text-sm text-gray-600 italic mb-3">&quot;{linkedCafe.quickNote}&quot;</p>
                 )}
                 <button
                   onClick={() => {

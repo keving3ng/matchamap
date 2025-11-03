@@ -3,7 +3,6 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { CheckInButton } from '../CheckInButton'
 import type { Cafe } from '../../../../../shared/types'
-import * as useUserFeaturesModule from '../../../hooks/useUserFeatures'
 
 // Mock the copy constants
 vi.mock('../../../constants/copy', () => ({

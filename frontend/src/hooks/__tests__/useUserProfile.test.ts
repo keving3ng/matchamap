@@ -417,7 +417,7 @@ describe('useMyProfile', () => {
       { displayName: 'Name 3' },
     ]
 
-    const responses = updates.map((update, index) => ({
+    const responses = updates.map((update, _index) => ({
       ...mockUserProfile,
       displayName: update.displayName,
     }))

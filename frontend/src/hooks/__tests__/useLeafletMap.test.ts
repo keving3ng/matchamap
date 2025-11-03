@@ -107,7 +107,7 @@ vi.mock('../../utils/mapMarkers', () => ({
 
 // Import mocked leaflet to access mock map
 import * as L from 'leaflet'
-const mockMapInstance = (L as any).__mockMap
+const _mockMapInstance = (L as any).__mockMap
 
 describe('useLeafletMap', () => {
   const mockCafes: CafeWithDistance[] = [

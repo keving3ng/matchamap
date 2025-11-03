@@ -79,7 +79,7 @@ export const ComingSoon: React.FC<ComingSoonProps> = ({ onPasswordCorrect }) => 
           </form>
         ) : (
           <div className="mt-2 py-3 text-white/90">
-            <p className="text-lg">you're in.</p>
+            <p className="text-lg">you&apos;re in.</p>
           </div>
         )}
 

@@ -691,7 +691,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
 
                     {/* Quick note preview */}
                     {cafe.quickNote && (
-                      <p className="text-sm text-gray-600 italic line-clamp-2 mb-3">"{cafe.quickNote}"</p>
+                      <p className="text-sm text-gray-600 italic line-clamp-2 mb-3">&quot;{cafe.quickNote}&quot;</p>
                     )}
                   </div>
 
@@ -847,7 +847,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                                 {new Date(snippet.createdAt).toLocaleDateString()}
                               </span>
                             </div>
-                            <p className="text-sm text-gray-700 italic">"{snippet.content}"</p>
+                            <p className="text-sm text-gray-700 italic">&quot;{snippet.content}&quot;</p>
                             {snippet.tags && snippet.tags.length > 0 && (
                               <div className="flex flex-wrap gap-1 mt-2">
                                 {snippet.tags.map((tag, tagIndex) => (

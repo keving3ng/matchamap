@@ -2,7 +2,6 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useAuthStore } from '../../../stores/authStore'
-import { mockFeatureFlag, resetStore, createMockUser } from '../../../test/helpers'
 import { RegisterForm } from '../RegisterForm'
 import { COPY } from '../../../constants/copy'
 

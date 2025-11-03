@@ -460,7 +460,7 @@ describe('locationStore', () => {
 
       // Should not throw error when store tries to remove expired data
       expect(() => {
-        const { result } = renderHook(() => useLocationStore())
+        renderHook(() => useLocationStore())
       }).not.toThrow()
     })
 

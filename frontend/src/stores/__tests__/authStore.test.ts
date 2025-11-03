@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { useAuthStore } from '../authStore'
-import { waitForPersistence, createMockUser } from '../../test/helpers'
 import type { User, RegisterRequest } from '../../../../shared/types'
 
 // Mock the API
@@ -103,7 +102,7 @@ describe('authStore', () => {
       await act(async () => {
         try {
           await result.current.login({ email: 'test@example.com', password: 'wrongpassword' })
-        } catch (error) {
+        } catch {
           // Expected error
         }
       })
