@@ -71,6 +71,17 @@ This guide helps you navigate the MatchaMap documentation and find exactly what 
 | Security guidelines | `TECH_SPEC.md` → Security |
 | Browser support | `TECH_SPEC.md` → Browser Support |
 
+### Performance Optimization
+
+| Task | Document |
+|------|----------|
+| Performance optimization procedures | `performance-optimization-runbook.md` ⭐ NEW |
+| Performance testing procedures | `performance-testing-procedures.md` ⭐ NEW |
+| React performance best practices | `react-performance-guide.md` ⭐ NEW |
+| Bundle size optimization | `../CLAUDE.md` → Bundle Size Strategy |
+| Web Vitals tracking | `frontend/src/utils/webVitals.ts` |
+| Image compression | `frontend/src/utils/imageCompression.ts` |
+
 ---
 
 ## 📚 Document Descriptions

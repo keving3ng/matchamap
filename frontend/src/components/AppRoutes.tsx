@@ -33,6 +33,7 @@ const WaitlistPage = React.lazy(() => import('./admin/WaitlistPage'))
 const ContentManagementPage = React.lazy(() => import('./admin/ContentManagementPage'))
 const CafePhotosManagementPage = React.lazy(() => import('./admin/CafePhotosManagementPage'))
 const CafeReviewsManagementPage = React.lazy(() => import('./admin/CafeReviewsManagementPage'))
+const ModerationDashboard = React.lazy(() => import('./admin/ModerationDashboard'))
 import { useFeatureToggle } from '../hooks/useFeatureToggle'
 import { useAppFeatures } from '../hooks/useAppFeatures'
 import { useDataStore } from '../stores/dataStore'
@@ -334,6 +335,17 @@ export const AppRoutes: React.FC = () => {
                 <AdminErrorBoundary>
                   <AdminLayout>
                     <UserManagementPage />
+                  </AdminLayout>
+                </AdminErrorBoundary>
+              </Suspense>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/moderation" element={
+            <ProtectedRoute requireAdmin={true}>
+              <Suspense fallback={<AdminLoadingFallback />}>
+                <AdminErrorBoundary>
+                  <AdminLayout>
+                    <ModerationDashboard />
                   </AdminLayout>
                 </AdminErrorBoundary>
               </Suspense>

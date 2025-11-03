@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import AdminWrapper from './components/AdminWrapper'
+import { initWebVitals } from './utils/webVitals'
+import { initAnalyticsBatching } from './utils/analyticsBatcher'
 import './styles/index.css'
 
 // Set dynamic page title based on environment
@@ -36,3 +38,7 @@ ReactDOM.createRoot(rootElement).render(
     </BrowserRouter>
   </React.StrictMode>,
 )
+
+// Initialize performance monitoring after app mounts
+initWebVitals()
+initAnalyticsBatching()

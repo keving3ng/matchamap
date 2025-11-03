@@ -347,6 +347,56 @@ export const adminAPI = {
       body: JSON.stringify(data),
     })
   },
+
+  /**
+   * Get moderation queue (all pending items) (admin only)
+   */
+  async getModerationQueue(): Promise<{
+    photos: any[];
+    reviews: any[];
+    comments: any[];
+    stats: {
+      photos: { pending: number; total: number };
+      reviews: { pending: number; total: number };
+      comments: { pending: number; total: number };
+    };
+  }> {
+    return fetchAPI('/admin/moderation/queue')
+  },
+
+  /**
+   * Bulk moderate items (admin only)
+   */
+  async bulkModerate(data: {
+    items: Array<{ id: number; type: 'photo' | 'review' | 'comment' }>;
+    status: 'approved' | 'rejected';
+    notes?: string;
+  }): Promise<{
+    results: { success: number; failed: number; errors: string[] };
+    message: string;
+  }> {
+    return fetchAPI('/admin/moderation/bulk', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  },
+
+  /**
+   * Get moderation statistics (admin only)
+   */
+  async getModerationStats(): Promise<{
+    photos: Record<string, number>;
+    reviews: Record<string, number>;
+    comments: Record<string, number>;
+    total: {
+      pending: number;
+      approved: number;
+      rejected: number;
+      flagged: number;
+    };
+  }> {
+    return fetchAPI('/admin/moderation/stats')
+  },
 }
 
 /**
