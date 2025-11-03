@@ -13,10 +13,13 @@ const mockVisitedCafesStore = vi.mocked(useVisitedCafesStore)
 
 describe('usePassportMigration', () => {
   const mockClearAllStamps = vi.fn()
-  
+
   beforeEach(() => {
     vi.clearAllMocks()
-    
+
+    // Reset mock implementation to default (no error)
+    mockClearAllStamps.mockImplementation(() => {})
+
     // Default auth store mock
     mockAuthStore.mockReturnValue({
       isAuthenticated: true,
@@ -30,7 +33,7 @@ describe('usePassportMigration', () => {
       requestPasswordReset: vi.fn(),
       resetPassword: vi.fn(),
     })
-    
+
     // Default visited cafes store mock
     mockVisitedCafesStore.mockReturnValue({
       stampedCafeIds: [1, 2, 3],

@@ -7,6 +7,16 @@ import { DetailView } from '../DetailView'
 import { api } from '../../utils/api'
 import type { CafeWithDistance, DrinkItem } from '../../types'
 
+// Mock react-router (needed for Vitest 4.x compatibility)
+const mockNavigate = vi.fn()
+vi.mock('react-router', async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  }
+})
+
 // Mock the copy constants
 vi.mock('../../constants/copy', () => ({
   COPY: {

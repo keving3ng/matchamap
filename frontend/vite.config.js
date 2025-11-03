@@ -59,20 +59,18 @@ export default defineConfig(({ command }) => ({
     },
   },
 
-  // Configure esbuild for dropping console and debugger statements in production
-  // Note: esbuild.drop only applies during build minification, not during dev
-  esbuild: {
-    drop: command === 'build' ? ['console', 'debugger'] : [],
-  },
-
   build: {
     outDir: 'dist',
     sourcemap: true,
 
     // Minification settings
-    // Use esbuild (default, faster) instead of terser
-    // Console and debugger dropping is configured via esbuild option above
-    minify: 'esbuild',
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true, // Remove console.logs in production
+        drop_debugger: true,
+      },
+    },
 
     rollupOptions: {
       output: {

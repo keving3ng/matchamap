@@ -4,6 +4,16 @@ import { MemoryRouter } from 'react-router-dom'
 import { EventsView } from '../EventsView'
 import { EventItem } from '../../types'
 
+// Mock react-router (needed for Vitest 4.x compatibility)
+const mockNavigate = vi.fn()
+vi.mock('react-router', async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  }
+})
+
 // Helper to render with Router
 const renderWithRouter = (ui: React.ReactElement) => {
   return render(<MemoryRouter>{ui}</MemoryRouter>)
@@ -174,7 +184,7 @@ describe('EventsView', () => {
     renderWithRouter(<EventsView eventItems={mockEventItems} />)
 
     expect(screen.getByText('Featured Event')).toBeInTheDocument()
-    
+
     const featuredBadge = screen.getByText('Featured Event').closest('div')
     expect(featuredBadge).toHaveClass('bg-gradient-to-r', 'from-green-500', 'to-green-600')
   })

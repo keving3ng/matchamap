@@ -1,5 +1,5 @@
 /// <reference types="vitest" />
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import { codecovVitePlugin } from "@codecov/vite-plugin";
@@ -28,6 +28,8 @@ export default defineConfig({
         outputFile: {
             junit: "./test-results/junit.xml",
         },
+        // Migration from v1→v2: Hook execution order changed to serial
+        // If tests need parallel hooks, set: sequence: { hooks: 'parallel' }
         // Handle YAML files as assets
         server: {
             deps: {
@@ -37,6 +39,8 @@ export default defineConfig({
         coverage: {
             provider: "v8",
             reporter: ["text", "json", "html", "lcov"],
+            // Migration from v2→v3: coverage.all is now enabled by default
+            // Migration from v1→v2: coverage.ignoreEmptyLines is now true by default
             exclude: [
                 "node_modules/",
                 "src/test/",
