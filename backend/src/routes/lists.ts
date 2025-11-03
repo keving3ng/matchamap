@@ -1,15 +1,17 @@
 import { IRequest } from 'itty-router';
-import { eq, desc, and } from 'drizzle-orm';
+import { eq, desc, and, count, sql } from 'drizzle-orm';
 import { Env } from '../types';
 import { getDb, userLists, userListItems, cafes } from '../db';
 import { jsonResponse, errorResponse, badRequestResponse } from '../utils/response';
 import { AuthenticatedRequest } from '../middleware/auth';
 import { HTTP_STATUS } from '../constants';
+import { sanitizeShortText, sanitizeTextInput } from '../utils/sanitize';
 import type { CreateListRequest, UpdateListRequest, AddListItemRequest } from '../../../shared/types';
 
 /**
  * GET /api/lists/me
- * Get current user's lists
+ * Get current user's lists with item counts
+ * Optimized with single query using LEFT JOIN and COUNT
  */
 export async function getMyLists(request: AuthenticatedRequest, env: Env): Promise<Response> {
   try {
@@ -19,29 +21,24 @@ export async function getMyLists(request: AuthenticatedRequest, env: Env): Promi
 
     const db = getDb(env.DB);
 
-    // Get user's lists
-    const lists = await db
-      .select()
+    // Get user's lists with item counts in a single query using LEFT JOIN
+    const listsWithCounts = await db
+      .select({
+        id: userLists.id,
+        userId: userLists.userId,
+        name: userLists.name,
+        description: userLists.description,
+        isPublic: userLists.isPublic,
+        createdAt: userLists.createdAt,
+        updatedAt: userLists.updatedAt,
+        itemCount: count(userListItems.id),
+      })
       .from(userLists)
+      .leftJoin(userListItems, eq(userLists.id, userListItems.listId))
       .where(eq(userLists.userId, request.user.userId))
+      .groupBy(userLists.id)
       .orderBy(desc(userLists.createdAt))
       .all();
-
-    // Get item counts for each list
-    const listsWithCounts = await Promise.all(
-      lists.map(async (list) => {
-        const items = await db
-          .select()
-          .from(userListItems)
-          .where(eq(userListItems.listId, list.id))
-          .all();
-
-        return {
-          ...list,
-          itemCount: items.length,
-        };
-      })
-    );
 
     return jsonResponse({ lists: listsWithCounts, total: listsWithCounts.length }, HTTP_STATUS.OK, request as Request, env);
   } catch (error) {
@@ -62,13 +59,14 @@ export async function createList(request: AuthenticatedRequest, env: Env): Promi
 
     const body = await request.json() as CreateListRequest;
 
-    if (!body.name || body.name.trim().length === 0) {
-      return badRequestResponse('List name is required', request as Request, env);
+    // Sanitize and validate list name
+    const sanitizedName = sanitizeShortText(body.name, 100);
+    if (!sanitizedName) {
+      return badRequestResponse('List name is required and must be valid', request as Request, env);
     }
 
-    if (body.name.length > 100) {
-      return badRequestResponse('List name must be 100 characters or less', request as Request, env);
-    }
+    // Sanitize description
+    const sanitizedDescription = sanitizeTextInput(body.description, 500);
 
     const db = getDb(env.DB);
 
@@ -77,8 +75,8 @@ export async function createList(request: AuthenticatedRequest, env: Env): Promi
       .insert(userLists)
       .values({
         userId: request.user.userId,
-        name: body.name.trim(),
-        description: body.description?.trim() || null,
+        name: sanitizedName,
+        description: sanitizedDescription,
         isPublic: body.isPublic ?? false,
       })
       .returning()
@@ -217,21 +215,19 @@ export async function updateList(request: AuthenticatedRequest, env: Env): Promi
       return errorResponse('Not authorized to update this list', HTTP_STATUS.FORBIDDEN, request as Request, env);
     }
 
-    // Build update object
+    // Build update object with sanitization
     const updateData: Partial<typeof userLists.$inferInsert> = {};
 
     if (body.name !== undefined) {
-      if (body.name.trim().length === 0) {
-        return badRequestResponse('List name cannot be empty', request as Request, env);
+      const sanitizedName = sanitizeShortText(body.name, 100);
+      if (!sanitizedName) {
+        return badRequestResponse('List name cannot be empty and must be valid', request as Request, env);
       }
-      if (body.name.length > 100) {
-        return badRequestResponse('List name must be 100 characters or less', request as Request, env);
-      }
-      updateData.name = body.name.trim();
+      updateData.name = sanitizedName;
     }
 
     if (body.description !== undefined) {
-      updateData.description = body.description?.trim() || null;
+      updateData.description = sanitizeTextInput(body.description, 500);
     }
 
     if (body.isPublic !== undefined) {
@@ -362,13 +358,16 @@ export async function addListItem(request: AuthenticatedRequest, env: Env): Prom
       return badRequestResponse('Cafe already in this list', request as Request, env);
     }
 
+    // Sanitize notes
+    const sanitizedNotes = sanitizeTextInput(body.notes, 500);
+
     // Add the item
     const result = await db
       .insert(userListItems)
       .values({
         listId,
         cafeId: body.cafeId,
-        notes: body.notes?.trim() || null,
+        notes: sanitizedNotes,
       })
       .returning()
       .get();
