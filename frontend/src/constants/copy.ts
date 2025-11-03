@@ -386,6 +386,7 @@ export const COPY = {
     stats: 'Analytics',
     users: 'Users',
     settings: 'Settings',
+    moderation: 'Moderation',
     // Error Boundaries
     errorBoundary: {
       title: 'Something went wrong in the admin panel',
@@ -495,6 +496,66 @@ export const COPY = {
       yesterday: 'Yesterday',
       daysAgo: (days: number) => `${days} days ago`,
       weeksAgo: (weeks: number) => `${weeks} weeks ago`,
+    },
+
+    // Moderation Dashboard
+    moderationDashboard: {
+      title: 'Moderation Dashboard',
+      subtitle: 'Review and moderate user-generated content',
+      tabs: {
+        reviews: 'Reviews',
+        photos: 'Photos',
+        comments: 'Comments',
+        suggestions: 'Suggestions',
+      },
+      bulkActions: {
+        title: 'Bulk Actions',
+        selected: (count: number) => `${count} selected`,
+        selectAll: 'Select All',
+        deselectAll: 'Deselect All',
+        approveSelected: 'Approve Selected',
+        rejectSelected: 'Reject Selected',
+        confirmApprove: (count: number) => `Approve ${count} item${count !== 1 ? 's' : ''}?`,
+        confirmReject: (count: number) => `Reject ${count} item${count !== 1 ? 's' : ''}?`,
+        success: (action: string, count: number) => `${action} ${count} item${count !== 1 ? 's' : ''} successfully`,
+        error: 'Failed to perform bulk action',
+        processing: 'Processing...',
+      },
+      stats: {
+        pending: (count: number) => `${count} pending`,
+        approved: (count: number) => `${count} approved`,
+        rejected: (count: number) => `${count} rejected`,
+        flagged: (count: number) => `${count} flagged`,
+        total: (count: number) => `${count} total`,
+      },
+      filters: {
+        all: 'All',
+        pending: 'Pending',
+        approved: 'Approved',
+        rejected: 'Rejected',
+        flagged: 'Flagged',
+        today: 'Today',
+        thisWeek: 'This Week',
+        thisMonth: 'This Month',
+      },
+      actions: {
+        approve: 'Approve',
+        reject: 'Reject',
+        flag: 'Flag',
+        view: 'View',
+        delete: 'Delete',
+      },
+      placeholders: {
+        noReviews: 'No reviews pending moderation',
+        noPhotos: 'No photos pending moderation',
+        noComments: 'No comments pending moderation',
+        noSuggestions: 'No cafe suggestions pending review',
+        allReviewed: 'All items have been reviewed',
+        comingSoon: 'This feature is coming soon',
+      },
+      loading: 'Loading moderation queue...',
+      error: 'Failed to load moderation queue',
+      retry: 'Retry',
     },
 
     // Date formatting
@@ -944,6 +1005,74 @@ export const COPY = {
     leaderboardTable: 'Leaderboard rankings table',
     userAvatar: (username: string) => `${username}'s avatar`,
     sortByRank: 'Sorted by rank',
+  },
+
+  // Cafe Suggestions
+  suggestions: {
+    // Form
+    title: 'Suggest a Cafe',
+    description: 'Know a great matcha spot we should add? Share it with us!',
+    nameLabel: 'Cafe Name',
+    namePlaceholder: 'Enter cafe name',
+    addressLabel: 'Address',
+    addressPlaceholder: 'Street address, city, province',
+    cityLabel: 'City',
+    cityPlaceholder: 'Select a city',
+    neighborhoodLabel: 'Neighborhood (optional)',
+    neighborhoodPlaceholder: 'e.g., Queen West, Little Italy',
+    descriptionLabel: 'Description (optional)',
+    descriptionPlaceholder: 'Tell us what makes this cafe special...',
+    googleMapsLabel: 'Google Maps URL (optional)',
+    googleMapsPlaceholder: 'https://maps.google.com/...',
+    instagramLabel: 'Instagram Handle (optional)',
+    instagramPlaceholder: '@cafename',
+    websiteLabel: 'Website (optional)',
+    websitePlaceholder: 'https://example.com',
+    submitButton: 'Submit Suggestion',
+    submitting: 'Submitting...',
+    cancelButton: 'Cancel',
+
+    // Validation
+    nameRequired: 'Cafe name is required',
+    nameMinLength: 'Cafe name must be at least 2 characters',
+    nameMaxLength: 'Cafe name must be less than 200 characters',
+    addressRequired: 'Address is required',
+    addressMinLength: 'Address must be at least 5 characters',
+    addressMaxLength: 'Address must be less than 500 characters',
+    cityRequired: 'City is required',
+    descriptionMinLength: 'Description must be at least 10 characters if provided',
+    descriptionMaxLength: 'Description must be less than 1000 characters',
+
+    // Success/Error
+    successTitle: 'Suggestion Submitted!',
+    successMessage: 'Thanks for your suggestion! We\'ll review it and add it to the map if it\'s a good fit.',
+    errorTitle: 'Submission Failed',
+    errorMessage: 'Unable to submit your suggestion. Please try again.',
+
+    // My Suggestions
+    mySuggestionsTitle: 'My Suggestions',
+    mySuggestionsEmpty: 'You haven\'t suggested any cafes yet',
+    statusPending: 'Pending Review',
+    statusApproved: 'Approved',
+    statusRejected: 'Rejected',
+    submittedOn: (date: string) => `Submitted on ${date}`,
+
+    // Admin
+    adminTitle: 'Pending Cafe Suggestions',
+    adminEmpty: 'No pending suggestions',
+    adminDescription: 'Review and moderate user-submitted cafe suggestions',
+    approveButton: 'Approve',
+    rejectButton: 'Reject',
+    adminNotesLabel: 'Admin Notes (optional)',
+    adminNotesPlaceholder: 'Internal notes about this suggestion...',
+    cafeIdLabel: 'Link to Cafe (optional)',
+    cafeIdPlaceholder: 'Enter cafe ID if already created',
+    approving: 'Approving...',
+    rejecting: 'Rejecting...',
+    approvedSuccess: 'Suggestion approved!',
+    rejectedSuccess: 'Suggestion rejected',
+    moderatedBy: (username: string) => `Moderated by ${username}`,
+    suggestedBy: (username: string) => `Suggested by ${username}`,
   },
 } as const
 

@@ -442,6 +442,41 @@ export const userFollows = sqliteTable('user_follows', {
   uniqueFollow: unique().on(table.followerId, table.followingId),
 }));
 
+// Cafe suggestions table (Phase 2F - User-submitted cafe suggestions)
+export const cafeSuggestions = sqliteTable('cafe_suggestions', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+
+  // Cafe details
+  name: text('name').notNull(),
+  address: text('address').notNull(),
+  city: text('city').notNull(),
+  neighborhood: text('neighborhood'),
+  description: text('description'),
+  googleMapsUrl: text('google_maps_url'),
+  instagram: text('instagram'),
+  website: text('website'),
+
+  // Status and approval
+  status: text('status', {
+    enum: ['pending', 'approved', 'rejected']
+  }).notNull().default('pending'),
+  cafeId: integer('cafe_id').references(() => cafes.id, { onDelete: 'set null' }), // Linked cafe if approved
+  adminNotes: text('admin_notes'),
+  moderatedBy: integer('moderated_by').references(() => users.id),
+  moderatedAt: text('moderated_at'),
+
+  // Timestamps
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+  userIdx: index('cafe_suggestions_user_idx').on(table.userId),
+  statusIdx: index('cafe_suggestions_status_idx').on(table.status),
+  cityIdx: index('cafe_suggestions_city_idx').on(table.city),
+  createdAtIdx: index('cafe_suggestions_created_at_idx').on(table.createdAt),
+  statusCreatedIdx: index('cafe_suggestions_status_created_idx').on(table.status, table.createdAt),
+}));
+
 // Type exports for use in the application
 export type Cafe = typeof cafes.$inferSelect;
 export type NewCafe = typeof cafes.$inferInsert;
@@ -477,3 +512,5 @@ export type ReviewCommentLike = typeof reviewCommentLikes.$inferSelect;
 export type NewReviewCommentLike = typeof reviewCommentLikes.$inferInsert;
 export type UserFollow = typeof userFollows.$inferSelect;
 export type NewUserFollow = typeof userFollows.$inferInsert;
+export type CafeSuggestion = typeof cafeSuggestions.$inferSelect;
+export type NewCafeSuggestion = typeof cafeSuggestions.$inferInsert;

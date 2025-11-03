@@ -611,6 +611,58 @@ export interface FollowActionResponse {
 }
 
 // ============================================================================
+// CAFE SUGGESTION TYPES
+// ============================================================================
+
+export interface CafeSuggestion {
+  id: number
+  userId: number
+  name: string
+  address: string
+  city: string
+  neighborhood?: string | null
+  description?: string | null
+  googleMapsUrl?: string | null
+  instagram?: string | null
+  website?: string | null
+  status: 'pending' | 'approved' | 'rejected'
+  cafeId?: number | null
+  adminNotes?: string | null
+  moderatedBy?: number | null
+  moderatedAt?: string | null
+  createdAt: string
+  updatedAt: string
+  user?: {
+    username: string
+    email: string
+  }
+}
+
+export interface CreateSuggestionRequest {
+  name: string
+  address: string
+  city: string
+  neighborhood?: string
+  description?: string
+  googleMapsUrl?: string
+  instagram?: string
+  website?: string
+}
+
+export interface SuggestionsResponse {
+  suggestions: CafeSuggestion[]
+}
+
+export interface ApproveSuggestionRequest {
+  adminNotes?: string
+  cafeId?: number
+}
+
+export interface RejectSuggestionRequest {
+  adminNotes?: string
+}
+
+// ============================================================================
 // API RESPONSE TYPES
 // ============================================================================
 
