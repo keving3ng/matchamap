@@ -534,6 +534,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
       {/* Photo Lightbox */}
       {lightboxPhoto && (
         <PhotoLightbox
+          key={`lightbox-${lightboxPhoto.index}`} // Force remount when index changes
           photos={lightboxPhoto.photos}
           initialIndex={lightboxPhoto.index}
           isOpen={true}

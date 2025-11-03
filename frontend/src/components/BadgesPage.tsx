@@ -207,6 +207,7 @@ export const BadgesPage: React.FC<BadgesPageProps> = ({
 
       {/* Badge Notification Modal */}
       <BadgeNotification
+        key={showNotification ? 'open' : 'closed'} // Force remount on open to reset state
         badges={newBadges}
         isOpen={showNotification}
         onClose={handleNotificationClose}

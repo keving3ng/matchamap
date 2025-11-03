@@ -26,12 +26,7 @@ export const BadgeNotification: React.FC<BadgeNotificationProps> = ({
   // Derive visibility from props
   const isVisible = isOpen && badges.length > 0
 
-  // Reset badge index when opening
-  useEffect(() => {
-    if (isOpen) {
-      setCurrentBadgeIndex(0)
-    }
-  }, [isOpen])
+  // Note: Badge index is automatically reset on remount (via key prop in parent)
 
   // Auto-advance through multiple badges
   useEffect(() => {

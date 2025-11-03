@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useParams, Navigate, useNavigate } from 'react-router'
 import { Loader2, AlertCircle, Sparkles, MapPin, Star } from '@/components/icons'
 import { useUserProfile, useMyProfile } from '../../hooks/useUserProfile'
@@ -22,22 +22,15 @@ export const UserProfilePage: React.FC = () => {
   const publicProfile = useUserProfile(username || '')
   const myProfile = useMyProfile()
 
-  // Lazy initialization: check localStorage once on mount
-  const [showWelcomeBanner, setShowWelcomeBanner] = useState(() => {
-    if (!isOwnProfile || !currentUser?.id) return false
-    const hasSeenWelcome = localStorage.getItem(`welcome_shown_${currentUser.id}`)
-    return !hasSeenWelcome
-  })
+  // Track manual dismissal (state to trigger re-render when dismissed)
+  const [hasDismissedWelcome, setHasDismissedWelcome] = useState(false)
 
-  // Sync welcome banner state when profile loads (only check, don't force to false)
-  useEffect(() => {
-    if (isOwnProfile && myProfile.profile?.totalCheckins === 0 && currentUser?.id) {
-      const hasSeenWelcome = localStorage.getItem(`welcome_shown_${currentUser.id}`)
-      if (!hasSeenWelcome && !showWelcomeBanner) {
-        setShowWelcomeBanner(true)
-      }
-    }
-  }, [isOwnProfile, myProfile.profile?.totalCheckins, currentUser?.id, showWelcomeBanner])
+  // Derive welcome banner visibility from conditions (no setState in effect needed)
+  const showWelcomeBanner = isOwnProfile &&
+    myProfile.profile?.totalCheckins === 0 &&
+    currentUser?.id &&
+    !localStorage.getItem(`welcome_shown_${currentUser.id}`) &&
+    !hasDismissedWelcome
 
   // Select the appropriate profile data
   const profile = isOwnProfile ? myProfile.profile : publicProfile.profile
@@ -175,7 +168,7 @@ export const UserProfilePage: React.FC = () => {
                     onClick={() => {
                       navigate('/')
                       localStorage.setItem(`welcome_shown_${currentUser?.id}`, 'true')
-                      setShowWelcomeBanner(false)
+                      setHasDismissedWelcome(true)
                     }}
                     className="flex-1 bg-gradient-to-r from-matcha-500 to-matcha-600 hover:from-matcha-600 hover:to-matcha-700 text-white font-semibold py-3 px-6 rounded-lg transition active:scale-[0.98]"
                   >
@@ -184,7 +177,7 @@ export const UserProfilePage: React.FC = () => {
                   <button
                     onClick={() => {
                       localStorage.setItem(`welcome_shown_${currentUser?.id}`, 'true')
-                      setShowWelcomeBanner(false)
+                      setHasDismissedWelcome(true)
                     }}
                     className="px-6 py-3 text-gray-600 hover:text-gray-900 font-medium transition"
                   >

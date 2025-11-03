@@ -165,6 +165,7 @@ export const UserPhotosPage: React.FC<UserPhotosPageProps> = ({ className = '' }
         {/* Lightbox */}
         {lightboxPhoto && (
           <PhotoLightbox
+            key={`lightbox-${lightboxPhoto.index}`} // Force remount when index changes
             photos={lightboxPhoto.photos}
             initialIndex={lightboxPhoto.index}
             isOpen={true}

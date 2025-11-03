@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useRef, useEffect, useMemo, useState } from 'react'
 import { calculateCafeDistances, sortCafesByDistance, findNearestCafe } from '../utils/distance'
 import type { Cafe } from '../types'
 import type { Coordinates, DistanceResult } from '../utils/distance'
@@ -14,11 +14,22 @@ interface UseDistanceCalculationOptions {
   updateThresholdMeters?: number
 }
 
+// Helper to compare coordinates by value
+const areCoordinatesEqual = (
+  a: Coordinates | null,
+  b: Coordinates | null
+): boolean => {
+  if (a === null || b === null) return a === b
+  return a.latitude === b.latitude && a.longitude === b.longitude
+}
+
 export const useDistanceCalculation = ({
   cafes,
   userLocation,
 }: UseDistanceCalculationOptions) => {
-  const [lastCalculatedLocation, setLastCalculatedLocation] = useState<Coordinates | null>(null)
+  const [lastCalculatedLocation, setLastCalculatedLocation] = useState<Coordinates | null>(userLocation)
+  const wasManuallyResetRef = useRef(false)
+  const previousUserLocationRef = useRef<Coordinates | null>(userLocation)
 
   // We've simplified this - always recalculate when userLocation changes
   // The shouldRecalculate logic was preventing updates when location first became available
@@ -38,9 +49,30 @@ export const useDistanceCalculation = ({
   }, [cafes, userLocation])
 
   // Update last calculated location when userLocation changes
+  // Only update if coordinates actually changed (not just reference equality)
+  // This allows recalculateDistances to set it to null without it being immediately reset
   useEffect(() => {
-    setLastCalculatedLocation(userLocation)
-  }, [userLocation])
+    if (!wasManuallyResetRef.current) {
+      // Normal update: update when userLocation changes
+      if (userLocation !== null && !areCoordinatesEqual(lastCalculatedLocation, userLocation)) {
+        setLastCalculatedLocation(userLocation)
+      } else if (userLocation === null && lastCalculatedLocation !== null) {
+        setLastCalculatedLocation(null)
+      }
+    } else {
+      // If manually reset, only update if userLocation actually changed from the previous value
+      const userLocationChanged = !areCoordinatesEqual(previousUserLocationRef.current, userLocation)
+      if (userLocationChanged) {
+        if (userLocation !== null) {
+          setLastCalculatedLocation(userLocation)
+        } else {
+          setLastCalculatedLocation(null)
+        }
+        wasManuallyResetRef.current = false
+      }
+    }
+    previousUserLocationRef.current = userLocation
+  }, [userLocation, lastCalculatedLocation])
 
   // Sort cafes by distance
   const cafesByDistance = useMemo(() => {
@@ -55,6 +87,7 @@ export const useDistanceCalculation = ({
   // Manual recalculation function
   const recalculateDistances = () => {
     setLastCalculatedLocation(null) // Reset last calculated location
+    wasManuallyResetRef.current = true // Track that it was manually reset
   }
 
   // Get distance info for a specific cafe

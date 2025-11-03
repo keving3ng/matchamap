@@ -27,13 +27,8 @@ export const PhotoLightbox: React.FC<PhotoLightboxProps> = ({
 
   const currentPhoto = photos[currentIndex]
 
-  // Reset when lightbox opens
-  useEffect(() => {
-    if (isOpen) {
-      setCurrentIndex(initialIndex)
-      setIsImageLoading(true)
-    }
-  }, [isOpen, initialIndex])
+  // Note: State is automatically reset on remount (via key prop in parent)
+  // Component remounts when initialIndex changes, resetting currentIndex to 0
 
   // Navigation functions (defined before keyboard effect uses them)
   const goToPrevious = useCallback(() => {
