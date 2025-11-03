@@ -140,7 +140,7 @@ export const useAuthStore = create<AuthState>()(
 
           // Server sets new access token cookie automatically
           return true
-        } catch (error) {
+        } catch {
           get().logout()
           return false
         }

@@ -28,6 +28,7 @@ export const useUserProfile = (username: string) => {
     if (username) {
       fetchProfile()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [username])
 
   return { profile, isLoading, error, refetch: fetchProfile }

@@ -24,7 +24,7 @@ export const ContentManagementPage: React.FC = () => {
 
   useEffect(() => {
     fetchCafes(undefined, true) // Bust cache on mount for admin
-  }, [])
+  }, [fetchCafes])
 
   // Fetch photo and review counts for all cafes
   useEffect(() => {
@@ -49,11 +49,15 @@ export const ContentManagementPage: React.FC = () => {
               ])
 
               const photos = photosRes.photos || []
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const visiblePhotos = photos.filter((p: any) => p.moderationStatus === 'approved')
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const hiddenPhotos = photos.filter((p: any) => p.moderationStatus === 'rejected')
 
               const reviews = reviewsRes.reviews || []
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const visibleReviews = reviews.filter((r: any) => r.moderationStatus === 'approved')
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const hiddenReviews = reviews.filter((r: any) => r.moderationStatus === 'rejected')
 
               return {

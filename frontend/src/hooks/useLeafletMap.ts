@@ -4,6 +4,7 @@ import { createMatchaMarker, createUserLocationMarker } from '../utils/mapMarker
 import type { CafeWithDistance } from '../types'
 
 // Fix for default markers in Leaflet with bundlers
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 delete (L.Icon.Default.prototype as any)._getIconUrl
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
@@ -39,7 +40,7 @@ export const useLeafletMap = ({
   const tileLayerRef = useRef<L.TileLayer | null>(null)
   const markersRef = useRef<Map<number, L.Marker>>(new Map())
   const userLocationMarkerRef = useRef<L.Marker | null>(null)
-  const routeLayerRef = useRef<L.Polyline | null>(null)
+  const routeLayerRef = useRef<L.Polyline | L.LayerGroup | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -88,6 +89,7 @@ export const useLeafletMap = ({
     return () => {
       map.remove()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Add map move listener
@@ -269,7 +271,7 @@ export const useLeafletMap = ({
 
     // Group both layers together
     const routeGroup = L.layerGroup([outline, mainLine])
-    routeLayerRef.current = routeGroup as any
+    routeLayerRef.current = routeGroup
 
     // Fit map to show entire route
     mapRef.current.fitBounds(mainLine.getBounds(), {
@@ -302,6 +304,5 @@ export const useLeafletMap = ({
     drawRoute,
     clearRoute,
     refreshTiles,
-    map: mapRef.current,
   }
 }

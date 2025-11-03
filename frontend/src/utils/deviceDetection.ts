@@ -1,7 +1,7 @@
 // Device detection utilities for better mobile geolocation handling
 
 export const isIOS = (): boolean => {
-  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as Window & { MSStream?: unknown }).MSStream
 }
 
 export const isIOSSafari = (): boolean => {
@@ -17,7 +17,7 @@ export const isMobile = (): boolean => {
 }
 
 export const isStandalone = (): boolean => {
-  return window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true
+  return window.matchMedia('(display-mode: standalone)').matches || (window.navigator as Navigator & { standalone?: boolean }).standalone === true
 }
 
 export const isSecureContext = (): boolean => {

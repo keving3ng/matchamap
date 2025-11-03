@@ -78,7 +78,6 @@ describe('ContactPage', () => {
   })
 
   it('should handle form validation', async () => {
-    const user = userEvent.setup()
     render(<ContactPage />)
 
     const submitButton = screen.getByText(/Send Message/i)

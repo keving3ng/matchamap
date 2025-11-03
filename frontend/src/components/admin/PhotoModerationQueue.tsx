@@ -255,7 +255,7 @@ const PhotoModerationCard: React.FC<PhotoModerationCardProps> = ({
           {photo.caption && (
             <div className="mb-4">
               <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">
-                "{photo.caption}"
+                &quot;{photo.caption}&quot;
               </p>
             </div>
           )}

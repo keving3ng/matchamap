@@ -310,7 +310,7 @@ export const FeatureTogglesPage: React.FC = () => {
               <li>Use the banner to enable/disable admin mode</li>
               <li>Each feature shows its dev and prod settings from the YAML config</li>
               <li>Toggle any feature ON/OFF to create an override</li>
-              <li>Click "Dev Settings" or "Prod Settings" to apply all settings from that environment (includes menu)</li>
+              <li>Click &quot;Dev Settings&quot; or &quot;Prod Settings&quot; to apply all settings from that environment (includes menu)</li>
               <li>Overrides are saved in localStorage and persist across sessions</li>
               <li>Orange ring indicates an active override</li>
               <li>Clear all overrides to restore default behavior</li>

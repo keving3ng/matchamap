@@ -64,7 +64,7 @@ function sendToAnalytics(metric: Metric): void {
       timestamp: Date.now(),
     })
     sessionStorage.setItem('webVitals', JSON.stringify(vitals))
-  } catch (error) {
+  } catch {
     // Silently fail - sessionStorage might be full or disabled
   }
 }
@@ -94,7 +94,7 @@ function observeLCP(): void {
     })
 
     observer.observe({ type: 'largest-contentful-paint', buffered: true })
-  } catch (error) {
+  } catch {
     // PerformanceObserver not supported
   }
 }
@@ -123,7 +123,7 @@ function observeFID(): void {
     })
 
     observer.observe({ type: 'first-input', buffered: true })
-  } catch (error) {
+  } catch {
     // PerformanceObserver not supported
   }
 }
@@ -135,7 +135,7 @@ function observeFID(): void {
 function observeCLS(): void {
   try {
     let clsValue = 0
-    let clsEntries: PerformanceEntry[] = []
+    const clsEntries: PerformanceEntry[] = []
 
     const observer = new PerformanceObserver((entryList) => {
       for (const entry of entryList.getEntries()) {
@@ -174,7 +174,7 @@ function observeCLS(): void {
 
     // Also report on beforeunload as fallback
     window.addEventListener('beforeunload', reportCLS)
-  } catch (error) {
+  } catch {
     // PerformanceObserver not supported
   }
 }
@@ -203,7 +203,7 @@ function observeFCP(): void {
     })
 
     observer.observe({ type: 'paint', buffered: true })
-  } catch (error) {
+  } catch {
     // PerformanceObserver not supported
   }
 }
@@ -227,7 +227,7 @@ function observeTTFB(): void {
         id: `ttfb-${Date.now()}`,
       })
     }
-  } catch (error) {
+  } catch {
     // Navigation Timing API not supported
   }
 }

@@ -6,7 +6,7 @@
  * Detects if the user is on an iOS device
  */
 export const isIOS = (): boolean => {
-  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as Window & { MSStream?: unknown }).MSStream
 }
 
 /**

@@ -103,7 +103,7 @@ export const CafeFormWizard: React.FC<CafeFormWizardProps> = ({ onSave, onCancel
         images: formData.images,
       }
 
-      await onSave(payload as any)
+      await onSave(payload as any) // eslint-disable-line @typescript-eslint/no-explicit-any
       onCancel()
     } catch (err) {
       setError((err as Error).message)
@@ -174,7 +174,7 @@ export const CafeFormWizard: React.FC<CafeFormWizardProps> = ({ onSave, onCancel
                   Enter Google Maps URL
                 </h3>
                 <p className="text-sm text-gray-600 mb-4">
-                  Paste the full Google Maps URL for this cafe. We'll automatically fetch the location details.
+                  Paste the full Google Maps URL for this cafe. We&apos;ll automatically fetch the location details.
                 </p>
 
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -366,7 +366,7 @@ export const CafeFormWizard: React.FC<CafeFormWizardProps> = ({ onSave, onCancel
 
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
                 <p className="text-sm text-blue-800">
-                  ℹ️ <strong>Note:</strong> Drink scores, pricing, and details will be managed separately after creating the cafe. You'll be able to add multiple drinks with individual scores.
+                  ℹ️ <strong>Note:</strong> Drink scores, pricing, and details will be managed separately after creating the cafe. You&apos;ll be able to add multiple drinks with individual scores.
                 </p>
               </div>
 
@@ -387,7 +387,7 @@ export const CafeFormWizard: React.FC<CafeFormWizardProps> = ({ onSave, onCancel
                     placeholder="e.g., 8.5"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Rate the cafe's atmosphere and vibe</p>
+                  <p className="text-xs text-gray-500 mt-1">Rate the cafe&apos;s atmosphere and vibe</p>
                 </div>
 
                 {/* Alt Milk Charge */}

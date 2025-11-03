@@ -66,7 +66,7 @@ export const useDataStore = create<DataStore>((set, get) => ({
       }, bustCache)
 
       // Transform API response to frontend format
-      const cafes = response.cafes.map((cafe: any) => ({
+      const cafes = response.cafes.map((cafe: Cafe) => ({
         id: cafe.id,
         name: cafe.name,
         slug: cafe.slug,
@@ -113,7 +113,7 @@ export const useDataStore = create<DataStore>((set, get) => ({
       const response = await api.events.getAll({ upcoming: true, limit: 50 }, bustCache)
 
       // Transform API response to frontend format
-      const eventItems = response.events.map((event: any) => ({
+      const eventItems = response.events.map((event: EventItem) => ({
         id: event.id,
         title: event.title,
         date: event.date,

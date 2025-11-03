@@ -17,7 +17,7 @@ describe('useUserFeatures', () => {
   })
 
   it('should return all features disabled when user accounts are disabled', () => {
-    mockUseFeatureToggle.mockImplementation((flag: string) => {
+    mockUseFeatureToggle.mockImplementation((_flag: string) => {
       // All flags disabled
       return false
     })
@@ -37,8 +37,8 @@ describe('useUserFeatures', () => {
   })
 
   it('should enable profiles when user accounts enabled and profiles enabled', () => {
-    mockUseFeatureToggle.mockImplementation((flag: string) => {
-      switch (flag) {
+    mockUseFeatureToggle.mockImplementation((_flag: string) => {
+      switch (_flag) {
         case 'ENABLE_USER_ACCOUNTS':
           return true
         case 'ENABLE_USER_PROFILES':
@@ -59,8 +59,8 @@ describe('useUserFeatures', () => {
   })
 
   it('should enable all social features when user accounts and social enabled', () => {
-    mockUseFeatureToggle.mockImplementation((flag: string) => {
-      switch (flag) {
+    mockUseFeatureToggle.mockImplementation((_flag: string) => {
+      switch (_flag) {
         case 'ENABLE_USER_ACCOUNTS':
           return true
         case 'ENABLE_USER_PROFILES':
@@ -87,8 +87,8 @@ describe('useUserFeatures', () => {
   })
 
   it('should require user accounts for profiles even when profiles enabled', () => {
-    mockUseFeatureToggle.mockImplementation((flag: string) => {
-      switch (flag) {
+    mockUseFeatureToggle.mockImplementation((_flag: string) => {
+      switch (_flag) {
         case 'ENABLE_USER_ACCOUNTS':
           return false
         case 'ENABLE_USER_PROFILES':
@@ -109,8 +109,8 @@ describe('useUserFeatures', () => {
   })
 
   it('should require user accounts for social features even when social enabled', () => {
-    mockUseFeatureToggle.mockImplementation((flag: string) => {
-      switch (flag) {
+    mockUseFeatureToggle.mockImplementation((_flag: string) => {
+      switch (_flag) {
         case 'ENABLE_USER_ACCOUNTS':
           return false
         case 'ENABLE_USER_PROFILES':
@@ -136,8 +136,8 @@ describe('useUserFeatures', () => {
   })
 
   it('should enable accounts without social when social disabled', () => {
-    mockUseFeatureToggle.mockImplementation((flag: string) => {
-      switch (flag) {
+    mockUseFeatureToggle.mockImplementation((_flag: string) => {
+      switch (_flag) {
         case 'ENABLE_USER_ACCOUNTS':
           return true
         case 'ENABLE_USER_PROFILES':
@@ -176,8 +176,8 @@ describe('useUserFeatures', () => {
 
   it('should update when feature flags change', () => {
     let accountsEnabled = false
-    mockUseFeatureToggle.mockImplementation((flag: string) => {
-      switch (flag) {
+    mockUseFeatureToggle.mockImplementation((_flag: string) => {
+      switch (_flag) {
         case 'ENABLE_USER_ACCOUNTS':
           return accountsEnabled
         case 'ENABLE_USER_PROFILES':
@@ -206,8 +206,8 @@ describe('useUserFeatures', () => {
   })
 
   it('should handle all individual social feature flags consistently', () => {
-    mockUseFeatureToggle.mockImplementation((flag: string) => {
-      switch (flag) {
+    mockUseFeatureToggle.mockImplementation((_flag: string) => {
+      switch (_flag) {
         case 'ENABLE_USER_ACCOUNTS':
           return true
         case 'ENABLE_USER_PROFILES':
@@ -233,23 +233,23 @@ describe('useUserFeatures', () => {
 
   it('should calculate hasAnyUserFeatures correctly for different combinations', () => {
     // Test case 1: Only accounts, no profiles or social
-    mockUseFeatureToggle.mockImplementation((flag: string) => {
-      return flag === 'ENABLE_USER_ACCOUNTS'
+    mockUseFeatureToggle.mockImplementation((_flag: string) => {
+      return _flag === 'ENABLE_USER_ACCOUNTS'
     })
 
     const { result, rerender } = renderHook(() => useUserFeatures())
     expect(result.current.hasAnyUserFeatures).toBe(false) // No profiles or social
 
     // Test case 2: Accounts + profiles
-    mockUseFeatureToggle.mockImplementation((flag: string) => {
-      return flag === 'ENABLE_USER_ACCOUNTS' || flag === 'ENABLE_USER_PROFILES'
+    mockUseFeatureToggle.mockImplementation((_flag: string) => {
+      return _flag === 'ENABLE_USER_ACCOUNTS' || _flag === 'ENABLE_USER_PROFILES'
     })
     rerender()
     expect(result.current.hasAnyUserFeatures).toBe(true)
 
     // Test case 3: Accounts + social
-    mockUseFeatureToggle.mockImplementation((flag: string) => {
-      return flag === 'ENABLE_USER_ACCOUNTS' || flag === 'ENABLE_USER_SOCIAL'
+    mockUseFeatureToggle.mockImplementation((_flag: string) => {
+      return _flag === 'ENABLE_USER_ACCOUNTS' || _flag === 'ENABLE_USER_SOCIAL'
     })
     rerender()
     expect(result.current.hasAnyUserFeatures).toBe(true)

@@ -24,6 +24,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, onClos
 
   useEffect(() => {
     fetchUserDetails()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId])
 
   const fetchUserDetails = async () => {

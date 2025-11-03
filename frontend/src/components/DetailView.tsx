@@ -131,7 +131,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
           {/* Quick Note in header area */}
           {cafe.quickNote && (
             <div className="bg-gradient-to-r from-cream-50 to-matcha-50 -mx-6 px-6 py-3 mb-4">
-              <p className="text-sm text-gray-700 italic">"{cafe.quickNote}"</p>
+              <p className="text-sm text-gray-700 italic">&quot;{cafe.quickNote}&quot;</p>
             </div>
           )}
 
@@ -534,6 +534,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
       {/* Photo Lightbox */}
       {lightboxPhoto && (
         <PhotoLightbox
+          key={`lightbox-${lightboxPhoto.index}`} // Force remount when index changes
           photos={lightboxPhoto.photos}
           initialIndex={lightboxPhoto.index}
           isOpen={true}

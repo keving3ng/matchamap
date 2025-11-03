@@ -36,6 +36,7 @@ export function parseJsonToCafes(jsonText: string): JsonParseResult {
 /**
  * Validate array of cafes
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function validateCafes(data: any[]): JsonParseResult {
   const errors: string[] = []
   const cafes: CsvCafe[] = []
@@ -75,8 +76,14 @@ function validateCafes(data: any[]): JsonParseResult {
 /**
  * Validate a single cafe object
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function validateCafe(cafe: any, index: number): string[] {
   const errors: string[] = []
+
+  if (typeof cafe !== 'object' || cafe === null) {
+    errors.push(`Cafe ${index + 1}: Invalid cafe object`)
+    return errors
+  }
 
   // Required fields
   if (!cafe.name || typeof cafe.name !== 'string') {
@@ -129,8 +136,14 @@ function validateCafe(cafe: any, index: number): string[] {
 /**
  * Validate drinks array
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function validateDrinks(drinks: any[], cafeIndex: number): any[] {
   return drinks.filter((drink, drinkIndex) => {
+    if (typeof drink !== 'object' || drink === null) {
+      console.warn(`Cafe ${cafeIndex + 1}, Drink ${drinkIndex + 1}: Invalid drink object - skipping`)
+      return false
+    }
+
     // Required: score
     if (typeof drink.score !== 'number') {
       console.warn(`Cafe ${cafeIndex + 1}, Drink ${drinkIndex + 1}: Missing or invalid "score" field - skipping`)
@@ -144,13 +157,15 @@ function validateDrinks(drinks: any[], cafeIndex: number): any[] {
     }
 
     return true
-  }).map(drink => ({
-    name: drink.name || 'Iced Matcha Latte',
-    score: drink.score,
-    priceAmount: drink.priceAmount ?? null,
-    priceCurrency: drink.priceCurrency ?? null,
-    gramsUsed: drink.gramsUsed ?? null,
-    isDefault: drink.isDefault ?? false,
-    notes: drink.notes ?? null,
-  }))
+  }).map(drink => {
+    return {
+      name: drink.name || 'Iced Matcha Latte',
+      score: drink.score,
+      priceAmount: drink.priceAmount ?? null,
+      priceCurrency: drink.priceCurrency ?? null,
+      gramsUsed: drink.gramsUsed ?? null,
+      isDefault: drink.isDefault ?? false,
+      notes: drink.notes ?? null,
+    }
+  })
 }

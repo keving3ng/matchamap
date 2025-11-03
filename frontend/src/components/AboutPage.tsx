@@ -8,7 +8,7 @@ export const AboutPage: React.FC = () => {
       {/* Header */}
       <div className="bg-white border-b-2 border-green-200 px-4 py-4 shadow-xs">
         <h2 className="text-2xl font-bold text-gray-800 font-caveat">About MatchaMap</h2>
-        <p className="text-sm text-gray-600 mt-1">Your guide to Toronto's best matcha</p>
+        <p className="text-sm text-gray-600 mt-1">Your guide to Toronto&apos;s best matcha</p>
       </div>
 
       <ContentContainer maxWidth="md">
@@ -18,7 +18,7 @@ export const AboutPage: React.FC = () => {
             <div className="w-20 h-20 bg-white/20 backdrop-blur rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-5xl">🍵</span>
             </div>
-            <h3 className="text-2xl font-bold mb-2">Discover Toronto's Matcha Scene</h3>
+            <h3 className="text-2xl font-bold mb-2">Discover Toronto&apos;s Matcha Scene</h3>
             <p className="text-green-50">
               Curated reviews and ratings to help you find the perfect matcha latte
             </p>
@@ -32,7 +32,7 @@ export const AboutPage: React.FC = () => {
             </h3>
             <p className="text-gray-700 leading-relaxed mb-4">
               MatchaMap was created out of a love for high-quality matcha and a desire to help fellow
-              matcha enthusiasts navigate Toronto's growing cafe scene. We personally visit and review
+              matcha enthusiasts navigate Toronto&apos;s growing cafe scene. We personally visit and review
               every location, evaluating the quality of the matcha, preparation technique, atmosphere,
               and overall experience.
             </p>
@@ -122,13 +122,13 @@ export const AboutPage: React.FC = () => {
               </div>
               <div>
                 <p className="text-gray-700 leading-relaxed mb-3">
-                  Hi! I'm a Toronto-based matcha enthusiast who has been exploring the city's cafe scene
+                  Hi! I&apos;m a Toronto-based matcha enthusiast who has been exploring the city&apos;s cafe scene
                   for over 5 years. After trying countless matcha lattes across the GTA, I created MatchaMap
                   to share my findings with fellow matcha lovers.
                 </p>
                 <p className="text-gray-700 leading-relaxed">
-                  All reviews are based on personal visits and reflect my honest opinions. I'm not affiliated
-                  with any of the cafes listed and don't accept payment for reviews.
+                  All reviews are based on personal visits and reflect my honest opinions. I&apos;m not affiliated
+                  with any of the cafes listed and don&apos;t accept payment for reviews.
                 </p>
               </div>
             </div>

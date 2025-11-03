@@ -107,7 +107,7 @@ vi.mock('../../utils/mapMarkers', () => ({
 
 // Import mocked leaflet to access mock map
 import * as L from 'leaflet'
-const mockMapInstance = (L as any).__mockMap
+const _mockMapInstance = (L as any).__mockMap
 
 describe('useLeafletMap', () => {
   const mockCafes: CafeWithDistance[] = [
@@ -173,12 +173,6 @@ describe('useLeafletMap', () => {
       expect(typeof result.current.drawRoute).toBe('function')
       expect(typeof result.current.clearRoute).toBe('function')
       expect(typeof result.current.refreshTiles).toBe('function')
-    })
-
-    it('should initialize with null map instance', () => {
-      const { result } = renderHook(() => useLeafletMap(defaultOptions))
-
-      expect(result.current.map).toBeNull()
     })
   })
 

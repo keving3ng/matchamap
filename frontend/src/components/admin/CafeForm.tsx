@@ -152,7 +152,7 @@ export const CafeForm: React.FC<CafeFormProps> = ({ cafe, onSave, onCancel }) =>
         images: formData.images || null,
       }
 
-      await onSave(payload as any)
+      await onSave(payload as any) // eslint-disable-line @typescript-eslint/no-explicit-any
       onCancel()
     } catch (err) {
       setError((err as Error).message)

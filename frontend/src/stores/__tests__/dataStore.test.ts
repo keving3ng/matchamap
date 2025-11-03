@@ -608,7 +608,7 @@ describe('dataStore', () => {
     it('should manage loading state correctly for concurrent fetches', async () => {
       const { result } = renderHook(() => useDataStore())
 
-      let resolvePromises: Array<() => void> = []
+      const resolvePromises: Array<() => void> = []
 
       // Create promises that we can resolve manually
       vi.mocked(api.cafes.getAll).mockReturnValueOnce(

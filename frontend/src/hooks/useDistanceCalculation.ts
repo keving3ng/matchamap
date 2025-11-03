@@ -19,7 +19,6 @@ export const useDistanceCalculation = ({
   userLocation,
 }: UseDistanceCalculationOptions) => {
   const [lastCalculatedLocation, setLastCalculatedLocation] = useState<Coordinates | null>(null)
-  const [isCalculating, setIsCalculating] = useState(false)
 
   // We've simplified this - always recalculate when userLocation changes
   // The shouldRecalculate logic was preventing updates when location first became available
@@ -38,22 +37,9 @@ export const useDistanceCalculation = ({
     return result
   }, [cafes, userLocation])
 
-  // Update calculating state when starting calculation
-  useEffect(() => {
-    if (userLocation) {
-      setIsCalculating(true)
-      const timer = setTimeout(() => setIsCalculating(false), 100)
-      return () => clearTimeout(timer)
-    } else {
-      setIsCalculating(false)
-    }
-  }, [userLocation])
-
   // Update last calculated location when userLocation changes
   useEffect(() => {
-    if (userLocation) {
-      setLastCalculatedLocation(userLocation)
-    }
+    setLastCalculatedLocation(userLocation)
   }, [userLocation])
 
   // Sort cafes by distance
@@ -68,7 +54,7 @@ export const useDistanceCalculation = ({
 
   // Manual recalculation function
   const recalculateDistances = () => {
-    setLastCalculatedLocation(null) // Force recalculation on next update
+    setLastCalculatedLocation(null) // Reset last calculated location
   }
 
   // Get distance info for a specific cafe
@@ -79,7 +65,7 @@ export const useDistanceCalculation = ({
 
   // Filter cafes within a certain distance
   const getCafesWithinDistance = (maxDistanceKm: number): CafeWithDistance[] => {
-    return cafesWithDistance.filter(cafe => 
+    return cafesWithDistance.filter(cafe =>
       cafe.distanceInfo && cafe.distanceInfo.kilometers <= maxDistanceKm
     )
   }
@@ -87,7 +73,7 @@ export const useDistanceCalculation = ({
   // Get statistics about distances
   const distanceStats = useMemo(() => {
     const cafesWithValidDistance = cafesWithDistance.filter(cafe => cafe.distanceInfo)
-    
+
     if (cafesWithValidDistance.length === 0) {
       return {
         count: 0,
@@ -100,7 +86,7 @@ export const useDistanceCalculation = ({
     }
 
     const distances = cafesWithValidDistance.map(cafe => cafe.distanceInfo!.kilometers)
-    
+
     return {
       count: cafesWithValidDistance.length,
       averageDistance: distances.reduce((sum, d) => sum + d, 0) / distances.length,
@@ -115,9 +101,9 @@ export const useDistanceCalculation = ({
     cafesWithDistance,
     cafesByDistance,
     nearestCafe,
-    isCalculating,
+    isCalculating: false, // Removed state - calculations are synchronous in useMemo
     hasUserLocation: !!userLocation,
-    lastCalculatedLocation,
+    lastCalculatedLocation, // Return state value to reflect recalculation state
     distanceStats,
     recalculateDistances,
     getDistanceForCafe,

@@ -165,6 +165,7 @@ export const UserPhotosPage: React.FC<UserPhotosPageProps> = ({ className = '' }
         {/* Lightbox */}
         {lightboxPhoto && (
           <PhotoLightbox
+            key={`lightbox-${lightboxPhoto.index}`} // Force remount when index changes
             photos={lightboxPhoto.photos}
             initialIndex={lightboxPhoto.index}
             isOpen={true}
@@ -263,7 +264,7 @@ const PhotoCard: React.FC<PhotoCardProps> = ({
             {/* Caption */}
             {photo.caption && (
               <p className="text-sm text-gray-700 line-clamp-2 mb-2">
-                "{photo.caption}"
+                &quot;{photo.caption}&quot;
               </p>
             )}
 

@@ -42,7 +42,7 @@ export const ContactPage: React.FC = () => {
                 <Send size={32} className="text-white" />
               </div>
               <h3 className="text-2xl font-bold text-gray-800 mb-2">Message Sent!</h3>
-              <p className="text-gray-600">Thanks for reaching out. We'll get back to you soon!</p>
+              <p className="text-gray-600">Thanks for reaching out. We&apos;ll get back to you soon!</p>
             </div>
           ) : (
             /* Contact Form */

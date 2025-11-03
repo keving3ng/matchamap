@@ -16,7 +16,6 @@ interface SwipeState {
   currentX: number
   currentY: number
   startTime: number
-  isSwiping: boolean
 }
 
 /**
@@ -48,10 +47,10 @@ export const useSwipeGesture = (options: SwipeGestureOptions = {}) => {
     currentX: 0,
     currentY: 0,
     startTime: 0,
-    isSwiping: false
   })
 
   const [swipeOffset, setSwipeOffset] = useState({ x: 0, y: 0 })
+  const [isSwiping, setIsSwiping] = useState(false)
 
   const handleTouchStart = (e: TouchEvent) => {
     const touch = e.touches[0]
@@ -61,12 +60,12 @@ export const useSwipeGesture = (options: SwipeGestureOptions = {}) => {
       currentX: touch.clientX,
       currentY: touch.clientY,
       startTime: Date.now(),
-      isSwiping: true
     }
+    setIsSwiping(true)
   }
 
   const handleTouchMove = (e: TouchEvent) => {
-    if (!swipeState.current.isSwiping) return
+    if (!isSwiping) return
 
     const touch = e.touches[0]
     swipeState.current.currentX = touch.clientX
@@ -85,7 +84,7 @@ export const useSwipeGesture = (options: SwipeGestureOptions = {}) => {
   }
 
   const handleTouchEnd = () => {
-    if (!swipeState.current.isSwiping) return
+    if (!isSwiping) return
 
     const deltaX = swipeState.current.currentX - swipeState.current.startX
     const deltaY = swipeState.current.currentY - swipeState.current.startY
@@ -115,7 +114,7 @@ export const useSwipeGesture = (options: SwipeGestureOptions = {}) => {
     }
 
     // Reset state
-    swipeState.current.isSwiping = false
+    setIsSwiping(false)
     setSwipeOffset({ x: 0, y: 0 })
   }
 
@@ -124,7 +123,7 @@ export const useSwipeGesture = (options: SwipeGestureOptions = {}) => {
     onTouchMove: handleTouchMove,
     onTouchEnd: handleTouchEnd,
     swipeOffset, // Use this for visual feedback
-    isSwiping: swipeState.current.isSwiping
+    isSwiping
   }
 }
 
@@ -154,7 +153,9 @@ export const useLongPress = (
   }
 
   const clear = () => {
-    timeout.current && clearTimeout(timeout.current)
+    if (timeout.current) {
+      clearTimeout(timeout.current)
+    }
     target.current = null
   }
 

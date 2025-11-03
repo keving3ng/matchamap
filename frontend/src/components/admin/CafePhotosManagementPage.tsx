@@ -154,7 +154,7 @@ export const CafePhotosManagementPage: React.FC = () => {
           <div className="bg-white rounded-lg shadow-md p-12 text-center">
             <ImageIcon size={48} className="mx-auto mb-4 text-gray-400" />
             <h3 className="text-lg font-semibold text-gray-800 mb-2">No photos found</h3>
-            <p className="text-gray-600">This cafe doesn't have any photos yet</p>
+            <p className="text-gray-600">This cafe doesn&apos;t have any photos yet</p>
           </div>
         )}
 

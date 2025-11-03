@@ -251,3 +251,5 @@ export const ReviewCard: React.FC<ReviewCardProps> = React.memo(({
     </div>
   )
 })
+
+ReviewCard.displayName = 'ReviewCard'
