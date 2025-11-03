@@ -111,7 +111,7 @@ jobs:
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
-        if: always()
+        if: github.ref == 'refs/heads/main' && always()
         with:
           files: ./frontend/coverage/coverage-final.json
           flags: frontend-shard-${{ matrix.shard }}
@@ -120,7 +120,7 @@ jobs:
 
       - name: Upload test results to Codecov
         uses: codecov/test-results-action@v1
-        if: ${{ !cancelled() }}
+        if: github.ref == 'refs/heads/main' && !cancelled()
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
         continue-on-error: true
