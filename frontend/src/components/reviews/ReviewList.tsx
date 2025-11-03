@@ -111,6 +111,7 @@ export const ReviewList: React.FC<ReviewListProps> = ({
     if (initialReviews.length === 0) {
       loadReviews(1, false)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cafeId, sortBy, filterBy])
 
   // Load more reviews

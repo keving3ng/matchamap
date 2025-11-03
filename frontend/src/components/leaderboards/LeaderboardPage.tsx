@@ -16,24 +16,23 @@ interface LeaderboardEntry {
   location?: string | null
 }
 
-// Unused types commented out - will be needed when leaderboard data fetching is implemented
-// interface PassportEntry extends LeaderboardEntry {
-//   totalCheckins: number
-//   passportCompletion: number
-// }
+interface PassportEntry extends LeaderboardEntry {
+  totalCheckins: number
+  passportCompletion: number
+}
 
-// interface ReviewerEntry extends LeaderboardEntry {
-//   totalReviews: number
-//   reputationScore: number
-// }
+interface ReviewerEntry extends LeaderboardEntry {
+  totalReviews: number
+  reputationScore: number
+}
 
-// interface ContributorEntry extends LeaderboardEntry {
-//   totalReviews: number
-//   totalPhotos: number
-//   totalFavorites: number
-//   totalContributions: number
-//   reputationScore: number
-// }
+interface ContributorEntry extends LeaderboardEntry {
+  totalReviews: number
+  totalPhotos: number
+  totalFavorites: number
+  totalContributions: number
+  reputationScore: number
+}
 
 type LeaderboardType = 'passport' | 'reviewers' | 'contributors'
 type TimePeriod = 'all' | 'monthly'
@@ -50,7 +49,8 @@ export const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ className = ''
   const [activeTab, setActiveTab] = useState<LeaderboardType>('passport')
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('all')
   const [selectedCity, setSelectedCity] = useState<string>('all')
-  const [leaderboardData, setLeaderboardData] = useState<any[]>([])
+  const [leaderboardData, setLeaderboardData] = useState<Array<PassportEntry | ReviewerEntry | ContributorEntry>>([])
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [userRank, setUserRank] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -112,6 +112,7 @@ export const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ className = ''
       fetchLeaderboard()
       fetchUserRank()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, timePeriod, selectedCity, isUserSocialEnabled])
 
   // Don't render if social features are disabled
@@ -171,46 +172,56 @@ export const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ className = ''
     )
   }
 
-  const renderStats = (entry: any) => {
+  const renderStats = (entry: PassportEntry | ReviewerEntry | ContributorEntry) => {
     switch (activeTab) {
       case 'passport':
-        return (
-          <div className="text-right">
-            <div className="font-semibold text-gray-900">
-              {COPY.leaderboard.checkinsCount(entry.totalCheckins)}
+        if ('totalCheckins' in entry && 'passportCompletion' in entry) {
+          return (
+            <div className="text-right">
+              <div className="font-semibold text-gray-900">
+                {COPY.leaderboard.checkinsCount(entry.totalCheckins)}
+              </div>
+              <div className="text-sm text-gray-600">
+                {COPY.leaderboard.passportProgress(entry.passportCompletion)}
+              </div>
             </div>
-            <div className="text-sm text-gray-600">
-              {COPY.leaderboard.passportProgress(entry.passportCompletion)}
-            </div>
-          </div>
-        )
+          )
+        }
+        break
       case 'reviewers':
-        return (
-          <div className="text-right">
-            <div className="font-semibold text-gray-900">
-              {COPY.leaderboard.reviewsCount(entry.totalReviews)}
+        if ('totalReviews' in entry && 'reputationScore' in entry && !('totalPhotos' in entry)) {
+          return (
+            <div className="text-right">
+              <div className="font-semibold text-gray-900">
+                {COPY.leaderboard.reviewsCount(entry.totalReviews)}
+              </div>
+              <div className="text-sm text-gray-600">
+                {COPY.leaderboard.reputationScore(entry.reputationScore)}
+              </div>
             </div>
-            <div className="text-sm text-gray-600">
-              {COPY.leaderboard.reputationScore(entry.reputationScore)}
-            </div>
-          </div>
-        )
+          )
+        }
+        break
       case 'contributors':
-        return (
-          <div className="text-right">
-            <div className="font-semibold text-gray-900">
-              {COPY.leaderboard.contributionsCount(entry.totalContributions)}
+        if ('totalContributions' in entry && 'totalPhotos' in entry && 'totalFavorites' in entry) {
+          return (
+            <div className="text-right">
+              <div className="font-semibold text-gray-900">
+                {COPY.leaderboard.contributionsCount(entry.totalContributions)}
+              </div>
+              <div className="text-sm text-gray-600">
+                {COPY.leaderboard.contributionBreakdown(
+                  entry.totalReviews,
+                  entry.totalPhotos,
+                  entry.totalFavorites
+                )}
+              </div>
             </div>
-            <div className="text-sm text-gray-600">
-              {COPY.leaderboard.contributionBreakdown(
-                entry.totalReviews,
-                entry.totalPhotos,
-                entry.totalFavorites
-              )}
-            </div>
-          </div>
-        )
+          )
+        }
+        break
     }
+    return null
   }
 
   const renderRankBadge = (rank: number) => {

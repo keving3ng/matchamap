@@ -49,6 +49,7 @@ export const ReviewComments: React.FC<ReviewCommentsProps> = React.memo(({
   // Load comments on mount
   useEffect(() => {
     loadComments()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reviewId])
 
   const loadComments = async () => {

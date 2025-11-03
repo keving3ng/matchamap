@@ -109,10 +109,12 @@ export function escapeHtml(text: string): string {
  * @param sanitizer - Sanitization function (default: sanitizeText)
  * @returns Sanitized object
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function sanitizeObject<T extends Record<string, any>>(
   obj: T,
   sanitizer: (value: string) => string = sanitizeText
 ): T {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sanitized: any = Array.isArray(obj) ? [] : {};
 
   for (const [key, value] of Object.entries(obj)) {

@@ -103,7 +103,7 @@ export const CafeFormWizard: React.FC<CafeFormWizardProps> = ({ onSave, onCancel
         images: formData.images,
       }
 
-      await onSave(payload as any)
+      await onSave(payload as any) // eslint-disable-line @typescript-eslint/no-explicit-any
       onCancel()
     } catch (err) {
       setError((err as Error).message)

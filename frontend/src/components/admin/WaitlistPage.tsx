@@ -63,6 +63,7 @@ export const WaitlistPage: React.FC = () => {
 
   useEffect(() => {
     fetchWaitlist(true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortField, sortOrder])
 
   const handleSort = (field: SortField) => {

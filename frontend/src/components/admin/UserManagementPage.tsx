@@ -33,6 +33,7 @@ export const UserManagementPage: React.FC = () => {
   // Fetch users and stats
   useEffect(() => {
     fetchData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm, roleFilter])
 
   const fetchData = async () => {

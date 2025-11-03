@@ -187,6 +187,7 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({
     return () => {
       selectedPhotos.forEach(photo => URL.revokeObjectURL(photo.previewUrl))
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   if (!isOpen) return null

@@ -37,7 +37,7 @@ export const ModerationDashboard: React.FC = () => {
   const [photos, setPhotos] = useState<ModerationItem[]>([])
   const [reviews, setReviews] = useState<ModerationItem[]>([])
   const [comments, setComments] = useState<ModerationItem[]>([])
-  const [stats, setStats] = useState<any>(null)
+  const [stats, setStats] = useState<any>(null) // eslint-disable-line @typescript-eslint/no-explicit-any
   const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set())
   const [processingBulk, setProcessingBulk] = useState(false)
   const [moderatingIds, setModeratingIds] = useState<Set<number>>(new Set())
@@ -597,7 +597,7 @@ const PhotosTab: React.FC<PhotoTabProps> = ({ items, selectedItems, moderatingId
               {item.content && (
                 <div className="mb-4">
                   <p className="text-gray-900 bg-white p-3 rounded-lg">
-                    "{item.content}"
+                    &quot;{item.content}&quot;
                   </p>
                 </div>
               )}

@@ -348,9 +348,9 @@ export const adminAPI = {
    * Get moderation queue (all pending items) (admin only)
    */
   async getModerationQueue(): Promise<{
-    photos: any[];
-    reviews: any[];
-    comments: any[];
+    photos: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
+    reviews: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
+    comments: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
     stats: {
       photos: { pending: number; total: number };
       reviews: { pending: number; total: number };
