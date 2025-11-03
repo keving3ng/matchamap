@@ -18,7 +18,7 @@ A mobile-first, map-based guide to matcha cafes in Toronto featuring expert revi
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: React 18, Vite, Tailwind CSS, Zustand, Leaflet
+- **Frontend**: React 19, Vite, Tailwind CSS 4.x, Zustand, Leaflet
 - **Backend**: Cloudflare Workers, D1 (SQLite), Drizzle ORM
 - **Hosting**: Cloudflare Pages + Workers (edge deployment)
 - **TypeScript**: Strict mode throughout
@@ -69,7 +69,7 @@ npm run typecheck
 
 This project uses npm workspaces for monorepo management:
 
-- **`frontend/`** - React application with Vite, Tailwind CSS, and Zustand
+- **`frontend/`** - React 19 application with Vite, Tailwind CSS 4.x, and Zustand
 - **`backend/`** - Cloudflare Workers API with D1 database and Drizzle ORM
 - **`shared/`** - Shared TypeScript types for API contracts
 

@@ -152,7 +152,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                     }}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                       isActive(item.path)
-                        ? 'bg-green-100 text-green-700 font-semibold shadow-sm'
+                        ? 'bg-green-100 text-green-700 font-semibold shadow-xs'
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}
                   >
@@ -179,7 +179,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                     }}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                       isActive(item.path)
-                        ? 'bg-green-100 text-green-700 font-semibold shadow-sm'
+                        ? 'bg-green-100 text-green-700 font-semibold shadow-xs'
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}
                   >
@@ -206,7 +206,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                     }}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                       isActive(item.path)
-                        ? 'bg-green-100 text-green-700 font-semibold shadow-sm'
+                        ? 'bg-green-100 text-green-700 font-semibold shadow-xs'
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}
                   >

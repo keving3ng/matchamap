@@ -140,7 +140,7 @@ zIndex.fixed             // 1000
 - Type-safe with TypeScript
 
 ### 3. Enhanced Animations
-Added mobile-optimized animations to `tailwind.config.js`:
+Added mobile-optimized animations to the theme configuration (now in `src/styles/index.css` with Tailwind CSS 4.x):
 
 **New Animations:**
 - `animate-slide-down` - Expandable sections

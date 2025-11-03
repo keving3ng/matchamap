@@ -4,7 +4,7 @@
 
 MatchaMap is a mobile-first web application providing a curated, map-based guide to matcha cafes in Toronto (expanding to more cities). The platform features expert reviews, ratings, location-based discovery tools, and community features with a Japanese-inspired aesthetic.
 
-**Tech Stack:** React 19 | Zustand | Vite | Tailwind CSS | Cloudflare Workers + D1 + R2 | TypeScript (strict mode)
+**Tech Stack:** React 19 | Zustand | Vite | Tailwind CSS 4.x | Cloudflare Workers + D1 + R2 | TypeScript (strict mode)
 
 **Project Phase:** V2 Development (User Accounts + Social Features + Photo Uploads)
 

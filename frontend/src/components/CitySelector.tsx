@@ -53,7 +53,7 @@ export const CitySelector: React.FC = () => {
         value={selectedCity}
         onChange={handleCityChange}
         className="appearance-none bg-transparent text-transparent font-medium text-sm pr-6 pl-2 py-1
-                   focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-1 rounded-lg
+                   focus:outline-hidden focus:ring-2 focus:ring-white focus:ring-offset-1 rounded-lg
                    cursor-pointer hover:bg-green-700 transition w-14 sm:w-auto"
       >
         {availableCities.map((city) => (

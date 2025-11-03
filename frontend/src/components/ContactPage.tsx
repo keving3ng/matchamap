@@ -28,7 +28,7 @@ export const ContactPage: React.FC = () => {
   return (
     <div className="flex-1 overflow-y-auto pb-24">
       {/* Header */}
-      <div className="bg-white border-b-2 border-green-200 px-4 py-4 shadow-sm">
+      <div className="bg-white border-b-2 border-green-200 px-4 py-4 shadow-xs">
         <h2 className="text-2xl font-bold text-gray-800 font-caveat">Contact Us</h2>
         <p className="text-sm text-gray-600 mt-1">Have a question or want to suggest a cafe?</p>
       </div>
@@ -61,7 +61,7 @@ export const ContactPage: React.FC = () => {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Your name"
-                      className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+                      className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
                       required
                     />
                   </div>
@@ -80,7 +80,7 @@ export const ContactPage: React.FC = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="your@email.com"
-                      className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+                      className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
                       required
                     />
                   </div>
@@ -95,7 +95,7 @@ export const ContactPage: React.FC = () => {
                     id="subject"
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition appearance-none bg-white"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-green-500 focus:border-transparent transition appearance-none bg-white"
                     required
                   >
                     <option value="">Select a topic...</option>
@@ -120,7 +120,7 @@ export const ContactPage: React.FC = () => {
                       onChange={(e) => setMessage(e.target.value)}
                       placeholder="Tell us more..."
                       rows={6}
-                      className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition resize-none"
+                      className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-green-500 focus:border-transparent transition resize-none"
                       required
                     />
                   </div>

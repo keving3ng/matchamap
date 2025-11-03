@@ -47,7 +47,7 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({ event }) => {
         {/* Back button */}
         <button
           onClick={() => navigate('/events')}
-          className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-xl hover:bg-white hover:scale-110 transition-all duration-200 z-20"
+          className="absolute top-4 left-4 bg-white/90 backdrop-blur-xs p-3 rounded-full shadow-xl hover:bg-white hover:scale-110 transition-all duration-200 z-20"
         >
           <ArrowLeft size={24} className="text-green-600" />
         </button>

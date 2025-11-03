@@ -88,7 +88,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
 
         <span className="text-8xl animate-bounce-subtle z-10">🍵</span>
         {isUserAccountsEnabled && (
-          <button className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-xl hover:bg-white hover:scale-110 transition-all duration-200 z-20">
+          <button className="absolute top-4 right-4 bg-white/90 backdrop-blur-xs p-3 rounded-full shadow-xl hover:bg-white hover:scale-110 transition-all duration-200 z-20">
             <Heart size={24} className="text-matcha-600" />
           </button>
         )}
@@ -224,7 +224,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
                       <div className="flex items-center gap-2 mb-2 flex-wrap">
                         <h4 className="font-bold text-gray-800 text-base">{drink.name || 'Iced Matcha Latte'}</h4>
                         {drink.isDefault && (
-                          <span className="px-2.5 py-1 bg-gradient-to-r from-matcha-500 to-matcha-600 text-white text-xs font-semibold rounded-full shadow-sm">
+                          <span className="px-2.5 py-1 bg-gradient-to-r from-matcha-500 to-matcha-600 text-white text-xs font-semibold rounded-full shadow-xs">
                             {COPY.detail.featured}
                           </span>
                         )}
@@ -516,7 +516,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
 
       {/* Review Form Modal */}
       {showReviewForm && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-fade-in">
           <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-scale-in">
             <ReviewForm
               cafeId={cafe.id}

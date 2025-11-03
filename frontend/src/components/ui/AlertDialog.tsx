@@ -112,7 +112,7 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
                     text-sm font-medium
                     hover:bg-matcha-600
                     transition
-                    focus:outline-none focus:ring-2 focus:ring-matcha-500 focus:ring-offset-2
+                    focus:outline-hidden focus:ring-2 focus:ring-matcha-500 focus:ring-offset-2
                     min-h-[44px]
                   "
                 >
@@ -129,7 +129,7 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
                     text-sm font-medium
                     hover:bg-gray-200
                     transition
-                    focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2
+                    focus:outline-hidden focus:ring-2 focus:ring-gray-500 focus:ring-offset-2
                     min-h-[44px]
                   "
                 >

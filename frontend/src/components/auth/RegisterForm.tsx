@@ -78,7 +78,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchT
           required
           minLength={3}
           maxLength={20}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-matcha-500 focus:border-transparent"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-matcha-500 focus:border-transparent"
           placeholder={COPY.auth.usernamePlaceholder}
           disabled={isLoading}
         />
@@ -98,7 +98,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchT
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-matcha-500 focus:border-transparent"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-matcha-500 focus:border-transparent"
           placeholder={COPY.auth.emailPlaceholder}
           disabled={isLoading}
         />
@@ -116,7 +116,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchT
           onChange={(e) => setPassword(e.target.value)}
           required
           minLength={8}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-matcha-500 focus:border-transparent"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-matcha-500 focus:border-transparent"
           placeholder={COPY.auth.passwordPlaceholder}
           disabled={isLoading}
         />
@@ -136,7 +136,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchT
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-matcha-500 focus:border-transparent"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-matcha-500 focus:border-transparent"
           placeholder={COPY.auth.passwordPlaceholder}
           disabled={isLoading}
         />

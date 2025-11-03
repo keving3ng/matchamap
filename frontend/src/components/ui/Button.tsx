@@ -45,7 +45,7 @@ export const PrimaryButton: React.FC<BaseButtonProps> = ({
         transition-all duration-200 ease-out
         disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100
         flex items-center justify-center gap-2
-        focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2
+        focus:outline-hidden focus:ring-2 focus:ring-green-500 focus:ring-offset-2
         min-h-[44px]
         ${fullWidth ? 'w-full' : ''}
         ${loading ? 'cursor-wait' : ''}
@@ -97,7 +97,7 @@ export const SecondaryButton: React.FC<BaseButtonProps> = ({
         transition-all duration-200 ease-out
         disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100
         flex items-center justify-center gap-2
-        focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2
+        focus:outline-hidden focus:ring-2 focus:ring-green-500 focus:ring-offset-2
         min-h-[44px]
         ${fullWidth ? 'w-full' : ''}
         ${loading ? 'cursor-wait' : ''}
@@ -148,7 +148,7 @@ export const TertiaryButton: React.FC<BaseButtonProps> = ({
         transition-all duration-200 ease-out
         disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100
         flex items-center justify-center gap-2
-        focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2
+        focus:outline-hidden focus:ring-2 focus:ring-gray-500 focus:ring-offset-2
         min-h-[44px]
         ${fullWidth ? 'w-full' : ''}
         ${loading ? 'cursor-wait' : ''}
@@ -198,7 +198,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
   const variantStyles = {
     primary: 'bg-green-600 text-white hover:bg-green-700',
     secondary: 'bg-green-100 text-green-700 hover:bg-green-200',
-    ghost: 'bg-white/95 backdrop-blur-sm text-green-700 hover:bg-white shadow-lg',
+    ghost: 'bg-white/95 backdrop-blur-xs text-green-700 hover:bg-white shadow-lg',
     danger: 'bg-red-100 text-red-600 hover:bg-red-200'
   }
 
@@ -220,7 +220,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
         active:scale-95
         transition-all duration-200 ease-out
         disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100
-        focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2
+        focus:outline-hidden focus:ring-2 focus:ring-green-500 focus:ring-offset-2
         ${variantStyles[variant]}
         ${loading ? 'cursor-wait' : ''}
         ${className}

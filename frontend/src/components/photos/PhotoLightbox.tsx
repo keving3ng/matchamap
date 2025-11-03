@@ -129,7 +129,7 @@ export const PhotoLightbox: React.FC<PhotoLightboxProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 bg-black/95 backdrop-blur-sm"
+      className="fixed inset-0 bg-black/95 backdrop-blur-xs"
       style={{ zIndex: zIndex.modal }}
     >
       {/* Header */}

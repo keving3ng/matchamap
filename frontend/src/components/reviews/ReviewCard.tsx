@@ -84,7 +84,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = React.memo(({
       : 'px-2 py-0.5 text-sm font-semibold'
 
     return (
-      <div className={`bg-gradient-to-br from-matcha-500 to-matcha-600 text-white rounded-lg ${sizeClasses} shadow-sm`}>
+      <div className={`bg-gradient-to-br from-matcha-500 to-matcha-600 text-white rounded-lg ${sizeClasses} shadow-xs`}>
         {rating.toFixed(1)}
       </div>
     )

@@ -18,7 +18,7 @@ export const CircleButton: React.FC<CircleButtonProps> = ({
     <button
       onClick={onClick}
       className={`
-        bg-white/95 backdrop-blur-sm
+        bg-white/95 backdrop-blur-xs
         w-12 h-12
         rounded-full
         shadow-lg shadow-black/10
@@ -27,7 +27,7 @@ export const CircleButton: React.FC<CircleButtonProps> = ({
         transition-all duration-200 ease-out
         flex items-center justify-center
         border border-white/50
-        focus:outline-none focus:ring-2 focus:ring-matcha-500 focus:ring-offset-2
+        focus:outline-hidden focus:ring-2 focus:ring-matcha-500 focus:ring-offset-2
         ${className}
       `}
     >

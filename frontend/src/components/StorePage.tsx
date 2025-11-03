@@ -62,7 +62,7 @@ export const StorePage: React.FC = () => {
   return (
     <div className="flex-1 overflow-y-auto pb-24">
       {/* Header */}
-      <div className="bg-white border-b-2 border-green-200 px-4 py-4 shadow-sm">
+      <div className="bg-white border-b-2 border-green-200 px-4 py-4 shadow-xs">
         <h2 className="text-2xl font-bold text-gray-800">Shop</h2>
         <p className="text-sm text-gray-600 mt-1">Matcha essentials and MatchaMap merch</p>
       </div>

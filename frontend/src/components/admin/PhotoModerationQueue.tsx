@@ -195,7 +195,7 @@ const PhotoModerationCard: React.FC<PhotoModerationCardProps> = ({
   }
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+    <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-xs">
       <div className="flex gap-6">
         {/* Photo Preview */}
         <div className="flex-shrink-0">

@@ -213,7 +213,7 @@ describe('IconButton', () => {
     expect(screen.getByLabelText('Secondary')).toHaveClass('bg-green-100', 'text-green-700')
     
     rerender(<IconButton icon={MapPin} variant="ghost" ariaLabel="Ghost" />)
-    expect(screen.getByLabelText('Ghost')).toHaveClass('bg-white/95', 'backdrop-blur-sm')
+    expect(screen.getByLabelText('Ghost')).toHaveClass('bg-white/95', 'backdrop-blur-xs')
   })
 
   it('should have proper size (44px x 44px) for touch targets', () => {
@@ -349,7 +349,7 @@ describe('Button Accessibility', () => {
   it('should have proper focus management', () => {
     render(<TertiaryButton>Focus management</TertiaryButton>)
     const button = screen.getByRole('button')
-    expect(button).toHaveClass('focus:outline-none')
+    expect(button).toHaveClass('focus:outline-hidden')
     expect(button).toHaveClass('focus:ring-2')
   })
 })

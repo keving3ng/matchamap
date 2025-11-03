@@ -204,7 +204,7 @@ export const FeatureTogglesPage: React.FC = () => {
                             <button
                               onClick={() => handleToggle(featureName)}
                               aria-label={`Toggle ${featureName}`}
-                              className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
+                              className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-hidden focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
                                 effectiveValue ? 'bg-green-500' : 'bg-gray-300'
                               }`}
                             >
@@ -274,7 +274,7 @@ export const FeatureTogglesPage: React.FC = () => {
                               <button
                                 onClick={() => handleToggle(featureName)}
                                 aria-label={`Toggle ${featureName}`}
-                                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
+                                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-hidden focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
                                   effectiveValue ? 'bg-green-500' : 'bg-gray-300'
                                 }`}
                               >

@@ -10,7 +10,7 @@ export const SettingsPage: React.FC = () => {
   return (
     <div className="flex-1 overflow-y-auto pb-24">
       {/* Header */}
-      <div className="bg-white border-b-2 border-green-200 px-4 py-4 shadow-sm">
+      <div className="bg-white border-b-2 border-green-200 px-4 py-4 shadow-xs">
         <h2 className="text-2xl font-bold text-gray-800">{COPY.settings.title}</h2>
         <p className="text-sm text-gray-600 mt-1">Manage your preferences and account</p>
       </div>

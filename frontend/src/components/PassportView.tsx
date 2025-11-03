@@ -146,7 +146,7 @@ export const PassportView: React.FC<PassportViewProps> = ({ cafes, visitedStamps
   return (
     <div className="flex-1 overflow-y-auto pb-24">
       {/* Header */}
-      <div className="bg-white border-b-2 border-green-200 px-4 py-4 shadow-sm">
+      <div className="bg-white border-b-2 border-green-200 px-4 py-4 shadow-xs">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center text-2xl shadow-md">
             🎫

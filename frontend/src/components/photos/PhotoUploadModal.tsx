@@ -185,7 +185,7 @@ export const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-fade-in">
       <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-scale-in">
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between rounded-t-2xl z-10">
@@ -298,7 +298,7 @@ export const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
                     {!isUploading && (
                       <button
                         onClick={() => handleRemovePhoto(index)}
-                        className="absolute top-2 right-2 p-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg hover:bg-white transition-colors"
+                        className="absolute top-2 right-2 p-2 bg-white/90 backdrop-blur-xs rounded-lg shadow-lg hover:bg-white transition-colors"
                         aria-label="Remove photo"
                       >
                         <X size={16} />

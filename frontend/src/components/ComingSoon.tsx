@@ -67,7 +67,7 @@ export const ComingSoon: React.FC<ComingSoonProps> = ({ onPasswordCorrect }) => 
               placeholder="your email"
               required
               disabled={isSubmitting}
-              className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white text-center placeholder-white/50 focus:outline-none focus:border-white/40 focus:bg-white/15 transition-all disabled:opacity-50"
+              className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white text-center placeholder-white/50 focus:outline-hidden focus:border-white/40 focus:bg-white/15 transition-all disabled:opacity-50"
             />
             <button
               type="submit"
@@ -91,7 +91,7 @@ export const ComingSoon: React.FC<ComingSoonProps> = ({ onPasswordCorrect }) => 
               onChange={(e) => setPassword(e.target.value)}
               placeholder="password"
               autoFocus
-              className="px-4 py-2 rounded bg-white/10 border border-white/20 text-white text-center placeholder-white/50 focus:outline-none focus:border-white/40"
+              className="px-4 py-2 rounded bg-white/10 border border-white/20 text-white text-center placeholder-white/50 focus:outline-hidden focus:border-white/40"
             />
           </form>
         )}

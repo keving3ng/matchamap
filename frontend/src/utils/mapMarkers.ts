@@ -53,7 +53,7 @@ export const createMatchaMarker = (cafe: Cafe, state: MarkerState = { isSelected
       <!-- Main marker pin -->
       <div class="relative">
         <!-- Pin shadow -->
-        <div class="absolute inset-0 ${colors.bg} opacity-30 rounded-full blur-sm transform translate-y-1"></div>
+        <div class="absolute inset-0 ${colors.bg} opacity-30 rounded-full blur-xs transform translate-y-1"></div>
 
         <!-- Main pin body -->
         <div class="${colors.bg} ${colors.border} border-2 ${colors.shadow} ${colors.pulse}
