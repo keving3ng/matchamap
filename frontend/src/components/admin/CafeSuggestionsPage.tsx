@@ -132,7 +132,7 @@ export const CafeSuggestionsPage: React.FC = () => {
                     <span>{formatDate(suggestion.createdAt)}</span>
                   </div>
                 </div>
-                <StatusBadge status="pending" />
+                <StatusBadge variant="warning">Pending</StatusBadge>
               </div>
 
               {/* Details */}
