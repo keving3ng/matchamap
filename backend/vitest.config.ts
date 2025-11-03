@@ -12,6 +12,11 @@ export default defineWorkersConfig({
             GOOGLE_PLACES_API_KEY: 'test-google-places-api-key',
           },
         },
+        // Use single worker mode to fix CI compatibility issue with snapshot client
+        // Error: "this.snapshotClient.startCurrentRun is not a function"
+        // This is a known issue with @cloudflare/vitest-pool-workers@0.10.x + Vitest 2.1.x
+        singleWorker: true,
+        isolate: false,
       },
     },
     coverage: {
