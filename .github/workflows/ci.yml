@@ -128,11 +128,13 @@ jobs:
   # ============================================================================
   # BACKEND TESTS
   # Fixed: removed continue-on-error to properly fail CI on test failures
+  # Note: Uses ubuntu-latest instead of self-hosted due to GLIBC requirements
+  #       for @cloudflare/workerd-linux-64 (requires GLIBC 2.32-2.35)
   # ============================================================================
   backend-tests:
     name: Backend Tests
     needs: [setup, typecheck]  # Ensure dependencies are installed and TypeScript compiles
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     timeout-minutes: 10
 
     steps:

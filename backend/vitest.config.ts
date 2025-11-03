@@ -5,6 +5,13 @@ export default defineWorkersConfig({
     poolOptions: {
       workers: {
         wrangler: { configPath: './wrangler.toml' },
+        miniflare: {
+          // Test environment bindings (required for tests to pass)
+          bindings: {
+            JWT_SECRET: 'dev-secret-change-in-production-use-wrangler-secret',
+            GOOGLE_PLACES_API_KEY: 'test-google-places-api-key',
+          },
+        },
       },
     },
     coverage: {
