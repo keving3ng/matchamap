@@ -256,6 +256,8 @@ export interface PublicUserProfile {
       tiktok?: string | null
       website?: string | null
     }
+    // Privacy settings (for respecting visibility)
+    showActivity?: boolean
   }
 }
 
