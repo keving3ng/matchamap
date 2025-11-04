@@ -34,6 +34,7 @@ const ContentManagementPage = React.lazy(() => import('./admin/ContentManagement
 const CafePhotosManagementPage = React.lazy(() => import('./admin/CafePhotosManagementPage'))
 const CafeReviewsManagementPage = React.lazy(() => import('./admin/CafeReviewsManagementPage'))
 const ModerationDashboard = React.lazy(() => import('./admin/ModerationDashboard'))
+const StatsPage = React.lazy(() => import('./admin/StatsPage'))
 import { useFeatureToggle } from '../hooks/useFeatureToggle'
 import { useAppFeatures } from '../hooks/useAppFeatures'
 import { useDataStore } from '../stores/dataStore'
@@ -447,6 +448,17 @@ export const AppRoutes: React.FC = () => {
                 <AdminErrorBoundary>
                   <AdminLayout>
                     <CafeReviewsManagementPage />
+                  </AdminLayout>
+                </AdminErrorBoundary>
+              </Suspense>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/stats" element={
+            <ProtectedRoute requireAdmin={true}>
+              <Suspense fallback={<AdminLoadingFallback />}>
+                <AdminErrorBoundary>
+                  <AdminLayout>
+                    <StatsPage />
                   </AdminLayout>
                 </AdminErrorBoundary>
               </Suspense>

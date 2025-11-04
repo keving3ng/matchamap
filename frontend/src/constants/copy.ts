@@ -458,6 +458,50 @@ export const COPY = {
     users: 'Users',
     settings: 'Settings',
     moderation: 'Moderation',
+
+    // Analytics Dashboard
+    analytics: {
+      title: 'Analytics Dashboard',
+      subtitle: 'Partner-actionable metrics and insights',
+
+      // User Activity Section
+      userActivity: 'User Activity',
+      totalUsers: 'Total Users',
+      activeUsers7d: 'Active (7d)',
+      activeUsers30d: 'Active (30d)',
+      totalCheckins: 'Total Check-ins',
+      repeatVisitors: 'Repeat Visitors',
+
+      // Cafe Performance Section
+      cafePerformance: 'Cafe Performance',
+      totalViews: 'Total Views',
+      totalDirections: 'Directions',
+      totalAnonymousMarks: 'Anonymous Marks',
+      totalAuthCheckins: 'Auth Check-ins',
+      totalDemand: 'Total Demand',
+      avgCtr: 'Avg CTR',
+
+      // Table Headers
+      cafe: 'Cafe',
+      city: 'City',
+      views: 'Views',
+      directions: 'Directions',
+      ctr: 'CTR',
+      anonymousMarks: 'Anon Marks',
+      checkins: 'Check-ins',
+      demand: 'Demand',
+      social: 'Social',
+
+      // Tooltips
+      demandTooltip: 'Anonymous marks + authenticated check-ins',
+      ctrTooltip: 'Click-through rate: directions / views',
+
+      // Loading/Error
+      loading: 'Loading analytics...',
+      error: 'Failed to load analytics',
+      noData: 'No data available yet',
+      retry: 'Retry',
+    },
     // Error Boundaries
     errorBoundary: {
       title: 'Something went wrong in the admin panel',

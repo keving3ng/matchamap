@@ -1396,6 +1396,48 @@ const notificationsAPI = {
 }
 
 /**
+ * Admin Analytics API endpoints
+ */
+export interface CafeStat {
+  id: number
+  name: string
+  city: string
+  neighborhood: string
+  views: number
+  directions_clicks: number
+  anonymous_passport_marks: number
+  authenticated_checkins: number
+  instagram_clicks: number
+  tiktok_clicks: number
+}
+
+export interface UserActivitySummary {
+  total_users: number
+  active_users_7d: number
+  active_users_30d: number
+  total_checkins: number
+  repeat_visitors: number
+}
+
+export const adminAnalyticsAPI = {
+  /**
+   * Get cafe performance statistics (admin only)
+   */
+  async getCafeStats(): Promise<{
+    stats: CafeStat[]
+  }> {
+    return fetchAPI('/admin/cafe-stats')
+  },
+
+  /**
+   * Get user activity summary (admin only)
+   */
+  async getUserActivitySummary(): Promise<UserActivitySummary> {
+    return fetchAPI('/admin/user-activity-summary')
+  },
+}
+
+/**
  * Export all APIs
  */
 export const api = {
@@ -1421,6 +1463,7 @@ export const api = {
   suggestions: suggestionsAPI,
   recommendations: recommendationsAPI,
   notifications: notificationsAPI,
+  adminAnalytics: adminAnalyticsAPI,
 }
 
 export default api
