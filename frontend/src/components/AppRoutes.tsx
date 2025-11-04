@@ -48,7 +48,7 @@ const AdminLoadingFallback: React.FC = () => (
   <div className="flex-1 overflow-y-auto p-6">
     <div className="max-w-4xl mx-auto space-y-6">
       <Skeleton variant="text" width="40%" height={32} className="mb-4" />
-      <div className="bg-white rounded-lg shadow p-6 space-y-4">
+      <div className="bg-white rounded-lg shadow-xs p-6 space-y-4">
         <Skeleton variant="rectangular" height={200} />
         <Skeleton variant="text" width="60%" height={20} />
         <Skeleton variant="text" width="80%" height={20} />

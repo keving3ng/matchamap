@@ -115,7 +115,7 @@ export const CafeSuggestionsPage: React.FC = () => {
           {suggestions.map((suggestion) => (
             <div
               key={suggestion.id}
-              className="bg-white border border-gray-200 rounded-lg p-4 md:p-6 hover:shadow-md transition-shadow"
+              className="bg-white border border-gray-200 rounded-lg p-4 md:p-6 hover:shadow-xs transition-shadow-xs"
             >
               {/* Header */}
               <div className="flex items-start justify-between mb-3">

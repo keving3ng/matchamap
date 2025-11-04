@@ -30,7 +30,7 @@ export const createMatchaMarker = (cafe: Cafe, state: MarkerState = { isSelected
     return {
       bg: 'bg-matcha-500',
       border: 'border-white',
-      shadow: 'shadow-lg',
+      shadow: 'shadow-xs',
       pulse: ''
     }
   }
@@ -52,7 +52,7 @@ export const createMatchaMarker = (cafe: Cafe, state: MarkerState = { isSelected
     <div class="relative flex items-center justify-center">
       <!-- Main marker pin -->
       <div class="relative">
-        <!-- Pin shadow -->
+        <!-- Pin shadow-xs -->
         <div class="absolute inset-0 ${colors.bg} opacity-30 rounded-full blur-xs transform translate-y-1"></div>
 
         <!-- Main pin body -->
@@ -70,7 +70,7 @@ export const createMatchaMarker = (cafe: Cafe, state: MarkerState = { isSelected
       ${cafe.displayScore ? `
       <!-- Score badge -->
       <div class="absolute -top-3 -right-2 ${scoreBadgeStyle}
-                  px-2 py-0.5 rounded-full text-xs font-bold shadow-md
+                  px-2 py-0.5 rounded-full text-xs font-bold shadow-xs
                   border border-white/20 min-w-[2rem] text-center
                   transition-all duration-200 z-10">
         ${cafe.displayScore.toFixed(1)}
@@ -86,7 +86,7 @@ export const createMatchaMarker = (cafe: Cafe, state: MarkerState = { isSelected
 
       <!-- Upcoming Event Indicator -->
       ${hasUpcomingEvent ? `
-        <div class="absolute -top-2 -left-1 bg-yellow-400 border-2 border-white rounded-full w-3 h-3 animate-pulse shadow-md" title="Upcoming Event"></div>
+        <div class="absolute -top-2 -left-1 bg-yellow-400 border-2 border-white rounded-full w-3 h-3 animate-pulse shadow-xs" title="Upcoming Event"></div>
       ` : ''}
 
       <!-- Selection ring -->
@@ -105,7 +105,7 @@ export const createUserLocationMarker = (): string => {
       <div class="absolute w-6 h-6 bg-blue-400 rounded-full opacity-20"></div>
 
       <!-- Main dot -->
-      <div class="w-4 h-4 bg-blue-600 border-2 border-white rounded-full shadow-lg">
+      <div class="w-4 h-4 bg-blue-600 border-2 border-white rounded-full shadow-xs">
         <div class="w-1.5 h-1.5 bg-white rounded-full absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
       </div>
     </div>

@@ -232,18 +232,18 @@ export const ModerationDashboard: React.FC = () => {
   if (loading) {
     return (
       <div className="p-6 space-y-6">
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-lg shadow-xs p-6">
           <Skeleton className="h-8 w-64 mb-4" />
           <Skeleton className="h-6 w-96" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[1, 2, 3].map(i => (
-            <div key={i} className="bg-white rounded-lg shadow-md p-6">
+            <div key={i} className="bg-white rounded-lg shadow-xs p-6">
               <Skeleton className="h-6 w-32" />
             </div>
           ))}
         </div>
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-lg shadow-xs p-6">
           <Skeleton className="h-10 w-full mb-4" />
           <div className="space-y-4">
             {[1, 2, 3].map(i => (
@@ -271,7 +271,7 @@ export const ModerationDashboard: React.FC = () => {
   return (
     <div className="p-4 md:p-6 space-y-6">
       {/* Header */}
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-white rounded-lg shadow-xs p-6">
         <h1 className="text-2xl font-bold text-gray-800 mb-2">
           {COPY.admin.moderationDashboard.title}
         </h1>
@@ -283,7 +283,7 @@ export const ModerationDashboard: React.FC = () => {
       {/* Stats Cards */}
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-lg shadow-xs p-6">
             <div className="flex items-center gap-3 mb-2">
               <MessageSquare size={24} className="text-purple-500" />
               <h3 className="font-semibold text-gray-800">Reviews</h3>
@@ -294,7 +294,7 @@ export const ModerationDashboard: React.FC = () => {
             </p>
           </div>
 
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-lg shadow-xs p-6">
             <div className="flex items-center gap-3 mb-2">
               <ImageIcon size={24} className="text-blue-500" />
               <h3 className="font-semibold text-gray-800">Photos</h3>
@@ -305,7 +305,7 @@ export const ModerationDashboard: React.FC = () => {
             </p>
           </div>
 
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-lg shadow-xs p-6">
             <div className="flex items-center gap-3 mb-2">
               <FileText size={24} className="text-green-500" />
               <h3 className="font-semibold text-gray-800">Comments</h3>
@@ -319,7 +319,7 @@ export const ModerationDashboard: React.FC = () => {
       )}
 
       {/* Tabs */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      <div className="bg-white rounded-lg shadow-xs overflow-hidden">
         <div className="flex border-b border-gray-200 overflow-x-auto">
           {tabs.map(tab => (
             <button

@@ -70,7 +70,7 @@ export const StorePage: React.FC = () => {
       <ContentContainer maxWidth="lg">
         <div className="px-4 py-8">
           {/* Featured Banner */}
-          <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-lg p-6 text-white mb-8">
+          <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-xs p-6 text-white mb-8">
             <div className="flex items-center gap-2 mb-2">
               <TrendingUp size={20} />
               <span className="text-sm font-semibold">Limited Time</span>
@@ -91,9 +91,9 @@ export const StorePage: React.FC = () => {
               {products.map((product) => (
                 <div
                   key={product.id}
-                  className={`bg-white rounded-2xl shadow-md border-2 ${
+                  className={`bg-white rounded-2xl shadow-xs border-2 ${
                     product.featured ? 'border-green-400' : 'border-green-100'
-                  } overflow-hidden hover:shadow-lg transition`}
+                  } overflow-hidden hover:shadow-xs transition`}
                 >
                   {product.featured && (
                     <div className="bg-gradient-to-r from-green-500 to-green-600 text-white px-3 py-1 flex items-center gap-1 text-xs font-semibold">
@@ -113,7 +113,7 @@ export const StorePage: React.FC = () => {
                     <p className="text-sm text-gray-600 mb-3 line-clamp-2">{product.description}</p>
                     <div className="flex items-center justify-between">
                       <span className="text-2xl font-bold text-green-600">{product.price}</span>
-                      <button className="bg-gradient-to-r from-green-600 to-green-500 text-white px-4 py-2 rounded-lg font-semibold hover:from-green-700 hover:to-green-600 transition shadow-md flex items-center gap-2">
+                      <button className="bg-gradient-to-r from-green-600 to-green-500 text-white px-4 py-2 rounded-lg font-semibold hover:from-green-700 hover:to-green-600 transition shadow-xs flex items-center gap-2">
                         <ShoppingBag size={16} />
                         Add
                       </button>
@@ -126,17 +126,17 @@ export const StorePage: React.FC = () => {
 
           {/* Info Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">
-            <div className="bg-white rounded-xl shadow-md border-2 border-green-100 p-4 text-center">
+            <div className="bg-white rounded-xl shadow-xs border-2 border-green-100 p-4 text-center">
               <div className="text-3xl mb-2">🚚</div>
               <h4 className="font-semibold text-gray-800 mb-1">Free Shipping</h4>
               <p className="text-sm text-gray-600">On orders over $50</p>
             </div>
-            <div className="bg-white rounded-xl shadow-md border-2 border-green-100 p-4 text-center">
+            <div className="bg-white rounded-xl shadow-xs border-2 border-green-100 p-4 text-center">
               <div className="text-3xl mb-2">🔄</div>
               <h4 className="font-semibold text-gray-800 mb-1">Easy Returns</h4>
               <p className="text-sm text-gray-600">30-day return policy</p>
             </div>
-            <div className="bg-white rounded-xl shadow-md border-2 border-green-100 p-4 text-center">
+            <div className="bg-white rounded-xl shadow-xs border-2 border-green-100 p-4 text-center">
               <div className="text-3xl mb-2">🎁</div>
               <h4 className="font-semibold text-gray-800 mb-1">Gift Wrapping</h4>
               <p className="text-sm text-gray-600">Available at checkout</p>

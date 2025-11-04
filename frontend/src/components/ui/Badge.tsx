@@ -30,7 +30,7 @@ export const ScoreBadge: React.FC<ScoreBadgeProps> = ({
         text-white
         rounded-full
         font-bold
-        shadow-md
+        shadow-xs
         flex items-center justify-center
         ${sizeStyles[size]}
         ${className}

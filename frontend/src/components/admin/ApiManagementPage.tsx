@@ -15,7 +15,7 @@ export const ApiManagementPage: React.FC = () => {
         </div>
 
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-xs p-4 md:p-6 mb-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <h1 className="text-xl md:text-2xl font-bold text-green-800 mb-2 flex items-center gap-2">
@@ -36,7 +36,7 @@ export const ApiManagementPage: React.FC = () => {
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="bg-white rounded-lg shadow-md p-4">
+          <div className="bg-white rounded-lg shadow-xs p-4">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                 <Key size={20} className="text-blue-600" />
@@ -48,7 +48,7 @@ export const ApiManagementPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-md p-4">
+          <div className="bg-white rounded-lg shadow-xs p-4">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
                 <Activity size={20} className="text-green-600" />
@@ -60,7 +60,7 @@ export const ApiManagementPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-md p-4">
+          <div className="bg-white rounded-lg shadow-xs p-4">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
                 <Code size={20} className="text-purple-600" />
@@ -81,7 +81,7 @@ export const ApiManagementPage: React.FC = () => {
             { name: 'Development Key', created: '2024-01-15', lastUsed: '1 day ago', status: 'active' },
             { name: 'Testing Key', created: '2024-02-01', lastUsed: 'Never', status: 'inactive' },
           ].map((key, i) => (
-            <div key={i} className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition">
+            <div key={i} className="bg-white rounded-lg shadow-xs p-4 hover:shadow-xs transition">
               <div className="flex flex-col gap-4">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                   <div className="flex-1">

@@ -88,7 +88,7 @@ export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
           {isLoading && sortedEvents.length === 0 ? (
             <ListSkeleton count={3} />
           ) : sortedEvents.length === 0 ? (
-            <div className="bg-white rounded-2xl shadow-md border-2 border-green-100 p-8 text-center">
+            <div className="bg-white rounded-2xl shadow-xs border-2 border-green-100 p-8 text-center">
               <Calendar size={48} className="mx-auto text-gray-300 mb-3" />
               <p className="text-gray-500 text-lg font-medium">No upcoming events</p>
               <p className="text-gray-400 text-sm mt-2">Check back soon for matcha community gatherings!</p>
@@ -97,7 +97,7 @@ export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
             sortedEvents.map((event) => (
             <article
               key={event.id}
-              className={`bg-white rounded-2xl shadow-md border-2 ${
+              className={`bg-white rounded-2xl shadow-xs border-2 ${
                 event.featured ? 'border-green-400' : 'border-green-100'
               } overflow-hidden`}
             >
@@ -119,7 +119,7 @@ export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
                     onClick={() => trackEventClick(event.id)}
                     className={`w-16 h-16 bg-gradient-to-br ${
                       event.featured ? 'from-green-500 to-green-700' : 'from-green-400 to-green-600'
-                    } rounded-xl flex items-center justify-center text-4xl flex-shrink-0 shadow-md hover:scale-105 transition-transform`}
+                    } rounded-xl flex items-center justify-center text-4xl flex-shrink-0 shadow-xs hover:scale-105 transition-transform`}
                     title={COPY.events.viewOnInstagram}
                   >
                     🍵
@@ -165,7 +165,7 @@ export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
                     trackEventClick(event.id)
                     handleViewEventDetails(event)
                   }}
-                  className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-green-600 text-white py-2.5 rounded-xl font-semibold hover:from-green-600 hover:to-green-700 transition-all shadow-md hover:shadow-lg"
+                  className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-green-600 text-white py-2.5 rounded-xl font-semibold hover:from-green-600 hover:to-green-700 transition-all shadow-xs hover:shadow-xs"
                 >
                   {COPY.events.viewDetails}
                 </button>
@@ -174,7 +174,7 @@ export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
                 {event.cafeId && (
                   <button
                     onClick={() => handleViewCafe(event.cafeId!)}
-                    className="w-full flex items-center justify-center gap-2 bg-white border-2 border-green-500 text-green-700 py-2.5 rounded-xl font-semibold hover:bg-green-50 transition-all shadow-md hover:shadow-lg"
+                    className="w-full flex items-center justify-center gap-2 bg-white border-2 border-green-500 text-green-700 py-2.5 rounded-xl font-semibold hover:bg-green-50 transition-all shadow-xs hover:shadow-xs"
                   >
                     <Navigation size={16} />
                     {COPY.events.viewCafe}
@@ -211,7 +211,7 @@ export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
               ) : loadingPastEvents ? (
                 <ListSkeleton count={3} />
               ) : pastEvents.length === 0 ? (
-                <div className="bg-white rounded-2xl shadow-md border-2 border-gray-200 p-8 text-center">
+                <div className="bg-white rounded-2xl shadow-xs border-2 border-gray-200 p-8 text-center">
                   <Calendar size={48} className="mx-auto text-gray-300 mb-3" />
                   <p className="text-gray-500 text-lg font-medium">No past events</p>
                   <p className="text-gray-400 text-sm mt-2">Past events will appear here</p>
@@ -226,7 +226,7 @@ export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
                     {pastEvents.map((event) => (
                       <article
                         key={event.id}
-                        className="bg-white rounded-2xl shadow-md border-2 border-gray-200 overflow-hidden"
+                        className="bg-white rounded-2xl shadow-xs border-2 border-gray-200 overflow-hidden"
                       >
                         <div className="p-4">
                           <div className="flex items-start gap-4">
@@ -237,7 +237,7 @@ export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={() => trackEventClick(event.id)}
-                                className="w-16 h-16 bg-gradient-to-br from-gray-400 to-gray-500 rounded-xl flex items-center justify-center text-4xl flex-shrink-0 shadow-md hover:scale-105 transition-transform"
+                                className="w-16 h-16 bg-gradient-to-br from-gray-400 to-gray-500 rounded-xl flex items-center justify-center text-4xl flex-shrink-0 shadow-xs hover:scale-105 transition-transform"
                                 title={COPY.events.viewOnInstagram}
                               >
                                 🍵
@@ -282,7 +282,7 @@ export const EventsView: React.FC<EventsViewProps> = ({ eventItems }) => {
                                 trackEventClick(event.id)
                                 handleViewEventDetails(event)
                               }}
-                              className="w-full flex items-center justify-center gap-2 bg-gray-200 text-gray-700 py-2.5 rounded-xl font-semibold hover:bg-gray-300 transition-all shadow-md"
+                              className="w-full flex items-center justify-center gap-2 bg-gray-200 text-gray-700 py-2.5 rounded-xl font-semibold hover:bg-gray-300 transition-all shadow-xs"
                             >
                               {COPY.events.viewDetails}
                             </button>

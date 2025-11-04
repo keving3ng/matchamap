@@ -66,7 +66,7 @@ export const FollowerList: React.FC<FollowerListProps> = ({
     : COPY.social.followingTitle(username)
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-2xl w-full max-w-md max-h-[80vh] flex flex-col">
         {/* Header */}
         <div className="p-4 border-b border-gray-200 flex items-center justify-between">

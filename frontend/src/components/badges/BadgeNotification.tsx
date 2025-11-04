@@ -59,7 +59,7 @@ export const BadgeNotification: React.FC<BadgeNotificationProps> = ({
       {/* Backdrop */}
       <div 
         className={`
-          fixed inset-0 bg-black bg-opacity-50 z-50
+          fixed inset-0 bg-black/50 z-50
           transition-opacity duration-300
           ${isVisible ? 'opacity-100' : 'opacity-0'}
         `}
@@ -74,7 +74,7 @@ export const BadgeNotification: React.FC<BadgeNotificationProps> = ({
       `}>
         <div 
           className="
-            bg-white rounded-2xl shadow-xl 
+            bg-white rounded-2xl shadow-xs 
             max-w-md w-full p-6 
             text-center space-y-6
             transform transition-all duration-300
@@ -102,7 +102,7 @@ export const BadgeNotification: React.FC<BadgeNotificationProps> = ({
                 rounded-full 
                 flex items-center justify-center 
                 text-4xl
-                shadow-lg shadow-green-200
+                shadow-xs shadow-green-200
                 border-4 border-white
                 animate-pulse
               ">
@@ -236,10 +236,10 @@ export const BadgeToast: React.FC<BadgeToastProps> = ({
     `}>
       <div 
         className="
-          bg-white rounded-lg shadow-lg border border-gray-200
+          bg-white rounded-lg shadow-xs border border-gray-200
           p-4 max-w-sm
-          cursor-pointer hover:shadow-xl
-          transition-shadow duration-200
+          cursor-pointer hover:shadow-xs
+          transition-shadow-xs duration-200
         "
         onClick={onClick}
       >

@@ -193,7 +193,7 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    @apply bg-matcha-400 rounded-sm;
+    @apply bg-matcha-400 rounded-xs;
   }
 
   &::-webkit-scrollbar-thumb:hover {
@@ -252,7 +252,7 @@
   }
 
   .leaflet-popup-content-wrapper {
-    @apply rounded-lg shadow-lg;
+    @apply rounded-lg shadow;
   }
 
   .leaflet-popup-content {

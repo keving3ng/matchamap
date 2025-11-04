@@ -66,7 +66,7 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
         absolute inset-x-4 top-4
         bg-white
         rounded-xl
-        shadow-xl
+        shadow-xs
         p-4
         z-[9999]
         border

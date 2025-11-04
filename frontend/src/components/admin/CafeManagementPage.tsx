@@ -115,7 +115,7 @@ export const CafeManagementPage: React.FC = () => {
         
         {isTooltipOpen && (
           <div
-            className={`absolute left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-sm shadow-xl ${getTooltipPosition()}`}
+            className={`absolute left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-sm shadow-xs ${getTooltipPosition()}`}
             style={{
               zIndex: zIndex.modal,
               borderRadius: borderRadius.lg,
@@ -206,7 +206,7 @@ export const CafeManagementPage: React.FC = () => {
       <div className="max-w-6xl mx-auto">
 
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-xs p-4 md:p-6 mb-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
             <div>
               <h1 className="text-xl md:text-2xl font-bold text-green-800 mb-2 flex items-center gap-2">
@@ -265,7 +265,7 @@ export const CafeManagementPage: React.FC = () => {
 
         {/* Empty State */}
         {!isLoading && filteredCafes.length === 0 && (
-          <div className="bg-white rounded-lg shadow-md p-12 text-center">
+          <div className="bg-white rounded-lg shadow-xs p-12 text-center">
             <Coffee size={48} className="mx-auto mb-4 text-gray-400" />
             <h3 className="text-lg font-semibold text-gray-800 mb-2">No cafes found</h3>
             <p className="text-gray-600 mb-4">
@@ -289,7 +289,7 @@ export const CafeManagementPage: React.FC = () => {
         {!isLoading && filteredCafes.length > 0 && (
           <div className="space-y-3">
             {filteredCafes.map((cafe) => (
-              <div key={cafe.id} className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition">
+              <div key={cafe.id} className="bg-white rounded-lg shadow-xs p-4 hover:shadow-xs transition">
                 <div className="flex flex-col md:flex-row md:items-center gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">

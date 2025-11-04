@@ -46,7 +46,7 @@ export const ContactPage: React.FC = () => {
             </div>
           ) : (
             /* Contact Form */
-            <div className="bg-white rounded-2xl shadow-md border-2 border-green-100 p-6">
+            <div className="bg-white rounded-2xl shadow-xs border-2 border-green-100 p-6">
               <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Name Field */}
                 <div>
@@ -129,7 +129,7 @@ export const ContactPage: React.FC = () => {
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-green-600 transition shadow-md flex items-center justify-center gap-2"
+                  className="w-full bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-green-600 transition shadow-xs flex items-center justify-center gap-2"
                 >
                   <Send size={20} />
                   Send Message
@@ -140,14 +140,14 @@ export const ContactPage: React.FC = () => {
 
           {/* Contact Info */}
           <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="bg-white rounded-xl shadow-md border-2 border-green-100 p-4 text-center">
+            <div className="bg-white rounded-xl shadow-xs border-2 border-green-100 p-4 text-center">
               <Mail size={24} className="text-green-600 mx-auto mb-2" />
               <h4 className="font-semibold text-gray-800 mb-1">Email</h4>
               <a href="mailto:hello@matchamap.com" className="text-sm text-green-600 hover:underline">
                 hello@matchamap.com
               </a>
             </div>
-            <div className="bg-white rounded-xl shadow-md border-2 border-green-100 p-4 text-center">
+            <div className="bg-white rounded-xl shadow-xs border-2 border-green-100 p-4 text-center">
               <svg className="w-6 h-6 text-green-600 mx-auto mb-2" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
               </svg>

@@ -110,7 +110,7 @@ export const UserManagementPage: React.FC = () => {
     <div className="p-4 md:p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-xs p-4 md:p-6 mb-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
             <div>
               <h1 className="text-xl md:text-2xl font-bold text-green-800 mb-2 flex items-center gap-2">
@@ -188,7 +188,7 @@ export const UserManagementPage: React.FC = () => {
         {/* Stats */}
         {stats && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white rounded-lg shadow-md p-4">
+            <div className="bg-white rounded-lg shadow-xs p-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                   <Users size={20} className="text-blue-600" />
@@ -200,7 +200,7 @@ export const UserManagementPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-md p-4">
+            <div className="bg-white rounded-lg shadow-xs p-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
                   <Shield size={20} className="text-red-600" />
@@ -212,7 +212,7 @@ export const UserManagementPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-md p-4">
+            <div className="bg-white rounded-lg shadow-xs p-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
                   <CheckCircle size={20} className="text-green-600" />
@@ -224,7 +224,7 @@ export const UserManagementPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-md p-4">
+            <div className="bg-white rounded-lg shadow-xs p-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
                   <Mail size={20} className="text-purple-600" />
@@ -240,7 +240,7 @@ export const UserManagementPage: React.FC = () => {
 
         {/* Loading State */}
         {loading && (
-          <div className="bg-white rounded-lg shadow-md p-8 text-center">
+          <div className="bg-white rounded-lg shadow-xs p-8 text-center">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
             <p className="mt-2 text-gray-600">{COPY.common.loading}</p>
           </div>
@@ -257,12 +257,12 @@ export const UserManagementPage: React.FC = () => {
         {!loading && !error && (
           <div className="space-y-3">
             {users.length === 0 ? (
-              <div className="bg-white rounded-lg shadow-md p-8 text-center">
+              <div className="bg-white rounded-lg shadow-xs p-8 text-center">
                 <p className="text-gray-600">No users found</p>
               </div>
             ) : (
               users.map((user) => (
-                <div key={user.id} className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition">
+                <div key={user.id} className="bg-white rounded-lg shadow-xs p-4 hover:shadow-xs transition">
                   <div className="flex flex-col md:flex-row md:items-center gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
@@ -339,7 +339,7 @@ export const UserManagementPage: React.FC = () => {
                               />
 
                               {/* Menu */}
-                              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
+                              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xs border border-gray-200 py-1 z-20">
                                 {/* Promote/Demote */}
                                 <button
                                   onClick={() => handleUpdateRole(user.id, user.role === 'admin' ? 'user' : 'admin')}

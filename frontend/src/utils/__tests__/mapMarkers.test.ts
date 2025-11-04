@@ -90,7 +90,7 @@ describe('mapMarkers', () => {
       expect(html).toContain('min-w-[2rem]') // Minimum width
       
       // Shadow and visual effects
-      expect(html).toContain('shadow') // Drop shadow
+      expect(html).toContain('shadow-xs') // Drop shadow-xs
       expect(html).toContain('transition-all') // Smooth transitions
     })
   })
@@ -102,7 +102,7 @@ describe('mapMarkers', () => {
       expect(html).toContain('bg-blue-600') // Main dot color
       expect(html).toContain('bg-blue-400') // Background ring
       expect(html).toContain('border-2 border-white') // White border
-      expect(html).toContain('shadow-lg') // Drop shadow
+      expect(html).toContain('shadow-xs') // Drop shadow-xs
     })
 
     it('should include required elements', () => {
@@ -120,7 +120,7 @@ describe('mapMarkers', () => {
       expect(html).toContain('relative') // Relative positioning for stacking
       expect(html).toContain('absolute') // Absolute positioning for rings
       expect(html).toContain('border-2 border-white') // White border
-      expect(html).toContain('shadow-lg') // Drop shadow
+      expect(html).toContain('shadow-xs') // Drop shadow-xs
       expect(html).toContain('opacity-20') // Background ring opacity
     })
   })

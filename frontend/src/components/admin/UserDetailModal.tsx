@@ -43,7 +43,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, onClos
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[10000] p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="bg-white rounded-2xl shadow-xs max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="bg-gradient-to-r from-green-600 to-green-500 text-white p-6 flex items-center justify-between">
           <h2 className="text-2xl font-bold">User Details</h2>

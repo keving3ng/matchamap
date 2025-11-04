@@ -14,7 +14,7 @@ export const AboutPage: React.FC = () => {
       <ContentContainer maxWidth="md">
         <div className="px-4 py-8 space-y-6">
           {/* Hero Section */}
-          <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 rounded-2xl shadow-lg p-8 text-white text-center">
+          <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 rounded-2xl shadow-xs p-8 text-white text-center">
             <div className="w-20 h-20 bg-white/20 backdrop-blur rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-5xl">🍵</span>
             </div>
@@ -25,7 +25,7 @@ export const AboutPage: React.FC = () => {
           </div>
 
           {/* Mission Statement */}
-          <div className="bg-white rounded-2xl shadow-md border-2 border-green-100 p-6">
+          <div className="bg-white rounded-2xl shadow-xs border-2 border-green-100 p-6">
             <h3 className="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
               <Heart size={24} className="text-green-600" />
               Our Mission
@@ -42,7 +42,7 @@ export const AboutPage: React.FC = () => {
           </div>
 
           {/* Rating System */}
-          <div className="bg-white rounded-2xl shadow-md border-2 border-green-100 p-6">
+          <div className="bg-white rounded-2xl shadow-xs border-2 border-green-100 p-6">
             <h3 className="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
               <Star size={24} className="text-green-600" />
               Our Rating System
@@ -88,7 +88,7 @@ export const AboutPage: React.FC = () => {
           </div>
 
           {/* What We Evaluate */}
-          <div className="bg-white rounded-2xl shadow-md border-2 border-green-100 p-6">
+          <div className="bg-white rounded-2xl shadow-xs border-2 border-green-100 p-6">
             <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
               <Coffee size={24} className="text-green-600" />
               What We Evaluate
@@ -114,10 +114,10 @@ export const AboutPage: React.FC = () => {
           </div>
 
           {/* About the Reviewer */}
-          <div className="bg-white rounded-2xl shadow-md border-2 border-green-100 p-6">
+          <div className="bg-white rounded-2xl shadow-xs border-2 border-green-100 p-6">
             <h3 className="text-xl font-bold text-gray-800 mb-3">About the Reviewer</h3>
             <div className="flex items-start gap-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-matcha-500 to-matcha-600 rounded-full flex items-center justify-center text-3xl flex-shrink-0 shadow-md">
+              <div className="w-16 h-16 bg-gradient-to-br from-matcha-500 to-matcha-600 rounded-full flex items-center justify-center text-3xl flex-shrink-0 shadow-xs">
                 👤
               </div>
               <div>
@@ -135,7 +135,7 @@ export const AboutPage: React.FC = () => {
           </div>
 
           {/* Coverage Area */}
-          <div className="bg-white rounded-2xl shadow-md border-2 border-green-100 p-6">
+          <div className="bg-white rounded-2xl shadow-xs border-2 border-green-100 p-6">
             <h3 className="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
               <MapPin size={24} className="text-green-600" />
               Coverage Area
