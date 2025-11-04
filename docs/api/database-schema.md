@@ -1,6 +1,6 @@
 # Database Schema Reference
 
-**Last Updated:** 2025-11-02
+**Last Updated:** 2025-11-04
 
 This document provides a comprehensive reference for the MatchaMap database schema. The database uses Cloudflare D1 (SQLite) with Drizzle ORM.
 
@@ -29,6 +29,9 @@ This document provides a comprehensive reference for the MatchaMap database sche
   - [user_badges](#user_badges)
 - [Social Features](#social-features)
   - [user_follows](#user_follows)
+  - [user_lists](#user_lists) ⭐ NEW
+  - [user_list_items](#user_list_items) ⭐ NEW
+  - [cafe_suggestions](#cafe_suggestions) ⭐ NEW
 - [Admin](#admin)
   - [admin_audit_log](#admin_audit_log)
 - [Relationships](#relationships)
@@ -497,6 +500,96 @@ User following/follower relationships.
 
 ---
 
+### user_lists ⭐ NEW
+
+Custom cafe lists created by users.
+
+| Column | Type | Nullable | Default | Description |
+|--------|------|----------|---------|-------------|
+| `id` | INTEGER | No | AUTO | Primary key |
+| `user_id` | INTEGER | No | - | Foreign key to users.id (CASCADE DELETE) - List owner |
+| `name` | TEXT | No | - | List name (max 100 chars) |
+| `description` | TEXT | Yes | NULL | List description (max 500 chars) |
+| `is_public` | INTEGER (BOOLEAN) | Yes | false | Public visibility |
+| `created_at` | TEXT | Yes | CURRENT_TIMESTAMP | Creation timestamp |
+| `updated_at` | TEXT | Yes | CURRENT_TIMESTAMP | Last update timestamp |
+
+**Indexes:**
+- `user_lists_user_id_idx` on `user_id`
+- `user_lists_is_public_idx` on `is_public`
+
+**Business Rules:**
+- Users can create multiple lists
+- Lists can be private (visible only to owner) or public
+- Deleting a list cascades to all list items
+
+---
+
+### user_list_items ⭐ NEW
+
+Cafes added to user lists.
+
+| Column | Type | Nullable | Default | Description |
+|--------|------|----------|---------|-------------|
+| `id` | INTEGER | No | AUTO | Primary key |
+| `list_id` | INTEGER | No | - | Foreign key to user_lists.id (CASCADE DELETE) |
+| `cafe_id` | INTEGER | No | - | Foreign key to cafes.id (CASCADE DELETE) |
+| `notes` | TEXT | Yes | NULL | User notes about this cafe (max 500 chars) |
+| `created_at` | TEXT | Yes | CURRENT_TIMESTAMP | Date added to list |
+
+**Indexes:**
+- `user_list_items_list_id_idx` on `list_id`
+- `user_list_items_cafe_id_idx` on `cafe_id`
+
+**Unique Constraints:**
+- `(list_id, cafe_id)` - One instance of each cafe per list
+
+**Business Rules:**
+- Each cafe can only appear once per list
+- Notes are optional and specific to the list entry
+- Deleting a list or cafe removes associated list items
+
+---
+
+### cafe_suggestions ⭐ NEW
+
+User-submitted suggestions for new cafes to add to MatchaMap.
+
+| Column | Type | Nullable | Default | Description |
+|--------|------|----------|---------|-------------|
+| `id` | INTEGER | No | AUTO | Primary key |
+| `user_id` | INTEGER | No | - | Foreign key to users.id (CASCADE DELETE) - Submitter |
+| `name` | TEXT | No | - | Suggested cafe name (max 200 chars) |
+| `address` | TEXT | No | - | Full address (max 300 chars) |
+| `city` | TEXT | No | - | City key (toronto, montreal, etc.) |
+| `neighborhood` | TEXT | Yes | NULL | Neighborhood name (max 100 chars) |
+| `description` | TEXT | Yes | NULL | User description (max 1000 chars) |
+| `google_maps_url` | TEXT | Yes | NULL | Google Maps link |
+| `instagram` | TEXT | Yes | NULL | Instagram handle |
+| `website` | TEXT | Yes | NULL | Cafe website URL |
+| `status` | TEXT | Yes | 'pending' | Moderation status: 'pending', 'approved', 'rejected' |
+| `cafe_id` | INTEGER | Yes | NULL | Foreign key to cafes.id if approved and created |
+| `admin_notes` | TEXT | Yes | NULL | Admin notes on decision (max 500 chars) |
+| `moderated_by` | INTEGER | Yes | NULL | Foreign key to users.id (admin who moderated) |
+| `moderated_at` | TEXT | Yes | NULL | Moderation timestamp |
+| `created_at` | TEXT | Yes | CURRENT_TIMESTAMP | Submission timestamp |
+| `updated_at` | TEXT | Yes | CURRENT_TIMESTAMP | Last update timestamp |
+
+**Indexes:**
+- `cafe_suggestions_user_id_idx` on `user_id`
+- `cafe_suggestions_status_idx` on `status`
+- `cafe_suggestions_city_idx` on `city`
+- `cafe_suggestions_created_at_idx` on `created_at`
+- `cafe_suggestions_status_created_idx` on `(status, created_at)` - For moderation queue
+
+**Business Rules:**
+- Users can submit multiple suggestions
+- Status workflow: pending → approved/rejected
+- When approved, admin can link to newly created cafe via `cafe_id`
+- Moderation metadata tracks who approved/rejected and when
+
+---
+
 ## Admin
 
 ### admin_audit_log
@@ -541,6 +634,9 @@ users (1) ──── (1) user_profiles
   ├── (1) ──── (many) user_favorites ──── (many) cafes
   ├── (1) ──── (many) user_badges
   ├── (follower) ──── (many) user_follows ──── (following)
+  ├── (1) ──── (many) user_lists ⭐
+  │     └── (1) ──── (many) user_list_items ──── (many) cafes ⭐
+  ├── (1) ──── (many) cafe_suggestions [──── (optional) cafes] ⭐
   └── (1) ──── (many) admin_audit_log
 
 cafes (1) ──── (many) drinks
@@ -549,7 +645,9 @@ cafes (1) ──── (many) drinks
   ├── (1) ──── (many) user_reviews
   ├── (1) ──── (many) review_photos
   ├── (1) ──── (many) user_checkins
-  └── (1) ──── (many) user_favorites
+  ├── (1) ──── (many) user_favorites
+  ├── (1) ──── (many) user_list_items ⭐
+  └── (1) ──── (optional many) cafe_suggestions (if approved) ⭐
 
 user_reviews (1) ──── (many) review_photos
   │
@@ -559,6 +657,8 @@ user_reviews (1) ──── (many) review_photos
       └── (1) ──── (many) review_comment_likes
 
 review_comments (parent) ──── (many) review_comments (self-reference)
+
+user_lists (1) ──── (many) user_list_items ⭐
 ```
 
 ---
@@ -588,9 +688,11 @@ Database migrations are managed via Drizzle and stored in `backend/drizzle/migra
 - `0015_drop_legacy_feed_items.sql` - Clean up old feed system
 - `0016_enhance_user_profiles.sql` - Enhanced profile fields
 - `0017_add_user_badges.sql` - Badges and achievements
-- `0018_add_user_follows.sql` - Social following system
+- `0018_add_user_follows.sql` - Social following system ⭐
 - `0018_add_review_comments.sql` - Review comments
 - `0018_add_waitlist_fraud_detection.sql` - Waitlist fraud detection
+- `0019_add_cafe_suggestions.sql` - Cafe suggestions system ⭐ NEW
+- `0019_add_user_lists.sql` - Custom user lists system ⭐ NEW
 
 ---
 

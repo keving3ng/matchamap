@@ -1,6 +1,6 @@
 # API Reference
 
-**Last Updated:** 2025-11-02
+**Last Updated:** 2025-11-04
 **Base URL:** `https://api.matchamap.app` (production) | `http://localhost:8787` (local)
 
 This document provides a comprehensive reference for all MatchaMap API endpoints.
@@ -21,10 +21,13 @@ This document provides a comprehensive reference for all MatchaMap API endpoints
 - [Favorites](#favorites)
 - [Passport/Check-ins](#passportcheck-ins)
 - [Badges](#badges)
+- [Lists](#lists) ⭐ NEW
+- [Cafe Suggestions](#cafe-suggestions) ⭐ NEW
 - [Following](#following)
-- [Leaderboards](#leaderboards)
+- [Leaderboards](#leaderboards) ⭐ UPDATED
 - [Waitlist](#waitlist)
 - [Admin](#admin)
+  - [Content Moderation](#content-moderation) ⭐ NEW
 - [Health](#health)
 
 ---
@@ -1254,13 +1257,448 @@ Get progress towards unearned badges.
 
 ---
 
+## Lists
+
+### Get My Lists
+
+Get the authenticated user's custom cafe lists.
+
+**Endpoint:** `GET /api/lists/me`
+
+**Authentication:** Required
+
+**Response (200):**
+```json
+{
+  "lists": [
+    {
+      "id": 1,
+      "userId": 1,
+      "name": "Must-Try Matcha Spots",
+      "description": "My favorite cafes for authentic matcha",
+      "isPublic": true,
+      "itemCount": 5,
+      "createdAt": "2025-10-01T10:00:00Z",
+      "updatedAt": "2025-11-01T14:30:00Z"
+    }
+  ]
+}
+```
+
+---
+
+### Create List
+
+Create a new custom list.
+
+**Endpoint:** `POST /api/lists`
+
+**Authentication:** Required
+
+**Request Body:**
+```json
+{
+  "name": "Weekend Favorites",
+  "description": "Best cafes for weekend visits",
+  "isPublic": true
+}
+```
+
+**Validation:**
+- `name`: Required, max 100 characters
+- `description`: Optional, max 500 characters
+- `isPublic`: Optional, defaults to false
+
+**Response (201):**
+```json
+{
+  "message": "List created successfully",
+  "list": {
+    "id": 2,
+    "userId": 1,
+    "name": "Weekend Favorites",
+    "description": "Best cafes for weekend visits",
+    "isPublic": true,
+    "itemCount": 0,
+    "createdAt": "2025-11-04T10:00:00Z",
+    "updatedAt": "2025-11-04T10:00:00Z"
+  }
+}
+```
+
+---
+
+### Get List by ID
+
+Get a specific list with all its items.
+
+**Endpoint:** `GET /api/lists/:id`
+
+**Authentication:** Optional (required for private lists)
+
+**Response (200):**
+```json
+{
+  "list": {
+    "id": 1,
+    "userId": 1,
+    "name": "Must-Try Matcha Spots",
+    "description": "My favorite cafes for authentic matcha",
+    "isPublic": true,
+    "createdAt": "2025-10-01T10:00:00Z",
+    "updatedAt": "2025-11-01T14:30:00Z",
+    "items": [
+      {
+        "id": 1,
+        "listId": 1,
+        "cafeId": 5,
+        "notes": "Try the ceremonial grade latte",
+        "createdAt": "2025-10-01T10:15:00Z",
+        "cafe": {
+          "id": 5,
+          "name": "Matcha Cafe",
+          "slug": "matcha-cafe-toronto",
+          "city": "toronto",
+          "displayScore": 9.2,
+          "address": "123 Queen St W"
+        }
+      }
+    ]
+  }
+}
+```
+
+**Errors:**
+- 403: List is private and you're not the owner
+- 404: List not found
+
+---
+
+### Update List
+
+Update list name, description, or privacy setting.
+
+**Endpoint:** `PUT /api/lists/:id`
+
+**Authentication:** Required (must be list owner)
+
+**Request Body:**
+```json
+{
+  "name": "Updated List Name",
+  "description": "Updated description",
+  "isPublic": false
+}
+```
+
+**Response (200):**
+```json
+{
+  "message": "List updated successfully",
+  "list": { /* updated list object */ }
+}
+```
+
+**Errors:**
+- 403: Not the list owner
+- 404: List not found
+
+---
+
+### Delete List
+
+Delete a list and all its items.
+
+**Endpoint:** `DELETE /api/lists/:id`
+
+**Authentication:** Required (must be list owner)
+
+**Response (200):**
+```json
+{
+  "message": "List deleted successfully"
+}
+```
+
+**Note:** Deletion cascades to all list items.
+
+---
+
+### Add Cafe to List
+
+Add a cafe to a list.
+
+**Endpoint:** `POST /api/lists/:id/items`
+
+**Authentication:** Required (must be list owner)
+
+**Request Body:**
+```json
+{
+  "cafeId": 5,
+  "notes": "Try the ceremonial grade latte"
+}
+```
+
+**Validation:**
+- `cafeId`: Required, must exist
+- `notes`: Optional, max 500 characters
+
+**Response (201):**
+```json
+{
+  "message": "Cafe added to list successfully",
+  "item": {
+    "id": 1,
+    "listId": 1,
+    "cafeId": 5,
+    "notes": "Try the ceremonial grade latte",
+    "createdAt": "2025-11-04T10:30:00Z"
+  }
+}
+```
+
+**Errors:**
+- 400: Cafe not found
+- 403: Not the list owner
+- 409: Cafe already in list
+
+---
+
+### Remove Cafe from List
+
+Remove a cafe from a list.
+
+**Endpoint:** `DELETE /api/lists/:id/items/:cafeId`
+
+**Authentication:** Required (must be list owner)
+
+**Response (200):**
+```json
+{
+  "message": "Cafe removed from list successfully"
+}
+```
+
+**Errors:**
+- 403: Not the list owner
+- 404: Cafe not in list
+
+---
+
+## Cafe Suggestions
+
+### Submit Cafe Suggestion
+
+Submit a suggestion for a new cafe to be added to MatchaMap.
+
+**Endpoint:** `POST /api/cafe-suggestions`
+
+**Authentication:** Required
+
+**Request Body:**
+```json
+{
+  "name": "Hidden Gem Matcha Bar",
+  "address": "789 College St, Toronto, ON M6G 1C5",
+  "city": "toronto",
+  "neighborhood": "Little Italy",
+  "description": "Cozy spot with amazing ceremonial grade matcha",
+  "googleMapsUrl": "https://maps.google.com/...",
+  "instagram": "@hiddengemmatcha",
+  "website": "https://hiddengemmatcha.com"
+}
+```
+
+**Validation:**
+- `name`: Required, max 200 characters
+- `address`: Required, max 300 characters
+- `city`: Required, must be valid city key
+- `neighborhood`: Optional, max 100 characters
+- `description`: Optional, max 1000 characters
+- `googleMapsUrl`, `instagram`, `website`: Optional URLs
+
+**Response (201):**
+```json
+{
+  "message": "Cafe suggestion submitted successfully",
+  "suggestion": {
+    "id": 1,
+    "userId": 1,
+    "name": "Hidden Gem Matcha Bar",
+    "address": "789 College St, Toronto, ON M6G 1C5",
+    "city": "toronto",
+    "neighborhood": "Little Italy",
+    "description": "Cozy spot with amazing ceremonial grade matcha",
+    "googleMapsUrl": "https://maps.google.com/...",
+    "instagram": "@hiddengemmatcha",
+    "website": "https://hiddengemmatcha.com",
+    "status": "pending",
+    "cafeId": null,
+    "adminNotes": null,
+    "moderatedBy": null,
+    "moderatedAt": null,
+    "createdAt": "2025-11-04T10:00:00Z",
+    "updatedAt": "2025-11-04T10:00:00Z"
+  }
+}
+```
+
+---
+
+### Get My Suggestions
+
+Get all cafe suggestions submitted by the authenticated user.
+
+**Endpoint:** `GET /api/users/me/suggestions`
+
+**Authentication:** Required
+
+**Response (200):**
+```json
+{
+  "suggestions": [
+    {
+      "id": 1,
+      "name": "Hidden Gem Matcha Bar",
+      "address": "789 College St, Toronto, ON M6G 1C5",
+      "city": "toronto",
+      "status": "pending",
+      "createdAt": "2025-11-04T10:00:00Z",
+      "updatedAt": "2025-11-04T10:00:00Z"
+    }
+  ]
+}
+```
+
+**Status Values:**
+- `pending`: Awaiting admin review
+- `approved`: Approved and added as cafe
+- `rejected`: Rejected by admin
+
+---
+
+### Get Pending Suggestions (Admin)
+
+Get all pending cafe suggestions for review.
+
+**Endpoint:** `GET /api/admin/cafe-suggestions`
+
+**Authentication:** Required (admin role)
+
+**Query Parameters:**
+- `status` (optional): Filter by status (pending, approved, rejected) - default: pending
+- `city` (optional): Filter by city
+- `limit`, `offset`: Pagination
+
+**Response (200):**
+```json
+{
+  "suggestions": [
+    {
+      "id": 1,
+      "userId": 1,
+      "name": "Hidden Gem Matcha Bar",
+      "address": "789 College St, Toronto, ON M6G 1C5",
+      "city": "toronto",
+      "neighborhood": "Little Italy",
+      "description": "Cozy spot with amazing ceremonial grade matcha",
+      "googleMapsUrl": "https://maps.google.com/...",
+      "instagram": "@hiddengemmatcha",
+      "website": "https://hiddengemmatcha.com",
+      "status": "pending",
+      "user": {
+        "id": 1,
+        "username": "matcha_lover",
+        "email": "user@example.com"
+      },
+      "createdAt": "2025-11-04T10:00:00Z"
+    }
+  ],
+  "total": 15
+}
+```
+
+---
+
+### Approve Suggestion (Admin)
+
+Approve a cafe suggestion and optionally link to a cafe.
+
+**Endpoint:** `PUT /api/admin/cafe-suggestions/:id/approve`
+
+**Authentication:** Required (admin role)
+
+**Request Body:**
+```json
+{
+  "cafeId": 42,
+  "adminNotes": "Added as new cafe - great suggestion!"
+}
+```
+
+**Validation:**
+- `cafeId`: Optional - ID of cafe created from suggestion
+- `adminNotes`: Optional, max 500 characters
+
+**Response (200):**
+```json
+{
+  "message": "Suggestion approved successfully",
+  "suggestion": {
+    "id": 1,
+    "status": "approved",
+    "cafeId": 42,
+    "adminNotes": "Added as new cafe - great suggestion!",
+    "moderatedBy": 2,
+    "moderatedAt": "2025-11-04T11:00:00Z"
+  }
+}
+```
+
+---
+
+### Reject Suggestion (Admin)
+
+Reject a cafe suggestion with explanation.
+
+**Endpoint:** `PUT /api/admin/cafe-suggestions/:id/reject`
+
+**Authentication:** Required (admin role)
+
+**Request Body:**
+```json
+{
+  "adminNotes": "Cafe already exists in database"
+}
+```
+
+**Validation:**
+- `adminNotes`: Optional, max 500 characters
+
+**Response (200):**
+```json
+{
+  "message": "Suggestion rejected successfully",
+  "suggestion": {
+    "id": 1,
+    "status": "rejected",
+    "adminNotes": "Cafe already exists in database",
+    "moderatedBy": 2,
+    "moderatedAt": "2025-11-04T11:00:00Z"
+  }
+}
+```
+
+---
+
 ## Following
 
 ### Get Followers
 
 Get a user's followers.
 
-**Endpoint:** `GET /api/following/followers/:userId`
+**Endpoint:** `GET /api/users/:username/followers`
 
 **Authentication:** None (if profile is public)
 
@@ -1286,20 +1724,24 @@ Get a user's followers.
 
 Follow another user.
 
-**Endpoint:** `POST /api/following/follow/:userId`
+**Endpoint:** `POST /api/users/:username/follow`
 
 **Authentication:** Required
+
+**Path Parameters:**
+- `username` - Username of user to follow
 
 **Response (200):**
 ```json
 {
   "success": true,
-  "message": "User followed successfully"
+  "message": "Successfully followed user"
 }
 ```
 
 **Errors:**
 - 400: Cannot follow yourself
+- 404: User not found
 - 409: Already following user
 
 ---
@@ -1308,15 +1750,76 @@ Follow another user.
 
 Unfollow a user.
 
-**Endpoint:** `POST /api/following/unfollow/:userId`
+**Endpoint:** `DELETE /api/users/:username/follow`
 
 **Authentication:** Required
+
+**Path Parameters:**
+- `username` - Username of user to unfollow
 
 **Response (200):**
 ```json
 {
   "success": true,
-  "message": "User unfollowed successfully"
+  "message": "Successfully unfollowed user"
+}
+```
+
+**Errors:**
+- 404: User not found or not following
+
+---
+
+### Get Following List
+
+Get list of users that a user is following.
+
+**Endpoint:** `GET /api/users/:username/following`
+
+**Authentication:** None (if profile is public)
+
+**Path Parameters:**
+- `username` - Username of user
+
+**Response (200):**
+```json
+{
+  "following": [
+    {
+      "id": 3,
+      "username": "cafe_expert",
+      "displayName": "Cafe Expert",
+      "avatarUrl": "...",
+      "bio": "Matcha enthusiast",
+      "followedAt": "2025-04-10T10:00:00Z"
+    }
+  ],
+  "total": 32
+}
+```
+
+**Errors:**
+- 403: Profile is private
+- 404: User not found
+
+---
+
+### Get Follow Status
+
+Check if current user follows a target user.
+
+**Endpoint:** `GET /api/users/:username/follow-status`
+
+**Authentication:** Required
+
+**Path Parameters:**
+- `username` - Username of target user
+
+**Response (200):**
+```json
+{
+  "isFollowing": true,
+  "followedAt": "2025-04-10T10:00:00Z"
 }
 ```
 
@@ -1324,17 +1827,19 @@ Unfollow a user.
 
 ## Leaderboards
 
-### Get Check-ins Leaderboard
+### Get Passport Leaderboard
 
-Get top users by check-in count.
+Get top users by check-in count (most cafes visited).
 
-**Endpoint:** `GET /api/leaderboards/checkins`
+**Endpoint:** `GET /api/leaderboard/passport`
 
 **Authentication:** None
 
 **Query Parameters:**
-- `period` (optional) - Time period (all, month, week) - default: all
-- `limit` (optional) - Number of results (default: 10, max: 50)
+- `period` (optional) - Time period: `all` (default) or `monthly`
+- `city` (optional) - Filter by city (toronto, montreal, etc.)
+- `limit` (optional) - Number of results (default: 50, max: 100)
+- `offset` (optional) - Pagination offset (default: 0)
 
 **Response (200):**
 ```json
@@ -1346,14 +1851,150 @@ Get top users by check-in count.
       "username": "matcha_lover",
       "displayName": "Matcha Lover",
       "avatarUrl": "...",
-      "checkinCount": 45,
-      "passportCompletion": 100
+      "totalCheckins": 45,
+      "passportCompletion": 100.0
+    },
+    {
+      "rank": 2,
+      "userId": 2,
+      "username": "cafe_explorer",
+      "displayName": "Cafe Explorer",
+      "avatarUrl": "...",
+      "totalCheckins": 38,
+      "passportCompletion": 84.4
     }
   ],
   "period": "all",
-  "generatedAt": "2025-11-02T12:00:00Z"
+  "city": null,
+  "total": 150
 }
 ```
+
+**Cache:** 5 minutes (Cache-Control: public, max-age=300)
+
+**Notes:**
+- Only includes users with public profiles
+- Rankings are ordered by totalCheckins DESC
+
+---
+
+### Get Reviewer Leaderboard
+
+Get top users by review count and quality.
+
+**Endpoint:** `GET /api/leaderboard/reviewers`
+
+**Authentication:** None
+
+**Query Parameters:**
+- `period` (optional) - Time period: `all` (default) or `monthly`
+- `city` (optional) - Filter by city
+- `limit` (optional) - Number of results (default: 50, max: 100)
+- `offset` (optional) - Pagination offset (default: 0)
+
+**Response (200):**
+```json
+{
+  "leaderboard": [
+    {
+      "rank": 1,
+      "userId": 1,
+      "username": "matcha_lover",
+      "displayName": "Matcha Lover",
+      "avatarUrl": "...",
+      "totalReviews": 28,
+      "reputationScore": 950,
+      "totalPhotos": 42
+    }
+  ],
+  "period": "all",
+  "city": null,
+  "total": 120
+}
+```
+
+**Ranking Logic:**
+- Primary: totalReviews DESC
+- Secondary: reputationScore DESC
+
+**Cache:** 5 minutes
+
+---
+
+### Get Contributor Leaderboard
+
+Get top users by total contributions (reviews + photos + favorites).
+
+**Endpoint:** `GET /api/leaderboard/contributors`
+
+**Authentication:** None
+
+**Query Parameters:**
+- `period` (optional) - Time period: `all` (default) or `monthly`
+- `city` (optional) - Filter by city
+- `limit` (optional) - Number of results (default: 50, max: 100)
+- `offset` (optional) - Pagination offset (default: 0)
+
+**Response (200):**
+```json
+{
+  "leaderboard": [
+    {
+      "rank": 1,
+      "userId": 1,
+      "username": "matcha_lover",
+      "displayName": "Matcha Lover",
+      "avatarUrl": "...",
+      "totalReviews": 28,
+      "totalPhotos": 42,
+      "totalFavorites": 15,
+      "contributionScore": 85
+    }
+  ],
+  "period": "all",
+  "city": null,
+  "total": 200
+}
+```
+
+**Contribution Score:** `totalReviews + totalPhotos + totalFavorites`
+
+**Ranking Logic:** contributionScore DESC
+
+**Cache:** 5 minutes
+
+---
+
+### Get User Rank
+
+Get authenticated user's rank on leaderboards.
+
+**Endpoint:** `GET /api/leaderboard/rank`
+
+**Authentication:** Required
+
+**Query Parameters:**
+- `type` (required) - Leaderboard type: `passport`, `reviewers`, or `contributors`
+- `period` (optional) - Time period: `all` (default) or `monthly`
+- `city` (optional) - Filter by city
+
+**Response (200):**
+```json
+{
+  "rank": 15,
+  "type": "passport",
+  "period": "all",
+  "city": null,
+  "stats": {
+    "totalCheckins": 12,
+    "passportCompletion": 26.7
+  }
+}
+```
+
+**Errors:**
+- 400: Invalid leaderboard type
+- 404: User not ranked (private profile or no activity)
 
 ---
 
@@ -1498,6 +2139,218 @@ Get waitlist statistics.
   }
 }
 ```
+
+---
+
+### Content Moderation
+
+#### Get Moderation Queue (Admin)
+
+Get all pending content awaiting moderation (photos, reviews, comments).
+
+**Endpoint:** `GET /api/admin/moderation/queue`
+
+**Authentication:** Required (admin role)
+
+**Response (200):**
+```json
+{
+  "photos": [
+    {
+      "id": 1,
+      "userId": 5,
+      "cafeId": 10,
+      "imageUrl": "https://photos.matchamap.app/reviews/abc123.jpg",
+      "moderationStatus": "pending",
+      "createdAt": "2025-11-04T09:00:00Z",
+      "user": {
+        "id": 5,
+        "username": "matcha_lover",
+        "email": "user@example.com"
+      },
+      "cafe": {
+        "id": 10,
+        "name": "Matcha Cafe",
+        "city": "toronto"
+      }
+    }
+  ],
+  "reviews": [
+    {
+      "id": 2,
+      "userId": 3,
+      "cafeId": 8,
+      "overallRating": 9.0,
+      "title": "Amazing matcha!",
+      "content": "The best matcha latte I've ever had...",
+      "moderationStatus": "pending",
+      "createdAt": "2025-11-04T10:00:00Z",
+      "user": {
+        "id": 3,
+        "username": "cafe_explorer"
+      },
+      "cafe": {
+        "id": 8,
+        "name": "Tokyo Matcha"
+      }
+    }
+  ],
+  "comments": [
+    {
+      "id": 3,
+      "userId": 7,
+      "reviewId": 5,
+      "content": "Great review! Thanks for sharing.",
+      "moderationStatus": "pending",
+      "createdAt": "2025-11-04T11:00:00Z",
+      "user": {
+        "id": 7,
+        "username": "matcha_fan"
+      }
+    }
+  ],
+  "stats": {
+    "totalPending": 28,
+    "pendingPhotos": 12,
+    "pendingReviews": 10,
+    "pendingComments": 6
+  }
+}
+```
+
+**Notes:**
+- Returns up to 50 pending items per content type
+- Items ordered by createdAt DESC (oldest first)
+- Includes associated user and cafe information for context
+
+---
+
+#### Bulk Moderate Content (Admin)
+
+Approve or reject multiple content items in a single operation.
+
+**Endpoint:** `POST /api/admin/moderation/bulk`
+
+**Authentication:** Required (admin role)
+
+**Request Body:**
+```json
+{
+  "action": "approve",
+  "items": [
+    {
+      "type": "photo",
+      "id": 1
+    },
+    {
+      "type": "review",
+      "id": 2
+    },
+    {
+      "type": "comment",
+      "id": 3
+    }
+  ],
+  "notes": "Content looks good"
+}
+```
+
+**Validation:**
+- `action`: Required - `approve` or `reject`
+- `items`: Required array with at least 1 item, max 50 items
+- `items[].type`: Required - `photo`, `review`, or `comment`
+- `items[].id`: Required - ID of the content item
+- `notes`: Optional, max 500 characters
+
+**Response (200):**
+```json
+{
+  "message": "Bulk moderation completed",
+  "results": {
+    "successful": 3,
+    "failed": 0,
+    "errors": []
+  },
+  "moderation": {
+    "action": "approve",
+    "itemsProcessed": 3,
+    "moderatedBy": 2,
+    "moderatedAt": "2025-11-04T12:00:00Z"
+  }
+}
+```
+
+**Error Handling:**
+- Individual item failures don't stop the batch
+- Failed items returned in `errors` array with reason
+- HTTP 200 returned even if some items fail
+- HTTP 400 only if request validation fails
+
+**Example Error Response (Partial Failure):**
+```json
+{
+  "message": "Bulk moderation completed with errors",
+  "results": {
+    "successful": 2,
+    "failed": 1,
+    "errors": [
+      {
+        "type": "photo",
+        "id": 999,
+        "error": "Photo not found"
+      }
+    ]
+  }
+}
+```
+
+---
+
+#### Get Moderation Statistics (Admin)
+
+Get moderation statistics across all content types.
+
+**Endpoint:** `GET /api/admin/moderation/stats`
+
+**Authentication:** Required (admin role)
+
+**Response (200):**
+```json
+{
+  "photos": {
+    "pending": 12,
+    "approved": 450,
+    "rejected": 23,
+    "total": 485
+  },
+  "reviews": {
+    "pending": 10,
+    "approved": 320,
+    "rejected": 15,
+    "flagged": 5,
+    "total": 350
+  },
+  "comments": {
+    "pending": 6,
+    "approved": 890,
+    "rejected": 8,
+    "flagged": 2,
+    "total": 906
+  },
+  "totals": {
+    "pending": 28,
+    "approved": 1660,
+    "rejected": 46,
+    "flagged": 7,
+    "total": 1741
+  }
+}
+```
+
+**Notes:**
+- Provides counts per content type and aggregated totals
+- `flagged` status only applies to reviews and comments
+- Updates in real-time (no caching)
 
 ---
 
