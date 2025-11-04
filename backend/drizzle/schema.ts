@@ -504,6 +504,38 @@ export const userListItems = sqliteTable('user_list_items', {
   uniqueListCafe: unique().on(table.listId, table.cafeId),
 }));
 
+// Notifications table (Phase 2F - Notification System)
+export const notifications = sqliteTable('notifications', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+
+  // Notification type and actor
+  type: text('type', {
+    enum: ['follower', 'comment', 'helpful', 'badge', 'comment_like']
+  }).notNull(),
+  actorId: integer('actor_id').references(() => users.id, { onDelete: 'cascade' }),
+
+  // Resource information
+  resourceType: text('resource_type', {
+    enum: ['review', 'comment', 'badge', 'user']
+  }),
+  resourceId: integer('resource_id'),
+
+  // Notification content
+  message: text('message').notNull(),
+
+  // Read status
+  isRead: integer('is_read', { mode: 'boolean' }).default(false),
+
+  // Timestamps
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+  userIdIdx: index('notifications_user_id_idx').on(table.userId),
+  isReadIdx: index('notifications_is_read_idx').on(table.isRead),
+  createdAtIdx: index('notifications_created_at_idx').on(table.createdAt),
+  userReadIdx: index('notifications_user_read_idx').on(table.userId, table.isRead),
+}));
+
 // Type exports for use in the application
 export type Cafe = typeof cafes.$inferSelect;
 export type NewCafe = typeof cafes.$inferInsert;
@@ -545,3 +577,5 @@ export type UserList = typeof userLists.$inferSelect;
 export type NewUserList = typeof userLists.$inferInsert;
 export type UserListItem = typeof userListItems.$inferSelect;
 export type NewUserListItem = typeof userListItems.$inferInsert;
+export type Notification = typeof notifications.$inferSelect;
+export type NewNotification = typeof notifications.$inferInsert;

@@ -1,13 +1,13 @@
 import { IRequest } from 'itty-router';
 import { eq, and, sql, desc, asc, isNull } from 'drizzle-orm';
 import { Env } from '../types';
-import { 
-  getDb, 
-  reviewComments, 
-  reviewCommentLikes, 
-  userReviews, 
-  users, 
-  userProfiles 
+import {
+  getDb,
+  reviewComments,
+  reviewCommentLikes,
+  userReviews,
+  users,
+  userProfiles
 } from '../db';
 import {
   jsonResponse,
@@ -22,6 +22,7 @@ import {
   validateUpdateComment,
   validateGetCommentsQuery,
 } from '../validators/comment';
+import { createCommentNotification, createCommentLikeNotification } from '../utils/notifications';
 
 /**
  * GET /api/reviews/:id/comments - Get comments for a review
@@ -260,6 +261,16 @@ export async function createComment(request: AuthenticatedRequest, env: Env): Pr
       },
     };
 
+    // Create notification for review owner
+    await createCommentNotification(
+      env,
+      review.userId,
+      request.user.userId,
+      request.user.username,
+      reviewId,
+      newComment.id
+    );
+
     return jsonResponse({ comment: processedComment }, HTTP_STATUS.CREATED, request as Request, env);
   } catch (error) {
     console.error('Error creating comment:', error);
@@ -419,6 +430,15 @@ export async function likeComment(request: AuthenticatedRequest, env: Env): Prom
           .update(reviewComments)
           .set({ likeCount: sql`${reviewComments.likeCount} + 1` })
           .where(eq(reviewComments.id, commentId));
+
+        // Create notification for comment owner
+        await createCommentLikeNotification(
+          env,
+          comment.userId,
+          request.user.userId,
+          request.user.username,
+          commentId
+        );
       } catch (error: any) {
         // Handle race condition - if unique constraint fails, another user voted
         if (error.message?.includes('UNIQUE constraint failed') || error.message?.includes('SQLITE_CONSTRAINT')) {

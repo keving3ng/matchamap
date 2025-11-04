@@ -4,6 +4,7 @@ import { ArrowLeft, Menu, Instagram, LogIn, LogOut, Mail, Info, ShoppingBag, Sli
 import { useFeatureToggle } from '../hooks/useFeatureToggle'
 import { useAuthStore } from '../stores/authStore'
 import { COPY } from '../constants/copy'
+import { NotificationBell } from './notifications/NotificationBell'
 
 export const Header: React.FC = () => {
   const navigate = useNavigate()
@@ -108,6 +109,10 @@ export const Header: React.FC = () => {
               />
             </svg>
           </a>
+
+          {/* Notification Bell (only show if user is authenticated) */}
+          {isAuthenticated && <NotificationBell />}
+
           {isMenuEnabled && (
             <div ref={menuRef} className="relative">
               <button

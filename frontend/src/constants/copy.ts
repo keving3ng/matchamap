@@ -1145,6 +1145,37 @@ export const COPY = {
     moderatedBy: (username: string) => `Moderated by ${username}`,
     suggestedBy: (username: string) => `Suggested by ${username}`,
   },
+
+  // Notifications
+  notifications: {
+    title: 'Notifications',
+    empty: 'No notifications yet',
+    emptyDescription: 'When someone follows you, comments on your reviews, or finds them helpful, you\'ll see it here',
+    markAllRead: 'Mark all as read',
+    markAsRead: 'Mark as read',
+    viewAll: 'View All',
+    newNotification: 'New notification',
+    unreadCount: (count: number) => count === 1 ? '1 unread' : `${count} unread`,
+
+    // Notification types
+    follower: (username: string) => `${username} started following you`,
+    comment: (username: string) => `${username} commented on your review`,
+    commentLike: (username: string) => `${username} liked your comment`,
+    helpful: (username: string) => `${username} found your review helpful`,
+    badge: (badgeName: string) => `You earned the "${badgeName}" badge!`,
+
+    // Time formatting
+    justNow: 'Just now',
+    minutesAgo: (minutes: number) => minutes === 1 ? '1 minute ago' : `${minutes} minutes ago`,
+    hoursAgo: (hours: number) => hours === 1 ? '1 hour ago' : `${hours} hours ago`,
+    daysAgo: (days: number) => days === 1 ? '1 day ago' : `${days} days ago`,
+    weeksAgo: (weeks: number) => weeks === 1 ? '1 week ago' : `${weeks} weeks ago`,
+
+    // Actions
+    loading: 'Loading notifications...',
+    error: 'Failed to load notifications',
+    retry: 'Retry',
+  },
 } as const
 
 // Type helper to ensure type safety when accessing COPY

@@ -1354,6 +1354,48 @@ export const recommendationsAPI = {
 }
 
 /**
+ * Notifications API
+ */
+const notificationsAPI = {
+  /**
+   * Get notifications for authenticated user
+   */
+  async getAll(params?: { limit?: number; offset?: number; unreadOnly?: boolean }): Promise<NotificationsResponse> {
+    const queryParams = buildQueryParams({
+      limit: params?.limit,
+      offset: params?.offset,
+      unreadOnly: params?.unreadOnly,
+    })
+    return fetchAPI(`/users/me/notifications${queryParams}`)
+  },
+
+  /**
+   * Get unread notification count
+   */
+  async getUnreadCount(): Promise<{ unreadCount: number }> {
+    return fetchAPI('/notifications/unread-count')
+  },
+
+  /**
+   * Mark a notification as read
+   */
+  async markAsRead(id: number): Promise<{ success: boolean }> {
+    return fetchAPI(`/notifications/${id}/read`, {
+      method: 'PUT',
+    })
+  },
+
+  /**
+   * Mark all notifications as read
+   */
+  async markAllRead(): Promise<{ success: boolean }> {
+    return fetchAPI('/notifications/mark-all-read', {
+      method: 'PUT',
+    })
+  },
+}
+
+/**
  * Export all APIs
  */
 export const api = {
@@ -1378,6 +1420,7 @@ export const api = {
   leaderboard: leaderboardAPI,
   suggestions: suggestionsAPI,
   recommendations: recommendationsAPI,
+  notifications: notificationsAPI,
 }
 
 export default api
