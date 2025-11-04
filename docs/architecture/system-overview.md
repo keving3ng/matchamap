@@ -303,7 +303,7 @@ Developer commits to main branch
     ↓
 GitHub Actions triggers
     ↓
-Run tests: npm test (969 tests)
+Run tests: npm test (100% passing)
     ↓
 Run build: npm run build
     ↓

@@ -43,7 +43,7 @@ When ANY code file (`.ts`, `.tsx`, `.js`, `.jsx`, `.json`, etc.) is staged, the 
 ✓ No TypeScript errors found
 
 🧪 Running tests...
-✓ All 969 tests passed
+✓ All tests passed (100%)
 
 ✅ All pre-commit checks passed!
 ```
@@ -113,4 +113,4 @@ rm -rf .husky
 
 - **TypeScript**: All `.ts` and `.tsx` files in frontend, backend, and shared workspaces
 - **Tests**: All test files in `frontend/src/**/__tests__/**`
-- **Current Status**: 969/969 tests passing ✅ (see `docs/TESTING.md`)
+- **Current Status**: 100% tests passing ✅ (see `docs/TESTING.md`)
