@@ -10,7 +10,6 @@ A mobile-first, map-based guide to matcha cafes in Toronto featuring expert revi
 - **Interactive Map** - Explore cafes with location-based discovery and user geolocation
 - **List & Detail Views** - Browse cafes with sorting, filtering, and detailed information
 - **Matcha Passport** - Track your visits and build your matcha journey
-- **News Feed** - Stay updated on new cafes and community news
 - **Events** - Discover matcha-related events and tastings
 - **User Accounts** - Registration, authentication, and profile management
 - **Social Features** - Check-ins, reviews, and community engagement
@@ -18,7 +17,7 @@ A mobile-first, map-based guide to matcha cafes in Toronto featuring expert revi
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: React 19, Vite, Tailwind CSS 4.x, Zustand, Leaflet
+- **Frontend**: React 19, Vite 7, Tailwind CSS 4, Zustand 5, Leaflet
 - **Backend**: Cloudflare Workers, D1 (SQLite), Drizzle ORM
 - **Hosting**: Cloudflare Pages + Workers (edge deployment)
 - **TypeScript**: Strict mode throughout
@@ -69,7 +68,7 @@ npm run typecheck
 
 This project uses npm workspaces for monorepo management:
 
-- **`frontend/`** - React 19 application with Vite, Tailwind CSS 4.x, and Zustand
+- **`frontend/`** - React 19 application with Vite 7, Tailwind CSS 4, and Zustand 5
 - **`backend/`** - Cloudflare Workers API with D1 database and Drizzle ORM
 - **`shared/`** - Shared TypeScript types for API contracts
 

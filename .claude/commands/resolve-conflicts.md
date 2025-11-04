@@ -682,7 +682,7 @@ Continuing rebase...
 
 Validating resolution...
 Running typecheck... ✓ Pass
-Running tests... ✓ Pass (969/969)
+Running tests... ✓ Pass (100%)
 
 ✅ Merge conflicts resolved successfully!
 

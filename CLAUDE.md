@@ -4,7 +4,7 @@
 
 MatchaMap is a mobile-first web application providing a curated, map-based guide to matcha cafes in Toronto (expanding to more cities). The platform features expert reviews, ratings, location-based discovery tools, and community features with a Japanese-inspired aesthetic.
 
-**Tech Stack:** React 19 | Zustand | Vite | Tailwind CSS 4.x | Cloudflare Workers + D1 + R2 | TypeScript (strict mode)
+**Tech Stack:** React 19 | Zustand 5 | Vite 7 | Tailwind CSS 4 | Cloudflare Workers + D1 + R2 | TypeScript (strict mode)
 
 **Project Phase:** V2 Development (User Accounts + Social Features + Photo Uploads)
 
@@ -217,7 +217,6 @@ const response = await fetch(`${import.meta.env.VITE_API_URL}/api/waitlist`, {
 export const api = {
   cafes: cafeAPI,          // Cafe CRUD, import/export
   cities: citiesAPI,       // City list with cafe counts
-  feed: feedAPI,           // News feed (legacy)
   events: eventsAPI,       // Events CRUD
   health: healthAPI,       // Health check
   places: placesAPI,       // Google Places lookup
@@ -323,11 +322,11 @@ zIndex.modal             // 9999
 import { useLazyData } from '../hooks/useLazyData'
 import { useDataStore } from '../stores/dataStore'
 
-export const FeedView: React.FC<FeedViewProps> = ({ feedItems }) => {
-  const { fetchFeed, feedFetched } = useDataStore()
+export const EventsView: React.FC<EventsViewProps> = ({ events }) => {
+  const { fetchEvents, eventsFetched } = useDataStore()
 
-  // Lazy load feed items when component mounts (only if not already fetched)
-  useLazyData(fetchFeed, feedFetched)
+  // Lazy load events when component mounts (only if not already fetched)
+  useLazyData(fetchEvents, eventsFetched)
 
   return (
     // ... component JSX
@@ -336,7 +335,7 @@ export const FeedView: React.FC<FeedViewProps> = ({ feedItems }) => {
 ```
 
 **When to use:**
-- View components that fetch their own data (Feed, Events, Store, etc.)
+- View components that fetch their own data (Events, Store, etc.)
 - Data should only load when user navigates to the view
 - Data should be cached in Zustand after first fetch
 
@@ -364,7 +363,7 @@ frontend/src/stores/
 ├── visitedCafesStore.ts  # Passport/visited tracking (localStorage)
 ├── uiStore.ts            # UI state (modals, panels, bottom nav)
 ├── authStore.ts          # Authentication state (JWT tokens)
-├── dataStore.ts          # Cafes, feed, events data
+├── dataStore.ts          # Cafes, events data
 ├── cityStore.ts          # Multi-city support
 ├── cafeStore.ts          # Cafe-specific state
 └── adminStore.ts         # Admin panel state
@@ -427,7 +426,6 @@ frontend/src/
 │   ├── ListView.tsx
 │   ├── DetailView.tsx
 │   ├── PassportView.tsx
-│   ├── FeedView.tsx
 │   ├── EventsView.tsx
 │   └── __tests__/       # Component tests
 ├── hooks/               # Custom React hooks ONLY
@@ -598,7 +596,7 @@ npm run build:frontend   # Build frontend only
 npm run deploy:backend   # Deploy backend to Cloudflare
 
 # Quality checks (run before commit)
-npm test                 # Run all tests (969/969 passing ✅)
+npm test                 # Run all tests (target: 100% passing)
 npm run typecheck        # Check TypeScript types
 npm run lint             # Lint frontend code
 npm run lint:ci          # Lint with max 200 warnings (CI mode)
@@ -619,7 +617,7 @@ npm test -- --ui         # Interactive UI mode
 ```
 
 **Pre-commit checklist:**
-1. ✅ `npm test` passes (969 tests passing)
+1. ✅ `npm test` passes (100% passing required)
 2. ✅ `npm run typecheck` passes
 3. ✅ `npm run build` succeeds
 4. ✅ No console errors in browser
@@ -635,7 +633,7 @@ npm test -- --ui         # Interactive UI mode
 2. **List View** - Expandable card interface with sorting (neighborhood, rating, distance)
 3. **Location Detail Pages** - Static pages with scores, reviews, social links, navigation
 4. **Matcha Passport** - Local storage visit tracking with progress visualization
-5. **News/Blog Feed** - Updates about new cafes and changes
+5. **Events** - Community events and workshops
 6. **FAQ/About Section** - Rating rubric, about the reviewer
 
 ### V2 Features (In Progress)
@@ -700,7 +698,7 @@ const { hasUserAccounts, hasUserProfiles, hasUserSocial } = useUserFeatures()
 
 ## Testing Approach
 
-**Automated Testing**: 969/969 tests passing (100% ✅) | See `docs/TESTING.md` for comprehensive guide
+**Automated Testing**: 100% tests passing ✅ | See `docs/TESTING.md` for comprehensive guide
 
 ### Automated Tests (Vitest + Testing Library)
 
@@ -910,7 +908,6 @@ All feature flags are defined in `frontend/src/config/features.yaml` with separa
 **Current Feature Flags:**
 ```yaml
 ENABLE_PASSPORT: false (dev/prod)       # Matcha Passport
-ENABLE_FEED: false (dev/prod)           # News Feed
 ENABLE_SEARCH: true (dev/prod)          # Search functionality
 ENABLE_GEOLOCATION: true (dev/prod)     # Geolocation services
 ENABLE_ADMIN_PANEL: true (dev/prod)     # Admin panel
@@ -922,7 +919,7 @@ ENABLE_CITY_SELECTOR: true/false        # Multi-city selector
 # User Account Features (Phase 2)
 ENABLE_USER_ACCOUNTS: true (dev/prod)   # Base user system
 ENABLE_USER_PROFILES: true/false        # Public profiles
-ENABLE_USER_SOCIAL: false (dev/prod)    # Social features
+ENABLE_USER_SOCIAL: true/true           # Social features
 ENABLE_CONTACT: true/false              # Contact page
 ENABLE_ABOUT: true/false                # About page
 ENABLE_STORE: true/false                # Store page
@@ -1018,10 +1015,10 @@ Before marking any task complete, verify:
 
 ---
 
-_Last updated: 2025-10-15_
+_Last updated: 2025-11-03_
 _Project Phase: V2 Development (User Accounts + Social Features + Photo Uploads)_
-_React: 19.0 | Zustand 5.0 | Vite 5.0 | TypeScript: Strict Mode_
+_React: 19.0 | Zustand 5.0 | Vite 7.1 | Tailwind CSS 4.1 | TypeScript: Strict Mode_
 _UI Component Library: Available in `frontend/src/components/ui/`_
-_Test Suite: 969/969 passing (100% ✅) - See docs/TESTING.md_
+_Test Suite: 100% passing ✅ - See docs/TESTING.md_
 _GitHub Operations: GitHub MCP Server (mcp__github__*) - See Git Workflow section_
 _Repository Owner: keving3ng_

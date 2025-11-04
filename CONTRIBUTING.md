@@ -90,7 +90,7 @@ Thank you for your interest in contributing to MatchaMap! This guide will help y
    ```bash
    # From project root
    npm test
-   # Should see: 969/969 tests passing ✅
+   # Should see: 100% tests passing ✅
    ```
 
 ### Development Documentation
@@ -342,7 +342,7 @@ frontend/src/
 - ✅ **Store tests** for Zustand stores
 - ✅ **Integration tests** for API endpoints
 
-**Current status:** 969/969 tests passing (100%)
+**Current status:** 100% tests passing ✅
 
 ### Writing Tests
 

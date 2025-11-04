@@ -330,7 +330,7 @@ Track 4: #193 (Cleanup) | #194 (Performance) | ✅ #195 (Testing) | #196 (Docs)
 ## Notes
 
 - **Feature Flags:** All new features should be behind feature flags
-- **Testing:** Maintain 100% test pass rate (969/969 as of last run)
+- **Testing:** Maintain 100% test pass rate at all times
 - **Mobile-First:** All UI work must start at 320px
 - **Bundle Size:** Keep < 100KB per page (currently optimized)
 - **API Design:** Follow existing patterns in `frontend/src/utils/api.ts`
