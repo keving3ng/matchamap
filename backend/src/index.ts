@@ -27,6 +27,7 @@ import { getPassportLeaderboard, getReviewerLeaderboard, getContributorLeaderboa
 import { handleAdminCafeStats, handleUserActivitySummary, handleFeedStats, handleEventStats } from './routes/admin-stats';
 import { createSuggestion, getMySuggestions, getPendingSuggestions, approveSuggestion, rejectSuggestion } from './routes/suggestions';
 import { getMyLists, createList, getListById, updateList, deleteList, addListItem, removeListItem } from './routes/lists';
+import { getForYouRecommendations, getTrending, getSimilarCafes } from './routes/recommendations';
 import { requireAuth, requireAdminAuth, optionalAuth } from './middleware/auth';
 import { authRateLimit, publicRateLimit, writeRateLimit } from './middleware/rateLimit';
 import { requireHTTPS } from './middleware/httpsOnly';
@@ -160,6 +161,11 @@ router.put('/api/comments/:id', writeRateLimit(), requireAuth(), updateComment);
 router.delete('/api/comments/:id', writeRateLimit(), requireAuth(), deleteComment);
 router.post('/api/comments/:id/like', writeRateLimit(), requireAuth(), likeComment);
 router.delete('/api/comments/:id/like', writeRateLimit(), requireAuth(), unlikeComment);
+
+// Recommendation endpoints
+router.get('/api/recommendations/for-you', authRateLimit(), requireAuth(), getForYouRecommendations);
+router.get('/api/recommendations/trending', publicRateLimit(), getTrending);
+router.get('/api/recommendations/similar/:cafeId', publicRateLimit(), getSimilarCafes);
 
 // Admin API endpoints (protected by JWT authentication + rate limiting)
 router.post('/api/admin/cafes', writeRateLimit(), requireAdminAuth(), createCafe);
