@@ -12,6 +12,10 @@
 import { eq, sql, desc, and, inArray, isNull, gt, gte } from 'drizzle-orm';
 import { getDb, cafes, userReviews, userCheckins, userProfiles, drinks } from '../db';
 import type { Cafe } from '../db';
+import type { RecommendationScore, UserLocation } from '../../../shared/types';
+
+// Re-export types for use in routes
+export type { RecommendationScore, UserLocation };
 
 // Algorithm weights
 const WEIGHTS = {
@@ -27,24 +31,8 @@ const MAX_RECOMMENDATIONS = 20;
 const TRENDING_DAYS = 7; // Look at last 7 days for trending
 const SIMILAR_CAFE_LIMIT = 10;
 const COLLABORATIVE_USER_LIMIT = 50; // Max similar users to consider
-
-export interface RecommendationScore {
-  cafeId: number;
-  score: number;
-  reasons: string[];
-  components: {
-    similar: number;
-    collaborative: number;
-    preferences: number;
-    proximity: number;
-    trending: number;
-  };
-}
-
-export interface UserLocation {
-  latitude: number;
-  longitude: number;
-}
+const NEARBY_THRESHOLD_KM = 5; // Distance threshold for "nearby" cafes
+const MAX_PROXIMITY_KM = 50; // Maximum distance for proximity scoring
 
 /**
  * Calculate distance between two points using Haversine formula
@@ -116,6 +104,25 @@ async function getSimilarCafes(
       ? targetDrinks.reduce((sum, d) => sum + d.score, 0) / targetDrinks.length
       : 0;
 
+  // Batch fetch ALL drinks for all cafes to avoid N+1 queries
+  const cafeIds = allCafes.map((c) => c.id);
+  const allDrinks = cafeIds.length > 0
+    ? await db
+        .select()
+        .from(drinks)
+        .where(inArray(drinks.cafeId, cafeIds))
+        .all()
+    : [];
+
+  // Group drinks by cafe ID
+  const drinksByCafeId = new Map<number, typeof allDrinks>();
+  for (const drink of allDrinks) {
+    if (!drinksByCafeId.has(drink.cafeId)) {
+      drinksByCafeId.set(drink.cafeId, []);
+    }
+    drinksByCafeId.get(drink.cafeId)!.push(drink);
+  }
+
   // Calculate similarity scores
   for (const cafe of allCafes) {
     let similarity = 0;
@@ -134,9 +141,8 @@ async function getSimilarCafes(
       cafe.latitude,
       cafe.longitude
     );
-    if (distance < 5) {
-      // Within 5km
-      similarity += 0.2 * (1 - distance / 5);
+    if (distance < NEARBY_THRESHOLD_KM) {
+      similarity += 0.2 * (1 - distance / NEARBY_THRESHOLD_KM);
       factors++;
     }
 
@@ -156,12 +162,8 @@ async function getSimilarCafes(
       factors++;
     }
 
-    // Drink score similarity
-    const cafeDrinks = await db
-      .select()
-      .from(drinks)
-      .where(eq(drinks.cafeId, cafe.id))
-      .all();
+    // Drink score similarity (using pre-fetched drinks)
+    const cafeDrinks = drinksByCafeId.get(cafe.id) || [];
 
     if (cafeDrinks.length > 0 && targetDrinks.length > 0) {
       const cafeAvgDrinkScore =
@@ -358,9 +360,9 @@ async function getProximityScores(
       cafe.longitude
     );
 
-    // Within 50km, score inversely proportional to distance
-    if (distance <= 50) {
-      scores.set(cafe.id, 1 - distance / 50);
+    // Within MAX_PROXIMITY_KM, score inversely proportional to distance
+    if (distance <= MAX_PROXIMITY_KM) {
+      scores.set(cafe.id, 1 - distance / MAX_PROXIMITY_KM);
     }
   }
 
@@ -447,12 +449,15 @@ export async function generateRecommendations(
   const cafeIds = allCafes.map((c) => c.id).filter((id) => !visitedCafeIds.has(id));
 
   // Adjust weights based on A/B test variant
-  const weights = { ...WEIGHTS };
-  if (abTestVariant === 'B') {
-    // Variant B: Increase collaborative filtering, decrease preferences
-    weights.COLLABORATIVE_FILTERING = 0.40;
-    weights.USER_PREFERENCES = 0.15;
-  }
+  const weights = abTestVariant === 'B'
+    ? {
+        SIMILAR_CAFES: 0.20,
+        COLLABORATIVE_FILTERING: 0.40,  // Increased from 0.30
+        USER_PREFERENCES: 0.15,          // Decreased from 0.25
+        PROXIMITY: 0.15,
+        TRENDING: 0.10,
+      }
+    : WEIGHTS;
 
   // Calculate combined scores
   const recommendations: RecommendationScore[] = [];

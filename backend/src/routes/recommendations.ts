@@ -26,10 +26,10 @@ import {
 } from '../utils/recommendations';
 import { eq, isNull, inArray } from 'drizzle-orm';
 
-// Cache duration in seconds
-const CACHE_DURATION = 300; // 5 minutes for personalized recommendations
-const TRENDING_CACHE_DURATION = 600; // 10 minutes for trending
-const SIMILAR_CACHE_DURATION = 1800; // 30 minutes for similar cafes
+// Cache duration strings
+const CACHE_DURATION = 'public, max-age=300'; // 5 minutes for personalized recommendations
+const TRENDING_CACHE_DURATION = 'public, max-age=600'; // 10 minutes for trending
+const SIMILAR_CACHE_DURATION = 'public, max-age=1800'; // 30 minutes for similar cafes
 
 /**
  * GET /api/recommendations/for-you
