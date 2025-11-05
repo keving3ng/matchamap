@@ -86,7 +86,7 @@ export const DataManagement: React.FC<DataManagementProps> = ({ onImportComplete
       {/* Export/Import Buttons */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Export */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-lg shadow-xs p-6">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
               <Download size={20} className="text-blue-600" />
@@ -116,7 +116,7 @@ export const DataManagement: React.FC<DataManagementProps> = ({ onImportComplete
         </div>
 
         {/* Import */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-lg shadow-xs p-6">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
               <Upload size={20} className="text-green-600" />
@@ -155,8 +155,8 @@ export const DataManagement: React.FC<DataManagementProps> = ({ onImportComplete
 
       {/* Import Status Modal */}
       {showImportStatus && importStatus && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xs max-w-2xl w-full max-h-[80vh] overflow-y-auto">
             <div className="p-6">
               {/* Header */}
               <div className="flex items-center justify-between mb-4">

@@ -385,7 +385,7 @@ export const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ className = ''
           {leaderboardData.map((entry) => (
             <div
               key={`${entry.userId}-${entry.rank}`}
-              className="bg-white rounded-xl p-4 shadow-xs hover:shadow-md transition-shadow"
+              className="bg-white rounded-xl p-4 shadow-xs hover:shadow-xs transition-shadow-xs"
             >
               <div className="flex items-center gap-4">
                 {/* Rank */}

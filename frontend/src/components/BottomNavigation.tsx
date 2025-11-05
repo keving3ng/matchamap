@@ -28,7 +28,7 @@ export const BottomNavigation: React.FC = () => {
 
   return (
     <div
-      className="bg-white border-t-2 border-green-200 px-6 py-3 shadow-lg"
+      className="bg-white border-t-2 border-green-200 px-6 py-3 shadow-xs"
       style={{
         paddingBottom: hasAdminBanner ? 'calc(0.75rem + var(--admin-banner-height, 0px))' : '0.75rem'
       }}

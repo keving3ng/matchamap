@@ -30,14 +30,14 @@ export const AggregatedRating: React.FC<AggregatedRatingProps> = ({
   const hasUserReviews = reviewCount > 0 && userScore !== undefined
 
   return (
-    <div className={`bg-white rounded-2xl shadow-lg border-2 border-matcha-100 p-5 ${className}`}>
+    <div className={`bg-white rounded-2xl shadow-xs border-2 border-matcha-100 p-5 ${className}`}>
       <div className="flex flex-col gap-4">
         
         {/* Expert Score Section */}
         {expertScore && (
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 p-2 rounded-xl shadow-md">
+              <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 p-2 rounded-xl shadow-xs">
                 <Award size={20} className="text-white" />
               </div>
               <div>
@@ -57,7 +57,7 @@ export const AggregatedRating: React.FC<AggregatedRatingProps> = ({
         {/* Community Score Section */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-2 rounded-xl shadow-md">
+            <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-2 rounded-xl shadow-xs">
               <Users size={20} className="text-white" />
             </div>
             <div>

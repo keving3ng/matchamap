@@ -49,7 +49,7 @@ export const LoginPage: React.FC = () => {
         {/* Header */}
         <div className="text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-matcha-500 to-matcha-600 rounded-full flex items-center justify-center text-2xl shadow-md">
+            <div className="w-12 h-12 bg-gradient-to-br from-matcha-500 to-matcha-600 rounded-full flex items-center justify-center text-2xl shadow-xs">
               🍵
             </div>
             <h1 className="text-3xl font-bold text-matcha-600 font-caveat">{COPY.header.title}</h1>
@@ -68,7 +68,7 @@ export const LoginPage: React.FC = () => {
         </div>
 
         {/* Form Card */}
-        <div className="bg-white rounded-2xl shadow-lg p-8">
+        <div className="bg-white rounded-2xl shadow-xs p-8">
           {mode === 'login' ? (
             <LoginForm
               onSuccess={handleSuccess}

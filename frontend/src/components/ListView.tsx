@@ -235,7 +235,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
   return (
     <div className="flex-1 overflow-y-auto pb-24 relative">
       {/* Sort & Filter Header */}
-      <div className="bg-gradient-to-b from-white to-cream-50 border-b-2 border-matcha-200 shadow-md">
+      <div className="bg-gradient-to-b from-white to-cream-50 border-b-2 border-matcha-200 shadow-xs">
         {/* Sort & Action Buttons */}
         <div className="px-4 py-3">
           <div className="flex items-center justify-between gap-2">
@@ -244,7 +244,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortOption)}
-                className="w-full px-4 py-2.5 rounded-full text-sm font-bold bg-gradient-to-r from-matcha-600 to-matcha-500 text-white appearance-none cursor-pointer pr-8 focus:outline-hidden focus:ring-2 focus:ring-matcha-500 focus:ring-offset-2 shadow-md hover:from-matcha-700 hover:to-matcha-600 transition-all"
+                className="w-full px-4 py-2.5 rounded-full text-sm font-bold bg-gradient-to-r from-matcha-600 to-matcha-500 text-white appearance-none cursor-pointer pr-8 focus:outline-hidden focus:ring-2 focus:ring-matcha-500 focus:ring-offset-2 shadow-xs hover:from-matcha-700 hover:to-matcha-600 transition-all"
               >
                 <option value="rating">{COPY.list.sortByRating}</option>
                 <option value="distance">{COPY.list.sortByDistance}</option>
@@ -260,7 +260,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                   setShowSearch(!showSearch)
                   if (!showSearch) setShowFilters(false) // Close filters when opening search
                 }}
-                className={`p-2 sm:px-3 sm:py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all flex items-center justify-center sm:justify-start gap-1.5 relative shadow-md ${
+                className={`p-2 sm:px-3 sm:py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all flex items-center justify-center sm:justify-start gap-1.5 relative shadow-xs ${
                   hasActiveSearch || showSearch
                     ? 'bg-gradient-to-r from-matcha-600 to-matcha-500 text-white scale-105'
                     : 'bg-matcha-100 text-matcha-700 hover:bg-matcha-200'
@@ -279,7 +279,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                   setShowFilters(!showFilters)
                   if (!showFilters) setShowSearch(false) // Close search when opening filters
                 }}
-                className={`p-2 sm:px-3 sm:py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all flex items-center justify-center sm:justify-start gap-1.5 relative shadow-md ${
+                className={`p-2 sm:px-3 sm:py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all flex items-center justify-center sm:justify-start gap-1.5 relative shadow-xs ${
                   hasActiveFilters || showFilters
                     ? 'bg-gradient-to-r from-matcha-600 to-matcha-500 text-white scale-105'
                     : 'bg-matcha-100 text-matcha-700 hover:bg-matcha-200'
@@ -296,7 +296,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
               <div className="relative hidden md:block">
                 <button
                   onClick={() => setShowCityDropdown(!showCityDropdown)}
-                  className={`px-3 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all flex items-center gap-1.5 relative shadow-md ${
+                  className={`px-3 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all flex items-center gap-1.5 relative shadow-xs ${
                     filters.selectedCities.length > 0
                       ? 'bg-gradient-to-r from-matcha-600 to-matcha-500 text-white scale-105'
                       : 'bg-matcha-100 text-matcha-700 hover:bg-matcha-200'
@@ -313,7 +313,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                 {showCityDropdown && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setShowCityDropdown(false)} />
-                    <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-2xl border border-gray-200 py-2 z-50 min-w-[160px]">
+                    <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-xs border border-gray-200 py-2 z-50 min-w-[160px]">
                       <div className="px-3 py-2 border-b border-gray-200">
                         <h3 className="text-xs font-bold text-gray-500 uppercase">{COPY.list.filterByCity}</h3>
                       </div>
@@ -366,7 +366,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
               <button
                 onClick={handleLocationClick}
                 disabled={!isSupported || (error !== null && error.code === 1)}
-                className={`p-2 rounded-full transition-all relative flex items-center justify-center shadow-md ${
+                className={`p-2 rounded-full transition-all relative flex items-center justify-center shadow-xs ${
                   coordinates
                     ? 'bg-gradient-to-r from-matcha-600 to-matcha-500 text-white hover:from-matcha-700 hover:to-matcha-600 scale-105'
                     : 'bg-matcha-100 text-matcha-700 hover:bg-matcha-200'
@@ -396,7 +396,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={COPY.list.searchPlaceholder}
-                className="w-full pl-10 pr-10 py-3 bg-white border-2 border-matcha-200 rounded-xl text-sm font-medium focus:outline-hidden focus:ring-2 focus:ring-matcha-500 focus:border-matcha-500 transition-all shadow-md"
+                className="w-full pl-10 pr-10 py-3 bg-white border-2 border-matcha-200 rounded-xl text-sm font-medium focus:outline-hidden focus:ring-2 focus:ring-matcha-500 focus:border-matcha-500 transition-all shadow-xs"
                 autoFocus
               />
               {hasActiveSearch && (
@@ -423,7 +423,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                   <select
                     value={selectedDrinkType || ''}
                     onChange={(e) => setSelectedDrinkType(e.target.value || null)}
-                    className="w-full px-4 py-2.5 rounded-xl text-sm font-medium bg-white border-2 border-matcha-200 focus:outline-hidden focus:ring-2 focus:ring-matcha-500 focus:border-matcha-500 transition-all shadow-md appearance-none pr-10"
+                    className="w-full px-4 py-2.5 rounded-xl text-sm font-medium bg-white border-2 border-matcha-200 focus:outline-hidden focus:ring-2 focus:ring-matcha-500 focus:border-matcha-500 transition-all shadow-xs appearance-none pr-10"
                   >
                     <option value="">{COPY.list.allDrinks}</option>
                     {availableDrinkTypes.map(drinkType => (
@@ -445,7 +445,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                       key={rating}
                       data-testid={`admin-rating-${rating}`}
                       onClick={() => setMinRating(filters.minRating === rating ? null : rating)}
-                      className={`px-4 py-2 rounded-full text-sm font-bold transition-all shadow-md ${
+                      className={`px-4 py-2 rounded-full text-sm font-bold transition-all shadow-xs ${
                         filters.minRating === rating
                           ? 'bg-gradient-to-r from-matcha-600 to-matcha-500 text-white scale-105'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-105'
@@ -466,7 +466,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                       key={rating}
                       data-testid={`user-rating-${rating}`}
                       onClick={() => setUserMinRating(filters.userMinRating === rating ? null : rating)}
-                      className={`px-4 py-2 rounded-full text-sm font-bold transition-all shadow-md ${
+                      className={`px-4 py-2 rounded-full text-sm font-bold transition-all shadow-xs ${
                         filters.userMinRating === rating
                           ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white scale-105'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-105'
@@ -489,7 +489,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                       key={distance}
                       onClick={() => setMaxDistance(filters.maxDistance === distance ? null : distance)}
                       disabled={!coordinates}
-                      className={`px-4 py-2 rounded-full text-sm font-bold transition-all shadow-md ${
+                      className={`px-4 py-2 rounded-full text-sm font-bold transition-all shadow-xs ${
                         filters.maxDistance === distance
                           ? 'bg-gradient-to-r from-matcha-600 to-matcha-500 text-white scale-105'
                           : coordinates
@@ -508,7 +508,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                 <h4 className="text-sm font-bold text-charcoal-900 mb-3">{COPY.list.availability}</h4>
                 <button
                   onClick={() => setFilters(prev => ({ ...prev, openNow: !prev.openNow }))}
-                  className={`px-4 py-2 rounded-full text-sm font-bold transition-all shadow-md ${
+                  className={`px-4 py-2 rounded-full text-sm font-bold transition-all shadow-xs ${
                     filters.openNow
                       ? 'bg-gradient-to-r from-matcha-600 to-matcha-500 text-white scale-105'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-105'
@@ -523,7 +523,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                 <div className="pt-2">
                   <button
                     onClick={clearFilters}
-                    className="w-full px-4 py-2.5 bg-gray-100 text-gray-700 rounded-xl text-sm font-bold hover:bg-gray-200 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                    className="w-full px-4 py-2.5 bg-gray-100 text-gray-700 rounded-xl text-sm font-bold hover:bg-gray-200 transition-all shadow-xs hover:shadow-xs flex items-center justify-center gap-2"
                   >
                     <X size={16} />
                     {COPY.list.clearAllFilters}
@@ -537,7 +537,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
 
       {/* Location Permission Dialog */}
       {error && error.code === 1 && ( // PERMISSION_DENIED
-        <div className="absolute inset-x-4 top-4 bg-white rounded-xl shadow-xl p-4 z-[9999] border border-red-200 animate-slide-up">
+        <div className="absolute inset-x-4 top-4 bg-white rounded-xl shadow-xs p-4 z-[9999] border border-red-200 animate-slide-up">
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
               <MapPin size={20} className="text-red-600" />
@@ -571,7 +571,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
 
       {/* Location Loading Dialog */}
       {loading && !error && !coordinates && (
-        <div className="absolute inset-x-4 top-4 bg-white rounded-xl shadow-xl p-4 z-[9999] border border-matcha-200 animate-slide-up">
+        <div className="absolute inset-x-4 top-4 bg-white rounded-xl shadow-xs p-4 z-[9999] border border-matcha-200 animate-slide-up">
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 bg-matcha-100 rounded-full flex items-center justify-center flex-shrink-0">
               <Crosshair size={20} className="text-matcha-600" />
@@ -594,7 +594,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
 
       {/* Location Error Dialog */}
       {error && error.code !== 1 && (
-        <div className="absolute inset-x-4 top-4 bg-white rounded-xl shadow-xl p-4 z-[9999] border border-yellow-200 animate-slide-up">
+        <div className="absolute inset-x-4 top-4 bg-white rounded-xl shadow-xs p-4 z-[9999] border border-yellow-200 animate-slide-up">
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
               <Crosshair size={20} className="text-yellow-600" />
@@ -643,7 +643,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
             filteredAndSortedCafes.map((cafe) => (
             <div
               key={cafe.id}
-              className={`bg-white rounded-2xl shadow-lg border-2 overflow-hidden transition-all duration-200 hover:shadow-xl ${
+              className={`bg-white rounded-2xl shadow-xs border-2 overflow-hidden transition-all duration-200 hover:shadow-xs ${
                 expandedCard === cafe.id ? 'border-matcha-400' : 'border-matcha-100'
               }`}
             >
@@ -656,7 +656,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                 <div className="flex items-start gap-3">
                   {/* Score Badge - Large and prominent */}
                   {cafe.displayScore && (
-                    <div className="flex-shrink-0 bg-gradient-to-br from-matcha-500 to-matcha-600 text-white w-14 h-14 rounded-2xl flex items-center justify-center font-bold text-lg shadow-md group-hover:scale-105 transition-transform">
+                    <div className="flex-shrink-0 bg-gradient-to-br from-matcha-500 to-matcha-600 text-white w-14 h-14 rounded-2xl flex items-center justify-center font-bold text-lg shadow-xs group-hover:scale-105 transition-transform">
                       {cafe.displayScore.toFixed(1)}
                     </div>
                   )}
@@ -710,7 +710,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                 {/* Primary actions */}
                 <button
                   onClick={() => onViewDetails(cafe)}
-                  className="flex-1 min-w-[120px] bg-gradient-to-r from-matcha-600 to-matcha-500 text-white py-2.5 px-4 rounded-xl font-semibold hover:from-matcha-700 hover:to-matcha-600 transition-all duration-200 shadow-md hover:shadow-lg active:scale-[0.98] text-sm flex items-center justify-center gap-1.5"
+                  className="flex-1 min-w-[120px] bg-gradient-to-r from-matcha-600 to-matcha-500 text-white py-2.5 px-4 rounded-xl font-semibold hover:from-matcha-700 hover:to-matcha-600 transition-all duration-200 shadow-xs hover:shadow-xs active:scale-[0.98] text-sm flex items-center justify-center gap-1.5"
                 >
                   <span>{COPY.map.viewDetails}</span>
                   <ChevronDown size={14} className="-rotate-90" />
@@ -720,7 +720,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                   href={getMapsUrl(cafe.address || '', cafe.link)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 min-w-[120px] bg-white border-2 border-blue-300 text-blue-600 py-2.5 px-4 rounded-xl font-semibold hover:bg-blue-50 active:scale-[0.98] transition-all duration-200 shadow-md hover:shadow-lg text-sm flex items-center justify-center gap-1.5"
+                  className="flex-1 min-w-[120px] bg-white border-2 border-blue-300 text-blue-600 py-2.5 px-4 rounded-xl font-semibold hover:bg-blue-50 active:scale-[0.98] transition-all duration-200 shadow-xs hover:shadow-xs text-sm flex items-center justify-center gap-1.5"
                 >
                   <Navigation size={14} />
                   <span>Directions</span>
@@ -732,7 +732,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                     href={`https://instagram.com/${cafe.instagram.replace('@', '')}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-11 h-11 bg-gradient-to-br from-purple-500 to-pink-500 text-white rounded-xl flex items-center justify-center hover:from-purple-600 hover:to-pink-600 transition-all shadow-md hover:shadow-lg active:scale-95"
+                    className="w-11 h-11 bg-gradient-to-br from-purple-500 to-pink-500 text-white rounded-xl flex items-center justify-center hover:from-purple-600 hover:to-pink-600 transition-all shadow-xs hover:shadow-xs active:scale-95"
                     aria-label={`Follow ${cafe.name} on Instagram`}
                     title={cafe.instagram.startsWith('@') ? cafe.instagram : `@${cafe.instagram}`}
                   >
@@ -881,7 +881,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                             href={cafe.instagramPostLink}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex-1 bg-white border-2 border-purple-300 text-purple-600 py-2.5 px-3 rounded-xl font-semibold hover:bg-purple-50 active:scale-[0.98] transition-all duration-200 shadow-md hover:shadow-lg text-sm flex items-center justify-center gap-2"
+                            className="flex-1 bg-white border-2 border-purple-300 text-purple-600 py-2.5 px-3 rounded-xl font-semibold hover:bg-purple-50 active:scale-[0.98] transition-all duration-200 shadow-xs hover:shadow-xs text-sm flex items-center justify-center gap-2"
                           >
                             <Instagram size={16} />
                             <span>Instagram</span>
@@ -892,7 +892,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
                             href={cafe.tiktokPostLink}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex-1 bg-white border-2 border-gray-300 text-gray-700 py-2.5 px-3 rounded-xl font-semibold hover:bg-gray-50 active:scale-[0.98] transition-all duration-200 shadow-md hover:shadow-lg text-sm flex items-center justify-center gap-2"
+                            className="flex-1 bg-white border-2 border-gray-300 text-gray-700 py-2.5 px-3 rounded-xl font-semibold hover:bg-gray-50 active:scale-[0.98] transition-all duration-200 shadow-xs hover:shadow-xs text-sm flex items-center justify-center gap-2"
                           >
                             <TikTokIcon size={16} />
                             <span>TikTok</span>
@@ -914,7 +914,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
       <div className="fixed bottom-24 right-4 z-50 md:hidden">
         <button
           onClick={() => setShowCityDropdown(!showCityDropdown)}
-          className={`w-14 h-14 rounded-full shadow-2xl transition-all flex items-center justify-center relative ${
+          className={`w-14 h-14 rounded-full shadow-xs transition-all flex items-center justify-center relative ${
             filters.selectedCities.length > 0
               ? 'bg-gradient-to-r from-matcha-600 to-matcha-500 text-white hover:from-matcha-700 hover:to-matcha-600 scale-105'
               : 'bg-white text-gray-700 hover:bg-gray-50'
@@ -933,7 +933,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
         {showCityDropdown && (
           <>
             <div className="fixed inset-0 z-40" onClick={() => setShowCityDropdown(false)} />
-            <div className="absolute bottom-full right-0 mb-2 bg-white rounded-lg shadow-2xl border border-gray-200 py-2 z-50 min-w-[160px]">
+            <div className="absolute bottom-full right-0 mb-2 bg-white rounded-lg shadow-xs border border-gray-200 py-2 z-50 min-w-[160px]">
               <div className="px-3 py-2 border-b border-gray-200">
                 <h3 className="text-xs font-bold text-gray-500 uppercase">{COPY.list.filterByCity}</h3>
               </div>

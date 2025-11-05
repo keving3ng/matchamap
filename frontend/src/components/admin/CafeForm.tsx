@@ -162,8 +162,8 @@ export const CafeForm: React.FC<CafeFormProps> = ({ cafe, onSave, onCancel }) =>
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col my-8">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-lg shadow-xs max-w-4xl w-full max-h-[90vh] flex flex-col my-8">
         {/* Header - Fixed */}
         <div className="flex items-center justify-between p-6 border-b flex-shrink-0">
           <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">

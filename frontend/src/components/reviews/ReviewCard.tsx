@@ -91,7 +91,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = React.memo(({
   }
 
   return (
-    <div className={`bg-white rounded-2xl shadow-md border border-gray-200 p-5 hover:shadow-lg transition-shadow ${className}`}>
+    <div className={`bg-white rounded-2xl shadow-xs border border-gray-200 p-5 hover:shadow-xs transition-shadow-xs ${className}`}>
 
       {/* Header with user info and overall rating */}
       <div className="flex items-start justify-between mb-4">

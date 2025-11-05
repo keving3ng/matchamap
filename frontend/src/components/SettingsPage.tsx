@@ -18,7 +18,7 @@ export const SettingsPage: React.FC = () => {
       <ContentContainer maxWidth="md">
         <div className="px-4 py-8 space-y-6">
           {/* Account Section */}
-          <div className="bg-white rounded-2xl shadow-md border-2 border-green-100 p-6">
+          <div className="bg-white rounded-2xl shadow-xs border-2 border-green-100 p-6">
             <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
               <Settings size={20} className="text-green-600" />
               {COPY.settings.account}
@@ -36,7 +36,7 @@ export const SettingsPage: React.FC = () => {
           </div>
 
           {/* Preferences Section */}
-          <div className="bg-white rounded-2xl shadow-md border-2 border-green-100 p-6">
+          <div className="bg-white rounded-2xl shadow-xs border-2 border-green-100 p-6">
             <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
               <Palette size={20} className="text-green-600" />
               {COPY.settings.preferences}
@@ -92,7 +92,7 @@ export const SettingsPage: React.FC = () => {
           </div>
 
           {/* Data & Privacy Section */}
-          <div className="bg-white rounded-2xl shadow-md border-2 border-green-100 p-6">
+          <div className="bg-white rounded-2xl shadow-xs border-2 border-green-100 p-6">
             <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
               <Shield size={20} className="text-green-600" />
               Data & Privacy
@@ -120,7 +120,7 @@ export const SettingsPage: React.FC = () => {
           </div>
 
           {/* About Section */}
-          <div className="bg-white rounded-2xl shadow-md border-2 border-green-100 p-6">
+          <div className="bg-white rounded-2xl shadow-xs border-2 border-green-100 p-6">
             <h3 className="text-lg font-bold text-gray-800 mb-4">About</h3>
             <div className="space-y-2 text-sm text-gray-600">
               <div className="flex justify-between">
@@ -146,7 +146,7 @@ export const SettingsPage: React.FC = () => {
           </div>
 
           {/* Danger Zone */}
-          <div className="bg-red-50 rounded-2xl shadow-md border-2 border-red-200 p-6">
+          <div className="bg-red-50 rounded-2xl shadow-xs border-2 border-red-200 p-6">
             <h3 className="text-lg font-bold text-red-800 mb-4">Danger Zone</h3>
             <div className="space-y-3">
               <button className="w-full px-4 py-3 bg-white border-2 border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors duration-200 font-semibold flex items-center justify-center gap-2">

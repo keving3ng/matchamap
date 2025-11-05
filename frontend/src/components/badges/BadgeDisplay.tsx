@@ -35,7 +35,7 @@ const BadgeIcon: React.FC<BadgeIconProps> = ({ badge, size, isEarned }) => {
         flex items-center justify-center
         rounded-full
         ${isEarned 
-          ? 'bg-gradient-to-br from-green-400 to-green-600 shadow-lg shadow-green-200' 
+          ? 'bg-gradient-to-br from-green-400 to-green-600 shadow-xs shadow-green-200' 
           : 'bg-gray-200 grayscale opacity-50'
         }
         border-2 border-white

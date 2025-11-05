@@ -61,7 +61,7 @@ describe('ScoreBadge', () => {
   it('should have white text and proper styling', () => {
     render(<ScoreBadge score={8.5} />)
     const badge = screen.getByText('8.5')
-    expect(badge).toHaveClass('text-white', 'rounded-full', 'font-bold', 'shadow-md')
+    expect(badge).toHaveClass('text-white', 'rounded-full', 'font-bold', 'shadow-xs')
   })
 
   it('should apply custom className', () => {

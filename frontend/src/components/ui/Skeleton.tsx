@@ -53,7 +53,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
  */
 export const CafeCardSkeleton: React.FC = () => {
   return (
-    <div className="bg-white rounded-2xl shadow-md border-2 border-green-100 p-4 animate-pulse">
+    <div className="bg-white rounded-2xl shadow-xs border-2 border-green-100 p-4 animate-pulse">
       <div className="flex items-center justify-between mb-3">
         <div className="flex-1">
           <Skeleton variant="text" width="60%" height={24} className="mb-2" />
@@ -89,7 +89,7 @@ export const DetailPageSkeleton: React.FC = () => {
 
       <div className="px-4 -mt-6 relative z-10">
         {/* Main info card */}
-        <div className="bg-white rounded-2xl shadow-lg p-5 border-2 border-green-100 mb-4">
+        <div className="bg-white rounded-2xl shadow-xs p-5 border-2 border-green-100 mb-4">
           <div className="flex justify-between mb-3">
             <div className="flex-1">
               <Skeleton variant="text" width="70%" height={28} className="mb-2" />
@@ -101,7 +101,7 @@ export const DetailPageSkeleton: React.FC = () => {
         </div>
 
         {/* Drinks menu skeleton */}
-        <div className="bg-white rounded-xl shadow p-4 border border-green-100 space-y-3">
+        <div className="bg-white rounded-xl shadow-xs p-4 border border-green-100 space-y-3">
           <Skeleton variant="text" width="40%" height={20} className="mb-3" />
           {[1, 2, 3].map((i) => (
             <div key={i} className="flex justify-between items-center py-2">

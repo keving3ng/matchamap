@@ -21,8 +21,8 @@ export const CircleButton: React.FC<CircleButtonProps> = ({
         bg-white/95 backdrop-blur-xs
         w-12 h-12
         rounded-full
-        shadow-lg shadow-black/10
-        hover:bg-white hover:shadow-xl hover:shadow-black/15
+        shadow-xs shadow-black/10
+        hover:bg-white hover:shadow-xs hover:shadow-black/15
         active:scale-95
         transition-all duration-200 ease-out
         flex items-center justify-center

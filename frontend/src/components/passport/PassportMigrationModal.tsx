@@ -31,12 +31,12 @@ export const PassportMigrationModal: React.FC<PassportMigrationModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
       onClick={handleOverlayClick}
     >
-      <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl relative">
+      <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xs relative">
         <div className="text-center mb-6">
-          <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center text-3xl shadow-md mx-auto mb-4">
+          <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center text-3xl shadow-xs mx-auto mb-4">
             🎫
           </div>
           <h2 className="text-xl font-bold text-gray-800 mb-2">

@@ -106,7 +106,7 @@ export const CafeReviewsManagementPage: React.FC = () => {
       <div className="max-w-4xl mx-auto">
 
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-xs p-4 md:p-6 mb-6">
           <button
             onClick={() => navigate('/admin/content')}
             className="flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-4 transition"
@@ -135,7 +135,7 @@ export const CafeReviewsManagementPage: React.FC = () => {
 
         {/* Empty State */}
         {!loading && reviews.length === 0 && (
-          <div className="bg-white rounded-lg shadow-md p-12 text-center">
+          <div className="bg-white rounded-lg shadow-xs p-12 text-center">
             <MessageSquare size={48} className="mx-auto mb-4 text-gray-400" />
             <h3 className="text-lg font-semibold text-gray-800 mb-2">No reviews found</h3>
             <p className="text-gray-600">This cafe doesn&apos;t have any reviews yet</p>
@@ -155,7 +155,7 @@ export const CafeReviewsManagementPage: React.FC = () => {
                 </h2>
                 <div className="space-y-4">
                   {visibleReviews.map((review) => (
-                    <div key={review.id} className="bg-white rounded-lg shadow-md p-5">
+                    <div key={review.id} className="bg-white rounded-lg shadow-xs p-5">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-3">
                           <div className="flex items-center gap-1">
@@ -238,7 +238,7 @@ export const CafeReviewsManagementPage: React.FC = () => {
                 </h2>
                 <div className="space-y-4">
                   {hiddenReviews.map((review) => (
-                    <div key={review.id} className="bg-white rounded-lg shadow-md p-5 opacity-60 border-2 border-red-200">
+                    <div key={review.id} className="bg-white rounded-lg shadow-xs p-5 opacity-60 border-2 border-red-200">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-3">
                           <div className="flex items-center gap-1">

@@ -45,7 +45,7 @@ export const Header: React.FC = () => {
     : 'map'
 
   return (
-    <div className="bg-gradient-to-r from-matcha-600 to-matcha-500 text-white px-4 py-3 shadow-lg">
+    <div className="bg-gradient-to-r from-matcha-600 to-matcha-500 text-white px-4 py-3 shadow-xs">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           {currentView === 'detail' && (
@@ -119,7 +119,7 @@ export const Header: React.FC = () => {
 
               {/* Dropdown Menu */}
               {showMenu && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-[9999]">
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xs py-2 z-[9999]">
                   {/* Login/Logout */}
                   {isUserAccountsEnabled && (
                     isAuthenticated ? (

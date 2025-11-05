@@ -355,7 +355,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
 
       {/* Location Permission Dialog */}
       {error && error.code === 1 && ( // PERMISSION_DENIED
-        <div className="absolute inset-x-4 top-4 bg-white rounded-xl shadow-xl p-4 z-[9999] border border-red-200 animate-slide-up">
+        <div className="absolute inset-x-4 top-4 bg-white rounded-xl shadow-xs p-4 z-[9999] border border-red-200 animate-slide-up">
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
               <MapPin size={20} className="text-red-600" />
@@ -389,7 +389,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
 
       {/* Location Loading Dialog */}
       {loading && !error && !coordinates && (
-        <div className="absolute inset-x-4 top-4 bg-white rounded-xl shadow-xl p-4 z-[9999] border border-matcha-200 animate-slide-up">
+        <div className="absolute inset-x-4 top-4 bg-white rounded-xl shadow-xs p-4 z-[9999] border border-matcha-200 animate-slide-up">
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 bg-matcha-100 rounded-full flex items-center justify-center flex-shrink-0">
               <Crosshair size={20} className="text-matcha-600" />
@@ -412,7 +412,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
 
       {/* Location Error Dialog */}
       {error && error.code !== 1 && (
-        <div className="absolute inset-x-4 top-4 bg-white rounded-xl shadow-xl p-4 z-[9999] border border-yellow-200 animate-slide-up">
+        <div className="absolute inset-x-4 top-4 bg-white rounded-xl shadow-xs p-4 z-[9999] border border-yellow-200 animate-slide-up">
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
               <Crosshair size={20} className="text-yellow-600" />
@@ -449,7 +449,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
         <>
           {/* Backdrop overlay for mobile */}
           <div
-            className={`absolute inset-0 bg-black bg-opacity-20 backdrop-blur-xs z-[9998] md:hidden ${
+            className={`absolute inset-0 bg-black/20 backdrop-blur-xs z-[9998] md:hidden ${
               isClosing ? 'animate-fade-out' : 'animate-fade-in'
             }`}
             onClick={handleClosePopover}
@@ -457,7 +457,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
 
           {/* Mobile Bottom Sheet */}
           <div
-            className={`absolute bottom-4 left-4 right-4 bg-white rounded-2xl shadow-2xl p-4 z-[9999] border-2 border-green-200 map-popover md:hidden transform transition-all duration-300 ease-out max-h-[40vh] overflow-y-auto ${
+            className={`absolute bottom-4 left-4 right-4 bg-white rounded-2xl shadow-xs p-4 z-[9999] border-2 border-green-200 map-popover md:hidden transform transition-all duration-300 ease-out max-h-[40vh] overflow-y-auto ${
               isClosing ? 'animate-slide-down-out' : 'animate-slide-up'
             }`}
             onClick={(e) => e.stopPropagation()}
@@ -557,14 +557,14 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                   href={mapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 text-white py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-600 transition shadow-md flex items-center justify-center gap-2"
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 text-white py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-600 transition shadow-xs flex items-center justify-center gap-2"
                 >
                   <Navigation size={18} />
                   {COPY.map.directions}
                 </a>
                 <button
                   onClick={() => handleViewDetails(selectedCafe)}
-                  className="flex-1 bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-green-600 transition shadow-md flex items-center justify-center gap-1.5"
+                  className="flex-1 bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-green-600 transition shadow-xs flex items-center justify-center gap-1.5"
                 >
                   <span>{COPY.map.viewDetails}</span>
                   <ChevronDown size={14} className="-rotate-90" />
@@ -643,7 +643,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
 
           {/* Tablet+ Sidebar */}
           <div
-            className="absolute top-4 left-4 bottom-4 w-80 lg:w-96 xl:w-[28rem] bg-white rounded-2xl shadow-2xl p-6 z-[9999] border-2 border-green-200 map-popover hidden md:block overflow-y-auto transform transition-all duration-300 ease-out animate-slide-in-left"
+            className="absolute top-4 left-4 bottom-4 w-80 lg:w-96 xl:w-[28rem] bg-white rounded-2xl shadow-xs p-6 z-[9999] border-2 border-green-200 map-popover hidden md:block overflow-y-auto transform transition-all duration-300 ease-out animate-slide-in-left"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="space-y-4">
@@ -745,7 +745,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                   href={mapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-500 text-white py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-600 transition shadow-md flex items-center justify-center gap-2"
+                  className="w-full bg-gradient-to-r from-blue-600 to-blue-500 text-white py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-600 transition shadow-xs flex items-center justify-center gap-2"
                 >
                   <Navigation size={18} />
                   {COPY.map.getDirections}
@@ -754,7 +754,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                 {/* Primary Action: View Details */}
                 <button
                   onClick={() => handleViewDetails(selectedCafe)}
-                  className="w-full bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-green-600 transition shadow-md flex items-center justify-center gap-1.5"
+                  className="w-full bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-green-600 transition shadow-xs flex items-center justify-center gap-1.5"
                 >
                   <span>{COPY.map.viewDetails}</span>
                   <ChevronDown size={14} className="-rotate-90" />
@@ -839,7 +839,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
       {showCityDropdown && (
         <>
           <div className="fixed inset-0 z-[9997]" onClick={() => setShowCityDropdown(false)} />
-          <div className="fixed top-[4.5rem] left-4 bg-white rounded-lg shadow-2xl border border-gray-200 py-1 z-[9998] min-w-[140px]">
+          <div className="fixed top-[4.5rem] left-4 bg-white rounded-lg shadow-xs border border-gray-200 py-1 z-[9998] min-w-[140px]">
             {availableCities.map(city => (
               <button
                 key={city.key}
@@ -880,7 +880,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
       {showDrinkDropdown && (
         <>
           <div className="fixed inset-0 z-[9997]" onClick={() => setShowDrinkDropdown(false)} />
-          <div className="fixed top-[4.5rem] left-4 bg-white rounded-lg shadow-2xl border border-gray-200 py-1 z-[9998] w-[200px] max-w-[calc(100vw-2rem)] max-h-[300px] overflow-y-auto">
+          <div className="fixed top-[4.5rem] left-4 bg-white rounded-lg shadow-xs border border-gray-200 py-1 z-[9998] w-[200px] max-w-[calc(100vw-2rem)] max-h-[300px] overflow-y-auto">
             <button
               onClick={(e) => {
                 e.stopPropagation()
@@ -923,7 +923,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                 e.stopPropagation()
                 setShowCityDropdown(!showCityDropdown)
               }}
-              className="px-3 py-[2px] rounded-full text-[11px] font-bold shadow-lg transition-all flex items-center gap-0.5 bg-gradient-to-r from-matcha-600 to-matcha-500 text-white whitespace-nowrap"
+              className="px-3 py-[2px] rounded-full text-[11px] font-bold shadow-xs transition-all flex items-center gap-0.5 bg-gradient-to-r from-matcha-600 to-matcha-500 text-white whitespace-nowrap"
             >
               <Building2 size={11} />
               {CITIES[selectedCity].name}
@@ -938,7 +938,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                 e.stopPropagation()
                 setShowDrinkDropdown(!showDrinkDropdown)
               }}
-              className={`px-3 py-[2px] rounded-full text-[11px] font-bold shadow-lg transition-all flex items-center gap-0.5 whitespace-nowrap max-w-[140px] ${
+              className={`px-3 py-[2px] rounded-full text-[11px] font-bold shadow-xs transition-all flex items-center gap-0.5 whitespace-nowrap max-w-[140px] ${
                 selectedDrinkType !== null
                   ? 'bg-gradient-to-r from-matcha-600 to-matcha-500 text-white'
                   : 'bg-white text-gray-700 hover:bg-gray-50'
@@ -957,7 +957,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
             <button
               key={rating}
               onClick={() => setMinRating(minRating === rating ? null : rating)}
-              className={`px-3 py-[2px] rounded-full text-[11px] font-bold transition-all shadow-lg flex-shrink-0 whitespace-nowrap ${
+              className={`px-3 py-[2px] rounded-full text-[11px] font-bold transition-all shadow-xs flex-shrink-0 whitespace-nowrap ${
                 minRating === rating
                   ? 'bg-gradient-to-r from-matcha-600 to-matcha-500 text-white'
                   : 'bg-white text-gray-700 hover:bg-gray-50'
@@ -972,7 +972,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
             <button
               key={price}
               onClick={() => setMaxPrice(maxPrice === price ? null : price)}
-              className={`px-3 py-[2px] rounded-full text-[11px] font-bold transition-all shadow-lg flex-shrink-0 whitespace-nowrap ${
+              className={`px-3 py-[2px] rounded-full text-[11px] font-bold transition-all shadow-xs flex-shrink-0 whitespace-nowrap ${
                 maxPrice === price
                   ? 'bg-gradient-to-r from-matcha-600 to-matcha-500 text-white'
                   : 'bg-white text-gray-700 hover:bg-gray-50'
@@ -985,7 +985,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
           {/* Open Now */}
           <button
             onClick={() => setOpenNow(!openNow)}
-            className={`px-3 py-[2px] rounded-full text-[11px] font-bold transition-all shadow-lg flex-shrink-0 whitespace-nowrap ${
+            className={`px-3 py-[2px] rounded-full text-[11px] font-bold transition-all shadow-xs flex-shrink-0 whitespace-nowrap ${
               openNow
                 ? 'bg-gradient-to-r from-matcha-600 to-matcha-500 text-white'
                 : 'bg-white text-gray-700 hover:bg-gray-50'

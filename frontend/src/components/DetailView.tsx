@@ -88,7 +88,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
 
         <span className="text-8xl animate-bounce-subtle z-10">🍵</span>
         {isUserAccountsEnabled && (
-          <button className="absolute top-4 right-4 bg-white/90 backdrop-blur-xs p-3 rounded-full shadow-xl hover:bg-white hover:scale-110 transition-all duration-200 z-20">
+          <button className="absolute top-4 right-4 bg-white/90 backdrop-blur-xs p-3 rounded-full shadow-xs hover:bg-white hover:scale-110 transition-all duration-200 z-20">
             <Heart size={24} className="text-matcha-600" />
           </button>
         )}
@@ -96,7 +96,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
 
       <ContentContainer maxWidth="md" className="px-4">
         {/* Main Info Card */}
-        <div className="bg-white rounded-2xl shadow-xl -mt-8 p-6 border-2 border-matcha-200 relative z-10 animate-slide-up">
+        <div className="bg-white rounded-2xl shadow-xs -mt-8 p-6 border-2 border-matcha-200 relative z-10 animate-slide-up">
           <div className="flex justify-between items-start mb-4">
             <div className="flex-1">
               <h2 className="text-2xl font-bold text-charcoal-900 mb-1">{sanitizeText(cafe.name)}</h2>
@@ -108,7 +108,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
               )}
             </div>
             {cafe.displayScore && (
-              <div className="bg-gradient-to-br from-matcha-500 via-matcha-600 to-matcha-700 text-white px-5 py-3 rounded-2xl font-bold text-2xl shadow-lg animate-scale-in">
+              <div className="bg-gradient-to-br from-matcha-500 via-matcha-600 to-matcha-700 text-white px-5 py-3 rounded-2xl font-bold text-2xl shadow-xs animate-scale-in">
                 {cafe.displayScore.toFixed(1)}
               </div>
             )}
@@ -140,7 +140,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => trackCafeStat(cafe.id, 'directions')}
-            className="w-full bg-gradient-to-r from-matcha-600 via-matcha-500 to-matcha-600 text-white py-3.5 rounded-xl font-semibold hover:from-matcha-700 hover:to-matcha-700 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+            className="w-full bg-gradient-to-r from-matcha-600 via-matcha-500 to-matcha-600 text-white py-3.5 rounded-xl font-semibold hover:from-matcha-700 hover:to-matcha-700 transition-all duration-200 shadow-xs hover:shadow-xs hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
           >
             <Navigation size={20} />
             {COPY.detail.getDirections}
@@ -202,12 +202,12 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
         {cafe.drinks && cafe.drinks.length > 0 && (
           <div className="mt-8 animate-fade-in">
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 p-2 rounded-xl shadow-md">
+              <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 p-2 rounded-xl shadow-xs">
                 <Coffee size={20} className="text-white" />
               </div>
               <h3 className="text-xl font-bold text-charcoal-900">{COPY.detail.drinksMenu}</h3>
             </div>
-            <div className="bg-white rounded-2xl shadow-lg border-2 border-matcha-100 overflow-hidden divide-y divide-gray-100">
+            <div className="bg-white rounded-2xl shadow-xs border-2 border-matcha-100 overflow-hidden divide-y divide-gray-100">
               {cafe.drinks
                 .filter(d => d.isDefault)
                 .concat(cafe.drinks.filter(d => !d.isDefault).sort((a, b) => b.score - a.score))
@@ -264,12 +264,12 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
         {/* Cafe Details Section */}
         <div className="mt-8 animate-fade-in">
           <div className="flex items-center gap-2.5 mb-4">
-            <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 p-2 rounded-xl shadow-md">
+            <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 p-2 rounded-xl shadow-xs">
               <Star size={20} className="text-white fill-white" />
             </div>
             <h3 className="text-xl font-bold text-charcoal-900">{COPY.detail.cafeDetails}</h3>
           </div>
-          <div className="bg-white rounded-2xl shadow-lg p-5 border-2 border-matcha-100 space-y-4">
+          <div className="bg-white rounded-2xl shadow-xs p-5 border-2 border-matcha-100 space-y-4">
               {cafe.ambianceScore && (
                 <div className="flex items-center justify-between p-3 bg-gradient-to-r from-cream-50 to-matcha-50 rounded-xl">
                   <span className="text-gray-700 font-medium">{COPY.detail.ambiance}</span>
@@ -296,12 +296,12 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
         {cafe.review && (
           <div className="mt-8 animate-fade-in">
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 p-2 rounded-xl shadow-md">
+              <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 p-2 rounded-xl shadow-xs">
                 <MessageSquare size={20} className="text-white" />
               </div>
               <h3 className="text-xl font-bold text-charcoal-900">{COPY.detail.ourReview}</h3>
             </div>
-            <div className="bg-gradient-to-br from-white to-cream-50 rounded-2xl shadow-lg p-6 border-2 border-matcha-100">
+            <div className="bg-gradient-to-br from-white to-cream-50 rounded-2xl shadow-xs p-6 border-2 border-matcha-100">
               <div className="flex items-start gap-3">
                 <div className="text-4xl">💭</div>
                 <p className="text-gray-700 leading-relaxed text-base flex-1 pt-1">{cafe.review}</p>
@@ -326,7 +326,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
             {/* Review Header with Write Button */}
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2.5">
-                <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 p-2 rounded-xl shadow-md">
+                <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 p-2 rounded-xl shadow-xs">
                   <MessageSquare size={20} className="text-white" />
                 </div>
                 <h3 className="text-xl font-bold text-charcoal-900">Community Reviews</h3>
@@ -334,7 +334,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
               {user && (
                 <button
                   onClick={() => setShowReviewForm(true)}
-                  className="bg-gradient-to-r from-matcha-600 to-matcha-500 text-white px-4 py-2 rounded-xl font-semibold hover:from-matcha-700 hover:to-matcha-600 transition-all duration-200 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 min-h-[44px]"
+                  className="bg-gradient-to-r from-matcha-600 to-matcha-500 text-white px-4 py-2 rounded-xl font-semibold hover:from-matcha-700 hover:to-matcha-600 transition-all duration-200 shadow-xs hover:shadow-xs hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 min-h-[44px]"
                 >
                   <Edit3 size={18} />
                   Write Review
@@ -366,12 +366,12 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
         {hoursData && hoursData.allHours.length > 0 && (
           <div className="mt-8 animate-fade-in">
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 p-2 rounded-xl shadow-md">
+              <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 p-2 rounded-xl shadow-xs">
                 <Clock size={20} className="text-white" />
               </div>
               <h3 className="text-xl font-bold text-charcoal-900">{COPY.detail.hours}</h3>
             </div>
-            <div className="bg-white rounded-2xl shadow-lg p-5 border-2 border-matcha-100">
+            <div className="bg-white rounded-2xl shadow-xs p-5 border-2 border-matcha-100">
               {/* Full week hours - always show with current day highlighted */}
               <div className="space-y-2">
                 {hoursData.allHours.map((hours, index) => {
@@ -407,7 +407,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
         {cafe.instagram && (
           <div className="mt-8 animate-fade-in">
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 p-2 rounded-xl shadow-md">
+              <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 p-2 rounded-xl shadow-xs">
                 <Instagram size={20} className="text-white" />
               </div>
               <h3 className="text-xl font-bold text-charcoal-900">{COPY.detail.follow}</h3>
@@ -417,7 +417,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => trackCafeStat(cafe.id, 'instagram')}
-              className="w-full bg-gradient-to-br from-purple-500 via-pink-500 to-pink-600 text-white py-4 rounded-2xl font-bold shadow-lg flex items-center justify-center gap-2.5 hover:from-purple-600 hover:to-pink-700 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full bg-gradient-to-br from-purple-500 via-pink-500 to-pink-600 text-white py-4 rounded-2xl font-bold shadow-xs flex items-center justify-center gap-2.5 hover:from-purple-600 hover:to-pink-700 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
             >
               <Instagram size={22} />
               {cafe.instagram.startsWith('@') ? cafe.instagram : `@${cafe.instagram}`}
@@ -429,7 +429,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
         {(cafe.instagramPostLink || cafe.tiktokPostLink) && (
           <div className="mt-8 animate-fade-in">
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 p-2 rounded-xl shadow-md">
+              <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 p-2 rounded-xl shadow-xs">
                 <Star size={20} className="text-white fill-white" />
               </div>
               <h3 className="text-xl font-bold text-charcoal-900">{COPY.detail.ourReviews}</h3>
@@ -441,7 +441,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => trackCafeStat(cafe.id, 'instagram')}
-                  className="flex-1 bg-white border-2 border-purple-300 text-purple-600 py-3.5 px-4 rounded-xl font-semibold hover:bg-purple-50 active:scale-[0.98] transition-all duration-200 ease-out flex items-center justify-center gap-2 min-h-[44px] shadow-md hover:shadow-lg"
+                  className="flex-1 bg-white border-2 border-purple-300 text-purple-600 py-3.5 px-4 rounded-xl font-semibold hover:bg-purple-50 active:scale-[0.98] transition-all duration-200 ease-out flex items-center justify-center gap-2 min-h-[44px] shadow-xs hover:shadow-xs"
                 >
                   <Instagram size={18} />
                   <span>{COPY.detail.seeInstagramReel}</span>
@@ -453,7 +453,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => trackCafeStat(cafe.id, 'tiktok')}
-                  className="flex-1 bg-white border-2 border-gray-300 text-gray-700 py-3.5 px-4 rounded-xl font-semibold hover:bg-gray-50 active:scale-[0.98] transition-all duration-200 ease-out flex items-center justify-center gap-2 min-h-[44px] shadow-md hover:shadow-lg"
+                  className="flex-1 bg-white border-2 border-gray-300 text-gray-700 py-3.5 px-4 rounded-xl font-semibold hover:bg-gray-50 active:scale-[0.98] transition-all duration-200 ease-out flex items-center justify-center gap-2 min-h-[44px] shadow-xs hover:shadow-xs"
                 >
                   <TikTokIcon size={18} />
                   <span>{COPY.detail.seeTikTokReview}</span>
@@ -467,7 +467,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
         {cafeEvents.length > 0 && (
           <div className="mt-8 animate-fade-in">
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 p-2 rounded-xl shadow-md">
+              <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 p-2 rounded-xl shadow-xs">
                 <CalendarIcon size={20} className="text-white" />
               </div>
               <h3 className="text-xl font-bold text-charcoal-900">{COPY.events.title}</h3>
@@ -476,7 +476,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
               {cafeEvents.map((event) => (
                 <div
                   key={event.id}
-                  className="bg-white rounded-xl shadow-md border-2 border-matcha-100 p-4 hover:shadow-lg transition"
+                  className="bg-white rounded-xl shadow-xs border-2 border-matcha-100 p-4 hover:shadow-xs transition"
                 >
                   <div className="flex items-start gap-3">
                     {event.featured && (
@@ -503,7 +503,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
                   </div>
                   <button
                     onClick={handleViewEvent}
-                    className="w-full mt-3 bg-gradient-to-r from-matcha-500 to-matcha-600 text-white py-2 rounded-lg font-semibold hover:from-matcha-600 hover:to-matcha-700 transition-all shadow-md hover:shadow-lg text-sm"
+                    className="w-full mt-3 bg-gradient-to-r from-matcha-500 to-matcha-600 text-white py-2 rounded-lg font-semibold hover:from-matcha-600 hover:to-matcha-700 transition-all shadow-xs hover:shadow-xs text-sm"
                   >
                     {COPY.events.viewDetails}
                   </button>
@@ -517,7 +517,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
       {/* Review Form Modal */}
       {showReviewForm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-scale-in">
+          <div className="bg-white rounded-2xl shadow-xs max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-scale-in">
             <ReviewForm
               cafeId={cafe.id}
               onSuccess={() => {

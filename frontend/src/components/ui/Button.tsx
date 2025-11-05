@@ -39,7 +39,7 @@ export const PrimaryButton: React.FC<BaseButtonProps> = ({
         py-3 px-6
         rounded-xl
         font-semibold
-        shadow-md
+        shadow-xs
         hover:from-green-700 hover:to-green-600
         active:scale-[0.98]
         transition-all duration-200 ease-out
@@ -198,7 +198,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
   const variantStyles = {
     primary: 'bg-green-600 text-white hover:bg-green-700',
     secondary: 'bg-green-100 text-green-700 hover:bg-green-200',
-    ghost: 'bg-white/95 backdrop-blur-xs text-green-700 hover:bg-white shadow-lg',
+    ghost: 'bg-white/95 backdrop-blur-xs text-green-700 hover:bg-white shadow-xs',
     danger: 'bg-red-100 text-red-600 hover:bg-red-200'
   }
 
@@ -275,7 +275,7 @@ export const FilterButton: React.FC<FilterButtonProps> = ({
         flex items-center justify-center sm:justify-start gap-1.5
         min-h-[44px] min-w-[44px]
         ${active
-          ? 'bg-green-600 text-white shadow-md'
+          ? 'bg-green-600 text-white shadow-xs'
           : 'bg-green-100 text-green-700 hover:bg-green-200'
         }
         ${loading ? 'cursor-wait opacity-75' : ''}

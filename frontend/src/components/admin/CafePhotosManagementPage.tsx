@@ -122,7 +122,7 @@ export const CafePhotosManagementPage: React.FC = () => {
       <div className="max-w-6xl mx-auto">
 
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-xs p-4 md:p-6 mb-6">
           <button
             onClick={() => navigate('/admin/content')}
             className="flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-4 transition"
@@ -151,7 +151,7 @@ export const CafePhotosManagementPage: React.FC = () => {
 
         {/* Empty State */}
         {!loading && photos.length === 0 && (
-          <div className="bg-white rounded-lg shadow-md p-12 text-center">
+          <div className="bg-white rounded-lg shadow-xs p-12 text-center">
             <ImageIcon size={48} className="mx-auto mb-4 text-gray-400" />
             <h3 className="text-lg font-semibold text-gray-800 mb-2">No photos found</h3>
             <p className="text-gray-600">This cafe doesn&apos;t have any photos yet</p>
@@ -171,7 +171,7 @@ export const CafePhotosManagementPage: React.FC = () => {
                 </h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                   {visiblePhotos.map((photo) => (
-                    <div key={photo.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div key={photo.id} className="bg-white rounded-lg shadow-xs overflow-hidden">
                       <div className="aspect-square relative">
                         <img
                           src={photo.thumbnailUrl || photo.imageUrl}
@@ -241,7 +241,7 @@ export const CafePhotosManagementPage: React.FC = () => {
                 </h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                   {hiddenPhotos.map((photo) => (
-                    <div key={photo.id} className="bg-white rounded-lg shadow-md overflow-hidden opacity-60">
+                    <div key={photo.id} className="bg-white rounded-lg shadow-xs overflow-hidden opacity-60">
                       <div className="aspect-square relative">
                         <img
                           src={photo.thumbnailUrl || photo.imageUrl}

@@ -158,7 +158,7 @@ export const BulkImporterPage: React.FC = () => {
           onClick={() => handleModeChange('csv')}
           className={`px-6 py-3 rounded-lg font-semibold transition ${
             importMode === 'csv'
-              ? 'bg-green-600 text-white shadow-md'
+              ? 'bg-green-600 text-white shadow-xs'
               : 'bg-white text-gray-700 hover:bg-gray-100'
           }`}
         >
@@ -168,7 +168,7 @@ export const BulkImporterPage: React.FC = () => {
           onClick={() => handleModeChange('json')}
           className={`px-6 py-3 rounded-lg font-semibold transition ${
             importMode === 'json'
-              ? 'bg-green-600 text-white shadow-md'
+              ? 'bg-green-600 text-white shadow-xs'
               : 'bg-white text-gray-700 hover:bg-gray-100'
           }`}
         >
@@ -204,7 +204,7 @@ export const BulkImporterPage: React.FC = () => {
       )}
 
       {/* Input */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+      <div className="bg-white rounded-lg shadow-xs p-6 mb-6">
         <label className="block text-sm font-semibold text-gray-700 mb-2">
           {importMode === 'csv' ? 'Paste CSV Data' : 'Paste JSON Data'}
         </label>
@@ -271,7 +271,7 @@ export const BulkImporterPage: React.FC = () => {
       {changelog && (
         <div className="space-y-6">
           {/* Summary */}
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-lg shadow-xs p-6">
             <h2 className="text-xl font-bold text-gray-800 mb-4">Import Summary</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-blue-50 p-4 rounded-lg">
@@ -297,7 +297,7 @@ export const BulkImporterPage: React.FC = () => {
 
           {/* Existing Changes */}
           {changelog.existingChanges.length > 0 && (
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white rounded-lg shadow-xs p-6">
               <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                 <CheckCircle className="text-blue-600" size={20} />
                 Existing Updates ({changelog.existingChanges.length})
@@ -324,7 +324,7 @@ export const BulkImporterPage: React.FC = () => {
 
           {/* New Additions */}
           {changelog.newAdditions.length > 0 && (
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white rounded-lg shadow-xs p-6">
               <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                 <CheckCircle className="text-green-600" size={20} />
                 New Additions ({changelog.newAdditions.length})
@@ -354,7 +354,7 @@ export const BulkImporterPage: React.FC = () => {
 
           {/* Invalid Entries */}
           {changelog.invalidEntries.length > 0 && (
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white rounded-lg shadow-xs p-6">
               <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                 <AlertCircle className="text-red-600" size={20} />
                 Cannot Add ({changelog.invalidEntries.length})
@@ -378,7 +378,7 @@ export const BulkImporterPage: React.FC = () => {
 
           {/* Execute Button */}
           {totalChanges > 0 && (
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white rounded-lg shadow-xs p-6">
               <button
                 onClick={handleExecute}
                 disabled={isExecuting}

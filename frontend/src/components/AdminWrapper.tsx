@@ -52,7 +52,7 @@ export const AdminWrapper: React.FC<AdminWrapperProps> = ({ children }) => {
     <div className="w-full h-screen flex flex-col">
       {/* Admin Control Bar - Part of document flow, amber warning color for admin mode */}
       <div
-        className={`w-full ${isAuthenticated ? 'bg-amber-600' : isProdMode ? 'bg-red-600' : 'bg-purple-600'} text-white px-4 shadow-lg flex items-center justify-between flex-shrink-0`}
+        className={`w-full ${isAuthenticated ? 'bg-amber-600' : isProdMode ? 'bg-red-600' : 'bg-purple-600'} text-white px-4 shadow-xs flex items-center justify-between flex-shrink-0`}
         style={{ 
           height: `${ADMIN_BANNER_HEIGHT}px`,
         }}

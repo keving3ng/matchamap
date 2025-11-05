@@ -218,7 +218,7 @@ export const EventManagementPage: React.FC = () => {
     if (!showPreview || !previewEvent) return null
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
           <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
             <h3 className="text-xl font-bold text-gray-800">{COPY.admin.eventManagement.preview}</h3>
@@ -233,7 +233,7 @@ export const EventManagementPage: React.FC = () => {
           {/* Render the event card exactly as it appears in EventsView */}
           <div className="p-6">
             <article
-              className={`bg-white rounded-2xl shadow-md border-2 ${
+              className={`bg-white rounded-2xl shadow-xs border-2 ${
                 previewEvent.featured ? 'border-green-400' : 'border-green-100'
               } overflow-hidden`}
             >
@@ -254,7 +254,7 @@ export const EventManagementPage: React.FC = () => {
                       rel="noopener noreferrer"
                       className={`w-16 h-16 bg-gradient-to-br ${
                         previewEvent.featured ? 'from-green-500 to-green-700' : 'from-green-400 to-green-600'
-                      } rounded-xl flex items-center justify-center text-4xl flex-shrink-0 shadow-md hover:scale-105 transition-transform`}
+                      } rounded-xl flex items-center justify-center text-4xl flex-shrink-0 shadow-xs hover:scale-105 transition-transform`}
                       title={COPY.events.viewOnInstagram}
                     >
                       🍵
@@ -303,7 +303,7 @@ export const EventManagementPage: React.FC = () => {
     return (
       <div className="p-4 md:p-6">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-lg shadow-xs p-6">
             <h2 className="text-2xl font-bold text-green-800 mb-4">
               {editingEvent ? COPY.admin.eventManagement.editEvent : COPY.admin.eventManagement.createEvent}
             </h2>
@@ -493,7 +493,7 @@ export const EventManagementPage: React.FC = () => {
     <div className="p-4 md:p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-xs p-4 md:p-6 mb-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
             <div>
               <h1 className="text-xl md:text-2xl font-bold text-green-800 mb-2 flex items-center gap-2">
@@ -549,12 +549,12 @@ export const EventManagementPage: React.FC = () => {
         {!loading && (
           <div className="space-y-3">
             {filteredEvents.length === 0 ? (
-              <div className="bg-white rounded-lg shadow-md p-8 text-center">
+              <div className="bg-white rounded-lg shadow-xs p-8 text-center">
                 <p className="text-gray-500">{COPY.admin.eventManagement.noEventsFound}</p>
               </div>
             ) : (
               filteredEvents.map((event) => (
-                <div key={event.id} className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition relative">
+                <div key={event.id} className="bg-white rounded-lg shadow-xs p-4 hover:shadow-xs transition relative">
                   <div className="flex flex-col md:flex-row md:items-center gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2 flex-wrap">
@@ -617,7 +617,7 @@ export const EventManagementPage: React.FC = () => {
                               className="fixed inset-0 z-10"
                               onClick={() => setOpenMenuId(null)}
                             />
-                            <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-20">
+                            <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xs border border-gray-200 py-1 z-20">
                               <button
                                 onClick={() => handlePreview(event)}
                                 className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"

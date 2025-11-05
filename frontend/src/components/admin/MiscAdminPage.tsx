@@ -15,7 +15,7 @@ export const MiscAdminPage: React.FC = () => {
         </div>
 
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-xs p-4 md:p-6 mb-6">
           <h1 className="text-xl md:text-2xl font-bold text-green-800 mb-2 flex items-center gap-2">
             <Wrench size={28} />
             Miscellaneous Admin
@@ -28,7 +28,7 @@ export const MiscAdminPage: React.FC = () => {
         {/* Admin Tools Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Database Management */}
-          <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+          <div className="bg-white rounded-lg shadow-xs p-6 hover:shadow-xs transition">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                 <Database size={24} className="text-blue-600" />
@@ -49,7 +49,7 @@ export const MiscAdminPage: React.FC = () => {
           </div>
 
           {/* Site Settings */}
-          <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+          <div className="bg-white rounded-lg shadow-xs p-6 hover:shadow-xs transition">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                 <Globe size={24} className="text-green-600" />
@@ -70,7 +70,7 @@ export const MiscAdminPage: React.FC = () => {
           </div>
 
           {/* Content Management */}
-          <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+          <div className="bg-white rounded-lg shadow-xs p-6 hover:shadow-xs transition">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
                 <FileText size={24} className="text-purple-600" />
@@ -91,7 +91,7 @@ export const MiscAdminPage: React.FC = () => {
           </div>
 
           {/* Notifications */}
-          <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+          <div className="bg-white rounded-lg shadow-xs p-6 hover:shadow-xs transition">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
                 <Bell size={24} className="text-orange-600" />
@@ -112,7 +112,7 @@ export const MiscAdminPage: React.FC = () => {
           </div>
 
           {/* Theme & Branding */}
-          <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+          <div className="bg-white rounded-lg shadow-xs p-6 hover:shadow-xs transition">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center">
                 <Palette size={24} className="text-pink-600" />
@@ -133,7 +133,7 @@ export const MiscAdminPage: React.FC = () => {
           </div>
 
           {/* System Logs */}
-          <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+          <div className="bg-white rounded-lg shadow-xs p-6 hover:shadow-xs transition">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
                 <FileText size={24} className="text-red-600" />

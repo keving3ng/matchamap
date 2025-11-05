@@ -91,7 +91,7 @@ Additional Context:
         </div>
 
         {/* Error Message Card */}
-        <div className="bg-white rounded-lg shadow p-6 border border-red-200">
+        <div className="bg-white rounded-lg shadow-xs p-6 border border-red-200">
           <h2 className="font-semibold text-gray-800 mb-2 flex items-center gap-2">
             <Bug size={18} className="text-red-600" />
             Error Details
@@ -140,7 +140,7 @@ Additional Context:
 
         {/* Technical Details (Collapsible) */}
         {showDetails && (
-          <div className="bg-white rounded-lg shadow p-6 border">
+          <div className="bg-white rounded-lg shadow-xs p-6 border">
             <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
               <ExternalLink size={18} />
               Technical Information

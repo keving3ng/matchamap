@@ -148,7 +148,7 @@ export const PassportView: React.FC<PassportViewProps> = ({ cafes, visitedStamps
       {/* Header */}
       <div className="bg-white border-b-2 border-green-200 px-4 py-4 shadow-xs">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center text-2xl shadow-md">
+          <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center text-2xl shadow-xs">
             🎫
           </div>
           <div>
@@ -183,7 +183,7 @@ export const PassportView: React.FC<PassportViewProps> = ({ cafes, visitedStamps
         {/* Progress Card */}
         {!loading && (
           <div className="px-4 py-6">
-            <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-lg p-6 text-white">
+            <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-xs p-6 text-white">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <p className="text-sm opacity-90 mb-1">Your Progress</p>
@@ -196,7 +196,7 @@ export const PassportView: React.FC<PassportViewProps> = ({ cafes, visitedStamps
 
               <div className="bg-white/20 backdrop-blur rounded-full h-3 overflow-hidden">
                 <div
-                  className="bg-white h-full rounded-full transition-all duration-500 shadow-md"
+                  className="bg-white h-full rounded-full transition-all duration-500 shadow-xs"
                   style={{ width: `${percentage}%` }}
                 />
               </div>
@@ -225,8 +225,8 @@ export const PassportView: React.FC<PassportViewProps> = ({ cafes, visitedStamps
                     key={cafe.id}
                     onClick={() => handleToggleStamp(cafe.id)}
                     disabled={loadingStamps.has(cafe.id)}
-                    className={`aspect-square rounded-2xl shadow-md transition-all transform active:scale-95 disabled:cursor-wait ${
-                      isVisited ? 'scale-100 shadow-lg' : 'opacity-40 grayscale scale-95'
+                    className={`aspect-square rounded-2xl shadow-xs transition-all transform active:scale-95 disabled:cursor-wait ${
+                      isVisited ? 'scale-100 shadow-xs' : 'opacity-40 grayscale scale-95'
                     } ${loadingStamps.has(cafe.id) ? 'animate-pulse' : ''}`}
                   >
                     <div className="w-full h-full bg-gradient-to-br from-green-400 to-green-600 rounded-2xl p-3 flex flex-col items-center justify-center relative overflow-hidden">
@@ -234,8 +234,8 @@ export const PassportView: React.FC<PassportViewProps> = ({ cafes, visitedStamps
                         <div className="absolute inset-0 border-4 border-white/40 rounded-2xl pointer-events-none" />
                       )}
 
-                      <div className="text-4xl mb-2 drop-shadow-md">🍵</div>
-                      <p className="text-white font-bold text-xs text-center leading-tight drop-shadow-md">
+                      <div className="text-4xl mb-2 drop-shadow-xs">🍵</div>
+                      <p className="text-white font-bold text-xs text-center leading-tight drop-shadow-xs">
                         {cafe.name}
                       </p>
                       
@@ -257,17 +257,17 @@ export const PassportView: React.FC<PassportViewProps> = ({ cafes, visitedStamps
 
                       {/* Notes indicator */}
                       {isAuthenticated && checkin?.notes && (
-                        <div className="absolute top-1 left-1 bg-white rounded-full w-6 h-6 flex items-center justify-center shadow-md">
+                        <div className="absolute top-1 left-1 bg-white rounded-full w-6 h-6 flex items-center justify-center shadow-xs">
                           <span className="text-sm">📝</span>
                         </div>
                       )}
 
                       {loadingStamps.has(cafe.id) ? (
-                        <div className="absolute top-1 right-1 bg-white rounded-full w-6 h-6 flex items-center justify-center shadow-md">
+                        <div className="absolute top-1 right-1 bg-white rounded-full w-6 h-6 flex items-center justify-center shadow-xs">
                           <div className="animate-spin rounded-full h-3 w-3 border-2 border-green-600 border-t-transparent" />
                         </div>
                       ) : isVisited ? (
-                        <div className="absolute top-1 right-1 bg-white rounded-full w-6 h-6 flex items-center justify-center shadow-md">
+                        <div className="absolute top-1 right-1 bg-white rounded-full w-6 h-6 flex items-center justify-center shadow-xs">
                           <span className="text-sm">✓</span>
                         </div>
                       ) : null}

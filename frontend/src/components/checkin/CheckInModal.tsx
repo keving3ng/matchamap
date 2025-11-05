@@ -228,11 +228,11 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center p-4 z-50"
+      className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center p-4 z-50"
       onClick={handleClose}
     >
       <div 
-        className="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-md max-h-[90vh] overflow-hidden shadow-2xl"
+        className="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-md max-h-[90vh] overflow-hidden shadow-xs"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -336,7 +336,7 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({
                     <button
                       onClick={() => handleRemovePhoto(index)}
                       disabled={isSubmitting}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 min-h-[32px] min-w-[32px] flex items-center justify-center shadow-lg hover:bg-red-600 transition-colors"
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 min-h-[32px] min-w-[32px] flex items-center justify-center shadow-xs hover:bg-red-600 transition-colors"
                       aria-label={COPY.checkin.removePhoto}
                     >
                       <Trash2 className="w-3 h-3" />

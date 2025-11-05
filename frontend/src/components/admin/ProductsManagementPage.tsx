@@ -15,7 +15,7 @@ export const ProductsManagementPage: React.FC = () => {
         </div>
 
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-xs p-4 md:p-6 mb-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
             <div>
               <h1 className="text-xl md:text-2xl font-bold text-green-800 mb-2 flex items-center gap-2">
@@ -46,7 +46,7 @@ export const ProductsManagementPage: React.FC = () => {
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="bg-white rounded-lg shadow-md p-4">
+          <div className="bg-white rounded-lg shadow-xs p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                 <Package size={20} className="text-blue-600" />
@@ -58,7 +58,7 @@ export const ProductsManagementPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-md p-4">
+          <div className="bg-white rounded-lg shadow-xs p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
                 <DollarSign size={20} className="text-green-600" />
@@ -70,7 +70,7 @@ export const ProductsManagementPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-md p-4">
+          <div className="bg-white rounded-lg shadow-xs p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
                 <ExternalLink size={20} className="text-purple-600" />
@@ -90,7 +90,7 @@ export const ProductsManagementPage: React.FC = () => {
             { name: 'Bamboo Whisk (Chasen)', brand: 'Artisan Tools', price: '$18', type: 'Accessories', stock: 'In Stock' },
             { name: 'Matcha Bowl Set', brand: 'Traditional Ceramics', price: '$45', type: 'Accessories', stock: 'Low Stock' },
           ].map((product, i) => (
-            <div key={i} className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition">
+            <div key={i} className="bg-white rounded-lg shadow-xs p-4 hover:shadow-xs transition">
               <div className="flex flex-col md:flex-row md:items-center gap-4">
                 {/* Product Image Placeholder */}
                 <div className="w-full md:w-20 h-20 bg-gradient-to-br from-green-100 to-green-200 rounded-lg flex items-center justify-center flex-shrink-0">

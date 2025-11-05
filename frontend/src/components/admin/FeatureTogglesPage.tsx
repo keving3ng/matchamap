@@ -57,7 +57,7 @@ export const FeatureTogglesPage: React.FC = () => {
     <div className="p-4 md:p-6">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-4 md:mb-6">
+        <div className="bg-white rounded-lg shadow-xs p-4 md:p-6 mb-4 md:mb-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
             <div>
               <h1 className="text-xl md:text-2xl font-bold text-green-800 mb-2">Feature Toggles</h1>
@@ -71,7 +71,7 @@ export const FeatureTogglesPage: React.FC = () => {
               onClick={() => setAdminModeActive(!adminModeActive)}
               className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all whitespace-nowrap ${
                 adminModeActive
-                  ? 'bg-green-500 text-white hover:bg-green-600 shadow-md'
+                  ? 'bg-green-500 text-white hover:bg-green-600 shadow-xs'
                   : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
               }`}
             >
@@ -173,7 +173,7 @@ export const FeatureTogglesPage: React.FC = () => {
                     return (
                       <div
                         key={featureName}
-                        className={`bg-white rounded-lg shadow-md p-3 md:p-4 transition ${
+                        className={`bg-white rounded-lg shadow-xs p-3 md:p-4 transition ${
                           hasOverride ? 'ring-2 ring-orange-400' : ''
                         }`}
                       >
@@ -243,7 +243,7 @@ export const FeatureTogglesPage: React.FC = () => {
                       return (
                         <div
                           key={featureName}
-                          className={`bg-white rounded-lg shadow-md p-3 md:p-4 transition ${
+                          className={`bg-white rounded-lg shadow-xs p-3 md:p-4 transition ${
                             hasOverride ? 'ring-2 ring-orange-400' : ''
                           }`}
                         >

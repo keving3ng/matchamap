@@ -47,7 +47,7 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({ event }) => {
         {/* Back button */}
         <button
           onClick={() => navigate('/events')}
-          className="absolute top-4 left-4 bg-white/90 backdrop-blur-xs p-3 rounded-full shadow-xl hover:bg-white hover:scale-110 transition-all duration-200 z-20"
+          className="absolute top-4 left-4 bg-white/90 backdrop-blur-xs p-3 rounded-full shadow-xs hover:bg-white hover:scale-110 transition-all duration-200 z-20"
         >
           <ArrowLeft size={24} className="text-green-600" />
         </button>
@@ -57,7 +57,7 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({ event }) => {
 
       <ContentContainer maxWidth="md" className="px-4">
         {/* Main Info Card */}
-        <div className="bg-white rounded-2xl shadow-xl -mt-8 p-6 border-2 border-green-200 relative z-10 animate-slide-up">
+        <div className="bg-white rounded-2xl shadow-xs -mt-8 p-6 border-2 border-green-200 relative z-10 animate-slide-up">
           <div className="mb-4">
             <h2 className="text-2xl font-bold text-charcoal-900 mb-2">{event.title}</h2>
             {event.featured && (
@@ -112,7 +112,7 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({ event }) => {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => trackEventClick(event.id)}
-              className="w-full bg-gradient-to-br from-purple-500 via-pink-500 to-pink-600 text-white py-3.5 rounded-xl font-semibold hover:from-purple-600 hover:to-pink-700 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 mb-3"
+              className="w-full bg-gradient-to-br from-purple-500 via-pink-500 to-pink-600 text-white py-3.5 rounded-xl font-semibold hover:from-purple-600 hover:to-pink-700 transition-all duration-200 shadow-xs hover:shadow-xs hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 mb-3"
             >
               <Instagram size={20} />
               {COPY.events.viewOnInstagram}
@@ -126,7 +126,7 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({ event }) => {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => trackEventClick(event.id)}
-              className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3.5 rounded-xl font-semibold hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 mb-3"
+              className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3.5 rounded-xl font-semibold hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-xs hover:shadow-xs hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 mb-3"
             >
               <Navigation size={20} />
               {COPY.events.getDirections}
@@ -142,12 +142,12 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({ event }) => {
         {/* Description Section */}
         <div className="mt-8 animate-fade-in">
           <div className="flex items-center gap-2.5 mb-4">
-            <div className="bg-gradient-to-br from-green-500 to-green-600 p-2 rounded-xl shadow-md">
+            <div className="bg-gradient-to-br from-green-500 to-green-600 p-2 rounded-xl shadow-xs">
               <Calendar size={20} className="text-white" />
             </div>
             <h3 className="text-xl font-bold text-charcoal-900">{COPY.events.description}</h3>
           </div>
-          <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-green-100">
+          <div className="bg-white rounded-2xl shadow-xs p-6 border-2 border-green-100">
             <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{event.description}</p>
           </div>
         </div>
@@ -156,12 +156,12 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({ event }) => {
         {linkedCafe && (
           <div className="mt-8 animate-fade-in">
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="bg-gradient-to-br from-green-500 to-green-600 p-2 rounded-xl shadow-md">
+              <div className="bg-gradient-to-br from-green-500 to-green-600 p-2 rounded-xl shadow-xs">
                 <MapPin size={20} className="text-white" />
               </div>
               <h3 className="text-xl font-bold text-charcoal-900">{COPY.events.hostedAt}</h3>
             </div>
-            <div className="bg-white rounded-2xl shadow-lg border-2 border-green-100 overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-xs border-2 border-green-100 overflow-hidden">
               <div className="p-5">
                 <div className="flex items-start justify-between gap-4 mb-3">
                   <div className="flex-1">
@@ -169,7 +169,7 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({ event }) => {
                     <p className="text-sm text-gray-600">{linkedCafe.address}</p>
                   </div>
                   {linkedCafe.displayScore && (
-                    <div className="bg-gradient-to-br from-green-500 to-green-600 text-white px-4 py-2 rounded-xl font-bold text-xl shadow-md">
+                    <div className="bg-gradient-to-br from-green-500 to-green-600 text-white px-4 py-2 rounded-xl font-bold text-xl shadow-xs">
                       {linkedCafe.displayScore.toFixed(1)}
                     </div>
                   )}
@@ -182,7 +182,7 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({ event }) => {
                     trackEventClick(event.id)
                     handleViewCafe()
                   }}
-                  className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3 rounded-xl font-semibold hover:from-green-600 hover:to-green-700 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                  className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3 rounded-xl font-semibold hover:from-green-600 hover:to-green-700 transition-all shadow-xs hover:shadow-xs flex items-center justify-center gap-2"
                 >
                   <Navigation size={18} />
                   {COPY.events.viewCafe}
@@ -196,12 +196,12 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({ event }) => {
         {/* TODO: Add when social features are implemented
         <div className="mt-8 animate-fade-in">
           <div className="flex items-center gap-2.5 mb-4">
-            <div className="bg-gradient-to-br from-green-500 to-green-600 p-2 rounded-xl shadow-md">
+            <div className="bg-gradient-to-br from-green-500 to-green-600 p-2 rounded-xl shadow-xs">
               <Users size={20} className="text-white" />
             </div>
             <h3 className="text-xl font-bold text-charcoal-900">Attendees</h3>
           </div>
-          <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-green-100 text-center">
+          <div className="bg-white rounded-2xl shadow-xs p-6 border-2 border-green-100 text-center">
             <p className="text-gray-500 text-sm">
               {COPY.events.goingCount(42)}
             </p>

@@ -111,9 +111,9 @@ describe('Skeleton', () => {
 describe('CafeCardSkeleton', () => {
   it('should render cafe card skeleton structure', () => {
     render(<CafeCardSkeleton />)
-    
+
     // Check main container
-    const container = document.querySelector('.bg-white.rounded-2xl.shadow-md.border-2.border-green-100.p-4.animate-pulse')
+    const container = document.querySelector('.bg-white.rounded-2xl.shadow-xs.border-2.border-green-100.p-4.animate-pulse')
     expect(container).toBeInTheDocument()
   })
 
@@ -208,8 +208,8 @@ describe('DetailPageSkeleton', () => {
 
   it('should render main info card skeleton', () => {
     render(<DetailPageSkeleton />)
-    
-    const infoCard = document.querySelector('.bg-white.rounded-2xl.shadow-lg.p-5.border-2.border-green-100.mb-4')
+
+    const infoCard = document.querySelector('.bg-white.rounded-2xl.shadow-xs.p-5.border-2.border-green-100.mb-4')
     expect(infoCard).toBeInTheDocument()
   })
 
@@ -224,8 +224,8 @@ describe('DetailPageSkeleton', () => {
 
   it('should render drinks menu skeleton', () => {
     render(<DetailPageSkeleton />)
-    
-    const drinksMenu = document.querySelector('.bg-white.rounded-xl.shadow.p-4.border.border-green-100.space-y-3')
+
+    const drinksMenu = document.querySelector('.bg-white.rounded-xl.shadow-xs.p-4.border.border-green-100.space-y-3')
     expect(drinksMenu).toBeInTheDocument()
   })
 
@@ -287,7 +287,7 @@ describe('Skeleton Components Integration', () => {
     )
     
     // Both should use similar card styling
-    const cards = document.querySelectorAll('.bg-white.rounded-2xl.shadow-md.border-2.border-green-100')
+    const cards = document.querySelectorAll('.bg-white.rounded-2xl.shadow-xs.border-2.border-green-100')
     expect(cards.length).toBe(2) // One from CafeCardSkeleton, one from ListSkeleton
   })
 })
