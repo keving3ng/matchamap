@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react'
-import { ArrowUpDown, TrendingUp, Users, MapPin, Navigation } from '@/components/icons'
+import { ArrowUpDown, TrendingUp, Users, MapPin } from '@/components/icons'
 import { api } from '../../utils/api'
 import { COPY } from '../../constants/copy'
 import { Skeleton } from '../ui/Skeleton'
 import { AlertDialog } from '../ui/AlertDialog'
 import type { CafeStat, UserActivitySummary } from '../../utils/api'
+
+// Type-safe numeric fields from CafeStat for sorting
+type NumericCafeStatKey = 'views' | 'directions_clicks' | 'anonymous_passport_marks' | 'authenticated_checkins' | 'instagram_clicks' | 'tiktok_clicks'
 
 interface SummaryCardProps {
   label: string
@@ -33,10 +36,10 @@ const SummaryCard: React.FC<SummaryCardProps> = ({ label, value, subtitle, color
 
 interface SortableHeaderProps {
   label: string
-  sortKey: keyof CafeStat
-  currentSortKey: keyof CafeStat
+  sortKey: NumericCafeStatKey
+  currentSortKey: NumericCafeStatKey
   sortDesc: boolean
-  onSort: (key: keyof CafeStat) => void
+  onSort: (key: NumericCafeStatKey) => void
 }
 
 const SortableHeader: React.FC<SortableHeaderProps> = ({ label, sortKey, currentSortKey, sortDesc, onSort }) => {
@@ -90,7 +93,7 @@ export const StatsPage: React.FC = () => {
   const [userSummary, setUserSummary] = useState<UserActivitySummary | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [sortBy, setSortBy] = useState<keyof CafeStat>('views')
+  const [sortBy, setSortBy] = useState<NumericCafeStatKey>('views')
   const [sortDesc, setSortDesc] = useState(true)
 
   useEffect(() => {
@@ -115,7 +118,7 @@ export const StatsPage: React.FC = () => {
     }
   }
 
-  const handleSort = (key: keyof CafeStat) => {
+  const handleSort = (key: NumericCafeStatKey) => {
     if (sortBy === key) {
       setSortDesc(!sortDesc)
     } else {
@@ -125,8 +128,8 @@ export const StatsPage: React.FC = () => {
   }
 
   const sorted = [...cafeStats].sort((a, b) => {
-    const aVal = typeof a[sortBy] === 'number' ? a[sortBy] as number : 0
-    const bVal = typeof b[sortBy] === 'number' ? b[sortBy] as number : 0
+    const aVal = a[sortBy] as number
+    const bVal = b[sortBy] as number
     return sortDesc ? bVal - aVal : aVal - bVal
   })
 
