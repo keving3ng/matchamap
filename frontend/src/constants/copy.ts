@@ -372,8 +372,15 @@ export const COPY = {
 
     // Profile Activity
     badges: 'Badges',
+    recentActivity: 'Recent Activity',
     ownActivityPlaceholder: 'Your recent activity will appear here once you start reviewing cafes!',
     userActivityPlaceholder: (username: string) => `${username}'s recent activity will appear here.`,
+    activityPrivate: 'This user\'s activity is private',
+    loadingActivity: 'Loading activity...',
+    reviewedCafe: 'Reviewed a cafe',
+    helpfulCount: (count: number) => `${count} helpful`,
+    noBadgesOther: 'No badges earned yet',
+    failedToLoadActivity: 'Failed to load activity',
   },
 
   // Lists (Phase 2E)

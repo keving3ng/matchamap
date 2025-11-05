@@ -5,6 +5,8 @@ import { useUserProfile, useMyProfile } from '../../hooks/useUserProfile'
 import { useAuthStore } from '../../stores/authStore'
 import { ProfileHeader } from './ProfileHeader'
 import { ProfileStats } from './ProfileStats'
+import { ProfileActivity } from './ProfileActivity'
+import { ProfileBadges } from './ProfileBadges'
 import { EditProfileModal } from './EditProfileModal'
 import { ContentContainer } from '../ContentContainer'
 import { COPY } from '../../constants/copy'
@@ -190,41 +192,26 @@ export const UserProfilePage: React.FC = () => {
         </ContentContainer>
       )}
 
+      {/* Badges Section */}
+      <ContentContainer maxWidth="lg">
+        <div className="p-4">
+          <ProfileBadges
+            badges={profileData.badges}
+            isOwnProfile={isOwnProfile}
+            className="mb-6"
+          />
+        </div>
+      </ContentContainer>
+
       {/* Activity Section */}
       <ContentContainer maxWidth="lg">
         <div className="p-4">
-          {/* Badges */}
-          {profileData.badges && profileData.badges.length > 0 && (
-            <div className="mb-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-3">{COPY.profile.badges}</h3>
-              <div className="flex flex-wrap gap-2">
-                {profileData.badges.map((badge) => (
-                  <div
-                    key={badge.type}
-                    className="inline-flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg"
-                  >
-                    {badge.iconUrl && (
-                      <img src={badge.iconUrl} alt={badge.name} className="w-5 h-5" />
-                    )}
-                    <div>
-                      <div className="text-sm font-semibold text-gray-900">{badge.name}</div>
-                      <div className="text-xs text-gray-500">{badge.description}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Recent Activity Placeholder */}
-          <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
-            <p className="text-gray-500">
-              {isOwnProfile
-                ? COPY.profile.ownActivityPlaceholder
-                : COPY.profile.userActivityPlaceholder(profileData.username)
-              }
-            </p>
-          </div>
+          <h3 className="text-lg font-bold text-gray-900 mb-3">{COPY.profile.recentActivity}</h3>
+          <ProfileActivity
+            username={profileData.username}
+            isOwnProfile={isOwnProfile}
+            showActivity={isOwnProfile ? true : (publicProfile.profile?.user.showActivity ?? true)}
+          />
         </div>
       </ContentContainer>
 
