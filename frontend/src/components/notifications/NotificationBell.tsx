@@ -8,17 +8,19 @@ import { COPY } from '../../constants/copy'
 import { api } from '../../utils/api'
 import { NotificationList } from './NotificationList'
 
+// Polling interval for fetching unread count (30 seconds)
+const NOTIFICATION_POLL_INTERVAL_MS = 30000
+
 export const NotificationBell: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0)
-  const [isLoading, setIsLoading] = useState(false)
 
   // Fetch unread count on mount and periodically
   useEffect(() => {
     fetchUnreadCount()
 
-    // Poll for new notifications every 30 seconds
-    const interval = setInterval(fetchUnreadCount, 30000)
+    // Poll for new notifications
+    const interval = setInterval(fetchUnreadCount, NOTIFICATION_POLL_INTERVAL_MS)
 
     return () => clearInterval(interval)
   }, [])

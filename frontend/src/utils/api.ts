@@ -5,7 +5,7 @@
 
 import { useAuthStore } from '../stores/authStore'
 import { useSessionExpiry } from '../hooks/useSessionExpiry'
-import type { Cafe, Drink, Event, PublicUserProfile, UpdateProfileRequest, UserProfile, CityWithCount, User, UserFavorite, FavoritesResponse, AddFavoriteRequest, UpdateFavoriteNotesRequest, UserReview, ReviewPhoto, ReviewComment, BadgesResponse, BadgeCheckResponse, BadgeProgressResponse, BadgeDefinitionsResponse, FollowersResponse, FollowingResponse, FollowStatusResponse, FollowActionResponse, WaitlistResponse, CafeSuggestion, CreateSuggestionRequest, SuggestionsResponse, ApproveSuggestionRequest, RejectSuggestionRequest, UserList, UserListItem, CreateListRequest, UpdateListRequest, AddListItemRequest, ListsResponse, ListDetailResponse } from '../../../shared/types'
+import type { Cafe, Drink, Event, PublicUserProfile, UpdateProfileRequest, UserProfile, CityWithCount, User, UserFavorite, FavoritesResponse, AddFavoriteRequest, UpdateFavoriteNotesRequest, UserReview, ReviewPhoto, ReviewComment, BadgesResponse, BadgeCheckResponse, BadgeProgressResponse, BadgeDefinitionsResponse, FollowersResponse, FollowingResponse, FollowStatusResponse, FollowActionResponse, WaitlistResponse, CafeSuggestion, CreateSuggestionRequest, SuggestionsResponse, ApproveSuggestionRequest, RejectSuggestionRequest, UserList, UserListItem, CreateListRequest, UpdateListRequest, AddListItemRequest, ListsResponse, ListDetailResponse, NotificationsResponse } from '../../../shared/types'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 

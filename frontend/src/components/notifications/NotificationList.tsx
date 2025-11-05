@@ -6,28 +6,18 @@
 import React, { useState, useEffect } from 'react'
 import { COPY } from '../../constants/copy'
 import { api } from '../../utils/api'
-import { SecondaryButton, TertiaryButton } from '../ui'
+import { TertiaryButton } from '../ui'
+import type { Notification } from '../../../../shared/types'
 
-interface NotificationItem {
-  id: number
-  type: 'follower' | 'comment' | 'helpful' | 'badge' | 'comment_like'
-  message: string
-  resourceType?: 'review' | 'comment' | 'badge' | 'user'
-  resourceId?: number
-  isRead: boolean
-  createdAt: string
-  actorId?: number
-  actorUsername?: string
-  actorDisplayName?: string
-  actorAvatarUrl?: string
-}
+// Number of notifications to fetch per page
+const NOTIFICATIONS_PER_PAGE = 20
 
 interface NotificationListProps {
   onClose: () => void
 }
 
-export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) => {
-  const [notifications, setNotifications] = useState<NotificationItem[]>([])
+export const NotificationList: React.FC<NotificationListProps> = ({ onClose: _onClose }) => {
+  const [notifications, setNotifications] = useState<Notification[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [unreadCount, setUnreadCount] = useState(0)
@@ -40,7 +30,7 @@ export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) =
     try {
       setIsLoading(true)
       setError(null)
-      const response = await api.notifications.getAll({ limit: 20 })
+      const response = await api.notifications.getAll({ limit: NOTIFICATIONS_PER_PAGE })
       setNotifications(response.notifications)
       setUnreadCount(response.unreadCount)
     } catch (err) {
@@ -119,7 +109,7 @@ export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) =
   }
 
   return (
-    <div className="w-96 max-h-[600px] bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden">
+    <div className="w-[calc(100vw-2rem)] sm:w-96 max-h-[600px] bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden">
       {/* Header */}
       <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
         <div className="flex items-center justify-between">

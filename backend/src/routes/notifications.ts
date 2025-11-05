@@ -67,7 +67,7 @@ export async function getNotifications(request: AuthenticatedRequest, env: Env):
       notifications: notificationsList,
       unreadCount,
       hasMore: notificationsList.length === limit,
-    }, request as Request, env);
+    }, HTTP_STATUS.OK, request as Request, env);
   } catch (error) {
     console.error('Error fetching notifications:', error);
     return errorResponse('Failed to fetch notifications', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
@@ -113,7 +113,7 @@ export async function markNotificationAsRead(request: AuthenticatedRequest, env:
       .where(eq(notifications.id, notificationId))
       .run();
 
-    return jsonResponse({ success: true }, request as Request, env);
+    return jsonResponse({ success: true }, HTTP_STATUS.OK, request as Request, env);
   } catch (error) {
     console.error('Error marking notification as read:', error);
     return errorResponse('Failed to mark notification as read', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
@@ -139,7 +139,7 @@ export async function markAllNotificationsAsRead(request: AuthenticatedRequest, 
       .where(and(eq(notifications.userId, request.user.userId), eq(notifications.isRead, false)))
       .run();
 
-    return jsonResponse({ success: true }, request as Request, env);
+    return jsonResponse({ success: true }, HTTP_STATUS.OK, request as Request, env);
   } catch (error) {
     console.error('Error marking all notifications as read:', error);
     return errorResponse('Failed to mark all notifications as read', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
@@ -166,7 +166,7 @@ export async function getUnreadCount(request: AuthenticatedRequest, env: Env): P
 
     const unreadCount = result?.count || 0;
 
-    return jsonResponse({ unreadCount }, request as Request, env);
+    return jsonResponse({ unreadCount }, HTTP_STATUS.OK, request as Request, env);
   } catch (error) {
     console.error('Error fetching unread count:', error);
     return errorResponse('Failed to fetch unread count', HTTP_STATUS.INTERNAL_SERVER_ERROR, request as Request, env);
