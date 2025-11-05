@@ -1289,6 +1289,71 @@ export const suggestionsAPI = {
 }
 
 /**
+ * Recommendations API
+ */
+export const recommendationsAPI = {
+  /**
+   * Get personalized recommendations for the authenticated user
+   */
+  async getForYou(params?: {
+    lat?: number
+    lng?: number
+    limit?: number
+    variant?: 'A' | 'B'
+  }): Promise<{
+    recommendations: Array<{
+      cafe: Cafe
+      score: number
+      reasons: string[]
+    }>
+    variant: 'A' | 'B'
+    total: number
+  }> {
+    const queryParams = buildQueryParams(params || {})
+    return fetchAPI(`/recommendations/for-you${queryParams}`)
+  },
+
+  /**
+   * Get trending cafes (public, no auth required)
+   */
+  async getTrending(params?: {
+    limit?: number
+  }): Promise<{
+    trending: Array<{
+      cafe: Cafe
+      score: number
+      reasons: string[]
+    }>
+    total: number
+  }> {
+    const queryParams = buildQueryParams(params || {})
+    return fetchAPI(`/recommendations/trending${queryParams}`)
+  },
+
+  /**
+   * Get cafes similar to a specific cafe
+   */
+  async getSimilar(cafeId: number, params?: {
+    limit?: number
+  }): Promise<{
+    similar: Array<{
+      cafe: Cafe
+      score: number
+      reasons: string[]
+    }>
+    sourceCafe: {
+      id: number
+      name: string
+      slug: string
+    }
+    total: number
+  }> {
+    const queryParams = buildQueryParams(params || {})
+    return fetchAPI(`/recommendations/similar/${cafeId}${queryParams}`)
+  },
+}
+
+/**
  * Export all APIs
  */
 export const api = {
@@ -1312,6 +1377,7 @@ export const api = {
   following: followingAPI,
   leaderboard: leaderboardAPI,
   suggestions: suggestionsAPI,
+  recommendations: recommendationsAPI,
 }
 
 export default api

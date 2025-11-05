@@ -826,3 +826,25 @@ export interface AdminFeedStatsResponse {
 export interface AdminEventStatsResponse {
   stats: EventStats[]
 }
+
+// ============================================================================
+// RECOMMENDATION TYPES
+// ============================================================================
+
+export interface RecommendationScore {
+  cafeId: number
+  score: number
+  reasons: string[]
+  components: {
+    similar: number
+    collaborative: number
+    preferences: number
+    proximity: number
+    trending: number
+  }
+}
+
+export interface UserLocation {
+  latitude: number
+  longitude: number
+}
