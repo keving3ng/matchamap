@@ -1,5 +1,5 @@
 import React from 'react'
-import { Award, Lock } from '@/components/icons'
+import { Award } from '@/components/icons'
 import { COPY } from '../../constants/copy'
 import type { UserBadge } from '../../../../shared/types'
 
@@ -32,7 +32,7 @@ export const ProfileBadges: React.FC<ProfileBadgesProps> = ({
         <p className="text-gray-500">
           {isOwnProfile
             ? COPY.badges.noBadges
-            : 'No badges earned yet'
+            : COPY.profile.noBadgesOther
           }
         </p>
         {isOwnProfile && (

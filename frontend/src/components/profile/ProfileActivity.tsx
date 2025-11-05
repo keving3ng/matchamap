@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react'
-import { Clock, MapPin, Star, Image, Loader2 } from '@/components/icons'
+import { Clock, Star, Loader2 } from '@/components/icons'
+import { ErrorAlert } from '../ui/ErrorAlert'
 import { COPY } from '../../constants/copy'
 import { api } from '../../utils/api'
+import { formatRelativeTime } from '../../utils/dateFormatter'
 import type { UserReview } from '../../../../shared/types'
 
 interface ProfileActivityProps {
@@ -11,13 +13,6 @@ interface ProfileActivityProps {
   isOwnProfile?: boolean
   /** Whether to show activity based on privacy settings */
   showActivity?: boolean
-}
-
-type ActivityItem = {
-  id: string
-  type: 'review' | 'checkin' | 'photo'
-  timestamp: string
-  data: UserReview | unknown
 }
 
 /**
@@ -74,7 +69,7 @@ export const ProfileActivity: React.FC<ProfileActivityProps> = ({
     return (
       <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
         <p className="text-gray-500">
-          This user's activity is private
+          {COPY.profile.activityPrivate}
         </p>
       </div>
     )
@@ -85,7 +80,7 @@ export const ProfileActivity: React.FC<ProfileActivityProps> = ({
     return (
       <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
         <Loader2 className="w-8 h-8 text-matcha-600 animate-spin mx-auto mb-2" />
-        <p className="text-gray-500">Loading activity...</p>
+        <p className="text-gray-500">{COPY.profile.loadingActivity}</p>
       </div>
     )
   }
@@ -93,9 +88,7 @@ export const ProfileActivity: React.FC<ProfileActivityProps> = ({
   // Error state
   if (error) {
     return (
-      <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
-        <p className="text-red-500">{error}</p>
-      </div>
+      <ErrorAlert message={COPY.profile.failedToLoadActivity} />
     )
   }
 
@@ -113,26 +106,6 @@ export const ProfileActivity: React.FC<ProfileActivityProps> = ({
     )
   }
 
-  // Format timestamp for display
-  const formatTimestamp = (timestamp: string): string => {
-    const date = new Date(timestamp)
-    const now = new Date()
-    const diffMs = now.getTime() - date.getTime()
-    const diffMins = Math.floor(diffMs / 60000)
-    const diffHours = Math.floor(diffMs / 3600000)
-    const diffDays = Math.floor(diffMs / 86400000)
-
-    if (diffMins < 60) {
-      return `${diffMins}m ago`
-    } else if (diffHours < 24) {
-      return `${diffHours}h ago`
-    } else if (diffDays < 7) {
-      return `${diffDays}d ago`
-    } else {
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-    }
-  }
-
   return (
     <div className="space-y-3">
       {reviews.map((review) => (
@@ -147,11 +120,11 @@ export const ProfileActivity: React.FC<ProfileActivityProps> = ({
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <span className="font-semibold text-gray-900">Reviewed a cafe</span>
+                <span className="font-semibold text-gray-900">{COPY.profile.reviewedCafe}</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
                 <Clock className="w-4 h-4" />
-                <span>{formatTimestamp(review.createdAt)}</span>
+                <span>{formatRelativeTime(review.createdAt)}</span>
               </div>
             </div>
             <div className="flex items-center gap-1">
@@ -177,7 +150,7 @@ export const ProfileActivity: React.FC<ProfileActivityProps> = ({
             {review.helpfulCount > 0 && (
               <div className="flex items-center gap-1">
                 <span>👍</span>
-                <span>{review.helpfulCount} helpful</span>
+                <span>{COPY.profile.helpfulCount(review.helpfulCount)}</span>
               </div>
             )}
           </div>

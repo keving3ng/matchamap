@@ -206,7 +206,7 @@ export const UserProfilePage: React.FC = () => {
       {/* Activity Section */}
       <ContentContainer maxWidth="lg">
         <div className="p-4">
-          <h3 className="text-lg font-bold text-gray-900 mb-3">Recent Activity</h3>
+          <h3 className="text-lg font-bold text-gray-900 mb-3">{COPY.profile.recentActivity}</h3>
           <ProfileActivity
             username={profileData.username}
             isOwnProfile={isOwnProfile}
