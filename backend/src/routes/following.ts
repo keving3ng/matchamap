@@ -5,6 +5,7 @@ import { getDb, users, userProfiles, userFollows } from '../db';
 import { jsonResponse, errorResponse, badRequestResponse } from '../utils/response';
 import { AuthenticatedRequest } from '../middleware/auth';
 import { HTTP_STATUS } from '../constants';
+import { createFollowerNotification } from '../utils/notifications';
 
 /**
  * Update follower/following counts for a user
@@ -110,6 +111,9 @@ export async function followUser(request: AuthenticatedRequest, env: Env): Promi
       updateFollowCounts(env, request.user.userId), // Update follower's following count
       updateFollowCounts(env, targetUser.id), // Update target's follower count
     ]);
+
+    // Create notification for the followed user
+    await createFollowerNotification(env, targetUser.id, request.user.userId, request.user.username);
 
     return jsonResponse(
       {

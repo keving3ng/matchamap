@@ -16,6 +16,7 @@ import {
   validateGetCafeReviewsQuery,
   validateGetUserReviewsQuery,
 } from '../validators/review';
+import { createHelpfulNotification } from '../utils/notifications';
 
 /**
  * POST /api/cafes/:id/reviews - Create a new review for a cafe
@@ -490,6 +491,15 @@ export async function markHelpful(request: AuthenticatedRequest, env: Env): Prom
           .update(userReviews)
           .set({ helpfulCount: sql`${userReviews.helpfulCount} + 1` })
           .where(eq(userReviews.id, reviewId));
+
+        // Create notification for review owner
+        await createHelpfulNotification(
+          env,
+          review.userId,
+          request.user.userId,
+          request.user.username,
+          reviewId
+        );
       } catch (error: any) {
         // Handle race condition - if unique constraint fails, another user voted
         if (error.message?.includes('UNIQUE constraint failed') || error.message?.includes('SQLITE_CONSTRAINT')) {

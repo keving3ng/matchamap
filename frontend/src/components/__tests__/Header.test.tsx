@@ -33,6 +33,10 @@ vi.mock('../../constants/copy', () => ({
       contact: 'Contact',
       settings: 'Settings',
     },
+    notifications: {
+      title: 'Notifications',
+      unreadCount: (count: number) => `${count} unread`,
+    },
   },
 }))
 
@@ -61,6 +65,11 @@ const mockAuthStore = {
 
 vi.mock('../../stores/authStore', () => ({
   useAuthStore: () => mockAuthStore,
+}))
+
+// Mock NotificationBell component
+vi.mock('../notifications/NotificationBell', () => ({
+  NotificationBell: () => null,
 }))
 
 // Mock document.referrer

@@ -28,6 +28,7 @@ import { handleAdminCafeStats, handleUserActivitySummary, handleFeedStats, handl
 import { createSuggestion, getMySuggestions, getPendingSuggestions, approveSuggestion, rejectSuggestion } from './routes/suggestions';
 import { getMyLists, createList, getListById, updateList, deleteList, addListItem, removeListItem } from './routes/lists';
 import { getForYouRecommendations, getTrending, getSimilarCafes } from './routes/recommendations';
+import { getNotifications, markNotificationAsRead, markAllNotificationsAsRead, getUnreadCount } from './routes/notifications';
 import { requireAuth, requireAdminAuth, optionalAuth } from './middleware/auth';
 import { authRateLimit, publicRateLimit, writeRateLimit } from './middleware/rateLimit';
 import { requireHTTPS } from './middleware/httpsOnly';
@@ -132,6 +133,12 @@ router.put('/api/lists/:id', writeRateLimit(), requireAuth(), updateList);
 router.delete('/api/lists/:id', writeRateLimit(), requireAuth(), deleteList);
 router.post('/api/lists/:id/items', writeRateLimit(), requireAuth(), addListItem);
 router.delete('/api/lists/:id/items/:cafeId', writeRateLimit(), requireAuth(), removeListItem);
+
+// Notification endpoints
+router.get('/api/users/me/notifications', authRateLimit(), requireAuth(), getNotifications);
+router.get('/api/notifications/unread-count', authRateLimit(), requireAuth(), getUnreadCount);
+router.put('/api/notifications/:id/read', writeRateLimit(), requireAuth(), markNotificationAsRead);
+router.put('/api/notifications/mark-all-read', writeRateLimit(), requireAuth(), markAllNotificationsAsRead);
 
 // User badges endpoints
 router.get('/api/users/me/badges', authRateLimit(), requireAuth(), getMyBadges);

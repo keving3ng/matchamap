@@ -722,6 +722,30 @@ export interface ListDetailResponse {
 }
 
 // ============================================================================
+// NOTIFICATION TYPES (Phase 2F)
+// ============================================================================
+
+export interface Notification {
+  id: number
+  type: 'follower' | 'comment' | 'helpful' | 'badge' | 'comment_like'
+  message: string
+  resourceType?: 'review' | 'comment' | 'badge' | 'user'
+  resourceId?: number
+  isRead: boolean
+  createdAt: string
+  actorId?: number
+  actorUsername?: string
+  actorDisplayName?: string
+  actorAvatarUrl?: string
+}
+
+export interface NotificationsResponse {
+  notifications: Notification[]
+  unreadCount: number
+  hasMore: boolean
+}
+
+// ============================================================================
 // API RESPONSE TYPES
 // ============================================================================
 
