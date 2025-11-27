@@ -5,7 +5,7 @@
 
 import { useAuthStore } from '../stores/authStore'
 import { useSessionExpiry } from '../hooks/useSessionExpiry'
-import type { Cafe, Drink, Event, PublicUserProfile, UpdateProfileRequest, UserProfile, CityWithCount, User, UserFavorite, FavoritesResponse, AddFavoriteRequest, UpdateFavoriteNotesRequest, UserReview, ReviewPhoto, ReviewComment, BadgesResponse, BadgeCheckResponse, BadgeProgressResponse, BadgeDefinitionsResponse, FollowersResponse, FollowingResponse, FollowStatusResponse, FollowActionResponse, WaitlistResponse, CafeSuggestion, CreateSuggestionRequest, SuggestionsResponse, ApproveSuggestionRequest, RejectSuggestionRequest, UserList, UserListItem, CreateListRequest, UpdateListRequest, AddListItemRequest, ListsResponse, ListDetailResponse, NotificationsResponse } from '../../../shared/types'
+import type { Cafe, Drink, Event, PublicUserProfile, UpdateProfileRequest, UserProfile, CityWithCount, User, UserFavorite, FavoritesResponse, AddFavoriteRequest, UpdateFavoriteNotesRequest, UserReview, ReviewPhoto, ReviewComment, BadgesResponse, BadgeCheckResponse, BadgeProgressResponse, BadgeDefinitionsResponse, FollowersResponse, FollowingResponse, FollowStatusResponse, FollowActionResponse, WaitlistResponse, CafeSuggestion, CreateSuggestionRequest, SuggestionsResponse, ApproveSuggestionRequest, RejectSuggestionRequest, UserList, UserListItem, CreateListRequest, UpdateListRequest, AddListItemRequest, ListsResponse, ListDetailResponse, NotificationsResponse, CafeStats, UserActivitySummary } from '../../../shared/types'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -1396,6 +1396,28 @@ const notificationsAPI = {
 }
 
 /**
+ * Admin Analytics API endpoints
+ * Types imported from shared/types: CafeStats, UserActivitySummary
+ */
+export const adminAnalyticsAPI = {
+  /**
+   * Get cafe performance statistics (admin only)
+   */
+  async getCafeStats(): Promise<{
+    stats: CafeStats[]
+  }> {
+    return fetchAPI('/admin/cafe-stats')
+  },
+
+  /**
+   * Get user activity summary (admin only)
+   */
+  async getUserActivitySummary(): Promise<UserActivitySummary> {
+    return fetchAPI('/admin/user-activity-summary')
+  },
+}
+
+/**
  * Export all APIs
  */
 export const api = {
@@ -1421,6 +1443,7 @@ export const api = {
   suggestions: suggestionsAPI,
   recommendations: recommendationsAPI,
   notifications: notificationsAPI,
+  adminAnalytics: adminAnalyticsAPI,
 }
 
 export default api

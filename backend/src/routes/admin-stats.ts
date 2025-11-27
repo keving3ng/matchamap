@@ -40,15 +40,21 @@ export async function handleAdminCafeStats(request: IRequest, env: Env): Promise
         c.id,
         c.name,
         c.city,
+        c.neighborhood,
         c.slug,
         COALESCE(s.views, 0) as views,
         COALESCE(s.directions_clicks, 0) as directions_clicks,
         COALESCE(s.anonymous_passport_marks, 0) as anonymous_passport_marks,
         COALESCE(s.instagram_clicks, 0) as instagram_clicks,
         COALESCE(s.tiktok_clicks, 0) as tiktok_clicks,
-        (SELECT COUNT(*) FROM user_checkins WHERE cafe_id = c.id) as authenticated_checkins
+        COALESCE(uc.checkin_count, 0) as authenticated_checkins
       FROM cafes c
       LEFT JOIN cafe_stats s ON c.id = s.cafe_id
+      LEFT JOIN (
+        SELECT cafe_id, COUNT(*) as checkin_count
+        FROM user_checkins
+        GROUP BY cafe_id
+      ) uc ON c.id = uc.cafe_id
       WHERE c.deleted_at IS NULL
       ORDER BY s.views DESC NULLS LAST
     `).all();
