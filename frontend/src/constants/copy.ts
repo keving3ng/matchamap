@@ -1176,6 +1176,53 @@ export const COPY = {
     error: 'Failed to load notifications',
     retry: 'Retry',
   },
+
+  // Discovery (Phase 2E)
+  discovery: {
+    title: 'Discover',
+    subtitle: 'Find your next favorite matcha spot',
+
+    // Section Titles
+    trending: 'Trending',
+    trendingSubtitle: 'Popular cafes this week',
+    newCafes: 'New Additions',
+    newCafesSubtitle: 'Recently added to MatchaMap',
+    underrated: 'Hidden Gems',
+    underratedSubtitle: 'Highly rated, underappreciated spots',
+    forYou: 'For You',
+    forYouSubtitle: 'Personalized recommendations',
+
+    // Empty States
+    noTrending: 'No trending cafes right now',
+    noNewCafes: 'No new cafes recently added',
+    noUnderrated: 'No hidden gems found',
+    noRecommendations: 'No recommendations yet',
+    noRecommendationsDescription: 'Visit and review cafes to get personalized recommendations',
+
+    // Loading States
+    loadingTrending: 'Loading trending cafes...',
+    loadingNew: 'Loading new cafes...',
+    loadingUnderrated: 'Loading hidden gems...',
+    loadingRecommendations: 'Loading recommendations...',
+
+    // Error States
+    errorLoading: 'Failed to load recommendations',
+    errorTrending: 'Failed to load trending cafes',
+    errorNew: 'Failed to load new cafes',
+    errorUnderrated: 'Failed to load hidden gems',
+    errorRecommendations: 'Failed to load recommendations',
+    retry: 'Try Again',
+
+    // Actions
+    viewCafe: 'View Details',
+    seeAll: 'See All',
+
+    // Cafe Card
+    activityScore: (score: number) => `${score} activity score`,
+    recentlyAdded: 'New',
+    highlyRated: 'Highly Rated',
+    matchScore: (score: number) => `${score}% match`,
+  },
 } as const
 
 // Type helper to ensure type safety when accessing COPY

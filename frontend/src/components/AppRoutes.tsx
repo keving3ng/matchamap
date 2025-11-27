@@ -17,6 +17,7 @@ const AboutPage = React.lazy(() => import('./AboutPage'))
 const StorePage = React.lazy(() => import('./StorePage'))
 const SettingsPage = React.lazy(() => import('./SettingsPage'))
 const LeaderboardPage = React.lazy(() => import('./leaderboards/LeaderboardPage').then(m => ({ default: m.LeaderboardPage })))
+const DiscoveryPage = React.lazy(() => import('./discovery/DiscoveryPage').then(m => ({ default: m.DiscoveryPage })))
 
 // Lazy load admin components for better performance
 const AdminLayout = React.lazy(() => import('./admin/AdminLayout'))
@@ -168,6 +169,7 @@ export const AppRoutes: React.FC = () => {
   const isSettingsEnabled = useFeatureToggle('ENABLE_SETTINGS')
   const isUserAccountsEnabled = useFeatureToggle('ENABLE_USER_ACCOUNTS')
   const isUserProfilesEnabled = useFeatureToggle('ENABLE_USER_PROFILES')
+  const isDiscoveryEnabled = useFeatureToggle('ENABLE_DISCOVERY')
 
   const { eventItems, fetchCafes } = useDataStore()
   const { cafesWithDistance, selectedCafe } = useCafeStore()
@@ -292,6 +294,14 @@ export const AppRoutes: React.FC = () => {
         <Route path="/leaderboards" element={
           <Suspense fallback={<PageLoadingFallback />}>
             <LeaderboardPage />
+          </Suspense>
+        } />
+      )}
+      {/* Discovery route - only if discovery enabled */}
+      {isDiscoveryEnabled && (
+        <Route path="/discover" element={
+          <Suspense fallback={<PageLoadingFallback />}>
+            <DiscoveryPage />
           </Suspense>
         } />
       )}

@@ -104,3 +104,9 @@ ENABLE_SETTINGS:
 ENABLE_ROUTE_DISPLAY:
   dev: false
   prod: false
+
+# Discovery Page (Phase 2E)
+# Personalized recommendations, trending, new, and underrated cafes
+ENABLE_DISCOVERY:
+  dev: true
+  prod: false
