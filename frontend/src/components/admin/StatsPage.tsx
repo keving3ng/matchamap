@@ -4,9 +4,9 @@ import { api } from '../../utils/api'
 import { COPY } from '../../constants/copy'
 import { Skeleton } from '../ui/Skeleton'
 import { AlertDialog } from '../ui/AlertDialog'
-import type { CafeStat, UserActivitySummary } from '../../utils/api'
+import type { CafeStats, UserActivitySummary } from '../../../../shared/types'
 
-// Type-safe numeric fields from CafeStat for sorting
+// Type-safe numeric fields from CafeStats for sorting
 type NumericCafeStatKey = 'views' | 'directions_clicks' | 'anonymous_passport_marks' | 'authenticated_checkins' | 'instagram_clicks' | 'tiktok_clicks'
 
 interface SummaryCardProps {
@@ -62,7 +62,7 @@ const SortableHeader: React.FC<SortableHeaderProps> = ({ label, sortKey, current
 }
 
 interface CafeStatsRowProps {
-  cafe: CafeStat
+  cafe: CafeStats
 }
 
 const CafeStatsRow: React.FC<CafeStatsRowProps> = ({ cafe }) => {
@@ -89,7 +89,7 @@ const CafeStatsRow: React.FC<CafeStatsRowProps> = ({ cafe }) => {
 }
 
 export const StatsPage: React.FC = () => {
-  const [cafeStats, setCafeStats] = useState<CafeStat[]>([])
+  const [cafeStats, setCafeStats] = useState<CafeStats[]>([])
   const [userSummary, setUserSummary] = useState<UserActivitySummary | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

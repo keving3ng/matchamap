@@ -5,7 +5,7 @@
 
 import { useAuthStore } from '../stores/authStore'
 import { useSessionExpiry } from '../hooks/useSessionExpiry'
-import type { Cafe, Drink, Event, PublicUserProfile, UpdateProfileRequest, UserProfile, CityWithCount, User, UserFavorite, FavoritesResponse, AddFavoriteRequest, UpdateFavoriteNotesRequest, UserReview, ReviewPhoto, ReviewComment, BadgesResponse, BadgeCheckResponse, BadgeProgressResponse, BadgeDefinitionsResponse, FollowersResponse, FollowingResponse, FollowStatusResponse, FollowActionResponse, WaitlistResponse, CafeSuggestion, CreateSuggestionRequest, SuggestionsResponse, ApproveSuggestionRequest, RejectSuggestionRequest, UserList, UserListItem, CreateListRequest, UpdateListRequest, AddListItemRequest, ListsResponse, ListDetailResponse, NotificationsResponse } from '../../../shared/types'
+import type { Cafe, Drink, Event, PublicUserProfile, UpdateProfileRequest, UserProfile, CityWithCount, User, UserFavorite, FavoritesResponse, AddFavoriteRequest, UpdateFavoriteNotesRequest, UserReview, ReviewPhoto, ReviewComment, BadgesResponse, BadgeCheckResponse, BadgeProgressResponse, BadgeDefinitionsResponse, FollowersResponse, FollowingResponse, FollowStatusResponse, FollowActionResponse, WaitlistResponse, CafeSuggestion, CreateSuggestionRequest, SuggestionsResponse, ApproveSuggestionRequest, RejectSuggestionRequest, UserList, UserListItem, CreateListRequest, UpdateListRequest, AddListItemRequest, ListsResponse, ListDetailResponse, NotificationsResponse, CafeStats, UserActivitySummary } from '../../../shared/types'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -1397,34 +1397,14 @@ const notificationsAPI = {
 
 /**
  * Admin Analytics API endpoints
+ * Types imported from shared/types: CafeStats, UserActivitySummary
  */
-export interface CafeStat {
-  id: number
-  name: string
-  city: string
-  neighborhood: string
-  views: number
-  directions_clicks: number
-  anonymous_passport_marks: number
-  authenticated_checkins: number
-  instagram_clicks: number
-  tiktok_clicks: number
-}
-
-export interface UserActivitySummary {
-  total_users: number
-  active_users_7d: number
-  active_users_30d: number
-  total_checkins: number
-  repeat_visitors: number
-}
-
 export const adminAnalyticsAPI = {
   /**
    * Get cafe performance statistics (admin only)
    */
   async getCafeStats(): Promise<{
-    stats: CafeStat[]
+    stats: CafeStats[]
   }> {
     return fetchAPI('/admin/cafe-stats')
   },

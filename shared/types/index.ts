@@ -787,6 +787,7 @@ export interface CafeStats {
   id: number
   name: string
   city: string
+  neighborhood: string
   slug: string
   views: number
   directions_clicks: number

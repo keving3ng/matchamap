@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { StatsPage } from '../StatsPage'
 import { api } from '../../../utils/api'
-import type { CafeStat, UserActivitySummary } from '../../../utils/api'
+import type { CafeStats, UserActivitySummary } from '../../../../../shared/types'
 
 // Mock the API
 vi.mock('../../../utils/api', () => ({
@@ -28,12 +28,13 @@ vi.mock('@/components/icons', () => ({
   XCircle: () => <div data-testid="x-circle-icon" />,
 }))
 
-const mockCafeStats: CafeStat[] = [
+const mockCafeStats: CafeStats[] = [
   {
     id: 1,
     name: 'Matcha Cafe A',
     city: 'toronto',
     neighborhood: 'Downtown',
+    slug: 'matcha-cafe-a',
     views: 1000,
     directions_clicks: 200,
     anonymous_passport_marks: 50,
@@ -46,6 +47,7 @@ const mockCafeStats: CafeStat[] = [
     name: 'Matcha Cafe B',
     city: 'toronto',
     neighborhood: 'Midtown',
+    slug: 'matcha-cafe-b',
     views: 500,
     directions_clicks: 75,
     anonymous_passport_marks: 25,
@@ -58,6 +60,7 @@ const mockCafeStats: CafeStat[] = [
     name: 'Matcha Cafe C',
     city: 'toronto',
     neighborhood: 'East End',
+    slug: 'matcha-cafe-c',
     views: 2000,
     directions_clicks: 500,
     anonymous_passport_marks: 100,
@@ -352,11 +355,12 @@ describe('StatsPage', () => {
 
   describe('Edge Cases', () => {
     it('should handle zero views correctly (avoid division by zero)', async () => {
-      const statsWithZeroViews: CafeStat[] = [{
+      const statsWithZeroViews: CafeStats[] = [{
         id: 1,
         name: 'New Cafe',
         city: 'toronto',
         neighborhood: 'Downtown',
+        slug: 'new-cafe',
         views: 0,
         directions_clicks: 0,
         anonymous_passport_marks: 0,
@@ -379,11 +383,12 @@ describe('StatsPage', () => {
     })
 
     it('should handle missing optional fields gracefully', async () => {
-      const statsWithNulls: CafeStat[] = [{
+      const statsWithNulls: CafeStats[] = [{
         id: 1,
         name: 'Cafe with nulls',
         city: 'toronto',
         neighborhood: 'Downtown',
+        slug: 'cafe-with-nulls',
         views: 100,
         directions_clicks: 10,
         anonymous_passport_marks: 0,
