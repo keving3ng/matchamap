@@ -19,6 +19,7 @@ import { PhotoGallery } from './photos/PhotoGallery'
 import { PhotoLightbox } from './photos/PhotoLightbox'
 import { PhotoUploadModal } from './photos/PhotoUploadModal'
 import { CheckInButton } from './checkin'
+import { AddToListButton } from './lists'
 import type { DetailViewProps } from '../types'
 import type { Event, ReviewPhoto } from '../../../shared/types'
 
@@ -155,6 +156,13 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
               className="w-full"
             />
           </div>
+
+          {/* Add to List Button */}
+          {isUserAccountsEnabled && user && (
+            <div className="mt-3">
+              <AddToListButton cafeId={cafe.id} cafeName={cafe.name} />
+            </div>
+          )}
         </div>
 
         {/* Visited Checkbox - Only show if passport is enabled */}

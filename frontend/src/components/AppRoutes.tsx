@@ -17,6 +17,8 @@ const AboutPage = React.lazy(() => import('./AboutPage'))
 const StorePage = React.lazy(() => import('./StorePage'))
 const SettingsPage = React.lazy(() => import('./SettingsPage'))
 const LeaderboardPage = React.lazy(() => import('./leaderboards/LeaderboardPage').then(m => ({ default: m.LeaderboardPage })))
+const ListsPage = React.lazy(() => import('./lists/ListsPage').then(m => ({ default: m.ListsPage })))
+const ListDetailPage = React.lazy(() => import('./lists/ListDetailPage').then(m => ({ default: m.ListDetailPage })))
 
 // Lazy load admin components for better performance
 const AdminLayout = React.lazy(() => import('./admin/AdminLayout'))
@@ -294,6 +296,25 @@ export const AppRoutes: React.FC = () => {
             <LeaderboardPage />
           </Suspense>
         } />
+      )}
+      {/* Lists routes - only if user accounts enabled */}
+      {isUserAccountsEnabled && (
+        <>
+          <Route path="/lists" element={
+            <ProtectedRoute>
+              <Suspense fallback={<PageLoadingFallback />}>
+                <ListsPage />
+              </Suspense>
+            </ProtectedRoute>
+          } />
+          <Route path="/lists/:id" element={
+            <ProtectedRoute>
+              <Suspense fallback={<PageLoadingFallback />}>
+                <ListDetailPage />
+              </Suspense>
+            </ProtectedRoute>
+          } />
+        </>
       )}
       {isAdminEnabled && (
         <>
