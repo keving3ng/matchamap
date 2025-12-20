@@ -34,6 +34,8 @@ runs:
       shell: bash
       run: |
         echo "Cache miss - installing dependencies..."
+        # Clean up stale node_modules from restore-key fallback to avoid npm ci conflicts
+        rm -rf node_modules frontend/node_modules backend/node_modules shared/node_modules
         npm ci --ignore-scripts
 
     - name: Cache hit info
