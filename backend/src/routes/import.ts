@@ -27,8 +27,9 @@ export async function bulkImportCafes(request: IRequest, env: Env) {
     const validationResult = bulkImportSchema.safeParse(rawBody)
 
     if (!validationResult.success) {
-      const errors = validationResult.error.errors.map(
-        (err) => `${err.path.join('.')}: ${err.message}`
+      // Zod 4: errors → issues
+      const errors = validationResult.error.issues.map(
+        (issue) => `${issue.path.join('.')}: ${issue.message}`
       )
       return badRequestResponse(
         `Validation failed: ${errors.join(', ')}`,

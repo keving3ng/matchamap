@@ -61,7 +61,7 @@ export const waitlistSchema = z.object({
 
 // Cafe schemas
 export const citySchema = z.enum(['toronto', 'montreal', 'tokyo', 'kyoto', 'osaka', 'new york', 'mississauga', 'scarborough'], {
-  errorMap: () => ({ message: 'Invalid city. Must be one of: toronto, montreal, tokyo, kyoto, osaka, new york, mississauga, or scarborough' }),
+  error: 'Invalid city. Must be one of: toronto, montreal, tokyo, kyoto, osaka, new york, mississauga, or scarborough',
 });
 
 export const createCafeSchema = z.object({
@@ -153,10 +153,10 @@ export const getDrinksQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(50),
   offset: z.coerce.number().int().min(0).default(0),
   sort: z.enum(['name', 'score', 'price', 'createdAt'], {
-    errorMap: () => ({ message: 'Sort must be one of: name, score, price, createdAt' }),
+    error: 'Sort must be one of: name, score, price, createdAt',
   }).default('score'),
   order: z.enum(['asc', 'desc'], {
-    errorMap: () => ({ message: 'Order must be either asc or desc' }),
+    error: 'Order must be either asc or desc',
   }).default('desc'),
 });
 
@@ -194,9 +194,9 @@ export function safeValidate<T>(
   if (result.success) {
     return { success: true, data: result.data };
   }
-  // Format Zod errors into readable message
-  const errorMessage = result.error.errors
-    .map((err) => `${err.path.join('.')}: ${err.message}`)
+  // Format Zod errors into readable message (Zod 4: errors → issues)
+  const errorMessage = result.error.issues
+    .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
     .join('; ');
   return { success: false, error: errorMessage };
 }
