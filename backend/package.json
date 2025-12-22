@@ -31,7 +31,7 @@
     "drizzle-orm": "^0.44.7",
     "itty-router": "^5.0.18",
     "jose": "^6.1.2",
-    "zod": "^3.22.3"
+    "zod": "^4.2.1"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.11.1",
