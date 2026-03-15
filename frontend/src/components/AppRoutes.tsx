@@ -244,8 +244,8 @@ export const AppRoutes: React.FC = () => {
           </Suspense>
         } />
       )}
-      {/* Login route - only if user accounts enabled */}
-      {isUserAccountsEnabled && (
+      {/* Login route - for user accounts or admin access (admins use /login directly when user accounts off) */}
+      {(isUserAccountsEnabled || isAdminEnabled) && (
         <Route path="/login" element={
           <Suspense fallback={<PageLoadingFallback />}>
             <LoginPage />

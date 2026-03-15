@@ -2,18 +2,19 @@
 [![CI](https://github.com/keving3ng/matchamap/actions/workflows/ci.yml/badge.svg)](https://github.com/keving3ng/matchamap/actions/workflows/ci.yml) 
 [![codecov](https://codecov.io/gh/keving3ng/matchamap/branch/main/graph/badge.svg?token=TQNXOMG9D5)](https://codecov.io/gh/keving3ng/matchamap)
 
-A mobile-first, map-based guide to matcha cafes in Toronto featuring expert reviews, ratings, and location-based discovery tools.
+A mobile-first, map-based **curated guide** to matcha cafes in Toronto (and beyond). We share our recommendations and data, relevant events, and promote our content creator backer [vivisual.diary](https://www.instagram.com/vivisual.diary).
 
 
 ## ✨ Features
 
-- **Interactive Map** - Explore cafes with location-based discovery and user geolocation
-- **List & Detail Views** - Browse cafes with sorting, filtering, and detailed information
-- **Matcha Passport** - Track your visits and build your matcha journey
-- **Events** - Discover matcha-related events and tastings
-- **User Accounts** - Registration, authentication, and profile management
-- **Social Features** - Check-ins, reviews, and community engagement
-- **Admin Panel** - Content management and analytics dashboard
+- **Interactive Map** – Explore cafes with location-based discovery and geolocation
+- **List & Detail Views** – Browse cafes with sorting, filtering, and expert reviews
+- **Events** – Curated matcha-related events and tastings
+- **About** – Who we are and links to vivisual.diary (Instagram, TikTok)
+- **Matcha Passport** – Optional local stamp collection of cafes you’ve visited
+- **Admin Panel** – Editor-only content management (cafes, drinks, events)
+
+Product scope is defined in [docs/PRODUCT_FOUNDATION.md](docs/PRODUCT_FOUNDATION.md). Simplification plan: [docs/SIMPLIFICATION_PLAN.md](docs/SIMPLIFICATION_PLAN.md).
 
 ## 🛠️ Tech Stack
 
@@ -123,9 +124,10 @@ See [Feature Flags Guide](./docs/feature-flags-guide.md) for details.
 - [Quick Start Guide](./docs/QUICKSTART_BACKEND.md) - Backend setup and development
 
 **Architecture & Design**
+- [Product Foundation](./docs/PRODUCT_FOUNDATION.md) - What MatchaMap is (and isn’t); product scope
+- [Simplification Plan](./docs/SIMPLIFICATION_PLAN.md) - Cut-off and cleanup checklist
 - [Tech Spec](./docs/TECH_SPEC.md) - Technical architecture overview
 - [Backend PRD](./docs/backend-prd.md) - Backend implementation details
-- [Social Features](./docs/social-features-prd.md) - Social networking functionality
 - [Metrics Tracking](./docs/metrics-tracking-prd.md) - Analytics implementation
 
 **Operations**

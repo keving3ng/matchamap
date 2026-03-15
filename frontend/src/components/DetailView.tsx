@@ -3,6 +3,7 @@ import { MapPin, Navigation, Heart, CheckCircle, Instagram, Star, Coffee, Messag
 import { useNavigate } from 'react-router'
 import { TikTokIcon } from './TikTokIcon'
 import { useAppFeatures } from '../hooks/useAppFeatures'
+import { useUserFeatures } from '../hooks/useUserFeatures'
 import { getMapsUrl } from '../utils/mapsUrl'
 import { ContentContainer } from './ContentContainer'
 import { formatHoursCompact } from '../utils/formatHours'
@@ -23,7 +24,8 @@ import type { DetailViewProps } from '../types'
 import type { Event, ReviewPhoto } from '../../../shared/types'
 
 export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, onToggleVisited }) => {
-  const { isPassportEnabled, isUserAccountsEnabled } = useAppFeatures()
+  const { isPassportEnabled } = useAppFeatures()
+  const { isUserSocialEnabled } = useUserFeatures()
   const { user } = useAuthStore()
   const { invalidateCache } = usePhotosStore()
   const isVisited: boolean = visitedLocations.includes(cafe.id)
@@ -87,8 +89,8 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
         <div className="absolute bottom-0 left-0 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
 
         <span className="text-8xl animate-bounce-subtle z-10">🍵</span>
-        {isUserAccountsEnabled && (
-          <button className="absolute top-4 right-4 bg-white/90 backdrop-blur-xs p-3 rounded-full shadow-xs hover:bg-white hover:scale-110 transition-all duration-200 z-20">
+        {isUserSocialEnabled && (
+            <button className="absolute top-4 right-4 bg-white/90 backdrop-blur-xs p-3 rounded-full shadow-xs hover:bg-white hover:scale-110 transition-all duration-200 z-20">
             <Heart size={24} className="text-matcha-600" />
           </button>
         )}
@@ -146,7 +148,8 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
             {COPY.detail.getDirections}
           </a>
 
-          {/* Check-in Button */}
+          {/* Check-in Button - only when social features enabled */}
+          {isUserSocialEnabled && (
           <div className="mt-4">
             <CheckInButton
               cafe={cafe}
@@ -155,6 +158,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
               className="w-full"
             />
           </div>
+          )}
         </div>
 
         {/* Visited Checkbox - Only show if passport is enabled */}
@@ -310,8 +314,8 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
           </div>
         )}
 
-        {/* User Reviews Section */}
-        {isUserAccountsEnabled && (
+        {/* User Reviews Section - only when social features enabled */}
+        {isUserSocialEnabled && (
           <div className="mt-8 animate-fade-in">
             
             {/* Aggregated Rating Component */}
@@ -351,7 +355,8 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
           </div>
         )}
 
-        {/* Photo Gallery Section */}
+        {/* Photo Gallery Section - only when social features enabled */}
+        {isUserSocialEnabled && (
         <div className="mt-8 animate-fade-in">
           <PhotoGallery
             cafeId={cafe.id}
@@ -361,6 +366,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
             maxInitialPhotos={6}
           />
         </div>
+        )}
 
         {/* Additional Info Sections */}
         {hoursData && hoursData.allHours.length > 0 && (

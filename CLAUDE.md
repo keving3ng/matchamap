@@ -2,11 +2,11 @@
 
 ## Project Overview
 
-MatchaMap is a mobile-first web application providing a curated, map-based guide to matcha cafes in Toronto (expanding to more cities). The platform features expert reviews, ratings, location-based discovery tools, and community features with a Japanese-inspired aesthetic.
+MatchaMap is a mobile-first **curated guide** to matcha cafes in Toronto (expanding to more cities). We share expert recommendations and data, relevant events, and promote our content creator backer vivisual.diary—not a social network or UGC platform. See **Product scope:** [docs/PRODUCT_FOUNDATION.md](docs/PRODUCT_FOUNDATION.md) and [docs/SIMPLIFICATION_PLAN.md](docs/SIMPLIFICATION_PLAN.md).
 
 **Tech Stack:** React 19 | Zustand 5 | Vite 7 | Tailwind CSS 4 | Cloudflare Workers + D1 + R2 | TypeScript (strict mode)
 
-**Project Phase:** V2 Development (User Accounts + Social Features + Photo Uploads)
+**Project Phase:** Simplified foundation (curated guide + events + About/vivisual.diary + admin). Social/user-account features are out of scope or disabled.
 
 ---
 
@@ -568,15 +568,14 @@ export const CafeCard: React.FC<CafeCardProps> = ({ cafe, onSelect }) => {
 
 | Task | Document |
 |------|----------|
+| **Product scope (what we build)** | `docs/PRODUCT_FOUNDATION.md` ⭐ |
+| **Simplification / cut-off plan** | `docs/SIMPLIFICATION_PLAN.md` ⭐ |
 | **Testing guide** | `docs/TESTING.md` ⭐ |
 | **Database schema** | `docs/TECH_SPEC.md` → Database Schema section |
 | **API endpoints** | `docs/TECH_SPEC.md` → API Architecture section |
 | **Deployment** | `docs/DEPLOYMENT.md` |
 | **Backend setup** | `docs/QUICKSTART_BACKEND.md` |
 | **Feature flags** | `docs/feature-flags-guide.md` |
-| **Social features** | `docs/social-features-guide.md` |
-| **Photo uploads** | `docs/photo-upload-guide.md` ⭐ |
-| **Analytics** | `docs/metrics-tracking-prd.md` |
 | **Adding cities** | `docs/adding-new-cities.md` |
 | **Full tech spec** | `docs/TECH_SPEC.md` |
 | **Doc navigation** | `docs/README.md` ⭐ START HERE |
@@ -628,71 +627,36 @@ npm test -- --ui         # Interactive UI mode
 
 ## Key Features
 
-### V1 Features (Complete)
-1. **Interactive Map Interface** - Toronto-centered map with cafe pins, popover with info
-2. **List View** - Expandable card interface with sorting (neighborhood, rating, distance)
-3. **Location Detail Pages** - Static pages with scores, reviews, social links, navigation
-4. **Matcha Passport** - Local storage visit tracking with progress visualization
-5. **Events** - Community events and workshops
-6. **FAQ/About Section** - Rating rubric, about the reviewer
+**Product scope:** See [docs/PRODUCT_FOUNDATION.md](docs/PRODUCT_FOUNDATION.md). We are a curated guide + events + vivisual.diary—not a social network.
 
-### V2 Features (In Progress)
-**Phase 2A: User Accounts & Check-ins**
-- ✅ User registration and login (email/password)
-- ✅ JWT-based authentication with refresh tokens
-- ✅ Email verification system
-- ✅ Profile management (view, edit)
-- ✅ User admin management
-- ⏳ Check-ins and passport sync
+### Core (Foundation)
+1. **Interactive Map** - Toronto-centered map with cafe pins, popover, directions
+2. **List View** - Expandable cards, sorting (neighborhood, rating, distance)
+3. **Detail Pages** - Per-cafe scores, expert review, drinks, hours, links (Maps, Instagram, TikTok)
+4. **Events** - Curated matcha events and workshops
+5. **About** - Mission, rating rubric, **vivisual.diary** (Instagram, TikTok)
+6. **Matcha Passport** - Optional localStorage stamp collection (no account required)
+7. **Admin Panel** - Editor-only: cafes, drinks, events (JWT auth)
 
-**Phase 2B: Reviews & Ratings** (Completed - Backend)
-- ✅ Review CRUD API endpoints
-- ✅ Rating aggregation (admin + user ratings)
-- ⏳ Frontend UI components
+### Out of scope / disabled
+- Public user accounts, profiles, check-ins, user reviews, photo uploads
+- Following, favorites, lists, badges, leaderboards, activity feed
+- Store, user settings, notifications
 
-**Phase 2C: Photo Uploads** (Completed - Backend)
-- ✅ Cloudflare R2 integration
-- ✅ Photo upload API
-- ✅ Moderation workflow
-- ✅ Thumbnail generation (placeholder)
-- ⏳ Frontend UI components
-→ See `docs/photo-upload-guide.md`
-
-**Phase 2D+: Social Features** (Planned)
-- Following system
-- Activity feed
-- Badges and achievements
-- Leaderboards
-→ See `docs/social-features-guide.md`
+(Backend and DB for the above may still exist; see [docs/SIMPLIFICATION_PLAN.md](docs/SIMPLIFICATION_PLAN.md).)
 
 ---
 
-## User Management & Social Features
+## Auth (Admin Only)
 
-**Feature Flags:** `ENABLE_USER_ACCOUNTS`, `ENABLE_USER_PROFILES`, `ENABLE_USER_SOCIAL`
+Authentication is for **editors only** (admin panel). No public sign-up or profiles in the simplified product.
 
-**Use the `useUserFeatures` hook:**
-```tsx
-import { useUserFeatures } from '@/hooks/useUserFeatures'
+**Feature flags:** `ENABLE_USER_ACCOUNTS` (for admin login), `ENABLE_USER_PROFILES`, `ENABLE_USER_SOCIAL` — typically off for public in prod; see [SIMPLIFICATION_PLAN.md](docs/SIMPLIFICATION_PLAN.md).
 
-const { hasUserAccounts, hasUserProfiles, hasUserSocial } = useUserFeatures()
-
-{hasUserAccounts && <LoginButton />}
-{hasUserProfiles && <ProfileLink />}
-{hasUserSocial && <CheckInButton />}
-```
-
-**Implemented:**
-- ✅ User registration and login (email/password)
-- ✅ JWT-based authentication with refresh tokens (cookies)
-- ✅ Email verification system
-- ✅ Profile management (GET, PUT endpoints)
-- ✅ Session management via `sessions` table
-- ✅ Protected routes with `<ProtectedRoute>` component
-- ✅ Session expiry handling with dialog
-- ✅ User admin management (list users, update roles, delete users)
-- ✅ Waitlist system with analytics
-- ⏳ Social features (Phase 2 - see docs/social-features-guide.md)
+**Implemented (for admin):**
+- JWT auth (login, refresh, logout), protected routes, session expiry dialog
+- Admin panel: cafes, drinks, events, waitlist; optional user management
+- `useUserFeatures` and `useFeatureToggle` control visibility of login/profile/social UI
 
 ---
 

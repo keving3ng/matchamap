@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router'
 import { ArrowLeft, Menu, Instagram, LogIn, LogOut, Mail, Info, ShoppingBag, Sliders, User } from '@/components/icons'
 import { useFeatureToggle } from '../hooks/useFeatureToggle'
+import { useUserFeatures } from '../hooks/useUserFeatures'
 import { useAuthStore } from '../stores/authStore'
 import { COPY } from '../constants/copy'
 import { NotificationBell } from './notifications/NotificationBell'
@@ -13,12 +14,14 @@ export const Header: React.FC = () => {
   const menuRef = useRef<HTMLDivElement>(null)
 
   const isMenuEnabled = useFeatureToggle('ENABLE_MENU')
+  const isAdminEnabled = useFeatureToggle('ENABLE_ADMIN_PANEL')
   const isUserAccountsEnabled = useFeatureToggle('ENABLE_USER_ACCOUNTS')
   const isUserProfilesEnabled = useFeatureToggle('ENABLE_USER_PROFILES')
   const isContactEnabled = useFeatureToggle('ENABLE_CONTACT')
   const isAboutEnabled = useFeatureToggle('ENABLE_ABOUT')
   const isStoreEnabled = useFeatureToggle('ENABLE_STORE')
   const isSettingsEnabled = useFeatureToggle('ENABLE_SETTINGS')
+  const { isUserSocialEnabled } = useUserFeatures()
 
   // Get auth state
   const { isAuthenticated, user, logout } = useAuthStore()
@@ -110,8 +113,28 @@ export const Header: React.FC = () => {
             </svg>
           </a>
 
-          {/* Notification Bell (only show if user is authenticated) */}
-          {isAuthenticated && <NotificationBell />}
+          {/* Notification Bell (only when social features + authenticated) */}
+          {isUserSocialEnabled && isAuthenticated && <NotificationBell />}
+
+          {/* About link when menu is disabled but About is enabled (e.g. prod with minimal nav) */}
+          {isAboutEnabled && !isMenuEnabled && (
+            <button
+              onClick={() => navigate('/about')}
+              className="px-3 py-1.5 text-sm font-medium hover:bg-matcha-700 rounded-lg transition-colors"
+            >
+              About
+            </button>
+          )}
+
+          {/* Admin login link when menu off, for editors to reach /login */}
+          {isAdminEnabled && !isAuthenticated && !isMenuEnabled && (
+            <button
+              onClick={() => navigate('/login')}
+              className="px-3 py-1.5 text-sm font-medium opacity-80 hover:opacity-100 hover:bg-matcha-700 rounded-lg transition-colors"
+            >
+              Admin
+            </button>
+          )}
 
           {isMenuEnabled && (
             <div ref={menuRef} className="relative">
@@ -125,8 +148,8 @@ export const Header: React.FC = () => {
               {/* Dropdown Menu */}
               {showMenu && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xs py-2 z-[9999]">
-                  {/* Login/Logout */}
-                  {isUserAccountsEnabled && (
+                  {/* Login/Logout - Admin login when user accounts off (admins use /login) */}
+                  {(isUserAccountsEnabled || isAdminEnabled) && (
                     isAuthenticated ? (
                       <>
                         {/* Profile Link - only show if profiles are enabled */}

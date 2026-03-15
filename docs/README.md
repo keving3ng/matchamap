@@ -1,8 +1,20 @@
 # MatchaMap Documentation Guide
 
-**Last Updated:** 2025-11-02
+**Last Updated:** 2025-03-14
 
 This guide helps you navigate the MatchaMap documentation and find exactly what you need for your task.
+
+---
+
+## 🎯 Product direction (start here)
+
+| I want to... | Read this |
+|-------------|-----------|
+| **Understand what MatchaMap is (and isn’t)** | `PRODUCT_FOUNDATION.md` ⭐ |
+| **See the simplification cut-off and cleanup plan** | `SIMPLIFICATION_PLAN.md` ⭐ |
+| **Run simplification with multiple agents in parallel** | `AGENT_PARALLELIZATION_PLAN.md` ⭐ |
+
+MatchaMap is a **curated guide** (recommendations, events, vivisual.diary)—not a social network. Social and public user-account features are out of scope or disabled.
 
 ---
 
@@ -11,12 +23,12 @@ This guide helps you navigate the MatchaMap documentation and find exactly what 
 | I want to... | Read this |
 |-------------|-----------|
 | **Understand the project basics** | `../CLAUDE.md` (start here!) ⭐ |
-| **Contribute to the project** | `../CONTRIBUTING.md` ⭐ NEW |
+| **Contribute to the project** | `../CONTRIBUTING.md` ⭐ |
 | **Set up the backend locally** | `QUICKSTART_BACKEND.md` |
 | **Deploy to production** | `DEPLOYMENT.md` |
-| **Understand the full architecture** | `architecture/system-overview.md` ⭐ NEW |
-| **View API endpoints** | `api/api-reference.md` ⭐ NEW |
-| **View database schema** | `api/database-schema.md` ⭐ NEW |
+| **Understand the full architecture** | `architecture/system-overview.md` ⭐ |
+| **View API endpoints** | `api/api-reference.md` ⭐ |
+| **View database schema** | `api/database-schema.md` ⭐ |
 
 ---
 

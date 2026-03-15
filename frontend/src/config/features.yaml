@@ -40,10 +40,10 @@ ENABLE_EVENTS:
   prod: true
 
 # Hamburger Menu
-# Top-right navigation menu for additional features and settings
+# Top-right navigation menu (About, Contact, Admin login when applicable)
 ENABLE_MENU:
   dev: true
-  prod: false
+  prod: true
 
 # City Selector
 # Dropdown to select different cities (Toronto, Montreal, Tokyo)
@@ -57,10 +57,10 @@ ENABLE_CITY_SELECTOR:
 # ============================================================================
 
 # User Accounts - Base System
-# User authentication and account features like favoriting cafes
+# Admin login only in prod (no public sign-up). /login route kept for admin access.
 ENABLE_USER_ACCOUNTS:
   dev: true
-  prod: true
+  prod: false
 
 # User Profiles
 # Public user profile pages showing activity and stats
@@ -70,10 +70,10 @@ ENABLE_USER_PROFILES:
 
 # User Social Features (Phase 2 - All-in-One)
 # Includes: check-ins, reviews, ratings, photos, following, activity feed, badges, leaderboards, favorites, lists
-# This is a master toggle for all user-generated content and social features
+# Disabled in prod per PRODUCT_FOUNDATION - we're a curated guide, not a social app
 ENABLE_USER_SOCIAL:
   dev: true
-  prod: true
+  prod: false
 
 # Contact Us Page
 # Contact form and information for users to reach out
@@ -82,10 +82,10 @@ ENABLE_CONTACT:
   prod: false
 
 # About Us Page
-# Information about the project, mission, and reviewer
+# Information about the project, mission, reviewer, and vivisual.diary
 ENABLE_ABOUT:
   dev: true
-  prod: false
+  prod: true
 
 # Store/Shop Page
 # E-commerce page for matcha-related products and merch
