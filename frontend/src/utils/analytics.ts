@@ -36,25 +36,3 @@ export async function trackEventClick(eventId: number): Promise<void> {
   const userId = getUserId()
   await api.stats.trackEventClick(eventId, userId)
 }
-
-/**
- * Track authenticated user check-in
- * Only works for logged-in users
- * Fire-and-forget - errors are silently ignored
- */
-export async function trackCheckIn(cafeId: number, notes?: string): Promise<void> {
-  const userId = getUserId()
-  
-  // Only track check-ins for authenticated users
-  if (!userId) {
-    console.warn('trackCheckIn called but user not authenticated')
-    return
-  }
-  
-  try {
-    await api.stats.checkIn(cafeId, notes)
-  } catch (error) {
-    console.error('Failed to track check-in:', error)
-    // Don't throw - fire-and-forget pattern
-  }
-}

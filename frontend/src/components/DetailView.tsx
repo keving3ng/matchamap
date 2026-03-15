@@ -1,44 +1,23 @@
 import React, { useState, useEffect } from 'react'
-import { MapPin, Navigation, Heart, CheckCircle, Instagram, Star, Coffee, MessageSquare, Clock, Calendar as CalendarIcon, Edit3 } from '@/components/icons'
+import { MapPin, Navigation, CheckCircle, Instagram, Star, Coffee, MessageSquare, Clock, Calendar as CalendarIcon } from '@/components/icons'
 import { useNavigate } from 'react-router'
 import { TikTokIcon } from './TikTokIcon'
 import { useAppFeatures } from '../hooks/useAppFeatures'
-import { useUserFeatures } from '../hooks/useUserFeatures'
 import { getMapsUrl } from '../utils/mapsUrl'
 import { ContentContainer } from './ContentContainer'
 import { formatHoursCompact } from '../utils/formatHours'
 import { sanitizeText } from '../utils/sanitize'
 import { COPY } from '../constants/copy'
 import { api } from '../utils/api'
-import { trackCafeStat, trackCheckIn } from '../utils/analytics'
-import { useAuthStore } from '../stores/authStore'
-import { usePhotosStore } from '../stores/photosStore'
-import { ReviewForm } from './reviews/ReviewForm'
-import { AggregatedRating } from './reviews/AggregatedRating'
-import { ReviewList } from './reviews/ReviewList'
-import { PhotoGallery } from './photos/PhotoGallery'
-import { PhotoLightbox } from './photos/PhotoLightbox'
-import { PhotoUploadModal } from './photos/PhotoUploadModal'
-import { CheckInButton } from './checkin'
+import { trackCafeStat } from '../utils/analytics'
 import type { DetailViewProps } from '../types'
-import type { Event, ReviewPhoto } from '../../../shared/types'
+import type { Event } from '../../../shared/types'
 
 export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, onToggleVisited }) => {
   const { isPassportEnabled } = useAppFeatures()
-  const { isUserSocialEnabled } = useUserFeatures()
-  const { user } = useAuthStore()
-  const { invalidateCache } = usePhotosStore()
   const isVisited: boolean = visitedLocations.includes(cafe.id)
   const mapsUrl = getMapsUrl(cafe.address || '', cafe.link)
   const [cafeEvents, setCafeEvents] = useState<Event[]>([])
-  const [showReviewForm, setShowReviewForm] = useState(false)
-  const [showPhotoUpload, setShowPhotoUpload] = useState(false)
-  const [reviewCount, setReviewCount] = useState(cafe.userRatingCount || 0)
-  const [lightboxPhoto, setLightboxPhoto] = useState<{
-    photos: ReviewPhoto[]
-    index: number
-  } | null>(null)
-  const [isCheckedIn, setIsCheckedIn] = useState(false)
   const navigate = useNavigate()
 
   const hoursData = cafe.hours ? formatHoursCompact(cafe.hours) : null
@@ -63,21 +42,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
   }, [cafe.id])
 
   const handleViewEvent = () => {
-    // Navigate to events view
     navigate('/events')
-  }
-
-  const handlePhotoClick = (_photo: ReviewPhoto, index: number, photos: ReviewPhoto[]) => {
-    setLightboxPhoto({ photos, index })
-  }
-
-  const handleUploadClick = () => {
-    setShowPhotoUpload(true)
-  }
-
-  const handlePhotoUploadSuccess = () => {
-    // Invalidate cache to trigger photo gallery refresh
-    invalidateCache(cafe.id)
   }
 
   return (
@@ -89,11 +54,6 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
         <div className="absolute bottom-0 left-0 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
 
         <span className="text-8xl animate-bounce-subtle z-10">🍵</span>
-        {isUserSocialEnabled && (
-            <button className="absolute top-4 right-4 bg-white/90 backdrop-blur-xs p-3 rounded-full shadow-xs hover:bg-white hover:scale-110 transition-all duration-200 z-20">
-            <Heart size={24} className="text-matcha-600" />
-          </button>
-        )}
       </div>
 
       <ContentContainer maxWidth="md" className="px-4">
@@ -147,18 +107,6 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
             <Navigation size={20} />
             {COPY.detail.getDirections}
           </a>
-
-          {/* Check-in Button - only when social features enabled */}
-          {isUserSocialEnabled && (
-          <div className="mt-4">
-            <CheckInButton
-              cafe={cafe}
-              isCheckedIn={isCheckedIn}
-              onCheckInSuccess={() => setIsCheckedIn(true)}
-              className="w-full"
-            />
-          </div>
-          )}
         </div>
 
         {/* Visited Checkbox - Only show if passport is enabled */}
@@ -173,15 +121,8 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
                 const wasVisited = isVisited
                 onToggleVisited(cafe.id)
                 
-                // Track differently for authenticated vs anonymous users
-                if (!wasVisited) { // Only track when marking as visited (not unvisiting)
-                  if (user) {
-                    // Authenticated: Track check-in via API
-                    trackCheckIn(cafe.id)
-                  } else {
-                    // Anonymous: Track passport mark
-                    trackCafeStat(cafe.id, 'passport')
-                  }
+                if (!wasVisited) {
+                  trackCafeStat(cafe.id, 'passport')
                 }
               }}
               className="flex items-center gap-3 w-full group"
@@ -312,60 +253,6 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
               </div>
             </div>
           </div>
-        )}
-
-        {/* User Reviews Section - only when social features enabled */}
-        {isUserSocialEnabled && (
-          <div className="mt-8 animate-fade-in">
-            
-            {/* Aggregated Rating Component */}
-            <div className="mb-6">
-              <AggregatedRating
-                expertScore={cafe.displayScore ?? undefined}
-                userScore={cafe.userRatingAvg ?? undefined}
-                reviewCount={reviewCount}
-              />
-            </div>
-
-            {/* Review Header with Write Button */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-2.5">
-                <div className="bg-gradient-to-br from-matcha-500 to-matcha-600 p-2 rounded-xl shadow-xs">
-                  <MessageSquare size={20} className="text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-charcoal-900">Community Reviews</h3>
-              </div>
-              {user && (
-                <button
-                  onClick={() => setShowReviewForm(true)}
-                  className="bg-gradient-to-r from-matcha-600 to-matcha-500 text-white px-4 py-2 rounded-xl font-semibold hover:from-matcha-700 hover:to-matcha-600 transition-all duration-200 shadow-xs hover:shadow-xs hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 min-h-[44px]"
-                >
-                  <Edit3 size={18} />
-                  Write Review
-                </button>
-              )}
-            </div>
-
-            {/* Review List Component */}
-            <ReviewList
-              cafeId={cafe.id}
-              className="mt-4"
-              onReviewsLoaded={(total) => setReviewCount(total)}
-            />
-          </div>
-        )}
-
-        {/* Photo Gallery Section - only when social features enabled */}
-        {isUserSocialEnabled && (
-        <div className="mt-8 animate-fade-in">
-          <PhotoGallery
-            cafeId={cafe.id}
-            onPhotoClick={handlePhotoClick}
-            showUploadButton={true}
-            onUploadClick={handleUploadClick}
-            maxInitialPhotos={6}
-          />
-        </div>
         )}
 
         {/* Additional Info Sections */}
@@ -519,49 +406,6 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
           </div>
         )}
       </ContentContainer>
-
-      {/* Review Form Modal */}
-      {showReviewForm && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-2xl shadow-xs max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-scale-in">
-            <ReviewForm
-              cafeId={cafe.id}
-              onSuccess={() => {
-                setShowReviewForm(false)
-                // Increment review count when a new review is added
-                setReviewCount((prev: number) => prev + 1)
-              }}
-              onCancel={() => setShowReviewForm(false)}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Photo Lightbox */}
-      {lightboxPhoto && (
-        <PhotoLightbox
-          key={`lightbox-${lightboxPhoto.index}`} // Force remount when index changes
-          photos={lightboxPhoto.photos}
-          initialIndex={lightboxPhoto.index}
-          isOpen={true}
-          onClose={() => setLightboxPhoto(null)}
-          cafeInfo={{
-            name: cafe.name,
-            city: cafe.city
-          }}
-        />
-      )}
-
-      {/* Photo Upload Modal */}
-      {showPhotoUpload && (
-        <PhotoUploadModal
-          cafeId={cafe.id}
-          cafeName={cafe.name}
-          isOpen={showPhotoUpload}
-          onClose={() => setShowPhotoUpload(false)}
-          onSuccess={handlePhotoUploadSuccess}
-        />
-      )}
     </div>
   )
 }

@@ -1,5 +1,9 @@
 # MatchaMap Parallelized Development Plan (Phases 4-6)
 
+> **⚠️ SUPERSEDED (2025-03):** This plan describes the old social feature roadmap. MatchaMap has been simplified. See [PRODUCT_FOUNDATION.md](./PRODUCT_FOUNDATION.md), [SIMPLIFICATION_PLAN.md](./SIMPLIFICATION_PLAN.md), and [AGENT_PARALLELIZATION_PLAN.md](./AGENT_PARALLELIZATION_PLAN.md) for current direction.
+
+---
+
 **Timeline:** 6 weeks (vs 7 weeks sequential)
 **Strategy:** 4-5 parallel tracks running concurrently
 **Last Updated:** 2025-11-26

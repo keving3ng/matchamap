@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router'
-import { Settings, Menu, X, Coffee, Calendar, Code, Users, Package, Wrench, Upload, Mail, FileText, ShieldCheck, TrendingUp } from '@/components/icons'
+import { Settings, Menu, X, Coffee, Calendar, Code, Wrench, Upload, Mail, TrendingUp } from '@/components/icons'
 
 interface AdminLayoutProps {
   children: React.ReactNode
@@ -22,28 +22,10 @@ const coreNavItems: NavItem[] = [
     path: '/admin/cafes',
   },
   {
-    id: 'users',
-    label: 'Users',
-    icon: <Users size={20} />,
-    path: '/admin/users',
-  },
-  {
     id: 'stats',
     label: 'Analytics',
     icon: <TrendingUp size={20} />,
     path: '/admin/stats',
-  },
-  {
-    id: 'moderation',
-    label: 'Moderation',
-    icon: <ShieldCheck size={20} />,
-    path: '/admin/moderation',
-  },
-  {
-    id: 'content',
-    label: 'Content',
-    icon: <FileText size={20} />,
-    path: '/admin/content',
   },
   {
     id: 'events',
@@ -66,12 +48,6 @@ const toolsNavItems: NavItem[] = [
     label: 'Bulk Import',
     icon: <Upload size={20} />,
     path: '/admin/import',
-  },
-  {
-    id: 'products',
-    label: 'Products',
-    icon: <Package size={20} />,
-    path: '/admin/products',
   },
   {
     id: 'api',

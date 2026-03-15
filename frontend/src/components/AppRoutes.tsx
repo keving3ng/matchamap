@@ -11,12 +11,8 @@ const PassportView = React.lazy(() => import('./PassportView'))
 const EventsView = React.lazy(() => import('./EventsView'))
 const LoginPage = React.lazy(() => import('./auth/LoginPage'))
 const ProtectedRoute = React.lazy(() => import('./auth/ProtectedRoute'))
-const UserProfilePage = React.lazy(() => import('./profile/UserProfilePage').then(m => ({ default: m.UserProfilePage })))
 const ContactPage = React.lazy(() => import('./ContactPage'))
 const AboutPage = React.lazy(() => import('./AboutPage'))
-const StorePage = React.lazy(() => import('./StorePage'))
-const SettingsPage = React.lazy(() => import('./SettingsPage'))
-const LeaderboardPage = React.lazy(() => import('./leaderboards/LeaderboardPage').then(m => ({ default: m.LeaderboardPage })))
 
 // Lazy load admin components for better performance
 const AdminLayout = React.lazy(() => import('./admin/AdminLayout'))
@@ -25,15 +21,9 @@ const AdminSettingsPage = React.lazy(() => import('./admin/AdminSettingsPage'))
 const CafeManagementPage = React.lazy(() => import('./admin/CafeManagementPage'))
 const EventManagementPage = React.lazy(() => import('./admin/EventManagementPage'))
 const ApiManagementPage = React.lazy(() => import('./admin/ApiManagementPage'))
-const UserManagementPage = React.lazy(() => import('./admin/UserManagementPage'))
-const ProductsManagementPage = React.lazy(() => import('./admin/ProductsManagementPage'))
 const MiscAdminPage = React.lazy(() => import('./admin/MiscAdminPage'))
 const BulkImporterPage = React.lazy(() => import('./admin/BulkImporterPage'))
 const WaitlistPage = React.lazy(() => import('./admin/WaitlistPage'))
-const ContentManagementPage = React.lazy(() => import('./admin/ContentManagementPage'))
-const CafePhotosManagementPage = React.lazy(() => import('./admin/CafePhotosManagementPage'))
-const CafeReviewsManagementPage = React.lazy(() => import('./admin/CafeReviewsManagementPage'))
-const ModerationDashboard = React.lazy(() => import('./admin/ModerationDashboard'))
 const StatsPage = React.lazy(() => import('./admin/StatsPage'))
 import { useFeatureToggle } from '../hooks/useFeatureToggle'
 import { useAppFeatures } from '../hooks/useAppFeatures'
@@ -165,10 +155,7 @@ export const AppRoutes: React.FC = () => {
   const isAdminEnabled = useFeatureToggle('ENABLE_ADMIN_PANEL')
   const isContactEnabled = useFeatureToggle('ENABLE_CONTACT')
   const isAboutEnabled = useFeatureToggle('ENABLE_ABOUT')
-  const isStoreEnabled = useFeatureToggle('ENABLE_STORE')
-  const isSettingsEnabled = useFeatureToggle('ENABLE_SETTINGS')
   const isUserAccountsEnabled = useFeatureToggle('ENABLE_USER_ACCOUNTS')
-  const isUserProfilesEnabled = useFeatureToggle('ENABLE_USER_PROFILES')
 
   const { eventItems, fetchCafes } = useDataStore()
   const { cafesWithDistance, selectedCafe } = useCafeStore()
@@ -252,14 +239,6 @@ export const AppRoutes: React.FC = () => {
           </Suspense>
         } />
       )}
-      {/* Profile route - only if user accounts AND profiles enabled */}
-      {isUserAccountsEnabled && isUserProfilesEnabled && (
-        <Route path="/profile/:username" element={
-          <Suspense fallback={<PageLoadingFallback />}>
-            <UserProfilePage />
-          </Suspense>
-        } />
-      )}
       {isContactEnabled && (
         <Route path="/contact" element={
           <Suspense fallback={<PageLoadingFallback />}>
@@ -271,28 +250,6 @@ export const AppRoutes: React.FC = () => {
         <Route path="/about" element={
           <Suspense fallback={<PageLoadingFallback />}>
             <AboutPage />
-          </Suspense>
-        } />
-      )}
-      {isStoreEnabled && (
-        <Route path="/store" element={
-          <Suspense fallback={<PageLoadingFallback />}>
-            <StorePage />
-          </Suspense>
-        } />
-      )}
-      {isSettingsEnabled && (
-        <Route path="/settings" element={
-          <Suspense fallback={<PageLoadingFallback />}>
-            <SettingsPage />
-          </Suspense>
-        } />
-      )}
-      {/* Leaderboards route - only if social features enabled */}
-      {useFeatureToggle('ENABLE_USER_SOCIAL') && (
-        <Route path="/leaderboards" element={
-          <Suspense fallback={<PageLoadingFallback />}>
-            <LeaderboardPage />
           </Suspense>
         } />
       )}
@@ -332,45 +289,12 @@ export const AppRoutes: React.FC = () => {
               </Suspense>
             </ProtectedRoute>
           } />
-          <Route path="/admin/users" element={
-            <ProtectedRoute requireAdmin={true}>
-              <Suspense fallback={<AdminLoadingFallback />}>
-                <AdminErrorBoundary>
-                  <AdminLayout>
-                    <UserManagementPage />
-                  </AdminLayout>
-                </AdminErrorBoundary>
-              </Suspense>
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/moderation" element={
-            <ProtectedRoute requireAdmin={true}>
-              <Suspense fallback={<AdminLoadingFallback />}>
-                <AdminErrorBoundary>
-                  <AdminLayout>
-                    <ModerationDashboard />
-                  </AdminLayout>
-                </AdminErrorBoundary>
-              </Suspense>
-            </ProtectedRoute>
-          } />
           <Route path="/admin/waitlist" element={
             <ProtectedRoute requireAdmin={true}>
               <Suspense fallback={<AdminLoadingFallback />}>
                 <AdminErrorBoundary>
                   <AdminLayout>
                     <WaitlistPage />
-                  </AdminLayout>
-                </AdminErrorBoundary>
-              </Suspense>
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/products" element={
-            <ProtectedRoute requireAdmin={true}>
-              <Suspense fallback={<AdminLoadingFallback />}>
-                <AdminErrorBoundary>
-                  <AdminLayout>
-                    <ProductsManagementPage />
                   </AdminLayout>
                 </AdminErrorBoundary>
               </Suspense>
@@ -415,39 +339,6 @@ export const AppRoutes: React.FC = () => {
                 <AdminErrorBoundary>
                   <AdminLayout>
                     <AdminSettingsPage />
-                  </AdminLayout>
-                </AdminErrorBoundary>
-              </Suspense>
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/content" element={
-            <ProtectedRoute requireAdmin={true}>
-              <Suspense fallback={<AdminLoadingFallback />}>
-                <AdminErrorBoundary>
-                  <AdminLayout>
-                    <ContentManagementPage />
-                  </AdminLayout>
-                </AdminErrorBoundary>
-              </Suspense>
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/content/cafes/:cafeId/photos" element={
-            <ProtectedRoute requireAdmin={true}>
-              <Suspense fallback={<AdminLoadingFallback />}>
-                <AdminErrorBoundary>
-                  <AdminLayout>
-                    <CafePhotosManagementPage />
-                  </AdminLayout>
-                </AdminErrorBoundary>
-              </Suspense>
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/content/cafes/:cafeId/reviews" element={
-            <ProtectedRoute requireAdmin={true}>
-              <Suspense fallback={<AdminLoadingFallback />}>
-                <AdminErrorBoundary>
-                  <AdminLayout>
-                    <CafeReviewsManagementPage />
                   </AdminLayout>
                 </AdminErrorBoundary>
               </Suspense>

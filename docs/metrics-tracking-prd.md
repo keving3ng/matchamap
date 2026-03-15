@@ -820,7 +820,7 @@ if (url.pathname === "/api/admin/user-activity-summary") {
 -   Conversion funnels → When optimizing sign-up flow
 -   Heatmaps / click tracking → When debugging UX issues
 
-**Phase 2 (Social Features) metrics** → See `docs/social-features-analytics-prd.md` (when `ENABLE_USER_SOCIAL` turns on)
+**Phase 2 (Social Features) metrics** → See `docs/archive/social-features-analytics-prd.md` (archived; social features out of scope per PRODUCT_FOUNDATION.md)
 
 ## Total Cost
 

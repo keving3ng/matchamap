@@ -1,5 +1,9 @@
 # Feed Refactoring Plan
 
+> **⚠️ ARCHIVED (2025-03):** Feed/activity feed is out of scope. See [PRODUCT_FOUNDATION.md](../PRODUCT_FOUNDATION.md). Kept for reference.
+
+---
+
 ## Current State (Phase 1)
 
 The feed system was originally designed for admin-curated blog posts:

@@ -138,10 +138,10 @@ Keep: TECH_SPEC, DEPLOYMENT, TESTING, QUICKSTART_BACKEND, feature-flags, adding-
 
 ## Checklist Summary
 
-- [ ] **Phase 1:** Set feature flags so prod has no public user accounts, no social (see table above); About on, Contact optional.
-- [ ] **Phase 2:** Hide or remove routes and nav items for login (or admin-only), profile, leaderboards, store, settings; hide check-ins, reviews, photos, favorites, follow UI when flags off.
+- [x] **Phase 1:** Set feature flags so prod has no public user accounts, no social (see table above); About on, Contact optional.
+- [x] **Phase 2:** Hide or remove routes and nav items for login (or admin-only), profile, leaderboards, store, settings; hide check-ins, reviews, photos, favorites, follow UI when flags off.
 - [ ] **Phase 3 (optional):** Deprecate/remove social and public-user API endpoints; keep DB tables for now; document admin-only auth.
-- [ ] **Phase 4:** Update README, docs/README, CLAUDE.md; archive or trim social/feed docs; update GitHub description and optionally issues/labels.
+- [x] **Phase 4:** Update README, docs/README, CLAUDE.md; archive or trim social/feed docs. *(GitHub description/labels: do manually in repo settings.)*
 
 **Cut-off definition:** The **new foundation** is the state of the product and repo after Phase 1 and Phase 2. Phase 3 and 4 can follow in order or in parallel.
 

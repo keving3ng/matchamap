@@ -67,93 +67,6 @@ export async function handleAdminCafeStats(request: IRequest, env: Env): Promise
 }
 
 /**
- * GET /api/admin/user-activity-summary
- * Get user activity summary (admin only)
- *
- * Returns aggregated user activity metrics:
- * - total_users: Total registered users
- * - active_users_7d: Users active in last 7 days
- * - active_users_30d: Users active in last 30 days
- * - total_checkins: Total authenticated check-ins
- * - repeat_visitors: Users with 3+ check-ins
- *
- * Uses user_activity_stats table for efficient aggregation.
- */
-export async function handleUserActivitySummary(request: IRequest, env: Env): Promise<Response> {
-  try {
-    // Total users
-    const { results: totalUsers } = await env.DB.prepare(
-      `SELECT COUNT(*) as count FROM users`
-    ).all();
-
-    // Active users (7 days)
-    const { results: activeUsers7d } = await env.DB.prepare(`
-      SELECT COUNT(*) as count FROM user_activity_stats
-      WHERE last_active_at >= datetime('now', '-7 days')
-    `).all();
-
-    // Active users (30 days)
-    const { results: activeUsers30d } = await env.DB.prepare(`
-      SELECT COUNT(*) as count FROM user_activity_stats
-      WHERE last_active_at >= datetime('now', '-30 days')
-    `).all();
-
-    // Total check-ins
-    const { results: totalCheckins } = await env.DB.prepare(
-      `SELECT COUNT(*) as count FROM user_checkins`
-    ).all();
-
-    // Repeat visitors (3+ check-ins)
-    const { results: repeatVisitors } = await env.DB.prepare(`
-      SELECT COUNT(*) as count FROM user_activity_stats
-      WHERE total_checkins >= 3
-    `).all();
-
-    return jsonResponse({
-      total_users: totalUsers[0]?.count || 0,
-      active_users_7d: activeUsers7d[0]?.count || 0,
-      active_users_30d: activeUsers30d[0]?.count || 0,
-      total_checkins: totalCheckins[0]?.count || 0,
-      repeat_visitors: repeatVisitors[0]?.count || 0,
-    }, HTTP_STATUS.OK, request, env);
-  } catch (error) {
-    console.error('Error fetching user activity summary:', error);
-    return errorResponse('Failed to fetch user activity summary', HTTP_STATUS.INTERNAL_SERVER_ERROR, request, env);
-  }
-}
-
-/**
- * GET /api/admin/feed-stats (Optional)
- * Get feed engagement statistics (admin only)
- *
- * Returns feed items with click counts, sorted by engagement.
- * Includes up to 50 most popular feed items.
- *
- * Note: Feed feature may be disabled via feature flags.
- */
-export async function handleFeedStats(request: IRequest, env: Env): Promise<Response> {
-  try {
-    const { results } = await env.DB.prepare(`
-      SELECT
-        f.id,
-        f.title,
-        f.type,
-        COALESCE(s.clicks, 0) as clicks,
-        f.published_at
-      FROM feed_items f
-      LEFT JOIN feed_stats s ON f.id = s.feed_item_id
-      ORDER BY s.clicks DESC NULLS LAST
-      LIMIT 50
-    `).all();
-
-    return jsonResponse({ stats: results }, HTTP_STATUS.OK, request, env);
-  } catch (error) {
-    console.error('Error fetching feed stats:', error);
-    return errorResponse('Failed to fetch feed stats', HTTP_STATUS.INTERNAL_SERVER_ERROR, request, env);
-  }
-}
-
-/**
  * GET /api/admin/event-stats (Optional)
  * Get event engagement statistics (admin only)
  *
@@ -167,7 +80,7 @@ export async function handleEventStats(request: IRequest, env: Env): Promise<Res
     const { results } = await env.DB.prepare(`
       SELECT
         e.id,
-        e.name,
+        e.title,
         e.date,
         COALESCE(s.clicks, 0) as clicks,
         e.featured

@@ -1,8 +1,12 @@
 # MatchaMap Social Features - Complete Guide
 
+> **⚠️ ARCHIVED (2025-03):** Social features are out of scope for the current product. See [PRODUCT_FOUNDATION.md](../PRODUCT_FOUNDATION.md) and [SIMPLIFICATION_PLAN.md](../SIMPLIFICATION_PLAN.md). Kept for historical reference.
+
+---
+
 **Version:** 2.0
 **Date:** October 2025
-**Status:** Planning / In Progress
+**Status:** Planning / In Progress (archived)
 **Phase:** User-Generated Content & Community Features
 
 > **Note:** This document consolidates the Social Features PRD and Technical Specification.

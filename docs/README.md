@@ -72,7 +72,7 @@ MatchaMap is a **curated guide** (recommendations, events, vivisual.diary)—not
 | Task | Document |
 |------|----------|
 | Toggle features on/off | `feature-flags-guide.md` |
-| Implement social features | `social-features-guide.md` |
+| *(Social features archived)* | See `archive/social-features-guide.md` + `PRODUCT_FOUNDATION.md` |
 | Track analytics/metrics | `metrics-tracking-prd.md` |
 | Add a new city | `adding-new-cities.md` |
 | Integrate Google Places | `GOOGLE_PLACES_SETUP.md` |
@@ -304,17 +304,11 @@ MatchaMap is a **curated guide** (recommendations, events, vivisual.diary)—not
 
 ### Feature Documents
 
-#### `social-features-guide.md` (Social Features)
-**Purpose:** Comprehensive guide to social features
-**Contents:**
-- User profiles, check-ins, reviews, ratings
-- Photo uploads and galleries
-- Following system and activity feeds
-- Database schema and API endpoints
-- Implementation phases
-- Success metrics
+#### `archive/social-features-guide.md` (Social Features – archived)
+**Purpose:** Historical reference; social features are out of scope per PRODUCT_FOUNDATION.md.
+**Contents:** User profiles, check-ins, reviews, photos, following, activity feeds, etc.
 
-**When to read:** Implementing social/community features
+**When to read:** Historical context only; current product scope in PRODUCT_FOUNDATION.md.
 
 ---
 
@@ -472,7 +466,6 @@ docs/
 ├── QUICKSTART_BACKEND.md             # Backend quick start
 ├── backend-prd.md                     # Backend PRD
 ├── feature-flags-guide.md            # Feature flags
-├── social-features-guide.md          # Social features
 ├── photo-upload-guide.md             # Photo upload technical guide
 ├── metrics-tracking-prd.md           # Analytics tracking
 ├── adding-new-cities.md              # City management
@@ -480,7 +473,10 @@ docs/
 ├── security-testing-guide.md         # Security testing
 │
 └── archive/                          # Historical documents
-    └── UI_POLISH_SUMMARY.md          # UI polish summary (completed)
+    ├── UI_POLISH_SUMMARY.md          # UI polish summary (completed)
+    ├── social-features-guide.md      # Social features (out of scope)
+    ├── social-features-analytics-prd.md
+    └── feed-refactoring-plan.md
 ```
 
 ---
@@ -514,12 +510,9 @@ docs/
 3. **Test endpoints**
 4. **Monitor via dashboard**
 
-### Adding Social Features
+### Adding Social Features *(out of scope)*
 
-1. **Read `social-features-guide.md` completely**
-2. **Follow implementation phases**
-3. **Update feature flags via `feature-flags-guide.md`**
-4. **Deploy via `DEPLOYMENT.md`**
+Social features are out of scope per PRODUCT_FOUNDATION.md. For historical reference only: `archive/social-features-guide.md`.
 
 ### Implementing Photo Uploads
 

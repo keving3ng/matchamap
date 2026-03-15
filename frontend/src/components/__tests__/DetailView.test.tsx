@@ -45,92 +45,7 @@ vi.mock('../../constants/copy', () => ({
       title: 'Events',
       viewDetails: 'View Details',
     },
-    checkin: {
-      checkIn: 'Check In',
-      checkedIn: 'Checked In',
-      checkingIn: 'Checking in...',
-      title: 'Check in to',
-      subtitle: 'Share your experience at this cafe',
-      notesLabel: 'Notes (Optional)',
-      notesPlaceholder: 'How was your visit? Any recommendations?',
-      photosLabel: 'Photos (Optional)',
-      ratingLabel: 'Quick Rating',
-      ratingOptional: '(Optional)',
-      submitButton: 'Check In',
-      submittingButton: 'Checking in...',
-      cancel: 'Cancel',
-      successTitle: 'Checked in successfully!',
-      successMessage: 'Your check-in has been recorded.',
-      successClose: 'Close',
-      errorTitle: 'Check-in Failed',
-      errorMessage: 'Unable to record your check-in. Please try again.',
-      errorRetry: 'Try Again',
-      errorClose: 'Close',
-      addPhotos: 'Add Photos',
-      removePhoto: 'Remove photo',
-      photoUploading: 'Uploading photo...',
-      photoError: 'Failed to upload photo',
-      ratingPrompt: 'Rate your experience',
-      stars: (count: number) => `${count} star${count !== 1 ? 's' : ''}`,
-      clearRating: 'Clear rating',
-      notesMaxLength: 500,
-      notesCharCount: (current: number, max: number) => `${current}/${max}`,
-      notesTooLong: (max: number) => `Notes must be ${max} characters or less`,
-      alreadyCheckedIn: 'You\'ve already checked in to this cafe today',
-      networkError: 'Check your internet connection and try again',
-    },
-    photos: {
-      upload: {
-        invalidFileType: 'Invalid file type. Please upload a JPEG, PNG, or WebP image.',
-        fileTooLarge: 'File too large. Maximum size is 5MB.',
-        emptyFile: 'File is empty. Please select a valid image.',
-      },
-    },
   },
-}))
-
-// Mock check-in components
-vi.mock('../checkin', () => ({
-  CheckInButton: () => <div data-testid="check-in-button">Check In Button</div>,
-}))
-
-// Mock review components to simplify testing
-vi.mock('../reviews/AggregatedRating', () => ({
-  AggregatedRating: ({ expertScore, userScore, reviewCount }: any) => (
-    <div data-testid="aggregated-rating">
-      {expertScore && <span>Expert: {expertScore}</span>}
-      {userScore && <span>User: {userScore}</span>}
-      {reviewCount !== undefined && <span>Reviews: {reviewCount}</span>}
-    </div>
-  ),
-}))
-
-vi.mock('../reviews/ReviewList', () => ({
-  ReviewList: ({ cafeId, onReviewsLoaded }: any) => {
-    // Call onReviewsLoaded if provided to simulate review count syncing
-    if (onReviewsLoaded) {
-      setTimeout(() => onReviewsLoaded(0), 0)
-    }
-    return <div data-testid="review-list">ReviewList for cafe {cafeId}</div>
-  },
-}))
-
-vi.mock('../reviews/ReviewForm', () => ({
-  ReviewForm: ({ onSuccess, onCancel }: any) => (
-    <div data-testid="review-form">
-      <button onClick={onSuccess}>Submit</button>
-      <button onClick={onCancel}>Cancel</button>
-    </div>
-  ),
-}))
-
-// Mock checkin components
-vi.mock('../checkin', () => ({
-  CheckInButton: ({ onCheckInSuccess }: any) => (
-    <div data-testid="check-in-button">
-      <button onClick={onCheckInSuccess}>Check In</button>
-    </div>
-  ),
 }))
 
 // Mock hooks
@@ -141,26 +56,14 @@ vi.mock('../../hooks/useAppFeatures', () => ({
   }),
 }))
 
-vi.mock('../../hooks/useUserFeatures', () => ({
-  useUserFeatures: () => ({
-    isUserSocialEnabled: true,
-    hasUserSocial: true,
-  }),
-}))
-
 // Mock API
 vi.mock('../../utils/api', () => ({
   api: {
     events: {
       getAll: vi.fn(),
     },
-    reviews: {
-      getForCafe: vi.fn(),
-      vote: vi.fn(),
-    },
     stats: {
       trackCafeStat: vi.fn(),
-      trackFeedClick: vi.fn(),
       trackEventClick: vi.fn(),
     },
   },
@@ -258,14 +161,7 @@ describe('DetailView', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    // Mock API to return no events by default
     vi.mocked(api.events.getAll).mockResolvedValue({ events: [] })
-    // Mock reviews API to return empty reviews by default
-    vi.mocked(api.reviews.getForCafe).mockResolvedValue({
-      reviews: [],
-      total: 0,
-      hasMore: false,
-    })
   })
 
   it('should render cafe details', () => {

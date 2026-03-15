@@ -45,12 +45,10 @@ vi.mock('../../hooks/useFeatureToggle', () => ({
   useFeatureToggle: (flag: string) => {
     const flags: Record<string, boolean> = {
       ENABLE_MENU: true,
+      ENABLE_ADMIN_PANEL: true,
       ENABLE_USER_ACCOUNTS: true,
-      ENABLE_USER_PROFILES: true,
       ENABLE_CONTACT: true,
       ENABLE_ABOUT: true,
-      ENABLE_STORE: true,
-      ENABLE_SETTINGS: true,
     }
     return flags[flag] ?? false
   },
@@ -65,11 +63,6 @@ const mockAuthStore = {
 
 vi.mock('../../stores/authStore', () => ({
   useAuthStore: () => mockAuthStore,
-}))
-
-// Mock NotificationBell component
-vi.mock('../notifications/NotificationBell', () => ({
-  NotificationBell: () => null,
 }))
 
 // Mock document.referrer
@@ -251,9 +244,7 @@ describe('Header', () => {
     )!
 
     await user.click(menuButton)
-    expect(screen.getByText('My Profile')).toBeInTheDocument()
     expect(screen.getByText('Sign Out')).toBeInTheDocument()
-    expect(screen.getByText('Settings')).toBeInTheDocument()
   })
 
   it('should navigate to login when clicking sign in', async () => {
@@ -290,24 +281,6 @@ describe('Header', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/')
   })
 
-  it('should navigate to profile when clicking my profile', async () => {
-    const user = userEvent.setup()
-    mockAuthStore.isAuthenticated = true
-    mockAuthStore.user = { id: 1, username: 'testuser', email: 'test@example.com' }
-
-    renderWithRouter(<Header />)
-
-    const menuButton = screen.getAllByRole('button').find(btn => 
-      btn.querySelector('svg')?.tagName === 'svg'
-    )!
-
-    await user.click(menuButton)
-    const profileButton = screen.getByText('My Profile')
-    await user.click(profileButton)
-
-    expect(mockNavigate).toHaveBeenCalledWith('/profile/testuser')
-  })
-
   it('should navigate to about when clicking about', async () => {
     const user = userEvent.setup()
     renderWithRouter(<Header />)
@@ -323,21 +296,6 @@ describe('Header', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/about')
   })
 
-  it('should navigate to store when clicking shop', async () => {
-    const user = userEvent.setup()
-    renderWithRouter(<Header />)
-
-    const menuButton = screen.getAllByRole('button').find(btn => 
-      btn.querySelector('svg')?.tagName === 'svg'
-    )!
-
-    await user.click(menuButton)
-    const shopButton = screen.getByText('Shop')
-    await user.click(shopButton)
-
-    expect(mockNavigate).toHaveBeenCalledWith('/store')
-  })
-
   it('should navigate to contact when clicking contact', async () => {
     const user = userEvent.setup()
     renderWithRouter(<Header />)
@@ -351,23 +309,6 @@ describe('Header', () => {
     await user.click(contactButton)
 
     expect(mockNavigate).toHaveBeenCalledWith('/contact')
-  })
-
-  it('should navigate to settings when clicking settings', async () => {
-    const user = userEvent.setup()
-    mockAuthStore.isAuthenticated = true
-
-    renderWithRouter(<Header />)
-
-    const menuButton = screen.getAllByRole('button').find(btn => 
-      btn.querySelector('svg')?.tagName === 'svg'
-    )!
-
-    await user.click(menuButton)
-    const settingsButton = screen.getByText('Settings')
-    await user.click(settingsButton)
-
-    expect(mockNavigate).toHaveBeenCalledWith('/settings')
   })
 
   it('should determine current view correctly from pathname', () => {
@@ -426,25 +367,4 @@ describe('Header', () => {
     })
   })
 
-  it('should only show settings when authenticated', async () => {
-    const user = userEvent.setup()
-    
-    // Test unauthenticated
-    mockAuthStore.isAuthenticated = false
-    renderWithRouter(<Header />)
-
-    const menuButton = screen.getAllByRole('button').find(btn => 
-      btn.querySelector('svg')?.tagName === 'svg'
-    )!
-
-    await user.click(menuButton)
-    expect(screen.queryByText('Settings')).not.toBeInTheDocument()
-
-    // Close menu and test authenticated
-    await user.click(menuButton)
-    mockAuthStore.isAuthenticated = true
-
-    await user.click(menuButton)
-    expect(screen.getByText('Settings')).toBeInTheDocument()
-  })
 })

@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { ArrowUpDown, TrendingUp, Users, MapPin } from '@/components/icons'
+import { ArrowUpDown, TrendingUp, MapPin } from '@/components/icons'
 import { api } from '../../utils/api'
 import { COPY } from '../../constants/copy'
 import { Skeleton } from '../ui/Skeleton'
 import { AlertDialog } from '../ui/AlertDialog'
-import type { CafeStats, UserActivitySummary } from '../../../../shared/types'
+import type { CafeStats } from '../../../../shared/types'
 
 // Type-safe numeric fields from CafeStats for sorting
 type NumericCafeStatKey = 'views' | 'directions_clicks' | 'anonymous_passport_marks' | 'authenticated_checkins' | 'instagram_clicks' | 'tiktok_clicks'
@@ -90,7 +90,6 @@ const CafeStatsRow: React.FC<CafeStatsRowProps> = ({ cafe }) => {
 
 export const StatsPage: React.FC = () => {
   const [cafeStats, setCafeStats] = useState<CafeStats[]>([])
-  const [userSummary, setUserSummary] = useState<UserActivitySummary | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [sortBy, setSortBy] = useState<NumericCafeStatKey>('views')
@@ -104,12 +103,8 @@ export const StatsPage: React.FC = () => {
     try {
       setLoading(true)
       setError(null)
-      const [cafeData, userData] = await Promise.all([
-        api.adminAnalytics.getCafeStats(),
-        api.adminAnalytics.getUserActivitySummary(),
-      ])
+      const cafeData = await api.adminAnalytics.getCafeStats()
       setCafeStats(cafeData.stats)
-      setUserSummary(userData)
     } catch (err) {
       console.error('Failed to load analytics:', err)
       setError(COPY.admin.analytics.error)
@@ -169,7 +164,7 @@ export const StatsPage: React.FC = () => {
     )
   }
 
-  if (!cafeStats.length && !userSummary) {
+  if (!cafeStats.length) {
     return (
       <div className="p-8 max-w-7xl mx-auto text-center">
         <div className="bg-white rounded-lg shadow p-12">
@@ -187,23 +182,6 @@ export const StatsPage: React.FC = () => {
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{COPY.admin.analytics.title}</h1>
         <p className="text-sm sm:text-base text-gray-600">{COPY.admin.analytics.subtitle}</p>
       </div>
-
-      {/* User Activity Summary Cards */}
-      {userSummary && (
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <Users size={20} className="text-gray-700" />
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">{COPY.admin.analytics.userActivity}</h2>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
-            <SummaryCard label={COPY.admin.analytics.totalUsers} value={userSummary.total_users} color="blue" />
-            <SummaryCard label={COPY.admin.analytics.activeUsers7d} value={userSummary.active_users_7d} color="green" />
-            <SummaryCard label={COPY.admin.analytics.activeUsers30d} value={userSummary.active_users_30d} color="green" />
-            <SummaryCard label={COPY.admin.analytics.totalCheckins} value={userSummary.total_checkins} color="purple" />
-            <SummaryCard label={COPY.admin.analytics.repeatVisitors} value={userSummary.repeat_visitors} color="yellow" />
-          </div>
-        </div>
-      )}
 
       {/* Cafe Performance Summary Cards */}
       <div className="mb-8">

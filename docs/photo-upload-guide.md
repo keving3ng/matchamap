@@ -981,7 +981,7 @@ npx wrangler d1 execute matchamap-db --remote \
 
 - **PR #211:** https://github.com/keving3ng/matchamap/pull/211
 - **Issue #170:** https://github.com/keving3ng/matchamap/issues/170
-- **Social Features Guide:** `docs/social-features-guide.md`
+- **Social Features Guide:** `docs/archive/social-features-guide.md` (archived; social out of scope)
 - **Deployment Guide:** `docs/DEPLOYMENT.md`
 - **Cloudflare R2 Docs:** https://developers.cloudflare.com/r2/
 - **Cloudflare Images Docs:** https://developers.cloudflare.com/images/

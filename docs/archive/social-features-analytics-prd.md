@@ -1,5 +1,9 @@
 # MatchaMap Social Features Analytics PRD (Phase 2)
 
+> **⚠️ ARCHIVED (2025-03):** Social features are out of scope. See [PRODUCT_FOUNDATION.md](../PRODUCT_FOUNDATION.md).
+
+---
+
 **Version:** 1.0
 **Date:** October 11, 2025
 **Status:** Draft (Activates when `ENABLE_USER_SOCIAL` = true)

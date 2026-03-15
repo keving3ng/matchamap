@@ -1,11 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router'
-import { ArrowLeft, Menu, Instagram, LogIn, LogOut, Mail, Info, ShoppingBag, Sliders, User } from '@/components/icons'
+import { ArrowLeft, Menu, Instagram, LogIn, LogOut, Mail, Info } from '@/components/icons'
 import { useFeatureToggle } from '../hooks/useFeatureToggle'
-import { useUserFeatures } from '../hooks/useUserFeatures'
 import { useAuthStore } from '../stores/authStore'
 import { COPY } from '../constants/copy'
-import { NotificationBell } from './notifications/NotificationBell'
 
 export const Header: React.FC = () => {
   const navigate = useNavigate()
@@ -16,15 +14,10 @@ export const Header: React.FC = () => {
   const isMenuEnabled = useFeatureToggle('ENABLE_MENU')
   const isAdminEnabled = useFeatureToggle('ENABLE_ADMIN_PANEL')
   const isUserAccountsEnabled = useFeatureToggle('ENABLE_USER_ACCOUNTS')
-  const isUserProfilesEnabled = useFeatureToggle('ENABLE_USER_PROFILES')
   const isContactEnabled = useFeatureToggle('ENABLE_CONTACT')
   const isAboutEnabled = useFeatureToggle('ENABLE_ABOUT')
-  const isStoreEnabled = useFeatureToggle('ENABLE_STORE')
-  const isSettingsEnabled = useFeatureToggle('ENABLE_SETTINGS')
-  const { isUserSocialEnabled } = useUserFeatures()
 
-  // Get auth state
-  const { isAuthenticated, user, logout } = useAuthStore()
+  const { isAuthenticated, logout } = useAuthStore()
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -113,9 +106,6 @@ export const Header: React.FC = () => {
             </svg>
           </a>
 
-          {/* Notification Bell (only when social features + authenticated) */}
-          {isUserSocialEnabled && isAuthenticated && <NotificationBell />}
-
           {/* About link when menu is disabled but About is enabled (e.g. prod with minimal nav) */}
           {isAboutEnabled && !isMenuEnabled && (
             <button
@@ -152,19 +142,6 @@ export const Header: React.FC = () => {
                   {(isUserAccountsEnabled || isAdminEnabled) && (
                     isAuthenticated ? (
                       <>
-                        {/* Profile Link - only show if profiles are enabled */}
-                        {isUserProfilesEnabled && (
-                          <button
-                            onClick={() => {
-                              navigate(`/profile/${user?.username}`)
-                              setShowMenu(false)
-                            }}
-                            className="w-full px-4 py-2 text-left text-gray-700 hover:bg-green-50 flex items-center gap-2 transition-colors duration-200"
-                          >
-                            <User size={18} />
-                            <span>{COPY.menu.myProfile}</span>
-                          </button>
-                        )}
                         {/* Logout */}
                         <button
                           onClick={() => {
@@ -206,20 +183,6 @@ export const Header: React.FC = () => {
                     </button>
                   )}
 
-                  {/* Store */}
-                  {isStoreEnabled && (
-                    <button
-                      onClick={() => {
-                        navigate('/store')
-                        setShowMenu(false)
-                      }}
-                      className="w-full px-4 py-2 text-left text-gray-700 hover:bg-green-50 flex items-center gap-2 transition"
-                    >
-                      <ShoppingBag size={18} />
-                      <span>{COPY.menu.shop}</span>
-                    </button>
-                  )}
-
                   {/* Contact */}
                   {isContactEnabled && (
                     <button
@@ -231,20 +194,6 @@ export const Header: React.FC = () => {
                     >
                       <Mail size={18} />
                       <span>{COPY.menu.contact}</span>
-                    </button>
-                  )}
-
-                  {/* Settings */}
-                  {isSettingsEnabled && isAuthenticated && (
-                    <button
-                      onClick={() => {
-                        navigate('/settings')
-                        setShowMenu(false)
-                      }}
-                      className="w-full px-4 py-2 text-left text-gray-700 hover:bg-green-50 flex items-center gap-2 transition"
-                    >
-                      <Sliders size={18} />
-                      <span>{COPY.menu.settings}</span>
                     </button>
                   )}
                 </div>

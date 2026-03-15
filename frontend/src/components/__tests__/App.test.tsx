@@ -8,20 +8,11 @@ import { App } from '../../App'
 vi.mock('../../hooks/useAppFeatures', () => ({
   useAppFeatures: () => ({
     showComingSoon: false,
-    isFeedEnabled: false,
     isPassportEnabled: true,
     isEventsEnabled: true,
-    isStoreEnabled: true,
     isMenuEnabled: true,
     isCitySelectorEnabled: true,
     isUserAccountsEnabled: true,
-    showUserProfiles: true,
-    showContact: true,
-    showAbout: true,
-    showStore: true,
-    showSettings: true,
-    isAdminPanelEnabled: true,
-    isUserSocialEnabled: true,
   }),
 }))
 

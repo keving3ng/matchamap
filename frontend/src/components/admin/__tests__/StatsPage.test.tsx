@@ -3,14 +3,13 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { StatsPage } from '../StatsPage'
 import { api } from '../../../utils/api'
-import type { CafeStats, UserActivitySummary } from '../../../../../shared/types'
+import type { CafeStats } from '../../../../../shared/types'
 
 // Mock the API
 vi.mock('../../../utils/api', () => ({
   api: {
     adminAnalytics: {
       getCafeStats: vi.fn(),
-      getUserActivitySummary: vi.fn(),
     }
   }
 }))
@@ -70,14 +69,6 @@ const mockCafeStats: CafeStats[] = [
   },
 ]
 
-const mockUserSummary: UserActivitySummary = {
-  total_users: 1500,
-  active_users_7d: 350,
-  active_users_30d: 800,
-  total_checkins: 5000,
-  repeat_visitors: 450,
-}
-
 describe('StatsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -88,13 +79,9 @@ describe('StatsPage', () => {
       vi.mocked(api.adminAnalytics.getCafeStats).mockImplementation(
         () => new Promise(() => {}) // Never resolves
       )
-      vi.mocked(api.adminAnalytics.getUserActivitySummary).mockImplementation(
-        () => new Promise(() => {}) // Never resolves
-      )
 
       render(<StatsPage />)
 
-      // Check for skeleton component structure
       const container = screen.getByText((content, element) => {
         return element?.className?.includes('max-w-7xl') || false
       })
@@ -106,7 +93,6 @@ describe('StatsPage', () => {
     it('should show error dialog when API fails', async () => {
       const errorMessage = 'Network error'
       vi.mocked(api.adminAnalytics.getCafeStats).mockRejectedValue(new Error(errorMessage))
-      vi.mocked(api.adminAnalytics.getUserActivitySummary).mockRejectedValue(new Error(errorMessage))
 
       render(<StatsPage />)
 
@@ -118,7 +104,6 @@ describe('StatsPage', () => {
     it('should allow retry after error', async () => {
       const user = userEvent.setup()
       vi.mocked(api.adminAnalytics.getCafeStats).mockRejectedValueOnce(new Error('Network error'))
-      vi.mocked(api.adminAnalytics.getUserActivitySummary).mockRejectedValueOnce(new Error('Network error'))
 
       render(<StatsPage />)
 
@@ -126,9 +111,7 @@ describe('StatsPage', () => {
         expect(screen.getByRole('heading', { name: /Failed to load analytics/i })).toBeInTheDocument()
       })
 
-      // Mock success for retry
       vi.mocked(api.adminAnalytics.getCafeStats).mockResolvedValue({ stats: mockCafeStats })
-      vi.mocked(api.adminAnalytics.getUserActivitySummary).mockResolvedValue(mockUserSummary)
 
       const retryButton = screen.getByRole('button', { name: /retry/i })
       await user.click(retryButton)
@@ -142,13 +125,6 @@ describe('StatsPage', () => {
   describe('Empty State', () => {
     it('should show "no data" message when no stats available', async () => {
       vi.mocked(api.adminAnalytics.getCafeStats).mockResolvedValue({ stats: [] })
-      vi.mocked(api.adminAnalytics.getUserActivitySummary).mockResolvedValue({
-        total_users: 0,
-        active_users_7d: 0,
-        active_users_30d: 0,
-        total_checkins: 0,
-        repeat_visitors: 0,
-      })
 
       render(<StatsPage />)
 
@@ -161,19 +137,6 @@ describe('StatsPage', () => {
   describe('Data Display', () => {
     beforeEach(async () => {
       vi.mocked(api.adminAnalytics.getCafeStats).mockResolvedValue({ stats: mockCafeStats })
-      vi.mocked(api.adminAnalytics.getUserActivitySummary).mockResolvedValue(mockUserSummary)
-    })
-
-    it('should display user activity summary cards', async () => {
-      render(<StatsPage />)
-
-      await waitFor(() => {
-        expect(screen.getByText('1,500')).toBeInTheDocument() // total_users
-        expect(screen.getByText('350')).toBeInTheDocument() // active_users_7d
-        expect(screen.getByText('800')).toBeInTheDocument() // active_users_30d
-        expect(screen.getByText('5,000')).toBeInTheDocument() // total_checkins
-        expect(screen.getByText('450')).toBeInTheDocument() // repeat_visitors
-      })
     })
 
     it('should display cafe performance summary cards', async () => {
@@ -229,7 +192,6 @@ describe('StatsPage', () => {
   describe('Sorting Functionality', () => {
     beforeEach(async () => {
       vi.mocked(api.adminAnalytics.getCafeStats).mockResolvedValue({ stats: mockCafeStats })
-      vi.mocked(api.adminAnalytics.getUserActivitySummary).mockResolvedValue(mockUserSummary)
     })
 
     it('should sort by views in descending order by default', async () => {
@@ -314,15 +276,13 @@ describe('StatsPage', () => {
   describe('Responsive Layout', () => {
     beforeEach(async () => {
       vi.mocked(api.adminAnalytics.getCafeStats).mockResolvedValue({ stats: mockCafeStats })
-      vi.mocked(api.adminAnalytics.getUserActivitySummary).mockResolvedValue(mockUserSummary)
     })
 
     it('should render mobile-friendly grid layout', async () => {
       render(<StatsPage />)
 
       await waitFor(() => {
-        // Check for grid containers with responsive classes
-        const summaryCards = screen.getAllByText(/Total Users|Active|Check-ins/i)
+        const summaryCards = screen.getAllByText(/Total Views|Directions|Marks|Check-ins|Demand/i)
         expect(summaryCards.length).toBeGreaterThan(0)
       })
     })
@@ -340,15 +300,13 @@ describe('StatsPage', () => {
   })
 
   describe('API Integration', () => {
-    it('should fetch both cafe stats and user summary in parallel', async () => {
+    it('should fetch cafe stats on mount', async () => {
       vi.mocked(api.adminAnalytics.getCafeStats).mockResolvedValue({ stats: mockCafeStats })
-      vi.mocked(api.adminAnalytics.getUserActivitySummary).mockResolvedValue(mockUserSummary)
 
       render(<StatsPage />)
 
       await waitFor(() => {
         expect(api.adminAnalytics.getCafeStats).toHaveBeenCalledTimes(1)
-        expect(api.adminAnalytics.getUserActivitySummary).toHaveBeenCalledTimes(1)
       })
     })
   })
@@ -370,7 +328,6 @@ describe('StatsPage', () => {
       }]
 
       vi.mocked(api.adminAnalytics.getCafeStats).mockResolvedValue({ stats: statsWithZeroViews })
-      vi.mocked(api.adminAnalytics.getUserActivitySummary).mockResolvedValue(mockUserSummary)
 
       render(<StatsPage />)
 
@@ -398,7 +355,6 @@ describe('StatsPage', () => {
       }]
 
       vi.mocked(api.adminAnalytics.getCafeStats).mockResolvedValue({ stats: statsWithNulls })
-      vi.mocked(api.adminAnalytics.getUserActivitySummary).mockResolvedValue(mockUserSummary)
 
       render(<StatsPage />)
 
