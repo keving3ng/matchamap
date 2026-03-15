@@ -28,10 +28,10 @@ ENABLE_ADMIN_PANEL:
   prod: true
 
 # Coming Soon Page
-# Password-protected splash page shown before public launch
+# Password-protected splash page shown before public launch (disabled = live)
 SHOW_COMING_SOON:
   dev: false
-  prod: true
+  prod: false
 
 # Events Page - Community gatherings and workshops
 # Displays upcoming matcha-related events, workshops, and festivals in Toronto
