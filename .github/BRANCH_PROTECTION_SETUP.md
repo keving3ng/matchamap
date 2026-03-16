@@ -85,7 +85,6 @@ If coverage reports aren't posted to PRs:
 1. Verify the workflows completed successfully
 2. Check that artifacts were uploaded properly
 3. Ensure the coverage-report job has proper permissions
-4. Verify codecov.yml configuration is valid
 
 ## Workflow Overview
 
@@ -128,7 +127,6 @@ The person setting up branch protection needs:
 ## Related Files
 
 - `.github/workflows/tests.yml` - Main test workflow
-- `.github/workflows/test-summary.yml` - PR comment workflow  
-- `codecov.yml` - Coverage configuration
+- `.github/workflows/test-summary.yml` - PR comment workflow
 - `frontend/vitest.config.ts` - Frontend test configuration
 - `backend/vitest.config.ts` - Backend test configuration

@@ -117,7 +117,6 @@ npm run bundle:check
 ```
 
 **Monitoring:**
-- Codecov bundle analysis integration
 - Bundle size trending in CI logs
 - Manual review during PR process
 

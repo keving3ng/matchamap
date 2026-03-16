@@ -2,7 +2,6 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import yaml from '@rollup/plugin-yaml'
-import { codecovVitePlugin } from '@codecov/vite-plugin'
 import { visualizer } from 'rollup-plugin-visualizer'
 import viteCompression from 'vite-plugin-compression'
 import fs from 'fs'
@@ -47,12 +46,6 @@ export default defineConfig(() => ({
       template: 'treemap', // or 'sunburst', 'network'
     }),
 
-    // Put the Codecov vite plugin after all other plugins
-    codecovVitePlugin({
-      enableBundleAnalysis: process.env.CODECOV_TOKEN !== undefined,
-      bundleName: 'matchamap-frontend',
-      uploadToken: process.env.CODECOV_TOKEN,
-    }),
   ].filter(Boolean),
 
   resolve: {

@@ -3,17 +3,11 @@ import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import yaml from "@rollup/plugin-yaml";
 import path from "path";
-import { codecovVitePlugin } from "@codecov/vite-plugin";
 
 export default defineConfig({
     plugins: [
         react(),
         yaml(),
-        codecovVitePlugin({
-            enableBundleAnalysis: process.env.CODECOV_TOKEN !== undefined,
-            bundleName: "matchamap-frontend",
-            uploadToken: process.env.CODECOV_TOKEN,
-        }),
     ],
     resolve: {
         alias: {
@@ -25,7 +19,7 @@ export default defineConfig({
         environment: "jsdom",
         setupFiles: ["./src/test/setup.ts"],
         css: true,
-        // Output JUnit XML for Codecov test analytics
+        // Output JUnit XML for CI
         reporters: process.env.CI ? ["default", "junit"] : ["default"],
         outputFile: {
             junit: "./test-results/junit.xml",

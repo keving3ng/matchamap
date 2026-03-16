@@ -1,6 +1,5 @@
 # 🍵 MatchaMap
-[![CI](https://github.com/keving3ng/matchamap/actions/workflows/ci.yml/badge.svg)](https://github.com/keving3ng/matchamap/actions/workflows/ci.yml) 
-[![codecov](https://codecov.io/gh/keving3ng/matchamap/branch/main/graph/badge.svg?token=TQNXOMG9D5)](https://codecov.io/gh/keving3ng/matchamap)
+[![CI](https://github.com/keving3ng/matchamap/actions/workflows/ci.yml/badge.svg)](https://github.com/keving3ng/matchamap/actions/workflows/ci.yml)
 
 A mobile-first, map-based **curated guide** to matcha cafes in Toronto (and beyond). We share our recommendations and data, relevant events, and promote our content creator backer [vivisual.diary](https://www.instagram.com/vivisual.diary).
 

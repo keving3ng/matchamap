@@ -63,7 +63,7 @@ temp/
 coverage/
 *.lcov
 
-# Test results (JUnit XML for Codecov test analytics)
+# Test results (JUnit XML)
 test-results/
 
 # nyc test coverage

@@ -356,7 +356,7 @@ jobs:
 ### Artifact Management
 
 - **Test Results**: JUnit XML for all test types
-- **Coverage Reports**: Codecov integration
+- **Coverage Reports**: JUnit and coverage artifacts in CI
 - **E2E Artifacts**: Videos/screenshots on failure
 - **Performance Metrics**: Trend analysis
 - **Bundle Analysis**: Size tracking

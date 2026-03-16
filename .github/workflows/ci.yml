@@ -123,22 +123,6 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: npm run test:coverage --workspace=frontend -- --shard=${{ matrix.shard }}/4
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        if: github.ref == 'refs/heads/main' && always()
-        with:
-          files: ./frontend/coverage/coverage-final.json
-          flags: frontend-shard-${{ matrix.shard }}
-          token: ${{ secrets.CODECOV_TOKEN }}
-        continue-on-error: true
-
-      - name: Upload test results to Codecov
-        uses: codecov/test-results-action@v1
-        if: github.ref == 'refs/heads/main' && !cancelled()
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-        continue-on-error: true
-
   # ============================================================================
   # BACKEND TESTS
   # Fixed: removed continue-on-error to properly fail CI on test failures
