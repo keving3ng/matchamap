@@ -6,10 +6,10 @@ These labels help track quality issues in PRs and are **automatically removed** 
 
 | Label | Description | Removed When |
 |-------|-------------|--------------|
-| `fix-tests` | Tests are failing | Frontend Tests AND Backend Tests jobs pass |
-| `fix-typecheck` | TypeScript type errors | Static Analysis job passes (includes typecheck) |
+| `fix-tests` | Tests are failing | **Frontend tests** (all shards) AND **Backend tests** pass |
+| `fix-typecheck` | TypeScript type errors | **Static checks** job passes (includes typecheck) |
 | `fix-build` | Build is failing | Build job passes |
-| `fix-lint` | Linting errors | Static Analysis job passes (includes lint) |
+| `fix-lint` | Linting errors | **Static checks** job passes (includes lint) |
 
 ## How It Works
 
@@ -33,7 +33,7 @@ gh pr edit 123 --add-label "fix-tests"
 gh pr edit 123 --add-label "fix-tests,fix-typecheck,fix-lint"
 
 # As each check passes, corresponding labels are removed
-# - Static Analysis passes → removes fix-typecheck and fix-lint
+# - Static checks passes → removes fix-typecheck and fix-lint
 # - Tests pass → removes fix-tests
 ```
 
@@ -62,13 +62,13 @@ fix-tests:
   - Backend Tests
 
 fix-typecheck:
-  - Static Analysis (typecheck step)
+  - Static checks (typecheck step)
 
 fix-build:
   - Build
 
 fix-lint:
-  - Static Analysis (lint step)
+  - Static checks (lint step)
 ```
 
 ## Tips

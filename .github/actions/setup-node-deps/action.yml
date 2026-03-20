@@ -1,5 +1,5 @@
 name: 'Setup Node.js & Dependencies'
-description: 'Setup Node.js and install dependencies with optimized caching for self-hosted runners'
+description: 'Setup Node.js and install dependencies with optimized npm cache (GitHub Actions cache)'
 
 inputs:
   node-version:

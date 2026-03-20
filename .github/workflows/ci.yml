@@ -8,159 +8,115 @@ on:
     branches:
       - main
 
+# PRs: cancel superseded runs (saves minutes). Main: never cancel (avoid interrupting deploy).
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   # ============================================================================
-  # SHARED SETUP JOB
-  # Install dependencies once and cache for all subsequent jobs
-  # Saves ~5-6 minutes per workflow run by eliminating repeated npm installs
+  # STATIC CHECKS (single job — minimizes runner minutes vs parallel typecheck/lint/audit)
+  # Typecheck is blocking; lint and audit are advisory (continue-on-error)
   # ============================================================================
-  setup:
-    name: Setup & Install Dependencies
-    runs-on: self-hosted
-    timeout-minutes: 3
-    outputs:
-      cache-hit: ${{ steps.cache-node-modules.outputs.cache-hit }}
+  static-checks:
+    name: Static checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
 
       - name: Setup Node & Dependencies
         uses: ./.github/actions/setup-node-deps
 
-  # ============================================================================
-  # PHASE 1: PARALLEL CRITICAL CHECKS
-  # TypeScript type checking - critical path for build
-  # ============================================================================
-  typecheck:
-    name: TypeScript Type Checking
-    needs: [setup]
-    runs-on: self-hosted
-    timeout-minutes: 3
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Setup Node & Dependencies
-        uses: ./.github/actions/setup-node-deps
-
-      - name: Run type checking
+      - name: TypeScript type checking
         run: npm run typecheck
 
-  # ============================================================================
-  # PARALLEL STATIC ANALYSIS (Non-blocking for build)
-  # ============================================================================
-  lint:
-    name: Linting
-    needs: [setup]
-    runs-on: self-hosted
-    timeout-minutes: 3
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Setup Node & Dependencies
-        uses: ./.github/actions/setup-node-deps
-
-      - name: Run linter
+      - name: Lint
         run: npm run lint:ci
-        continue-on-error: true  # Don't block on lint warnings
+        continue-on-error: true
 
-  security-audit:
-    name: Security Audit
-    needs: [setup]
-    runs-on: self-hosted
-    timeout-minutes: 2
-    # Only run on main branch or when dependencies change
-    if: |
-      github.ref == 'refs/heads/main' ||
-      contains(github.event.head_commit.modified, 'package.json') ||
-      contains(github.event.head_commit.modified, 'package-lock.json') ||
-      contains(github.event.head_commit.modified, 'backend/package.json') ||
-      contains(github.event.head_commit.modified, 'backend/package-lock.json')
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Setup Node & Dependencies
-        uses: ./.github/actions/setup-node-deps
-
-      - name: Run security audit
+      - name: Security audit
+        if: |
+          github.ref == 'refs/heads/main' ||
+          contains(github.event.head_commit.modified, 'package.json') ||
+          contains(github.event.head_commit.modified, 'package-lock.json') ||
+          contains(github.event.head_commit.modified, 'backend/package.json') ||
+          contains(github.event.head_commit.modified, 'backend/package-lock.json')
         run: npm audit --audit-level=high --production
-        continue-on-error: true  # Don't block on audit findings
+        continue-on-error: true
 
   # ============================================================================
-  # FRONTEND TESTS (Chunked for parallel execution)
-  # 1079 tests split into 4 shards for ~4-5 min time savings
-  # PRs: run without coverage for speed
-  # Main: run with coverage for tracking
+  # FRONTEND TESTS — 2 shards (balance: fewer concurrent runners vs wall-clock time)
+  # PRs: no coverage. Main: coverage for tracking.
   # ============================================================================
   frontend-tests:
-    name: Frontend Tests (Shard ${{ matrix.shard }})
-    needs: [setup, typecheck]  # Ensure dependencies are installed and TypeScript compiles
-    runs-on: self-hosted
-    timeout-minutes: 5
+    name: Frontend tests (shard ${{ matrix.shard }}/2)
+    needs: [static-checks]
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
     strategy:
       matrix:
-        shard: [1, 2, 3, 4]
-      fail-fast: false  # Run all shards even if one fails
+        shard: [1, 2]
+      fail-fast: false
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
 
       - name: Setup Node & Dependencies
         uses: ./.github/actions/setup-node-deps
 
-      - name: Run frontend tests (shard ${{ matrix.shard }}/4) - without coverage
+      - name: Run frontend tests (no coverage)
         if: github.ref != 'refs/heads/main'
-        run: npm test --workspace=frontend -- --shard=${{ matrix.shard }}/4
+        run: npm test --workspace=frontend -- --shard=${{ matrix.shard }}/2
 
-      - name: Run frontend tests (shard ${{ matrix.shard }}/4) - with coverage
+      - name: Run frontend tests (with coverage)
         if: github.ref == 'refs/heads/main'
-        run: npm run test:coverage --workspace=frontend -- --shard=${{ matrix.shard }}/4
+        run: npm run test:coverage --workspace=frontend -- --shard=${{ matrix.shard }}/2
 
   # ============================================================================
   # BACKEND TESTS
-  # Fixed: removed continue-on-error to properly fail CI on test failures
-  # Note: Uses ubuntu-latest instead of self-hosted due to GLIBC requirements
-  #       for @cloudflare/workerd-linux-64 (requires GLIBC 2.32-2.35)
+  # @cloudflare/workerd-linux-64 needs GLIBC 2.32+ (ubuntu-latest)
   # ============================================================================
   backend-tests:
-    name: Backend Tests
-    needs: [setup, typecheck]  # Ensure dependencies are installed and TypeScript compiles
+    name: Backend tests
+    needs: [static-checks]
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
 
       - name: Setup Node & Dependencies
         uses: ./.github/actions/setup-node-deps
 
       - name: Run backend tests
         run: npm run test:ci --workspace=backend
-        # Removed continue-on-error - backend tests should now fail CI if they fail
 
   # ============================================================================
-  # BUILD (Only on main branch - verification before deployment)
-  # Starts ~2-3 minutes earlier than before
+  # BUILD (main pushes only — before deploy)
   # ============================================================================
   build:
     name: Build
-    runs-on: self-hosted
-    needs: [setup, typecheck]  # Ensure dependencies are installed and typecheck passes
+    runs-on: ubuntu-latest
+    needs: [static-checks]
     timeout-minutes: 10
-    # Only run on main branch pushes
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
 
       - name: Setup Node & Dependencies
         uses: ./.github/actions/setup-node-deps
@@ -169,20 +125,20 @@ jobs:
         run: npm run build
 
   # ============================================================================
-  # DEPLOY BACKEND (Only on main branch after all checks pass)
-  # Consolidates deploy-backend.yml workflow to avoid duplicate checks
+  # DEPLOY BACKEND (main pushes only)
   # ============================================================================
   deploy-backend:
-    name: Deploy Backend to Production
-    runs-on: self-hosted
-    needs: [typecheck, backend-tests, build]  # Wait for all critical checks
-    timeout-minutes: 5
-    # Only deploy on main branch pushes (not PRs)
+    name: Deploy backend
+    runs-on: ubuntu-latest
+    needs: [static-checks, backend-tests, build]
+    timeout-minutes: 8
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
 
       - name: Setup Node & Dependencies
         uses: ./.github/actions/setup-node-deps
@@ -203,8 +159,4 @@ jobs:
           echo "✅ Backend successfully deployed to production"
           echo "🔗 API URL: https://matchamap-api-production.keving3ng.workers.dev"
 
-  # ============================================================================
-  # NOTE: ci-success job removed
-  # GitHub's native status checks are sufficient - configure branch protection
-  # to require: typecheck, lint, security-audit, frontend-tests, backend-tests, build
-  # ============================================================================
+  # Branch protection: require static-checks, frontend-tests, backend-tests; build + deploy-backend on main.

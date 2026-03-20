@@ -578,6 +578,23 @@ export const CafeCard: React.FC<CafeCardProps> = ({ cafe, onSelect }) => {
 | **Adding cities** | `docs/adding-new-cities.md` |
 | **Full tech spec** | `docs/TECH_SPEC.md` |
 | **Doc navigation** | `docs/README.md` ⭐ START HERE |
+| **CI workflow efficiency** | This file → **CI/CD (GitHub Actions)** |
+
+---
+
+## CI/CD (GitHub Actions)
+
+GitHub-hosted runners bill **per minute**. Keep workflows **lean**:
+
+- **Fewer jobs** — Combine steps that share one checkout and `node_modules` (e.g. typecheck + lint + conditional audit in a single job) unless a separate job is required for gates or deploy.
+- **Fewer matrix shards** — Use the minimum shard count that keeps test time acceptable; each shard is a full runner.
+- **No redundant “warm cache” jobs** — Rely on `actions/cache` in `.github/actions/setup-node-deps`; one install per job is enough.
+- **Cancel stale PR runs** — Workflow uses `concurrency` so new pushes cancel in-flight PR workflows (not `main`).
+- **Shallow clones** — `fetch-depth: 1` on checkout where history is not needed.
+
+**Cursor rule:** `.cursor/rules/ci-github-actions.mdc` (applies when editing `.github/` workflows).
+
+**After changing required jobs:** Update **branch protection** required checks to match exact job names in GitHub (see `.github/BRANCH_PROTECTION_SETUP.md`).
 
 ---
 
@@ -621,6 +638,7 @@ npm test -- --ui         # Interactive UI mode
 4. ✅ No console errors in browser
 5. ✅ Test on mobile viewport (320px)
 6. ✅ Check bundle size didn't explode
+7. ✅ Edits to `.github/workflows/**` follow **CI/CD (GitHub Actions)** (cost-aware)
 
 ---
 
@@ -962,6 +980,9 @@ Before marking any task complete, verify:
 - [ ] Tests pass (`npm test`)
 - [ ] New tests added for new features
 - [ ] Test coverage maintained
+
+**CI/CD (if you edited `.github/workflows/` or actions):**
+- [ ] Follows **CI/CD (GitHub Actions)** — minimal jobs/shards, no redundant install jobs, concurrency as documented
 
 ---
 

@@ -35,10 +35,10 @@ await mcp__github__pull_request_read({
 ```
 
 Parse the response to identify FAILED checks. Common checks in this project:
-- **Static Analysis** (typecheck + lint:ci + audit) - Most common failure
-- **Frontend Tests** (vitest)
-- **Backend Tests** (vitest backend)
-- **Build** (vite build)
+- **Static checks** (typecheck + lint:ci + conditional audit) — typecheck is blocking
+- **Frontend tests** (Vitest shards)
+- **Backend tests** (Vitest backend)
+- **Build** (main-branch pushes only; not on PRs)
 
 Look for `conclusion: "FAILURE"` in the `statusCheckRollup` array.
 
@@ -70,7 +70,7 @@ git pull origin <pr.head.ref>
 
 **Only run the check that failed** - don't waste time on passing checks.
 
-**If Static Analysis failed:**
+**If Static checks failed:**
 ```bash
 npm run typecheck  # TypeScript errors are the most common cause
 ```
