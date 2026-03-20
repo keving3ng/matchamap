@@ -65,6 +65,24 @@ waitForPersistence(ms?: number): Promise<void>
 -   Global setup file auto-loaded
 -   Coverage reporting configured
 
+### Log verbosity (CI vs local)
+
+Vitest supports different **reporters** and **console suppression** so pipelines stay quiet while local runs stay debuggable.
+
+| Environment | Behavior |
+|-------------|----------|
+| **GitHub Actions** (`CI=true`) | `silent: "passed-only"` — hides `console.*` from **passing** tests (still shows logs for **failed** tests). Terminal reporter: **`dot`** (compact). JUnit is still written for the frontend. |
+| **Local** (no `CI`) | Full default reporter; all console output from tests. |
+| **`npm run test:verbose`** (frontend/backend) | `VITEST_VERBOSE=1` + `verbose` reporter — per-test names and full console. |
+
+**Manual overrides (any shell):**
+
+- `VITEST_LOG_LEVEL=normal` — with `CI=true`, use default reporter and full console (e.g. debug CI-like output).
+- `VITEST_LOG_LEVEL=quiet` — locally, apply CI-style quiet (`passed-only` + dot).
+- `VITEST_LOG_LEVEL=verbose` — same as verbose reporter intent (use with `VITEST_VERBOSE=1` for full console).
+
+**Note:** `@cloudflare/vitest-pool-workers` may still print its own `[vpw:debug]` lines; that is separate from Vitest’s `silent` option.
+
 ---
 
 ## Writing Tests
@@ -593,6 +611,10 @@ await waitFor(
 ```bash
 # Run all tests
 npm test
+
+# Verbose (per-test output + full console) — frontend or backend workspace
+npm run test:verbose --workspace=frontend
+npm run test:verbose --workspace=backend
 
 # Run in watch mode
 npm test -- --watch

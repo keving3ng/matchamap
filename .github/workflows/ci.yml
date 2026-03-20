@@ -71,11 +71,23 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
+      # Frontend deploy runs only after tests + build + API deploy (sequential with CI).
+      # Disable Git-connected production builds in the Pages project settings, or every push
+      # will still start a second Pages build in parallel with this workflow.
+      - name: Deploy frontend to Cloudflare Pages
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: npx wrangler pages deploy frontend/dist --project-name="${CLOUDFLARE_PAGES_PROJECT_NAME}"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_PAGES_PROJECT_NAME: ${{ secrets.CLOUDFLARE_PAGES_PROJECT_NAME }}
+
       - name: Deployment status
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
           echo "✅ Database migrations applied successfully"
           echo "✅ Backend successfully deployed to production"
+          echo "✅ Frontend deployed to Cloudflare Pages (from CI — disable Git builds on the Pages project to avoid duplicate deploys)"
           echo "🔗 API URL: https://matchamap-api-production.keving3ng.workers.dev"
 
       - name: Upload Vitest JUnit (frontend)

@@ -83,53 +83,40 @@ cd workers && npm run dev
 
 ## Cloudflare Pages Setup (Frontend)
 
-### Initial Setup
+### CI-only production deploy (recommended)
 
-1. **Connect Repository**
-
-    ```bash
-    # Via Cloudflare Dashboard:
-    Pages → Create Project → Connect to Git
-    Select: GitHub/GitLab repository
-    ```
-
-2. **Build Configuration**
-
-    ```
-    Framework preset: Vite
-    Build command: npm run build
-    Build output directory: dist
-    Root directory: /
-    Branch: main
-    ```
-
-3. **Environment Variables** (none needed for V1)
-
-### Automatic Deployment
-
-**Using GitHub MCP Server (Recommended):**
-
-Use the GitHub MCP server tools to push changes:
-1. Use `mcp__github__create_or_update_file` to update individual files
-2. Use `mcp__github__push_files` to push multiple files in a single commit
-3. Cloudflare Pages automatically detects the push and deploys
-
-**Example commit message format:** `feat: add new feature`
-
-Cloudflare Pages automatically:
-1. Detects push to main
-2. Runs npm run build
-3. Deploys to edge CDN (~1 min)
-
-### Manual Deployment
+Production builds should run **only** after GitHub Actions CI passes (tests, typecheck, build). The workflow **`.github/workflows/ci.yml`** deploys the built site with:
 
 ```bash
-# Deploy via Wrangler
-npx wrangler pages deploy dist
-
-# Preview deployment (doesn't affect production)
-npx wrangler pages deploy dist --branch preview
+npx wrangler pages deploy frontend/dist --project-name="<your-pages-project-name>"
 ```
+
+**GitHub Actions secrets** (repository): `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, and **`CLOUDFLARE_PAGES_PROJECT_NAME`** (Pages project slug).
+
+If the Pages project is **connected to GitHub**, Cloudflare also starts a build **on every push**, in parallel with Actions—the site can deploy **before** CI finishes. To avoid that duplicate deploy:
+
+1. Cloudflare Dashboard → **Workers & Pages** → your project → **Settings** → **Builds & deployments** → **Disconnect** the Git repository (or use a **Direct Upload** / Wrangler-only project), **or**
+2. Otherwise disable automatic production builds for `main` if your dashboard offers that option.
+
+After disconnecting, production updates come **only** from the CI workflow step.
+
+### Manual / local deploy
+
+From the repo root (after `npm run build`):
+
+```bash
+npx wrangler pages deploy frontend/dist --project-name="<your-pages-project-name>"
+```
+
+Preview (non-production branch name):
+
+```bash
+npx wrangler pages deploy frontend/dist --branch preview --project-name="<your-pages-project-name>"
+```
+
+### Legacy: Git-connected project (not recommended for sequencing)
+
+If you use **Connect to Git** in the Pages UI, set **root** to the monorepo root, build **`npm run build`** or **`npm run build:frontend`**, and output **`frontend/dist`** (Vite `outDir`). Prefer migrating to **CI-only** deploy above so production does not race GitHub Actions.
 
 ## Cloudflare Workers Setup (Backend)
 

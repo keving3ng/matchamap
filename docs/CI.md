@@ -6,6 +6,14 @@
 
 This minimizes GitHub-hosted **runner minutes** (no parallel fan-out that repeats installs).
 
+### Cloudflare Pages vs GitHub Actions
+
+If the Pages project is **connected to GitHub**, Cloudflare starts a **production build as soon as you push**, in **parallel** with this workflow—so the site can deploy **before** tests finish.
+
+**Recommended:** Use **only** the workflow step **Deploy frontend to Cloudflare Pages** (after tests, build, migrations, and Workers). In the Cloudflare dashboard, **disconnect the Git repository** from the Pages project (or otherwise **disable automatic production builds**) so pushes do not trigger a second Pages build. See `docs/DEPLOYMENT.md` → *Frontend: CI-only deploy*.
+
+Secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, and **`CLOUDFLARE_PAGES_PROJECT_NAME`** (the Pages project slug).
+
 ## Forks and untrusted PRs
 
 - Workflows triggered by **`pull_request`** from forks run with a **`GITHUB_TOKEN`** that has **no access to repository secrets** (e.g. `CLOUDFLARE_API_TOKEN`). Deploy and other secret-backed steps are **skipped** or **not defined** for those events; only the same **build/test/lint** steps that use the public token run.

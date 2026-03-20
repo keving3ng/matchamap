@@ -1,7 +1,38 @@
 import { defineWorkersConfig } from '@cloudflare/vitest-pool-workers/config';
 
+/** CI: quiet console + compact reporter; local: full output. Override with VITEST_VERBOSE=1 or VITEST_LOG_LEVEL=normal|quiet|verbose */
+function resolveVitestLogOptions() {
+  const isCI = process.env.CI === 'true'
+  const verboseFlag =
+    process.env.VITEST_VERBOSE === '1' ||
+    process.env.VITEST_VERBOSE === 'true'
+  const logLevel = process.env.VITEST_LOG_LEVEL
+  const forceNormal = logLevel === 'normal'
+  const forceQuiet = logLevel === 'quiet'
+  const forceVerbose = logLevel === 'verbose' || verboseFlag
+
+  const silent: boolean | 'passed-only' =
+    forceVerbose || forceNormal
+      ? false
+      : isCI || forceQuiet
+        ? 'passed-only'
+        : false
+
+  const terminalReporter = forceVerbose
+    ? 'verbose'
+    : isCI && !forceNormal
+      ? 'dot'
+      : 'default'
+
+  return { silent, terminalReporter, isCI }
+}
+
+const logOpts = resolveVitestLogOptions()
+
 export default defineWorkersConfig({
   test: {
+    silent: logOpts.silent,
+    reporters: [logOpts.terminalReporter],
     poolOptions: {
       workers: {
         wrangler: { configPath: './wrangler.toml' },

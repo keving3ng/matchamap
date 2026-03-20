@@ -24,6 +24,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:ci": "vitest run",
+    "test:verbose": "VITEST_VERBOSE=1 vitest run --reporter=verbose",
     "test:watch": "vitest",
     "test:coverage": "vitest --coverage"
   },

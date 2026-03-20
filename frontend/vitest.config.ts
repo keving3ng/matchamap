@@ -4,6 +4,35 @@ import react from "@vitejs/plugin-react";
 import yaml from "@rollup/plugin-yaml";
 import path from "path";
 
+/** CI: quiet console + compact reporter; local: full output. Override with VITEST_VERBOSE=1 or VITEST_LOG_LEVEL=normal|quiet|verbose */
+function resolveVitestLogOptions() {
+    const isCI = process.env.CI === "true";
+    const verboseFlag =
+        process.env.VITEST_VERBOSE === "1" ||
+        process.env.VITEST_VERBOSE === "true";
+    const logLevel = process.env.VITEST_LOG_LEVEL;
+    const forceNormal = logLevel === "normal";
+    const forceQuiet = logLevel === "quiet";
+    const forceVerbose = logLevel === "verbose" || verboseFlag;
+
+    const silent: boolean | "passed-only" =
+        forceVerbose || forceNormal
+            ? false
+            : isCI || forceQuiet
+              ? "passed-only"
+              : false;
+
+    const terminalReporter = forceVerbose
+        ? "verbose"
+        : isCI && !forceNormal
+          ? "dot"
+          : "default";
+
+    return { silent, terminalReporter, isCI };
+}
+
+const logOpts = resolveVitestLogOptions();
+
 export default defineConfig({
     plugins: [
         react(),
@@ -19,8 +48,10 @@ export default defineConfig({
         environment: "jsdom",
         setupFiles: ["./src/test/setup.ts"],
         css: true,
-        // Output JUnit XML for CI
-        reporters: process.env.CI ? ["default", "junit"] : ["default"],
+        silent: logOpts.silent,
+        reporters: logOpts.isCI
+            ? [logOpts.terminalReporter, "junit"]
+            : [logOpts.terminalReporter],
         outputFile: {
             junit: "./test-results/junit.xml",
         },
