@@ -50,6 +50,7 @@ export const COPY = {
     ratingFilter: (rating: number) => `${rating}+ ★`,
     drinkType: 'Drink Type',
     allDrinks: 'All Drinks',
+    clearFilters: 'Clear filters',
     allCities: 'All Cities',
     showRoute: 'Show Route',
     hideRoute: 'Hide Route',

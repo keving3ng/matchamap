@@ -1,6 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MapView } from '../MapView'
+import { COPY } from '../../constants/copy'
+import { useUIStore } from '../../stores/uiStore'
 import type { CafeWithDistance } from '../../types'
 
 // Mock Leaflet - define inline to avoid hoisting issues
@@ -9,10 +12,15 @@ vi.mock('leaflet', () => {
     map: vi.fn(() => ({
       setView: vi.fn().mockReturnThis(),
       remove: vi.fn(),
+      removeLayer: vi.fn(),
       zoomIn: vi.fn(),
       zoomOut: vi.fn(),
       on: vi.fn().mockReturnThis(),
       off: vi.fn().mockReturnThis(),
+      getCenter: vi.fn(() => ({ lat: 43.65, lng: -79.38 })),
+      getZoom: vi.fn(() => 14),
+      invalidateSize: vi.fn(),
+      fitBounds: vi.fn(),
     })),
     tileLayer: vi.fn(() => ({
       addTo: vi.fn(),
@@ -71,6 +79,7 @@ const mockProps = {
 describe('MapView', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    useUIStore.setState({ selectedDrinkType: null })
   })
 
   it('renders map container', () => {
@@ -107,5 +116,35 @@ describe('MapView', () => {
     // Should have Details button on mobile and desktop
     const detailsButtons = screen.getAllByText('Details')
     expect(detailsButtons.length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('does not show clear filters control when no quick filters are active', () => {
+    render(<MapView {...mockProps} />)
+    expect(screen.queryByRole('button', { name: COPY.map.clearFilters })).not.toBeInTheDocument()
+  })
+
+  it('shows clear filters control when a drink type is selected', () => {
+    useUIStore.setState({ selectedDrinkType: 'Iced Matcha Latte' })
+    render(<MapView {...mockProps} />)
+    expect(screen.getByRole('button', { name: COPY.map.clearFilters })).toBeInTheDocument()
+  })
+
+  it('clears drink type and quick filters when clear is activated', async () => {
+    const user = userEvent.setup()
+    useUIStore.setState({ selectedDrinkType: 'Iced Matcha Latte' })
+    render(<MapView {...mockProps} />)
+    await user.click(screen.getByRole('button', { name: COPY.map.clearFilters }))
+    expect(useUIStore.getState().selectedDrinkType).toBeNull()
+    expect(screen.queryByRole('button', { name: COPY.map.clearFilters })).not.toBeInTheDocument()
+  })
+
+  it('clears local quick filters when clear is activated', async () => {
+    const user = userEvent.setup()
+    render(<MapView {...mockProps} />)
+    const openNowBtn = screen.getByRole('button', { name: COPY.map.openNow })
+    await user.click(openNowBtn)
+    expect(openNowBtn).toHaveClass('from-matcha-600')
+    await user.click(screen.getByRole('button', { name: COPY.map.clearFilters }))
+    expect(openNowBtn).toHaveClass('bg-white')
   })
 })
