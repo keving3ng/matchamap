@@ -39,11 +39,9 @@ jobs:
 
       - name: Lint (GitHub annotations)
         run: npm run lint:ci --workspace=frontend -- -f gha
-        continue-on-error: true
 
       - name: Security audit
-        run: npm audit --audit-level=high --production
-        continue-on-error: true
+        run: npm audit --audit-level=high --omit=dev
 
       # One step always runs (avoid relying on github.ref for pull_request / merge_group edge cases).
       # Coverage on direct pushes to main; test:ci for PRs and merge queue.

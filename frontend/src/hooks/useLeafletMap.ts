@@ -37,7 +37,10 @@ export const useLeafletMap = ({
   const initialCenterRef = useRef(initialCenter)
   const initialZoomRef = useRef(initialZoom)
   const onMapMoveRef = useRef(onMapMove)
-  onMapMoveRef.current = onMapMove
+
+  useEffect(() => {
+    onMapMoveRef.current = onMapMove
+  }, [onMapMove])
 
   useEffect(() => {
     if (!containerRef.current) return
