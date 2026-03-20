@@ -210,14 +210,6 @@ export async function cleanupTestData(env: any) {
 
   // List of tables to clean in dependency order (children first, parents last)
   const tables = [
-    'review_comment_likes',
-    'review_comments',
-    'review_helpful',
-    'user_reviews',
-    'user_follows',
-    'user_badges',
-    'user_favorites',
-    'review_photos',
     'user_activity_stats',
     'drinks',
     'cafe_stats',

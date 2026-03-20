@@ -95,13 +95,11 @@ Deprecate or remove (social / public user):
 
 Mark deprecated routes with a comment or small doc; remove when no frontend calls them.
 
-### 3.2 Database tables (do not drop without backup)
+### 3.2 Database tables
 
-**Keep:** `cafes`, `drinks`, `events`, `cafe_stats` (or equivalent), `waitlist`, `users`, `sessions`, `admin_audit_log` (if used).
+**Core (retained):** `cafes`, `drinks`, `events`, `cafe_stats` (or equivalent), `waitlist`, `contact_submissions`, `users`, `sessions`, `user_profiles` (admin/profile shape), `admin_audit_log` (if used).
 
-**Leave in place but unused (for now):**  
-`user_profiles`, `user_checkins`, `user_reviews`, `review_photos`, `review_helpful`, `review_comments`, `review_comment_likes`, `user_favorites`, `user_badges`, `user_follows`, and any other user/social tables.  
-Dropping tables is a separate migration; only after you’re sure you don’t need the data.
+**Removed (social/UGC era):** Migration `0023_drop_social_era_tables.sql` drops `user_reviews`, `review_photos`, `review_helpful`, `review_comments`, `review_comment_likes`, `user_favorites`, `user_badges`, `user_follows`, `user_lists`, `user_list_items`, `notifications`, `user_checkins`, `cafe_suggestions`, and related indexes. Apply with `npm run db:migrate:prod` before deploy; backup remote D1 if you still need legacy data.
 
 ### 3.3 Auth model
 
@@ -140,7 +138,7 @@ Keep: TECH_SPEC, DEPLOYMENT, TESTING, QUICKSTART_BACKEND, feature-flags, adding-
 
 - [x] **Phase 1:** Set feature flags so prod has no public user accounts, no social (see table above); About on, Contact optional.
 - [x] **Phase 2:** Hide or remove routes and nav items for login (or admin-only), profile, leaderboards, store, settings; hide check-ins, reviews, photos, favorites, follow UI when flags off.
-- [ ] **Phase 3 (optional):** Deprecate/remove social and public-user API endpoints; keep DB tables for now; document admin-only auth.
+- [x] **Phase 3 (optional):** Social-era DB tables removed (`0023`); cafe list search uses curated fields only; unused backend helpers deleted. Remaining: audit any lingering shared types/docs for social wording.
 - [x] **Phase 4:** Update README, docs/README, CLAUDE.md; archive or trim social/feed docs. *(GitHub description/labels: do manually in repo settings.)*
 
 **Cut-off definition:** The **new foundation** is the state of the product and repo after Phase 1 and Phase 2. Phase 3 and 4 can follow in order or in parallel.

@@ -49,39 +49,9 @@
 
 ### Unused/Deprecated Database Tables
 
-**Issue:** Database schema contains tables for features that are out of scope per PRODUCT_FOUNDATION.md.
+**Status (2026-03):** Addressed — migration `0023_drop_social_era_tables.sql` drops social/UGC tables; `backend/drizzle/schema.ts` and cafe search updated; see `docs/SIMPLIFICATION_PLAN.md` §3.2.
 
-**Files:** `backend/drizzle/schema.ts` (full file)
-
-**Deprecated tables:**
-- `userReviews` - User review system (social feature, out of scope)
-- `reviewPhotos` - User photo uploads for reviews (out of scope)
-- `reviewHelpful` - Review ratings (out of scope)
-- `reviewComments` - Threaded review comments (out of scope)
-- `reviewCommentLikes` - Comment reactions (out of scope)
-- `userFavorites` - User favorites/bookmarks (out of scope)
-- `userBadges` - Gamification/badges (out of scope)
-- `userFollows` - User following system (social feature, out of scope)
-- `userLists` - User-created lists (out of scope)
-- `userListItems` - List items (out of scope)
-- `notifications` - User notifications (out of scope)
-- `userCheckins` - Check-in tracking (out of scope)
-- `cafeSuggestions` - User cafe suggestions (out of scope)
-
-**Impact:**
-- Schema bloat: 21 tables total, only ~8 actually used in simplified foundation
-- Wasted database storage and indexing
-- Confusion for future developers about which tables are active
-- Migrations not cleaned up (22 migration files, many adding deprecated features)
-- No clear indication which migrations are "live" vs. historical
-
-**Fix approach:**
-1. Create final migration (0021_cleanup_deprecated_tables.sql) that drops unused tables
-2. Update schema.ts to remove deprecated exports
-3. Document in SIMPLIFICATION_PLAN.md which migrations can be skipped in fresh deploys
-4. Consider creating clean "production schema" snapshot for new environments
-
-**Priority:** Medium - Not breaking but creates confusion and maintenance burden.
+**Remaining:** Historical migration files still exist for audit; fresh D1 databases still run the full chain through `0023`.
 
 ---
 

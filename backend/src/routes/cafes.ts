@@ -1,7 +1,7 @@
 import { IRequest } from 'itty-router';
 import { eq, isNull, and, gte, lte, sql, like, or, inArray } from 'drizzle-orm';
 import { Env } from '../types';
-import { getDb, cafes, drinks, userReviews } from '../db';
+import { getDb, cafes, drinks } from '../db';
 import {
   jsonResponse,
   errorResponse,
@@ -11,13 +11,11 @@ import {
 import { HTTP_STATUS, PAGINATION_CONSTANTS, CACHE_CONSTANTS } from '../constants';
 import { logAdminAction, generateChangesSummary } from '../utils/auditLog';
 import { AuthenticatedRequest } from '../middleware/auth';
-import { VALID_CITY_KEYS, ReviewSnippet } from '../../../shared/types';
+import { VALID_CITY_KEYS } from '../../../shared/types';
 
 // Search constants
 const SEARCH_CONSTANTS = {
   MAX_SEARCH_LENGTH: 100, // Maximum length of search query
-  SNIPPET_TRUNCATE_LENGTH: 150, // Characters to show in review snippet
-  MAX_SNIPPETS_PER_CAFE: 2, // Maximum review snippets to return per cafe
 } as const;
 
 /**
@@ -103,44 +101,33 @@ export async function listCafes(request: IRequest, env: Env): Promise<Response> 
       
       // Get cafe IDs that match search criteria
       const searchResults = await db
-        .select({ 
+        .select({
           cafeId: sql<number>`DISTINCT ${cafes.id}`,
           relevanceScore: sql<number>`
-            CASE 
+            CASE
               WHEN LOWER(${cafes.name}) LIKE ${searchTerm} THEN 3
               WHEN LOWER(${cafes.quickNote}) LIKE ${searchTerm} THEN 2
+              WHEN ${cafes.review} IS NOT NULL AND LOWER(${cafes.review}) LIKE ${searchTerm} THEN 2
               WHEN LOWER(${cafes.address}) LIKE ${searchTerm} THEN 1
               ELSE 0
-            END +
-            CASE 
-              WHEN ${userReviews.content} IS NOT NULL AND LOWER(${userReviews.content}) LIKE ${searchTerm} THEN 2
-              WHEN ${userReviews.tags} IS NOT NULL AND LOWER(${userReviews.tags}) LIKE ${searchTerm} THEN 1
-              ELSE 0
             END
-          `
+          `,
         })
         .from(cafes)
-        .leftJoin(userReviews, and(
-          eq(userReviews.cafeId, cafes.id),
-          eq(userReviews.moderationStatus, 'approved'),
-          eq(userReviews.isPublic, true)
-        ))
-        .where(and(
-          ...conditions,
-          or(
-            like(sql`LOWER(${cafes.name})`, searchTerm),
-            like(sql`LOWER(${cafes.quickNote})`, searchTerm),
-            like(sql`LOWER(${cafes.address})`, searchTerm),
-            and(
-              sql`${userReviews.content} IS NOT NULL`,
-              like(sql`LOWER(${userReviews.content})`, searchTerm)
-            ),
-            and(
-              sql`${userReviews.tags} IS NOT NULL`,
-              like(sql`LOWER(${userReviews.tags})`, searchTerm)
+        .where(
+          and(
+            ...conditions,
+            or(
+              like(sql`LOWER(${cafes.name})`, searchTerm),
+              like(sql`LOWER(${cafes.quickNote})`, searchTerm),
+              like(sql`LOWER(${cafes.address})`, searchTerm),
+              and(
+                sql`${cafes.review} IS NOT NULL`,
+                like(sql`LOWER(${cafes.review})`, searchTerm)
+              )
             )
           )
-        ))
+        )
         .orderBy(sql`relevanceScore DESC`)
         .limit(limit + 1)
         .offset(offset);
@@ -209,70 +196,7 @@ export async function listCafes(request: IRequest, env: Env): Promise<Response> 
       drinksByCafeId.get(drink.cafeId)!.push(drink);
     }
 
-    // Batch fetch review snippets if search was performed
-    let reviewSnippetsByCafeId = new Map<number, ReviewSnippet[]>();
-    if (search && search.trim().length > 0 && cafeIds.length > 0) {
-      // Sanitize search query using centralized helper
-      const searchTerm = sanitizeSearchQuery(search);
-
-      const allReviewSnippets = await db
-        .select({
-          cafeId: userReviews.cafeId,
-          id: userReviews.id,
-          content: userReviews.content,
-          tags: userReviews.tags,
-          overallRating: userReviews.overallRating,
-          createdAt: userReviews.createdAt
-        })
-        .from(userReviews)
-        .where(and(
-          inArray(userReviews.cafeId, cafeIds),
-          eq(userReviews.moderationStatus, 'approved'),
-          eq(userReviews.isPublic, true),
-          or(
-            like(sql`LOWER(${userReviews.content})`, searchTerm),
-            like(sql`LOWER(${userReviews.tags})`, searchTerm)
-          )
-        ))
-        .orderBy(sql`${userReviews.overallRating} DESC`);
-
-      // Group snippets by cafe ID (limit to MAX_SNIPPETS_PER_CAFE per cafe)
-      // Parse tags from JSON string to array with error handling
-      for (const snippet of allReviewSnippets) {
-        if (!reviewSnippetsByCafeId.has(snippet.cafeId)) {
-          reviewSnippetsByCafeId.set(snippet.cafeId, []);
-        }
-        const cafeSnippets = reviewSnippetsByCafeId.get(snippet.cafeId)!;
-        if (cafeSnippets.length < SEARCH_CONSTANTS.MAX_SNIPPETS_PER_CAFE) {
-          // Parse tags from JSON string to match ReviewSnippet type
-          let parsedTags: string[] | null = null;
-          if (snippet.tags) {
-            try {
-              parsedTags = JSON.parse(snippet.tags);
-              // Validate that parsed tags is an array
-              if (!Array.isArray(parsedTags)) {
-                console.error(`Invalid tags format for review ${snippet.id}: expected array, got ${typeof parsedTags}`);
-                parsedTags = null;
-              }
-            } catch (error) {
-              console.error(`Failed to parse tags for review ${snippet.id}:`, error);
-              parsedTags = null;
-            }
-          }
-
-          const parsedSnippet: ReviewSnippet = {
-            id: snippet.id,
-            content: snippet.content,
-            tags: parsedTags,
-            overallRating: snippet.overallRating,
-            createdAt: snippet.createdAt || new Date().toISOString(),
-          };
-          cafeSnippets.push(parsedSnippet);
-        }
-      }
-    }
-
-    // Build cafe data with drinks and review snippets
+    // Build cafe data with drinks (UGC review snippets removed — curated guide only)
     const cafesWithScores = cafesList.map((cafe) => {
       const cafeDrinks = drinksByCafeId.get(cafe.id) || [];
 
@@ -287,19 +211,10 @@ export async function listCafes(request: IRequest, env: Env): Promise<Response> 
         }
       }
 
-      const reviewSnippets = reviewSnippetsByCafeId.get(cafe.id) || [];
-
       return {
         ...cafe,
         displayScore,
         drinks: cafeDrinks,
-        // Truncate snippets for display (tags already parsed earlier)
-        reviewSnippets: reviewSnippets.map(snippet => ({
-          ...snippet,
-          content: snippet.content.length > SEARCH_CONSTANTS.SNIPPET_TRUNCATE_LENGTH
-            ? snippet.content.substring(0, SEARCH_CONSTANTS.SNIPPET_TRUNCATE_LENGTH) + '...'
-            : snippet.content
-        }))
       };
     });
 
