@@ -194,6 +194,19 @@ export const waitlist = sqliteTable('waitlist', {
   fraudIdx: index('waitlist_fraud_idx').on(table.isFlaggedFraud),
 }));
 
+// Public contact form submissions (admin retrieval can be added later)
+export const contactSubmissions = sqliteTable('contact_submissions', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  name: text('name').notNull(),
+  email: text('email').notNull(),
+  subject: text('subject').notNull(),
+  message: text('message').notNull(),
+  signupIp: text('signup_ip'),
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+  createdAtIdx: index('contact_submissions_created_at_idx').on(table.createdAt),
+}));
+
 // User check-ins / passport tracking
 export const userCheckins = sqliteTable('user_checkins', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -551,6 +564,8 @@ export type Session = typeof sessions.$inferSelect;
 export type NewSession = typeof sessions.$inferInsert;
 export type Waitlist = typeof waitlist.$inferSelect;
 export type NewWaitlist = typeof waitlist.$inferInsert;
+export type ContactSubmission = typeof contactSubmissions.$inferSelect;
+export type NewContactSubmission = typeof contactSubmissions.$inferInsert;
 export type UserCheckin = typeof userCheckins.$inferSelect;
 export type NewUserCheckin = typeof userCheckins.$inferInsert;
 export type ReviewPhoto = typeof reviewPhotos.$inferSelect;

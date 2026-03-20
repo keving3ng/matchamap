@@ -59,6 +59,21 @@ export const waitlistSchema = z.object({
   referralSource: z.string().max(255).optional().nullable(),
 });
 
+export const CONTACT_SUBJECT_KEYS = [
+  'cafe-suggestion',
+  'correction',
+  'general',
+  'partnership',
+  'feedback',
+] as const;
+
+export const contactSchema = z.object({
+  name: z.string().min(1, 'Name is required').max(120, 'Name too long'),
+  email: emailSchema,
+  subject: z.enum(CONTACT_SUBJECT_KEYS),
+  message: z.string().min(1, 'Message is required').max(10000, 'Message too long'),
+});
+
 // Cafe schemas
 export const citySchema = z.enum(['toronto', 'montreal', 'tokyo', 'kyoto', 'osaka', 'new york', 'mississauga', 'scarborough'], {
   errorMap: () => ({ message: 'Invalid city. Must be one of: toronto, montreal, tokyo, kyoto, osaka, new york, mississauga, or scarborough' }),

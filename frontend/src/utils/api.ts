@@ -397,6 +397,21 @@ export const adminAnalyticsAPI = {
   },
 }
 
+/** Public contact form (matches backend contactSchema subject keys) */
+export const contactAPI = {
+  async submit(data: {
+    name: string
+    email: string
+    subject: 'cafe-suggestion' | 'correction' | 'general' | 'partnership' | 'feedback'
+    message: string
+  }): Promise<{ success: boolean }> {
+    return fetchAPI('/contact', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  },
+}
+
 /**
  * Export all APIs
  */
@@ -411,6 +426,7 @@ export const api = {
   waitlist: waitlistAPI,
   stats: statsAPI,
   adminAnalytics: adminAnalyticsAPI,
+  contact: contactAPI,
 }
 
 export default api

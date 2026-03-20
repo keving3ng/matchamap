@@ -12,6 +12,7 @@ import { lookupPlace } from './routes/places';
 import { bulkImportCafes, exportCafes } from './routes/import';
 import { register, login, logout, getCurrentUser, refreshToken } from './routes/auth';
 import { joinWaitlist, getWaitlistAdmin } from './routes/waitlist';
+import { submitContact } from './routes/contact';
 import { trackCafeStat, trackEventClick } from './routes/stats';
 import { handleAdminCafeStats, handleEventStats } from './routes/admin-stats';
 import { requireAuth, requireAdminAuth } from './middleware/auth';
@@ -60,6 +61,7 @@ router.get('/api/drinks', publicRateLimit(), getDrinks);
 router.get('/api/drinks/:id', publicRateLimit(), getDrink);
 router.get('/api/events', publicRateLimit(), listEvents);
 router.post('/api/waitlist', authRateLimit(), joinWaitlist);
+router.post('/api/contact', authRateLimit(), submitContact);
 
 // Stats tracking endpoints (public, no auth required)
 router.post('/api/stats/cafe/:cafeId/:stat', publicRateLimit(), trackCafeStat);
