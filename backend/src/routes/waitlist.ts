@@ -1,5 +1,5 @@
 import { IRequest } from 'itty-router';
-import { eq, desc, count, gte } from 'drizzle-orm';
+import { eq, asc, desc, count, gte } from 'drizzle-orm';
 import { Env } from '../types';
 import { jsonResponse, errorResponse, badRequestResponse } from '../utils/response';
 import { drizzle } from 'drizzle-orm/d1';
@@ -93,24 +93,13 @@ export async function getWaitlistAdmin(request: IRequest, env: Env): Promise<Res
     
     const total = totalResult?.count || 0;
 
-    // Get waitlist entries with pagination and sorting
-    let query = db.select().from(waitlist);
+    const sortColumn = sortBy === 'email' ? waitlist.email : waitlist.createdAt;
+    const orderByFn = sortOrder === 'desc' ? desc(sortColumn) : asc(sortColumn);
 
-    // Apply sorting
-    if (sortBy === 'email') {
-      // @ts-expect-error - Drizzle ORM query builder type narrowing issue
-      query = sortOrder === 'desc'
-        ? query.orderBy(desc(waitlist.email))
-        : query.orderBy(waitlist.email);
-    } else {
-      // Default to created_at
-      // @ts-expect-error - Drizzle ORM query builder type narrowing issue
-      query = sortOrder === 'desc'
-        ? query.orderBy(desc(waitlist.createdAt))
-        : query.orderBy(waitlist.createdAt);
-    }
-
-    const results = await query
+    const results = await db
+      .select()
+      .from(waitlist)
+      .orderBy(orderByFn)
       .limit(limit + 1)
       .offset(offset);
 
