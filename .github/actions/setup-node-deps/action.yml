@@ -1,5 +1,5 @@
 name: 'Setup Node.js & Dependencies'
-description: 'Setup Node.js and install dependencies with optimized npm cache (GitHub Actions cache)'
+description: 'Setup Node.js, npm cache (via setup-node), and install dependencies'
 
 inputs:
   node-version:
@@ -14,32 +14,11 @@ runs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ inputs.node-version }}
-        # Remove cache: "npm" - we'll use better caching below
-
-    - name: Cache node_modules
-      id: cache-node-modules
-      uses: actions/cache@v4
-      with:
-        path: |
-          node_modules
-          frontend/node_modules
-          backend/node_modules
-          shared/node_modules
-        key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-node-modules-
+        cache: npm
+        cache-dependency-path: |
+          package-lock.json
+          backend/package-lock.json
 
     - name: Install dependencies
-      if: steps.cache-node-modules.outputs.cache-hit != 'true'
       shell: bash
-      run: |
-        echo "Cache miss - installing dependencies..."
-        # Clean up stale node_modules from restore-key fallback to avoid npm ci conflicts
-        rm -rf node_modules frontend/node_modules backend/node_modules shared/node_modules
-        npm ci --ignore-scripts
-
-    - name: Cache hit info
-      if: steps.cache-node-modules.outputs.cache-hit == 'true'
-      shell: bash
-      run: |
-        echo "✅ Cache hit! Skipping npm install (saved ~32 seconds)"
+      run: npm ci --ignore-scripts

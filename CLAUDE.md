@@ -588,7 +588,7 @@ GitHub-hosted runners bill **per minute**. Keep workflows **lean**:
 
 - **Fewer jobs** — Combine steps that share one checkout and `node_modules` (e.g. typecheck + lint + conditional audit in a single job) unless a separate job is required for gates or deploy.
 - **Fewer matrix shards** — Use the minimum shard count that keeps test time acceptable; each shard is a full runner.
-- **No redundant “warm cache” jobs** — Rely on `actions/cache` in `.github/actions/setup-node-deps`; one install per job is enough.
+- **No redundant “warm cache” jobs** — Rely on `actions/setup-node` npm cache (see `.github/actions/setup-node-deps`); one `npm ci` per job is enough.
 - **Cancel stale PR runs** — Workflow uses `concurrency` so new pushes cancel in-flight PR workflows (not `main`).
 - **Shallow clones** — `fetch-depth: 1` on checkout where history is not needed.
 

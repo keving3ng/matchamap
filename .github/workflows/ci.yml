@@ -42,10 +42,12 @@ jobs:
       - name: Security audit
         if: |
           github.ref == 'refs/heads/main' ||
-          contains(github.event.head_commit.modified, 'package.json') ||
-          contains(github.event.head_commit.modified, 'package-lock.json') ||
-          contains(github.event.head_commit.modified, 'backend/package.json') ||
-          contains(github.event.head_commit.modified, 'backend/package-lock.json')
+          (github.event_name == 'push' && github.event.head_commit && (
+            contains(github.event.head_commit.modified, 'package.json') ||
+            contains(github.event.head_commit.modified, 'package-lock.json') ||
+            contains(github.event.head_commit.modified, 'backend/package.json') ||
+            contains(github.event.head_commit.modified, 'backend/package-lock.json')
+          ))
         run: npm audit --audit-level=high --production
         continue-on-error: true
 
