@@ -2,7 +2,7 @@
 
 ## Workflow layout
 
-- **Single workflow** (`.github/workflows/ci.yml`), **one job** named **CI**: one checkout, one `npm ci`, then typecheck → lint → audit → frontend tests → backend tests. **Build**, **migrations**, and **deploy** run only on **push to `main`** (not on pull requests from branches).
+- **Single workflow** (`.github/workflows/ci.yml`), **one job** named **CI**: one checkout, one `npm ci`, then typecheck → lint → audit → **frontend tests** (always runs: `test:ci` on PRs / merge queue, `test:coverage` on **push** to `main`) → backend tests. **Build**, **migrations**, and **deploy** run only on **push to `main`** (not on pull requests from branches). **`merge_group`** is included so [merge queue](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/merging-a-pull-request-with-a-merge-queue) runs the same checks.
 
 This minimizes GitHub-hosted **runner minutes** (no parallel fan-out that repeats installs).
 

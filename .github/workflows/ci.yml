@@ -7,6 +7,7 @@ on:
   push:
     branches:
       - main
+  merge_group:
 
 # PRs: cancel superseded runs (saves minutes). Main: never cancel (avoid interrupting deploy).
 concurrency:
@@ -44,13 +45,15 @@ jobs:
         run: npm audit --audit-level=high --production
         continue-on-error: true
 
+      # One step always runs (avoid relying on github.ref for pull_request / merge_group edge cases).
+      # Coverage on direct pushes to main; test:ci for PRs and merge queue.
       - name: Frontend tests
-        if: github.ref != 'refs/heads/main'
-        run: npm run test:ci --workspace=frontend
-
-      - name: Frontend tests (coverage)
-        if: github.ref == 'refs/heads/main'
-        run: npm run test:coverage --workspace=frontend
+        run: |
+          if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            npm run test:coverage --workspace=frontend
+          else
+            npm run test:ci --workspace=frontend
+          fi
 
       - name: Backend tests
         run: npm run test:ci --workspace=backend
