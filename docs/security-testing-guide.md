@@ -456,7 +456,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v6
       
       - name: Install dependencies
         run: npm ci

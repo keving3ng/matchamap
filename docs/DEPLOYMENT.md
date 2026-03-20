@@ -444,7 +444,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
-            - uses: actions/setup-node@v3
+            - uses: actions/setup-node@v6
             - run: npm install
             - run: npm run build
             - uses: cloudflare/pages-action@v1
