@@ -131,7 +131,7 @@ describe('useLeafletMap', () => {
   })
 
   it('survives unmount', () => {
-    const { result, unmount } = renderHook(() => useLeafletMap({ ...defaultOptions, cafes: [] }))
+    const { unmount } = renderHook(() => useLeafletMap({ ...defaultOptions, cafes: [] }))
     expect(() => unmount()).not.toThrow()
   })
 })

@@ -66,6 +66,7 @@ MatchaMap is a **curated guide** (recommendations, events, vivisual.diary)—not
 | Add user-facing strings | `../CLAUDE.md` → Copy & Internationalization |
 | Manage global state | `../CLAUDE.md` → State Management Philosophy |
 | Lazy load data | `../CLAUDE.md` → Lazy Loading Pattern |
+| React Compiler (automatic memoization, ESLint) | `REACT_COMPILER.md` |
 | Code organization rules | `../CLAUDE.md` → Code Organization |
 
 ### Features & Functionality

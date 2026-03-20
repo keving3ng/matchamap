@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { reactCompilerBabelPlugins } from './babel-react-compiler.js'
 import tailwindcss from '@tailwindcss/vite'
 import yaml from '@rollup/plugin-yaml'
 import { visualizer } from 'rollup-plugin-visualizer'
@@ -21,7 +22,11 @@ const httpsConfig = fs.existsSync('./localhost+2-key.pem') && fs.existsSync('./l
 
 export default defineConfig(() => ({
   plugins: [
-    react(),
+    react({
+      babel: {
+        plugins: reactCompilerBabelPlugins,
+      },
+    }),
     tailwindcss(),
     yaml(),
 

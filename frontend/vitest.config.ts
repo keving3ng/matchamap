@@ -6,6 +6,8 @@ import path from "path";
 
 export default defineConfig({
     plugins: [
+        // No React Compiler here: compiled output uses react-compiler-runtime and
+        // must run under a React renderer; global test setup runs before any tree.
         react(),
         yaml(),
     ],

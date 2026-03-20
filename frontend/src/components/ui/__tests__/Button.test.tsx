@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MapPin, Navigation, Filter } from '@/components/icons'
+import { MapPin } from '@/components/icons'
 import { PrimaryButton, SecondaryButton, TertiaryButton, IconButton, FilterButton } from '../Button'
 
 describe('PrimaryButton', () => {
