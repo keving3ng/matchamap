@@ -54,7 +54,10 @@ export const cafeSchema = z.object({
   instagramPostLink: z.string().optional(),
   tiktokPostLink: z.string().optional(),
   images: z.string().optional(),
-  drinks: z.array(drinkSchema).min(1, 'At least one drink is required'),
+  drinks: z.preprocess(
+    (val) => (val === null || val === undefined ? [] : val),
+    z.array(drinkSchema)
+  ),
 })
 
 /**

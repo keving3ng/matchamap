@@ -52,11 +52,6 @@ export function generateChangelog(
 
     const allErrors = [...cafeErrors, ...drinkErrors]
 
-    // If cafe has no drinks, it's invalid
-    if (csvCafe.drinks.length === 0) {
-      allErrors.push('Cafe must have at least one drink')
-    }
-
     // If there are validation errors, add to invalid
     if (allErrors.length > 0) {
       invalidEntries.push({
