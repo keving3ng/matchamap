@@ -24,7 +24,7 @@ MatchaMap is a mobile-first **curated guide** to matcha cafes in Toronto (expand
 **Performance rules:**
 -   Always lazy load routes and heavy components
 -   Optimize images (WebP, proper sizing, lazy loading)
--   Minimize re-renders (React.memo, useMemo, useCallback when needed)
+-   **React Compiler** (Babel) optimizes re-renders automatically; keep following the Rules of React. Manual `React.memo` / `useMemo` / `useCallback` remain fine for edge cases or gradual cleanup—see [docs/REACT_COMPILER.md](docs/REACT_COMPILER.md)
 -   Keep Zustand stores focused and minimal
 -   Test on real mobile devices, not just desktop emulation
 

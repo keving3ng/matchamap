@@ -42,14 +42,17 @@ export const useLeafletMap = ({
   const userLocationMarkerRef = useRef<L.Marker | null>(null)
   const routeLayerRef = useRef<L.Polyline | L.LayerGroup | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
+  /** First-render center/zoom only — avoids remounting the map when props change (see comment below). */
+  const initialCenterRef = useRef(initialCenter)
+  const initialZoomRef = useRef(initialZoom)
 
   useEffect(() => {
     if (!containerRef.current) return
 
     // Initialize map
     const map = L.map(containerRef.current, {
-      center: initialCenter,
-      zoom: initialZoom,
+      center: initialCenterRef.current,
+      zoom: initialZoomRef.current,
       zoomControl: false, // We'll add custom controls
       scrollWheelZoom: true,
       touchZoom: 'center', // Zoom to center for predictable mobile UX
@@ -89,7 +92,6 @@ export const useLeafletMap = ({
     return () => {
       map.remove()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Add map move listener

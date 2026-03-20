@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { Download, ArrowUpDown, Users, TrendingUp, Calendar, Percent, Eye, EyeOff, AlertTriangle } from '@/components/icons'
 import { api } from '../../utils/api'
 import { COPY } from '../../constants/copy'
@@ -21,17 +21,19 @@ export const WaitlistPage: React.FC = () => {
   const [showFraudStats, setShowFraudStats] = useState(false)
 
   const LIMIT = 50
+  const offsetRef = useRef(0)
+  offsetRef.current = offset
 
-  const fetchWaitlist = async (reset = false) => {
+  const fetchWaitlist = useCallback(async (reset = false) => {
     try {
       if (reset) {
         setLoading(true)
         setOffset(0)
-      } else if (offset > 0) {
+      } else if (offsetRef.current > 0) {
         setLoadingMore(true)
       }
 
-      const currentOffset = reset ? 0 : offset
+      const currentOffset = reset ? 0 : offsetRef.current
 
       const result = await api.waitlist.getAll({
         limit: LIMIT,
@@ -59,12 +61,11 @@ export const WaitlistPage: React.FC = () => {
       setLoading(false)
       setLoadingMore(false)
     }
-  }
+  }, [sortField, sortOrder, LIMIT])
 
   useEffect(() => {
-    fetchWaitlist(true)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sortField, sortOrder])
+    void fetchWaitlist(true)
+  }, [sortField, sortOrder, fetchWaitlist])
 
   const handleSort = (field: SortField) => {
     if (field === sortField) {

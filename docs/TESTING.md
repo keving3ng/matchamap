@@ -64,6 +64,7 @@ waitForPersistence(ms?: number): Promise<void>
 -   Path aliases (`@/` → `src/`)
 -   Global setup file auto-loaded
 -   Coverage reporting configured
+-   **React Compiler:** Production and dev (`vite.config.js`) use the compiler; **Vitest does not** (`vitest.config.ts` uses the default React plugin). Compiled output relies on `react-compiler-runtime` under a real React renderer, while Vitest’s global setup runs before any tree, so the compiler is skipped in tests to avoid runtime hook errors. `react-compiler` ESLint still validates source against the Rules of React.
 
 ### Log verbosity (CI vs local)
 
