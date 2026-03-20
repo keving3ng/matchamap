@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState } from 'react'
 import { Navigation, MapPin, ChevronDown, Crosshair, Filter, X, Search, Coffee, Star, Building2, Instagram, Clock } from '@/components/icons'
 import { TikTokIcon } from './TikTokIcon'
 import { useGeolocation } from '../hooks/useGeolocation'
@@ -64,19 +64,17 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
     if ((sortBy === 'distance' || filters.maxDistance !== null) && !coordinates && !loading && !error) {
       requestLocation()
     }
-  }, [sortBy, filters.maxDistance, coordinates, loading, error, requestLocation])
+  }, [sortBy, filters.maxDistance, coordinates, loading, error])
 
   // Get unique drink types from all cafes
-  const availableDrinkTypes = React.useMemo(() => {
-    const drinkTypes = new Set<string>()
-    cafes.forEach(cafe => {
-      cafe.drinks?.forEach(drink => {
-        const drinkName = drink.name || 'Iced Matcha Latte'
-        drinkTypes.add(drinkName)
-      })
+  const drinkTypes = new Set<string>()
+  cafes.forEach(cafe => {
+    cafe.drinks?.forEach(drink => {
+      const drinkName = drink.name || 'Iced Matcha Latte'
+      drinkTypes.add(drinkName)
     })
-    return Array.from(drinkTypes).sort()
-  }, [cafes])
+  })
+  const availableDrinkTypes = Array.from(drinkTypes).sort()
 
   // Check if any filters or search are active
   const hasActiveFilters = filters.minRating !== null || filters.userMinRating !== null || filters.maxDistance !== null || filters.selectedCities.length > 0 || filters.openNow || selectedDrinkType !== null
@@ -117,120 +115,121 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
   }
 
   // Filter and sort cafes based on selected options
-  const filteredAndSortedCafes = useMemo(() => {
-    // First apply search
-    let filtered = cafes.filter(cafe => {
-      if (hasActiveSearch) {
-        const query = searchQuery.toLowerCase().trim()
+  // First apply search
+  let filtered = cafes.filter(cafe => {
+    if (hasActiveSearch) {
+      const query = searchQuery.toLowerCase().trim()
 
-        // Search in cafe name
-        if (cafe.name.toLowerCase().includes(query)) {
-          return true
-        }
+      // Search in cafe name
+      if (cafe.name.toLowerCase().includes(query)) {
+        return true
+      }
 
-        // Search in quick note (keywords/tags)
-        if (cafe.quickNote && cafe.quickNote.toLowerCase().includes(query)) {
-          return true
-        }
+      // Search in quick note (keywords/tags)
+      if (cafe.quickNote && cafe.quickNote.toLowerCase().includes(query)) {
+        return true
+      }
 
-        // Search in address
-        if (cafe.address && cafe.address.toLowerCase().includes(query)) {
-          return true
-        }
+      // Search in address
+      if (cafe.address && cafe.address.toLowerCase().includes(query)) {
+        return true
+      }
 
-        // Search in drink names
-        if (cafe.drinks && cafe.drinks.some(drink => drink.name?.toLowerCase().includes(query))) {
-          return true
-        }
+      // Search in drink names
+      if (cafe.drinks && cafe.drinks.some(drink => drink.name?.toLowerCase().includes(query))) {
+        return true
+      }
 
+      return false
+    }
+    return true
+  })
+
+  // Then apply filters
+  filtered = filtered.filter(cafe => {
+    // Admin rating filter (displayScore)
+    if (filters.minRating !== null) {
+      const cafeScore = cafe.displayScore ?? 0
+      if (cafeScore < filters.minRating) {
         return false
       }
-      return true
-    })
-
-    // Then apply filters
-    filtered = filtered.filter(cafe => {
-      // Admin rating filter (displayScore)
-      if (filters.minRating !== null) {
-        const cafeScore = cafe.displayScore ?? 0
-        if (cafeScore < filters.minRating) {
-          return false
-        }
-      }
-
-      // User rating filter (userRatingAvg)
-      if (filters.userMinRating !== null) {
-        const userRating = cafe.userRatingAvg ?? 0
-        if (userRating < filters.userMinRating) {
-          return false
-        }
-      }
-
-      // Distance filter (only if we have location and distance info)
-      if (filters.maxDistance !== null && cafe.distanceInfo) {
-        if (cafe.distanceInfo.kilometers > filters.maxDistance) {
-          return false
-        }
-      }
-
-      // City filter (multi-select)
-      // City keys are already normalized in database, no need to toLowerCase
-      if (filters.selectedCities.length > 0) {
-        if (!cafe.city || !filters.selectedCities.includes(cafe.city as CityKey)) {
-          return false
-        }
-      }
-
-      // Drink type filter
-      if (selectedDrinkType !== null && cafe.drinks && cafe.drinks.length > 0) {
-        const hasDrink = cafe.drinks.some(drink => {
-          const drinkName = drink.name || 'Iced Matcha Latte'
-          return drinkName === selectedDrinkType
-        })
-        if (!hasDrink) {
-          return false
-        }
-      }
-
-      // Open now filter
-      if (filters.openNow) {
-        const cafeIsOpen = isCurrentlyOpen(cafe.hours)
-        // Only filter out if we know it's closed (false)
-        // If null (can't determine), include it in results
-        if (cafeIsOpen === false) {
-          return false
-        }
-      }
-
-      return true
-    })
-
-    // Then apply sorting
-    const cafesCopy = [...filtered]
-
-    switch (sortBy) {
-      case 'rating':
-        // Sort by displayScore (highest first)
-        return cafesCopy.sort((a, b) => {
-          const scoreA = a.displayScore ?? 0
-          const scoreB = b.displayScore ?? 0
-          return scoreB - scoreA
-        })
-
-      case 'distance':
-        // Sort by distance (nearest first)
-        // Cafes without distance info go to the end
-        return cafesCopy.sort((a, b) => {
-          if (!a.distanceInfo && !b.distanceInfo) return 0
-          if (!a.distanceInfo) return 1
-          if (!b.distanceInfo) return -1
-          return a.distanceInfo.kilometers - b.distanceInfo.kilometers
-        })
-
-      default:
-        return cafesCopy
     }
-  }, [cafes, sortBy, filters.minRating, filters.userMinRating, filters.maxDistance, filters.selectedCities, filters.openNow, selectedDrinkType, searchQuery, hasActiveSearch])
+
+    // User rating filter (userRatingAvg)
+    if (filters.userMinRating !== null) {
+      const userRating = cafe.userRatingAvg ?? 0
+      if (userRating < filters.userMinRating) {
+        return false
+      }
+    }
+
+    // Distance filter (only if we have location and distance info)
+    if (filters.maxDistance !== null && cafe.distanceInfo) {
+      if (cafe.distanceInfo.kilometers > filters.maxDistance) {
+        return false
+      }
+    }
+
+    // City filter (multi-select)
+    // City keys are already normalized in database, no need to toLowerCase
+    if (filters.selectedCities.length > 0) {
+      if (!cafe.city || !filters.selectedCities.includes(cafe.city as CityKey)) {
+        return false
+      }
+    }
+
+    // Drink type filter
+    if (selectedDrinkType !== null && cafe.drinks && cafe.drinks.length > 0) {
+      const hasDrink = cafe.drinks.some(drink => {
+        const drinkName = drink.name || 'Iced Matcha Latte'
+        return drinkName === selectedDrinkType
+      })
+      if (!hasDrink) {
+        return false
+      }
+    }
+
+    // Open now filter
+    if (filters.openNow) {
+      const cafeIsOpen = isCurrentlyOpen(cafe.hours)
+      // Only filter out if we know it's closed (false)
+      // If null (can't determine), include it in results
+      if (cafeIsOpen === false) {
+        return false
+      }
+    }
+
+    return true
+  })
+
+  // Then apply sorting
+  const cafesCopy = [...filtered]
+
+  let filteredAndSortedCafes: typeof cafesCopy
+  switch (sortBy) {
+    case 'rating':
+      // Sort by displayScore (highest first)
+      filteredAndSortedCafes = cafesCopy.sort((a, b) => {
+        const scoreA = a.displayScore ?? 0
+        const scoreB = b.displayScore ?? 0
+        return scoreB - scoreA
+      })
+      break
+
+    case 'distance':
+      // Sort by distance (nearest first)
+      // Cafes without distance info go to the end
+      filteredAndSortedCafes = cafesCopy.sort((a, b) => {
+        if (!a.distanceInfo && !b.distanceInfo) return 0
+        if (!a.distanceInfo) return 1
+        if (!b.distanceInfo) return -1
+        return a.distanceInfo.kilometers - b.distanceInfo.kilometers
+      })
+      break
+
+    default:
+      filteredAndSortedCafes = cafesCopy
+  }
 
   return (
     <div className="flex-1 overflow-y-auto pb-24 relative">

@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import featureConfig from '../config/features.yaml';
 import { useAdminStore } from '../stores/adminStore'
 
@@ -24,23 +23,21 @@ const getEnvironment = (): Environment => {
 export const useFeatureToggle = (featureName: FeatureKey): boolean => {
   const { adminModeActive, featureOverrides, environment } = useAdminStore()
 
-  const isEnabled = useMemo(() => {
-    // Only apply admin overrides if admin mode is active
-    if (adminModeActive && featureOverrides[featureName] !== undefined) {
-      return featureOverrides[featureName] as boolean
-    }
-
-    // Fall back to config file (use simulated environment if admin mode is active, otherwise use actual)
+  // Only apply admin overrides if admin mode is active
+  let isEnabled: boolean
+  if (adminModeActive && featureOverrides[featureName] !== undefined) {
+    isEnabled = featureOverrides[featureName] as boolean
+  } else {
     const env = (adminModeActive && environment) ? environment : getEnvironment()
     const feature = featureConfig[featureName]
 
     if (!feature) {
       console.warn(`Feature "${featureName}" not found in feature config`)
-      return false
+      isEnabled = false
+    } else {
+      isEnabled = feature[env] ?? false
     }
-
-    return feature[env] ?? false
-  }, [featureName, adminModeActive, featureOverrides, environment])
+  }
 
   return isEnabled
 }

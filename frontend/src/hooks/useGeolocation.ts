@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react'
+import { useEffect } from 'react'
 import { useLocationStore } from '../stores/locationStore'
 
 interface UseGeolocationOptions {
@@ -24,7 +24,7 @@ export const useGeolocation = (_options: UseGeolocationOptions = {}) => {
   // Use options for potential future configuration (currently unused but structured for extensibility)
 
   // Request location permission and get current position
-  const requestLocation = useCallback(() => {
+  const requestLocation = () => {
     if (!navigator.geolocation) {
       setError({
         code: 0,
@@ -77,12 +77,12 @@ export const useGeolocation = (_options: UseGeolocationOptions = {}) => {
 
     // Make the actual geolocation request
     navigator.geolocation.getCurrentPosition(onSuccess, onError, geoOptions)
-  }, [setCoordinates, setError, setLoading])
+  }
 
   // Clear location data
-  const clearLocation = useCallback(() => {
+  const clearLocation = () => {
     clearLocationStore()
-  }, [clearLocationStore])
+  }
 
   // Check permission status on mount
   useEffect(() => {

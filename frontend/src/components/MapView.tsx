@@ -60,82 +60,74 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
   }, [])
 
   // Get unique drink types from all cafes
-  const availableDrinkTypes = React.useMemo(() => {
-    const drinkTypes = new Set<string>()
-    cafes.forEach(cafe => {
-      cafe.drinks?.forEach(drink => {
-        const drinkName = drink.name || 'Iced Matcha Latte'
-        drinkTypes.add(drinkName)
-      })
+  const drinkTypes = new Set<string>()
+  cafes.forEach(cafe => {
+    cafe.drinks?.forEach(drink => {
+      const drinkName = drink.name || 'Iced Matcha Latte'
+      drinkTypes.add(drinkName)
     })
-    return Array.from(drinkTypes).sort()
-  }, [cafes])
+  })
+  const availableDrinkTypes = Array.from(drinkTypes).sort()
 
   // Filter cafes based on quick filters (no city filter - city is handled by map navigation)
-  const filteredCafes = React.useMemo(() => {
-    return cafes.filter(cafe => {
-      // Rating filter
-      if (minRating !== null) {
-        const cafeScore = cafe.displayScore ?? 0
-        if (cafeScore < minRating) {
-          return false
-        }
+  const filteredCafes = cafes.filter(cafe => {
+    // Rating filter
+    if (minRating !== null) {
+      const cafeScore = cafe.displayScore ?? 0
+      if (cafeScore < minRating) {
+        return false
       }
+    }
 
-      // Max price filter
-      if (maxPrice !== null && cafe.drinks && cafe.drinks.length > 0) {
-        const minDrinkPrice = Math.min(...cafe.drinks.map(d => d.priceAmount || Infinity))
-        if (minDrinkPrice > maxPrice) {
-          return false
-        }
+    // Max price filter
+    if (maxPrice !== null && cafe.drinks && cafe.drinks.length > 0) {
+      const minDrinkPrice = Math.min(...cafe.drinks.map(d => d.priceAmount || Infinity))
+      if (minDrinkPrice > maxPrice) {
+        return false
       }
+    }
 
-      // Drink type filter
-      if (selectedDrinkType !== null && cafe.drinks && cafe.drinks.length > 0) {
-        const hasDrink = cafe.drinks.some(drink => {
-          const drinkName = drink.name || 'Iced Matcha Latte'
-          return drinkName === selectedDrinkType
-        })
-        if (!hasDrink) {
-          return false
-        }
+    // Drink type filter
+    if (selectedDrinkType !== null && cafe.drinks && cafe.drinks.length > 0) {
+      const hasDrink = cafe.drinks.some(drink => {
+        const drinkName = drink.name || 'Iced Matcha Latte'
+        return drinkName === selectedDrinkType
+      })
+      if (!hasDrink) {
+        return false
       }
+    }
 
-      // Open now filter
-      if (openNow) {
-        const cafeIsOpen = isCurrentlyOpen(cafe.hours)
-        // Only filter out if we know it's closed (false)
-        // If null (can't determine), include it in results
-        if (cafeIsOpen === false) {
-          return false
-        }
+    // Open now filter
+    if (openNow) {
+      const cafeIsOpen = isCurrentlyOpen(cafe.hours)
+      // Only filter out if we know it's closed (false)
+      // If null (can't determine), include it in results
+      if (cafeIsOpen === false) {
+        return false
       }
+    }
 
-      return true
-    })
-  }, [cafes, minRating, maxPrice, selectedDrinkType, openNow])
+    return true
+  })
 
   const hasActiveQuickFilters =
     selectedDrinkType !== null || minRating !== null || maxPrice !== null || openNow
 
-  const clearQuickFilters = React.useCallback(() => {
+  const clearQuickFilters = () => {
     setSelectedDrinkType(null)
     setMinRating(null)
     setMaxPrice(null)
     setOpenNow(false)
     setShowCityDropdown(false)
     setShowDrinkDropdown(false)
-  }, [
-    setSelectedDrinkType,
-    setMinRating,
-    setMaxPrice,
-    setOpenNow,
-    setShowCityDropdown,
-    setShowDrinkDropdown,
-  ])
+  }
+
+  // Track programmatic city changes to avoid infinite loops
+  const isProgrammaticChangeRef = React.useRef(false)
 
   // Handle map movement to update city selector
-  const handleMapMove = React.useCallback((center: { lat: number; lng: number }) => {
+  const handleMapMove = (center: { lat: number; lng: number }) => {
     // Ignore if this is a programmatic change (user clicked city selector)
     if (isProgrammaticChangeRef.current) {
       isProgrammaticChangeRef.current = false
@@ -146,7 +138,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
     if (closestCity !== selectedCity) {
       setCity(closestCity)
     }
-  }, [selectedCity, setCity])
+  }
 
   const {
     route,
@@ -191,19 +183,16 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
   // Track if we've already auto-centered on initial location
   const hasAutoCenteredRef = React.useRef(false)
 
-  // Track programmatic city changes to avoid infinite loops
-  const isProgrammaticChangeRef = React.useRef(false)
-
   // Handle popover closing with exit animation
-  const handleClosePopover = React.useCallback(() => {
+  const handleClosePopover = () => {
     if (isClosing) return // Prevent multiple close attempts
-    
+
     setIsClosing(true)
     setTimeout(() => {
       setIsClosing(false)
       onClosePopover()
     }, 300) // Match animation duration
-  }, [isClosing, onClosePopover])
+  }
 
   // Reset closing state when popover opens
   React.useEffect(() => {
@@ -213,18 +202,18 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
   }, [showPopover, isClosing])
 
   // Handle view details with animation
-  const handleViewDetails = React.useCallback((cafe: typeof selectedCafe) => {
+  const handleViewDetails = (cafe: typeof selectedCafe) => {
     if (!cafe) return
-    
+
     if (isClosing) return // Prevent multiple close attempts
-    
+
     setIsClosing(true)
     setTimeout(() => {
       setIsClosing(false)
       onClosePopover()
       onViewDetails(cafe)
     }, 300) // Match animation duration
-  }, [isClosing, onClosePopover, onViewDetails])
+  }
 
   // Track city transitions for smooth loading state
   const [isTransitioningCity, setIsTransitioningCity] = React.useState(false)
@@ -254,7 +243,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
       removeUserLocationMarker()
       hasAutoCenteredRef.current = false // Reset if location is cleared
     }
-  }, [coordinates, addUserLocationMarker, removeUserLocationMarker, centerOnLocation])
+  }, [coordinates])
 
   const handleLocationClick = () => {
     // Mark this as a manual request so location updates will center the map
@@ -309,7 +298,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
     } else if (!showRoute) {
       clearRouteVisual()
     }
-  }, [route, showRoute, drawRoute, clearRouteVisual])
+  }, [route, showRoute])
 
   // Clear route when cafe changes (but not when popover just closes)
   React.useEffect(() => {
@@ -317,7 +306,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
       clearRouteVisual()
       clearRouteData()
     }
-  }, [selectedCafe, clearRouteVisual, clearRouteData])
+  }, [selectedCafe])
 
   // Handle city transitions with smooth loading state
   React.useEffect(() => {
@@ -339,7 +328,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
       clearTimeout(refreshTimeoutId)
       clearTimeout(transitionTimeoutId)
     }
-  }, [selectedCity, refreshTiles])
+  }, [selectedCity])
 
   return (
     <div className="flex-1 relative">

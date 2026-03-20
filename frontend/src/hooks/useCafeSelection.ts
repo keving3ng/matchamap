@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import { useNavigate } from 'react-router'
 import { useUIStore } from '../stores/uiStore'
 import { useCafeStore } from '../stores/cafeStore'
@@ -14,10 +13,9 @@ export const useCafeSelection = (cafesWithDistance: CafeWithDistance[]) => {
   const { selectedCafe, setSelectedCafe } = useCafeStore()
 
   // Ensure selectedCafe always has the latest distance info
-  const selectedCafeWithLatestInfo = useMemo(() => {
-    if (!selectedCafe) return null
-    return cafesWithDistance.find(c => c.id === selectedCafe.id) || selectedCafe
-  }, [selectedCafe, cafesWithDistance])
+  const selectedCafeWithLatestInfo = !selectedCafe
+    ? null
+    : (cafesWithDistance.find(c => c.id === selectedCafe.id) || selectedCafe)
 
   const handlePinClick = (cafe: CafeWithDistance): void => {
     setSelectedCafe(cafe)

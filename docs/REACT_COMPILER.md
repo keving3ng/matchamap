@@ -18,7 +18,7 @@ MatchaMap uses the [React Compiler](https://react.dev/learn/react-compiler) (Bab
 - **`all`** (current): Every function component and hook in compiled files is a candidate. Matches production rollout in the PR plan.
 - **`annotation`**: Only files that opt in with the `"use memo"` directive at the top are compiled—useful for incremental adoption or debugging a single file.
 
-Existing manual `useMemo`, `useCallback`, and `React.memo` remain valid; the compiler composes with them.
+Source code avoids manual `useMemo`, `useCallback`, and `React.memo` so the compiler owns memoization; where tests run **without** the compiler (Vitest), effects depend on primitives or refs so behavior stays stable. You can still add manual memoization for rare edge cases if needed.
 
 ## When to change the plan
 

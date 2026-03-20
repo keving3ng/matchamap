@@ -3,7 +3,7 @@
  * Handles fetching routes from OpenRouteService and managing route state
  */
 
-import { useState, useCallback, useRef } from 'react'
+import { useState, useRef } from 'react'
 import { fetchWalkingRoute, type RouteCoordinate, type RouteResponse } from '../utils/routing'
 
 interface UseRouteVisualizationResult {
@@ -54,7 +54,7 @@ export function useRouteVisualization(): UseRouteVisualizationResult {
   // Threshold: invalidate cache if user moves more than 50 meters
   const LOCATION_THRESHOLD_METERS = 50
 
-  const loadRoute = useCallback(async (start: RouteCoordinate, end: RouteCoordinate, cafeId: number) => {
+  const loadRoute = async (start: RouteCoordinate, end: RouteCoordinate, cafeId: number) => {
     setIsLoadingRoute(true)
     setRouteError(null)
 
@@ -108,18 +108,18 @@ export function useRouteVisualization(): UseRouteVisualizationResult {
     } finally {
       setIsLoadingRoute(false)
     }
-  }, [])
+  }
 
-  const clearRoute = useCallback(() => {
+  const clearRoute = () => {
     setRoute(null)
     setShowRoute(false)
     setRouteError(null)
     setRouteCafeId(null)
-  }, [])
+  }
 
-  const toggleRoute = useCallback(() => {
+  const toggleRoute = () => {
     setShowRoute(prev => !prev)
-  }, [])
+  }
 
   return {
     route,

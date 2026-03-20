@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React from 'react'
 import { Calendar, Clock, MapPin, DollarSign, Navigation, Instagram, ArrowLeft } from '@/components/icons'
 import { useNavigate } from 'react-router'
 import { ContentContainer } from './ContentContainer'
@@ -17,13 +17,9 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({ event }) => {
   const navigate = useNavigate()
   const { cafesWithDistance } = useCafeStore()
 
-  // Memoize linked cafe lookup for better performance
-  const linkedCafe = useMemo(() => {
-    if (event.cafeId) {
-      return cafesWithDistance.find(c => c.id === event.cafeId) || null
-    }
-    return null
-  }, [event.cafeId, cafesWithDistance])
+  const linkedCafe = event.cafeId
+    ? (cafesWithDistance.find(c => c.id === event.cafeId) || null)
+    : null
 
   const instagramUrl = getInstagramUrl(event.link)
   const googleMapsUrl = event.location ? createSafeGoogleMapsUrl(event.location) : null

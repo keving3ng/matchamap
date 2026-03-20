@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { Coffee, Plus, Search, Edit, Trash2, Loader, AlertCircle, Info } from '@/components/icons'
 import { useDataStore } from '../../stores/dataStore'
 import { api } from '../../utils/api'
@@ -12,6 +12,25 @@ import { OPTIONAL_CAFE_FIELDS } from '../../constants/cafeFields'
 import { borderRadius, zIndex, spacing } from '../../styles/spacing'
 import { CITIES } from '../../stores/cityStore'
 import type { Cafe } from '../../types'
+
+const TOOLTIP_POSITION_THRESHOLD = parseInt(spacing.tooltipPositionThreshold, 10)
+
+function getMissingOptionalFieldLabels(cafe: Cafe): string[] {
+  return OPTIONAL_CAFE_FIELDS
+    .filter(field => {
+      const value = cafe[field.key as keyof Cafe]
+
+      // For numeric fields (chargeForAltMilk, ambianceScore), 0 is valid
+      const isNumericField = field.key === 'ambianceScore' || field.key === 'chargeForAltMilk'
+      if (isNumericField) {
+        return value === null || value === undefined
+      }
+
+      // For string fields, null/undefined/empty are all missing
+      return value === null || value === undefined || value === ''
+    })
+    .map(field => field.label)
+}
 
 export const CafeManagementPage: React.FC = () => {
   const { allCafes, fetchCafes, isLoading } = useDataStore()
@@ -27,49 +46,25 @@ export const CafeManagementPage: React.FC = () => {
     fetchCafes(undefined, true) // Bust cache on mount for admin
   }, [fetchCafes])
 
-  // Memoized helper function to check for missing optional fields
-  const getMissingFields = useMemo(() => {
-    return (cafe: Cafe): string[] => {
-      return OPTIONAL_CAFE_FIELDS
-        .filter(field => {
-          const value = cafe[field.key as keyof Cafe]
-          
-          // For numeric fields (chargeForAltMilk, ambianceScore), 0 is valid
-          const isNumericField = field.key === 'ambianceScore' || field.key === 'chargeForAltMilk'
-          if (isNumericField) {
-            return value === null || value === undefined
-          }
-          
-          // For string fields, null/undefined/empty are all missing
-          return value === null || value === undefined || value === ''
-        })
-        .map(field => field.label)
-    }
-  }, [])
-
   // Close tooltip when clicking outside
-  const handleClickOutside = useCallback((event: MouseEvent) => {
-    if (openTooltip !== null) {
-      const target = event.target as Element
-      if (!target.closest('[data-tooltip-container]')) {
-        setOpenTooltip(null)
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (openTooltip !== null) {
+        const target = event.target as Element
+        if (!target.closest('[data-tooltip-container]')) {
+          setOpenTooltip(null)
+        }
       }
     }
-  }, [openTooltip])
-
-  useEffect(() => {
     document.addEventListener('click', handleClickOutside)
     return () => document.removeEventListener('click', handleClickOutside)
-  }, [handleClickOutside])
+  }, [openTooltip])
 
   // Component for missing fields indicator with tooltip
   const MissingFieldsIndicator: React.FC<{ cafe: Cafe }> = ({ cafe }) => {
     const tooltipRef = useRef<HTMLDivElement>(null)
-    const missingFields = getMissingFields(cafe)
+    const missingFields = getMissingOptionalFieldLabels(cafe)
     const isTooltipOpen = openTooltip === cafe.id
-    
-    // Memoize the parseInt call for tooltip positioning threshold
-    const threshold = useMemo(() => parseInt(spacing.tooltipPositionThreshold, 10), [])
     
     if (missingFields.length === 0) {
       return null
@@ -84,7 +79,7 @@ export const CafeManagementPage: React.FC = () => {
       const spaceBelow = window.innerHeight - rect.bottom
       
       // If not enough space above (< threshold for tooltip), position below
-      return spaceAbove < threshold && spaceBelow > threshold ? 'top-full mt-2' : 'bottom-full mb-2'
+      return spaceAbove < TOOLTIP_POSITION_THRESHOLD && spaceBelow > TOOLTIP_POSITION_THRESHOLD ? 'top-full mt-2' : 'bottom-full mb-2'
     }
 
     const handleToggleTooltip = (event: React.MouseEvent) => {

@@ -231,10 +231,8 @@ export default function CafeCard(props: any) {
 - ✅ **File name matches component name** (`CafeCard.tsx`)
 
 **Performance:**
-- Use `React.memo` for expensive components
-- Use `useMemo` for expensive calculations
-- Use `useCallback` for event handlers passed to children
-- Avoid inline object/array creation in render
+- Rely on the **React Compiler** (see `docs/REACT_COMPILER.md`) for memoization; avoid manual `React.memo` / `useMemo` / `useCallback` unless you have a concrete exception
+- Avoid inline object/array creation in render when it causes unnecessary child updates (profile first)
 
 ### Critical Patterns (MUST Follow)
 

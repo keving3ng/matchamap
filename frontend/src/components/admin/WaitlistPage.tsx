@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Download, ArrowUpDown, Users, TrendingUp, Calendar, Percent, Eye, EyeOff, AlertTriangle } from '@/components/icons'
 import { api } from '../../utils/api'
 import { COPY } from '../../constants/copy'
@@ -24,7 +24,7 @@ export const WaitlistPage: React.FC = () => {
   const offsetRef = useRef(0)
   offsetRef.current = offset
 
-  const fetchWaitlist = useCallback(async (reset = false) => {
+  const fetchWaitlist = async (reset = false) => {
     try {
       if (reset) {
         setLoading(true)
@@ -61,11 +61,11 @@ export const WaitlistPage: React.FC = () => {
       setLoading(false)
       setLoadingMore(false)
     }
-  }, [sortField, sortOrder, LIMIT])
+  }
 
   useEffect(() => {
     void fetchWaitlist(true)
-  }, [sortField, sortOrder, fetchWaitlist])
+  }, [sortField, sortOrder])
 
   const handleSort = (field: SortField) => {
     if (field === sortField) {

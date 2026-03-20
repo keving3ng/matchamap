@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef } from 'react'
 import L from 'leaflet'
 import { createMatchaMarker, createUserLocationMarker } from '../utils/mapMarkers'
 import type { CafeWithDistance } from '../types'
@@ -45,6 +45,8 @@ export const useLeafletMap = ({
   /** First-render center/zoom only — avoids remounting the map when props change (see comment below). */
   const initialCenterRef = useRef(initialCenter)
   const initialZoomRef = useRef(initialZoom)
+  const onMapMoveRef = useRef(onMapMove)
+  onMapMoveRef.current = onMapMove
 
   useEffect(() => {
     if (!containerRef.current) return
@@ -94,14 +96,16 @@ export const useLeafletMap = ({
     }
   }, [])
 
-  // Add map move listener
+  // Add map move listener (callback via ref so parent need not wrap in useCallback)
   useEffect(() => {
-    if (!mapRef.current || !onMapMove) return
+    if (!mapRef.current) return
 
     const handleMoveEnd = () => {
       if (!mapRef.current) return
+      const cb = onMapMoveRef.current
+      if (!cb) return
       const center = mapRef.current.getCenter()
-      onMapMove({ lat: center.lat, lng: center.lng })
+      cb({ lat: center.lat, lng: center.lng })
     }
 
     mapRef.current.on('moveend', handleMoveEnd)
@@ -109,7 +113,7 @@ export const useLeafletMap = ({
     return () => {
       mapRef.current?.off('moveend', handleMoveEnd)
     }
-  }, [onMapMove])
+  }, [])
 
   // Note: We don't auto-update the map center when initialCenter changes
   // This would cause the map to "yank" when the user pans near another city
@@ -191,12 +195,12 @@ export const useLeafletMap = ({
     mapRef.current?.zoomOut()
   }
 
-  const centerOnLocation = useCallback((lat: number, lng: number, zoom?: number) => {
+  const centerOnLocation = (lat: number, lng: number, zoom?: number) => {
     if (!mapRef.current) return
-    
+
     // Pan to new location
     mapRef.current.setView([lat, lng], zoom ?? 15)
-    
+
     // Force tile layer refresh to ensure tiles load for new viewport
     if (tileLayerRef.current) {
       // Small delay to allow pan animation to complete
@@ -208,7 +212,7 @@ export const useLeafletMap = ({
         }
       }, 100)
     }
-  }, [])
+  }
 
   const addUserLocationMarker = (lat: number, lng: number) => {
     if (!mapRef.current) return
@@ -239,7 +243,7 @@ export const useLeafletMap = ({
     }
   }
 
-  const drawRoute = useCallback((coordinates: Array<{ lat: number; lng: number }>) => {
+  const drawRoute = (coordinates: Array<{ lat: number; lng: number }>) => {
     if (!mapRef.current) {
       return
     }
@@ -280,21 +284,21 @@ export const useLeafletMap = ({
       padding: [50, 50],
       maxZoom: 16,
     })
-  }, [])
+  }
 
-  const clearRoute = useCallback(() => {
+  const clearRoute = () => {
     if (routeLayerRef.current && mapRef.current) {
       mapRef.current.removeLayer(routeLayerRef.current)
       routeLayerRef.current = null
     }
-  }, [])
+  }
 
-  const refreshTiles = useCallback(() => {
+  const refreshTiles = () => {
     if (tileLayerRef.current && mapRef.current) {
       tileLayerRef.current.redraw()
       mapRef.current.invalidateSize()
     }
-  }, [])
+  }
 
   return {
     containerRef,

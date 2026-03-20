@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState } from 'react'
 import { Upload, CheckCircle, AlertCircle, FileText, Loader, Download } from '@/components/icons'
 import { parseCsvToCafes } from '../../utils/csvParser'
 import { parseJsonToCafes } from '../../utils/jsonParser'
@@ -118,11 +118,9 @@ export const BulkImporterPage: React.FC = () => {
     }
   }
 
-  const totalChanges = useMemo(() => {
-    return changelog
-      ? changelog.existingChanges.length + changelog.newAdditions.length
-      : 0
-  }, [changelog])
+  const totalChanges = changelog
+    ? changelog.existingChanges.length + changelog.newAdditions.length
+    : 0
 
   return (
     <div className="p-6 max-w-7xl mx-auto">

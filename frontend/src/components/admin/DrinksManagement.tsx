@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Plus, Edit, Trash2, Coffee, Star, Crown } from '@/components/icons'
 import { api } from '../../utils/api'
 import type { DrinkItem } from '../../types'
@@ -22,7 +22,7 @@ export const DrinksManagement: React.FC<DrinksManagementProps> = ({ cafeId, cafe
   const [settingDefaultId, setSettingDefaultId] = useState<number | null>(null)
   const { fetchCafes } = useDataStore()
 
-  const loadDrinks = useCallback(async () => {
+  const loadDrinks = async () => {
     try {
       setLoading(true)
       const response = await api.drinks.getAll(cafeId)
@@ -32,11 +32,11 @@ export const DrinksManagement: React.FC<DrinksManagementProps> = ({ cafeId, cafe
     } finally {
       setLoading(false)
     }
-  }, [cafeId])
+  }
 
   useEffect(() => {
-    loadDrinks()
-  }, [loadDrinks])
+    void loadDrinks()
+  }, [cafeId])
 
   const handleDelete = async (drinkId: number) => {
     if (!confirm('Are you sure you want to delete this drink?')) return

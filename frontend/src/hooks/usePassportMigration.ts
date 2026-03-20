@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import { useAuthStore } from '../stores/authStore'
 import { useVisitedCafesStore } from '../stores/visitedCafesStore'
 
@@ -28,7 +28,7 @@ export const usePassportMigration = () => {
    * Check if cleanup is needed and show modal
    * Now only shows for users with localStorage data to offer cleanup
    */
-  const checkAndShowMigration = useCallback(() => {
+  const checkAndShowMigration = () => {
     // Only show for authenticated users with local stamps to offer cleanup
     if (isAuthenticated && stampedCafeIds.length > 0) {
       setState(prev => ({
@@ -38,23 +38,23 @@ export const usePassportMigration = () => {
         error: null,
       }))
     }
-  }, [isAuthenticated, stampedCafeIds.length])
+  }
 
   /**
    * Close modal
    */
-  const closeMigration = useCallback(() => {
+  const closeMigration = () => {
     setState(prev => ({
       ...prev,
       isOpen: false,
       error: null,
     }))
-  }, [])
+  }
 
   /**
    * Clear localStorage data (simplified - no migration needed)
    */
-  const migrateStamps = useCallback(async () => {
+  const migrateStamps = async () => {
     setState(prev => ({ ...prev, isLoading: true, error: null }))
 
     try {
@@ -75,15 +75,15 @@ export const usePassportMigration = () => {
         error: error instanceof Error ? error.message : 'Cleanup failed',
       }))
     }
-  }, [clearAllStamps])
+  }
 
   /**
    * Skip cleanup and clear local storage
    */
-  const skipMigration = useCallback(() => {
+  const skipMigration = () => {
     clearAllStamps()
     closeMigration()
-  }, [clearAllStamps, closeMigration])
+  }
 
   return {
     migrationState: state,
