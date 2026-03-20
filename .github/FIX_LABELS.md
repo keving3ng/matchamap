@@ -1,97 +1,16 @@
-# Fix Labels - Auto-removal System
+# Fix Labels (manual / future automation)
 
-## Available Labels
+Some teams use labels like `fix-tests`, `fix-typecheck` to track PR issues. **There is no `auto-remove-fix-labels` workflow in this repo right now** — if you add one, map it to the single **CI** job and the **step** that failed (see `docs/CI.md`).
 
-These labels help track quality issues in PRs and are **automatically removed** when the corresponding checks pass:
+## Conceptual mapping (if you automate)
 
-| Label | Description | Removed When |
-|-------|-------------|--------------|
-| `fix-tests` | Tests are failing | **Frontend tests** (all shards) AND **Backend tests** pass |
-| `fix-typecheck` | TypeScript type errors | **Static checks** job passes (includes typecheck) |
-| `fix-build` | Build is failing | Build job passes |
-| `fix-lint` | Linting errors | **Static checks** job passes (includes lint) |
+| Label | Meaning | Cleared when |
+|-------|---------|----------------|
+| `fix-tests` | Frontend or backend tests failing | **CI** log shows Frontend + Backend test steps succeeded |
+| `fix-typecheck` | TypeScript errors | **CI** log shows typecheck step succeeded |
+| `fix-build` | Build failing | **CI** log shows Build step succeeded (`main` only) |
+| `fix-lint` | Lint issues | **CI** log shows Lint step succeeded (lint is advisory and does not block merge) |
 
-## How It Works
+## Single required check
 
-1. **Manual Labeling**: Add these labels to PRs when you identify issues
-2. **Automatic Removal**: The `auto-remove-fix-labels.yml` workflow runs after CI completes
-3. **Smart Detection**: Labels are only removed when all required checks pass
-
-## Usage Examples
-
-### Scenario 1: PR with test failures
-```bash
-# Add label manually or via gh CLI
-gh pr edit 123 --add-label "fix-tests"
-
-# After tests are fixed and CI passes, label is auto-removed
-```
-
-### Scenario 2: Multiple issues
-```bash
-# Add multiple labels
-gh pr edit 123 --add-label "fix-tests,fix-typecheck,fix-lint"
-
-# As each check passes, corresponding labels are removed
-# - Static checks passes → removes fix-typecheck and fix-lint
-# - Tests pass → removes fix-tests
-```
-
-## Workflow Details
-
-**Trigger**: Runs after the CI workflow completes on PRs
-
-**Steps**:
-1. Identifies the PR associated with the workflow run
-2. Checks results of all CI jobs
-3. Compares current PR labels with job results
-4. Removes labels for passing checks
-
-**Requirements**:
-- PR must be open
-- CI workflow must complete (success or failure)
-- Labels must exist on the PR for removal to occur
-
-## CI Job Mapping
-
-The workflow maps labels to these CI jobs:
-
-```yaml
-fix-tests:
-  - Frontend Tests
-  - Backend Tests
-
-fix-typecheck:
-  - Static checks (typecheck step)
-
-fix-build:
-  - Build
-
-fix-lint:
-  - Static checks (lint step)
-```
-
-## Tips
-
-- Use these labels for tracking issues across PRs
-- Labels are visual indicators of what needs attention
-- Automation ensures labels stay accurate as issues are resolved
-- Can be combined with GitHub Projects for better tracking
-
-## Debugging
-
-To check if the workflow is running correctly:
-
-```bash
-# View workflow runs
-gh run list --workflow=auto-remove-fix-labels.yml
-
-# View specific run logs
-gh run view <run-id> --log
-```
-
-## Configuration
-
-The workflow file: `.github/workflows/auto-remove-fix-labels.yml`
-
-To modify label rules, edit the `labelRules` object in the workflow script.
+Branch protection should require **`CI`** only. See `.github/BRANCH_PROTECTION_SETUP.md`.

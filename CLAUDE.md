@@ -578,7 +578,7 @@ export const CafeCard: React.FC<CafeCardProps> = ({ cafe, onSelect }) => {
 | **Adding cities** | `docs/adding-new-cities.md` |
 | **Full tech spec** | `docs/TECH_SPEC.md` |
 | **Doc navigation** | `docs/README.md` ⭐ START HERE |
-| **CI workflow efficiency** | This file → **CI/CD (GitHub Actions)** |
+| **CI workflow (single job, forks, artifacts)** | `docs/CI.md` ⭐ |
 
 ---
 
@@ -586,11 +586,11 @@ export const CafeCard: React.FC<CafeCardProps> = ({ cafe, onSelect }) => {
 
 GitHub-hosted runners bill **per minute**. Keep workflows **lean**:
 
-- **Fewer jobs** — Combine steps that share one checkout and `node_modules` (e.g. typecheck + lint + conditional audit in a single job) unless a separate job is required for gates or deploy.
-- **Fewer matrix shards** — Use the minimum shard count that keeps test time acceptable; each shard is a full runner.
-- **No redundant “warm cache” jobs** — Rely on `actions/setup-node` npm cache (see `.github/actions/setup-node-deps`); one `npm ci` per job is enough.
+- **Single CI job** — One checkout + `npm ci` per run (typecheck, lint, audit, frontend + backend tests; build/deploy only on `main` push). See `docs/CI.md`.
+- **No redundant “warm cache” jobs** — Rely on `actions/setup-node` npm cache (see `.github/actions/setup-node-deps`); one `npm ci` per workflow run.
 - **Cancel stale PR runs** — Workflow uses `concurrency` so new pushes cancel in-flight PR workflows (not `main`).
 - **Shallow clones** — `fetch-depth: 1` on checkout where history is not needed.
+- **Forks / secrets** — `pull_request` from forks has no repo secrets; deploy runs only on trusted pushes to `main`. Documented in `docs/CI.md`.
 
 **Cursor rule:** `.cursor/rules/ci-github-actions.mdc` (applies when editing `.github/` workflows).
 
@@ -982,7 +982,7 @@ Before marking any task complete, verify:
 - [ ] Test coverage maintained
 
 **CI/CD (if you edited `.github/workflows/` or actions):**
-- [ ] Follows **CI/CD (GitHub Actions)** — minimal jobs/shards, no redundant install jobs, concurrency as documented
+- [ ] Follows **CI/CD (GitHub Actions)** — single job, `docs/CI.md` fork/secret guidance, concurrency as documented
 
 ---
 

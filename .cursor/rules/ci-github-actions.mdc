@@ -5,22 +5,22 @@ globs: ".github/**/*.yml,.github/**/*.yaml,.github/actions/**"
 
 # CI/CD efficiency (GitHub-hosted runners)
 
-We optimize for **fewer billable minutes** and **less workflow churn**, not maximal parallel fan-out.
+We optimize for **fewer billable minutes** and **less workflow churn**, not parallel fan-out.
 
 ## Principles
 
-1. **Prefer fewer jobs** — Combine related steps (e.g. typecheck + lint + optional audit) in one job when they share the same checkout and `node_modules`, unless separation is required for correctness or deploy gates.
-2. **Avoid redundant installs** — One `npm ci` per job; rely on `actions/setup-node` **npm cache** (lockfiles in `.github/actions/setup-node-deps`) so `npm ci` stays fast. Do not add a separate “warm cache” job unless profiling shows it helps.
-3. **Limit matrix shards** — Use the smallest shard count that keeps test wall time acceptable; each shard is a full runner.
-4. **Cancel stale PR runs** — Use `concurrency` with `cancel-in-progress: true` for PRs only; do not cancel `main` runs mid-deploy.
-5. **Shallow git** — Use `actions/checkout` with `fetch-depth: 1` unless a job needs history.
-6. **Conditional work** — Run expensive or noisy steps (e.g. audits) only when inputs change or on `main`, with team agreement.
-7. **Pin actions** — Prefer pinned major versions; bump deliberately after reading changelogs.
+1. **Single workflow, single job** — One checkout + `npm ci` per run; sequential typecheck → lint → audit → tests → (on `main` only) build → migrate → deploy. See `docs/CI.md`.
+2. **Avoid redundant installs** — Rely on `actions/setup-node` **npm cache** with root `package-lock.json` (`.github/actions/setup-node-deps`). Do not add a separate “warm cache” job unless profiling shows it helps.
+3. **Cancel stale PR runs** — Use `concurrency` with `cancel-in-progress: true` for PRs only; do not cancel `main` runs mid-deploy.
+4. **Shallow git** — Use `actions/checkout` with `fetch-depth: 1` unless a step needs history.
+5. **Conditional work** — Run deploy only on trusted `push` to `main` with secrets; fork PRs never receive secrets.
+6. **Pin actions** — Prefer pinned major versions; bump deliberately after reading changelogs.
+7. **Dependabot** — Target monorepo root (`directory: "/"`) so the workspace lockfile stays consistent.
 
-## Before adding a job or shard
+## Before adding a job or splitting CI
 
 - Does this duplicate an existing checkout + install?
-- Can this step run inside an existing job?
+- Can this step run inside the existing **CI** job?
 - Will branch protection / deploy gates still make sense?
 
-See `CLAUDE.md` → **CI/CD (GitHub Actions)** for the project summary.
+See `CLAUDE.md` → **CI/CD (GitHub Actions)** and `docs/CI.md` for the project summary.

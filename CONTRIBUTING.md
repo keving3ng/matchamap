@@ -189,6 +189,8 @@ git push origin feature/your-feature-name
 # Use the PR template provided
 ```
 
+**CI from a fork:** GitHub Actions runs tests and lint on your PR, but **repository secrets** (for example deploy keys) are **not** available to forked workflows. Production deploy still happens from pushes to `main` in this repo. See **[docs/CI.md](docs/CI.md)** for details.
+
 ---
 
 ## Code Standards

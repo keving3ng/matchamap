@@ -15,9 +15,7 @@ runs:
       with:
         node-version: ${{ inputs.node-version }}
         cache: npm
-        cache-dependency-path: |
-          package-lock.json
-          backend/package-lock.json
+        cache-dependency-path: package-lock.json
 
     - name: Install dependencies
       shell: bash

@@ -23,7 +23,7 @@ MatchaMap is a **curated guide** (recommendations, events, vivisual.diary)—not
 | I want to... | Read this |
 |-------------|-----------|
 | **Understand the project basics** | `../CLAUDE.md` (start here!) ⭐ |
-| **CI workflows (efficiency, hosted runners)** | `../CLAUDE.md` → CI/CD (GitHub Actions) |
+| **CI (single workflow, forks, Dependabot root lockfile)** | `CI.md` ⭐ |
 | **Contribute to the project** | `../CONTRIBUTING.md` ⭐ |
 | **Set up the backend locally** | `QUICKSTART_BACKEND.md` |
 | **Deploy to production** | `DEPLOYMENT.md` |

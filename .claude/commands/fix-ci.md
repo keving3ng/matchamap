@@ -34,11 +34,12 @@ await mcp__github__pull_request_read({
 })
 ```
 
-Parse the response to identify FAILED checks. Common checks in this project:
-- **Static checks** (typecheck + lint:ci + conditional audit) — typecheck is blocking
-- **Frontend tests** (Vitest shards)
-- **Backend tests** (Vitest backend)
-- **Build** (main-branch pushes only; not on PRs)
+Parse the response to identify FAILED checks. This repo uses a **single required check** named **CI** (one job). Inspect the log for which **step** failed:
+- **TypeScript type checking** — blocking
+- **Lint** — advisory (`continue-on-error`)
+- **Security audit** — advisory (`continue-on-error`)
+- **Frontend tests** / **Backend tests** — blocking
+- **Build** — `main` pushes only (not on PRs)
 
 Look for `conclusion: "FAILURE"` in the `statusCheckRollup` array.
 
@@ -70,7 +71,7 @@ git pull origin <pr.head.ref>
 
 **Only run the check that failed** - don't waste time on passing checks.
 
-**If Static checks failed:**
+**If the typecheck step failed:**
 ```bash
 npm run typecheck  # TypeScript errors are the most common cause
 ```
@@ -95,14 +96,14 @@ Check if it has `continue-on-error: true` in `.github/workflows/ci.yml` - if so,
 
 ### Step 4: Fix and Verify
 
-Make the fixes, then **only re-run the check that failed**:
+Make the fixes, then **only re-run what failed**:
 
 ```bash
-npm run typecheck  # For Static Analysis
+npm run typecheck  # typecheck step
 # OR
-npm test           # For test failures
+npm test           # frontend tests (or backend workspace as needed)
 # OR
-npm run build      # For build failures
+npm run build      # build step (main only)
 ```
 
 Don't run all checks - the pre-commit hook will do that automatically.
@@ -156,18 +157,17 @@ All checks now passing.`
 
 ## Project-Specific Quick Reference
 
-### MatchaMap CI Jobs (`.github/workflows/ci.yml`)
+### MatchaMap CI (`.github/workflows/ci.yml`)
 
-1. **Static Analysis** (most common failure source):
-   - `npm run typecheck` - TypeScript (can fail)
-   - `npm run lint:ci` - ESLint (continue-on-error: true, won't block)
-   - `npm audit` - Security (continue-on-error: true, won't block)
+Single job **CI**, sequential steps:
 
-2. **Frontend Tests**: `npm run test:coverage --workspace=frontend`
-
-3. **Backend Tests**: `npm run test:ci --workspace=backend`
-
-4. **Build** (depends on Static Analysis): `npm run build`
+1. **Typecheck** — `npm run typecheck` (blocking)
+2. **Lint** — `npm run lint:ci --workspace=frontend -- -f gha` (advisory)
+3. **Audit** — `npm audit` (advisory)
+4. **Frontend tests** — `npm run test:ci` or `test:coverage` on `main`
+5. **Backend tests** — `npm run test:ci --workspace=backend`
+6. **Build** — `npm run build` on `main` push only
+7. **Deploy** — migrations + wrangler on `main` only
 
 ### Common MatchaMap TypeScript Fixes
 

@@ -8,12 +8,9 @@ Use the exact names GitHub shows after a workflow run (case-sensitive). Current 
 
 | Check name (typical) | Role |
 |---------------------|------|
-| **Static checks** | Typecheck (blocking); lint & audit (advisory in workflow) |
-| **Frontend tests (shard 1/2)** | Frontend Vitest shard |
-| **Frontend tests (shard 2/2)** | Frontend Vitest shard |
-| **Backend tests** | Backend Vitest |
+| **CI** | Single job: typecheck (blocking); lint & audit (advisory); frontend + backend tests; on `main` push only: build, migrate, deploy |
 
-**PRs:** Require the checks above. **Build** and **Deploy backend** only run on pushes to `main`, not on PRs—do not require them for merge (they will not appear on PR runs).
+**PRs:** Require **CI** only. **Build / deploy** run inside the same job on pushes to `main` — they do not appear as separate checks on PRs from forks.
 
 **After changing workflow job `name:` fields**, update this list and branch protection to match.
 
@@ -27,4 +24,4 @@ Use the exact names GitHub shows after a workflow run (case-sensitive). Current 
 
 If a check name is missing from the dropdown, open a PR and let CI finish once so GitHub registers the check names.
 
-See **CI/CD (GitHub Actions)** in `CLAUDE.md` for cost-aware workflow guidelines.
+See **CI/CD (GitHub Actions)** in `CLAUDE.md` and `docs/CI.md` for workflow behavior and fork safety.

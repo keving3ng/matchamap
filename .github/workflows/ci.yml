@@ -13,15 +13,16 @@ concurrency:
   group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
+# Minimal scopes: fork PRs never receive repository secrets; token is only for artifacts + checkout.
+permissions:
+  contents: read
+  actions: write # upload-artifact (JUnit for debugging / agents)
+
 jobs:
-  # ============================================================================
-  # STATIC CHECKS (single job — minimizes runner minutes vs parallel typecheck/lint/audit)
-  # Typecheck is blocking; lint and audit are advisory (continue-on-error)
-  # ============================================================================
-  static-checks:
-    name: Static checks
+  ci:
+    name: CI
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 25
 
     steps:
       - name: Checkout code
@@ -35,130 +36,59 @@ jobs:
       - name: TypeScript type checking
         run: npm run typecheck
 
-      - name: Lint
-        run: npm run lint:ci
+      - name: Lint (GitHub annotations)
+        run: npm run lint:ci --workspace=frontend -- -f gha
         continue-on-error: true
 
       - name: Security audit
-        if: |
-          github.ref == 'refs/heads/main' ||
-          (github.event_name == 'push' && github.event.head_commit && (
-            contains(github.event.head_commit.modified, 'package.json') ||
-            contains(github.event.head_commit.modified, 'package-lock.json') ||
-            contains(github.event.head_commit.modified, 'backend/package.json') ||
-            contains(github.event.head_commit.modified, 'backend/package-lock.json')
-          ))
         run: npm audit --audit-level=high --production
         continue-on-error: true
 
-  # ============================================================================
-  # FRONTEND TESTS — 2 shards (balance: fewer concurrent runners vs wall-clock time)
-  # PRs: no coverage. Main: coverage for tracking.
-  # ============================================================================
-  frontend-tests:
-    name: Frontend tests (shard ${{ matrix.shard }}/2)
-    needs: [static-checks]
-    runs-on: ubuntu-latest
-    timeout-minutes: 8
-    strategy:
-      matrix:
-        shard: [1, 2]
-      fail-fast: false
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 1
-
-      - name: Setup Node & Dependencies
-        uses: ./.github/actions/setup-node-deps
-
-      - name: Run frontend tests (no coverage)
+      - name: Frontend tests
         if: github.ref != 'refs/heads/main'
-        run: npm test --workspace=frontend -- --shard=${{ matrix.shard }}/2
+        run: npm run test:ci --workspace=frontend
 
-      - name: Run frontend tests (with coverage)
+      - name: Frontend tests (coverage)
         if: github.ref == 'refs/heads/main'
-        run: npm run test:coverage --workspace=frontend -- --shard=${{ matrix.shard }}/2
+        run: npm run test:coverage --workspace=frontend
 
-  # ============================================================================
-  # BACKEND TESTS
-  # @cloudflare/workerd-linux-64 needs GLIBC 2.32+ (ubuntu-latest)
-  # ============================================================================
-  backend-tests:
-    name: Backend tests
-    needs: [static-checks]
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 1
-
-      - name: Setup Node & Dependencies
-        uses: ./.github/actions/setup-node-deps
-
-      - name: Run backend tests
+      - name: Backend tests
         run: npm run test:ci --workspace=backend
 
-  # ============================================================================
-  # BUILD (main pushes only — before deploy)
-  # ============================================================================
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    needs: [static-checks]
-    timeout-minutes: 10
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 1
-
-      - name: Setup Node & Dependencies
-        uses: ./.github/actions/setup-node-deps
-
-      - name: Run build
+      - name: Build
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: npm run build
 
-  # ============================================================================
-  # DEPLOY BACKEND (main pushes only)
-  # ============================================================================
-  deploy-backend:
-    name: Deploy backend
-    runs-on: ubuntu-latest
-    needs: [static-checks, backend-tests, build]
-    timeout-minutes: 8
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 1
-
-      - name: Setup Node & Dependencies
-        uses: ./.github/actions/setup-node-deps
-
       - name: Apply database migrations
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: cd backend && npm run db:migrate:prod
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
       - name: Deploy to Cloudflare Workers
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: cd backend && npx wrangler deploy --env=""
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
       - name: Deployment status
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
           echo "✅ Database migrations applied successfully"
           echo "✅ Backend successfully deployed to production"
           echo "🔗 API URL: https://matchamap-api-production.keving3ng.workers.dev"
 
-  # Branch protection: require static-checks, frontend-tests, backend-tests; build + deploy-backend on main.
+      - name: Upload Vitest JUnit (frontend)
+        if: failure()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: vitest-junit-frontend
+          path: frontend/test-results/junit.xml
+          if-no-files-found: ignore
+
+      - name: CI failure summary
+        if: failure()
+        run: |
+          echo "::error::CI failed — see the failing step above."
+          echo "If frontend tests ran, JUnit may be available under Actions → this run → Artifacts (vitest-junit-frontend)."
