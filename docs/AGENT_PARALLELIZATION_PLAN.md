@@ -124,7 +124,7 @@
 | 4E.3 Archive social-features-analytics-prd.md | `shell` | Move to archive |
 | 4E.4 Simplify user-guide/getting-started.md | `generalPurpose` | Remove sign-up, check-ins, reviews, profile; keep map/list/events/about |
 | 4E.5 Archive feed-refactoring-plan.md | `shell` | Move to archive |
-| 4E.6 Update or archive PARALLEL_EXECUTION_PLAN.md | `generalPurpose` | Add banner: references old social roadmap; see SIMPLIFICATION_PLAN and this doc |
+| 4E.6 Update or archive PARALLEL_EXECUTION_PLAN.md | `shell` | **Done:** moved to `docs/archive/PARALLEL_EXECUTION_PLAN.md` with superseded banner |
 
 **Suggested agent prompt:** *"Move social-features-guide.md, social-features-analytics-prd.md, feed-refactoring-plan.md to docs/archive/. Add deprecation banner to social-features-guide. Simplify user-guide/getting-started to only describe map, list, events, about—no sign-up or social."*
 

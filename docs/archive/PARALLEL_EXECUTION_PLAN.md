@@ -1,6 +1,6 @@
 # MatchaMap Parallelized Development Plan (Phases 4-6)
 
-> **⚠️ SUPERSEDED (2025-03):** This plan describes the old social feature roadmap. MatchaMap has been simplified. See [PRODUCT_FOUNDATION.md](./PRODUCT_FOUNDATION.md), [SIMPLIFICATION_PLAN.md](./SIMPLIFICATION_PLAN.md), and [AGENT_PARALLELIZATION_PLAN.md](./AGENT_PARALLELIZATION_PLAN.md) for current direction.
+> **⚠️ ARCHIVED — SUPERSEDED (2025-03):** This plan describes the old social feature roadmap. MatchaMap has been simplified. See [PRODUCT_FOUNDATION.md](../PRODUCT_FOUNDATION.md), [SIMPLIFICATION_PLAN.md](../SIMPLIFICATION_PLAN.md), and [AGENT_PARALLELIZATION_PLAN.md](../AGENT_PARALLELIZATION_PLAN.md) for current direction.
 
 ---
 

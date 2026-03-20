@@ -118,6 +118,8 @@ See [Feature Flags Guide](./docs/feature-flags-guide.md) for details.
 
 ## 📚 Documentation
 
+**Index:** [docs/README.md](./docs/README.md) — task-oriented map of all guides.
+
 **Getting Started**
 - [CLAUDE.md](./CLAUDE.md) - Comprehensive development guide for contributors
 - [Quick Start Guide](./docs/QUICKSTART_BACKEND.md) - Backend setup and development
@@ -130,8 +132,7 @@ See [Feature Flags Guide](./docs/feature-flags-guide.md) for details.
 - [Metrics Tracking](./docs/metrics-tracking-prd.md) - Analytics implementation
 
 **Operations**
-- [Deployment Guide](./docs/DEPLOYMENT.md) - Production deployment instructions
-- [Deployment Commands](./docs/DEPLOYMENT_COMMANDS.md) - Common deployment commands
+- [Deployment Guide](./docs/DEPLOYMENT.md) - Production deployment, migrations, rollback (includes command reference)
 - [Feature Flags](./docs/feature-flags-guide.md) - Managing feature toggles
 - [Google Places Setup](./docs/GOOGLE_PLACES_SETUP.md) - API integration guide
 

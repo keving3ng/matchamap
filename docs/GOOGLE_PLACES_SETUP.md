@@ -107,3 +107,19 @@ You'll never pay anything unless you add 4000+ cafes in a single month.
 ## Need Help?
 
 Check the [Google Places API Documentation](https://developers.google.com/maps/documentation/places/web-service/overview)
+
+---
+
+## Integration reference (code)
+
+Setup steps above enable the feature. Implementation lives in the repo (not duplicated here—avoid drift):
+
+| Layer | Location |
+|--------|----------|
+| Backend lookup | `backend/src/routes/places.ts` — `POST /api/admin/places/lookup` |
+| API client | `frontend/src/utils/api.ts` — `api.places.lookup(...)` |
+| Admin UI | Cafe form uses lookup to pre-fill fields when a Google Maps URL is present |
+
+**Security:** Keep `GOOGLE_PLACES_API_KEY` in Wrangler/backend only—never in the frontend bundle. Restrict the key to Places API (and Photos if you enable photo media URLs). Rate-limit or cache admin lookups if exposed beyond trusted editors.
+
+**Cost:** Occasional cafe imports stay well within typical Google Maps Platform free credit; see **Pricing** above.

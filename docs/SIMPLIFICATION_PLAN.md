@@ -124,7 +124,7 @@ Dropping tables is a separate migration; only after you’re sure you don’t ne
 - **social-features-analytics-prd.md** – Archive or mark deprecated.
 - **user-guide/getting-started.md** – Simplify to “how to use the map/list/events/about”; remove sign-up, check-ins, reviews, profile.
 - **feed-refactoring-plan.md** – Already about a deprecated feed; keep in archive or delete.
-- **PARALLEL_EXECUTION_PLAN.md** – If it references activity feed and social work, archive or update.
+- **PARALLEL_EXECUTION_PLAN.md** – Archived as [`docs/archive/PARALLEL_EXECUTION_PLAN.md`](./archive/PARALLEL_EXECUTION_PLAN.md) (old social roadmap; superseded).
 
 Keep: TECH_SPEC, DEPLOYMENT, TESTING, QUICKSTART_BACKEND, feature-flags, adding-new-cities, GOOGLE_PLACES_SETUP, photo-upload-guide (only if you ever want to allow editor uploads; otherwise archive).
 
