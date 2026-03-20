@@ -496,6 +496,8 @@ export const COPY = {
       // Tooltips
       demandTooltip: 'Anonymous marks + authenticated check-ins',
       ctrTooltip: 'Click-through rate: directions / views',
+      /** Accessible label for sortable column header buttons */
+      sortTableByColumn: (columnLabel: string) => `Sort by ${columnLabel}`,
 
       // Loading/Error
       loading: 'Loading analytics...',

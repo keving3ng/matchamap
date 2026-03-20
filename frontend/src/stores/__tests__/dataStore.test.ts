@@ -90,11 +90,11 @@ describe('dataStore', () => {
     expect(vi.mocked(api.cafes.getAll)).toHaveBeenCalledTimes(2)
   })
 
-  it('fetchCafes passes city string as filter', async () => {
+  it('fetchCafes passes city in filter object', async () => {
     vi.mocked(api.cafes.getAll).mockResolvedValue({ cafes: [] })
     const { result } = renderHook(() => useDataStore())
     await act(async () => {
-      await result.current.fetchCafes('toronto')
+      await result.current.fetchCafes({ city: 'toronto' })
     })
     expect(vi.mocked(api.cafes.getAll)).toHaveBeenCalledWith(
       expect.objectContaining({ city: 'toronto' }),

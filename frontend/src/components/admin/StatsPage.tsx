@@ -5,6 +5,7 @@ import { COPY } from '../../constants/copy'
 import { Skeleton } from '../ui/Skeleton'
 import { AlertDialog } from '../ui/AlertDialog'
 import type { CafeStats } from '../../../../shared/types'
+import { calculateCtrPercentString } from '../../utils/metrics'
 
 // Type-safe numeric fields from CafeStats for sorting
 type NumericCafeStatKey = 'views' | 'directions_clicks' | 'anonymous_passport_marks' | 'authenticated_checkins' | 'instagram_clicks' | 'tiktok_clicks'
@@ -44,17 +45,22 @@ interface SortableHeaderProps {
 
 const SortableHeader: React.FC<SortableHeaderProps> = ({ label, sortKey, currentSortKey, sortDesc, onSort }) => {
   const isActive = currentSortKey === sortKey
+  const ariaSort = isActive ? (sortDesc ? 'descending' : 'ascending') : 'none'
 
   return (
-    <th className="px-4 py-3 text-right">
+    <th scope="col" className="px-4 py-3 text-right" aria-sort={ariaSort}>
       <button
+        type="button"
         onClick={() => onSort(sortKey)}
         className="flex items-center gap-1 justify-end w-full hover:text-green-600 transition"
+        aria-label={COPY.admin.analytics.sortTableByColumn(label)}
       >
         <span className={isActive ? 'font-semibold' : ''}>{label}</span>
-        <ArrowUpDown size={14} className={isActive ? 'text-green-600' : 'opacity-40'} />
+        <ArrowUpDown size={14} className={isActive ? 'text-green-600' : 'opacity-40'} aria-hidden />
         {isActive && (
-          <span className="text-xs">{sortDesc ? '↓' : '↑'}</span>
+          <span className="text-xs" aria-hidden>
+            {sortDesc ? '↓' : '↑'}
+          </span>
         )}
       </button>
     </th>
@@ -66,7 +72,7 @@ interface CafeStatsRowProps {
 }
 
 const CafeStatsRow: React.FC<CafeStatsRowProps> = ({ cafe }) => {
-  const ctr = cafe.views > 0 ? ((cafe.directions_clicks / cafe.views) * 100).toFixed(1) : '0.0'
+  const ctr = calculateCtrPercentString(cafe.directions_clicks, cafe.views)
   const demand = cafe.anonymous_passport_marks + cafe.authenticated_checkins
   const social = cafe.instagram_clicks + cafe.tiktok_clicks
 
@@ -134,7 +140,7 @@ export const StatsPage: React.FC = () => {
   const totalAnonymousMarks = cafeStats.reduce((sum, s) => sum + s.anonymous_passport_marks, 0)
   const totalAuthCheckins = cafeStats.reduce((sum, s) => sum + s.authenticated_checkins, 0)
   const totalDemand = totalAnonymousMarks + totalAuthCheckins
-  const avgCtr = totalViews > 0 ? ((totalDirections / totalViews) * 100).toFixed(1) : '0.0'
+  const avgCtr = calculateCtrPercentString(totalDirections, totalViews)
 
   if (loading) {
     return (
@@ -209,15 +215,15 @@ export const StatsPage: React.FC = () => {
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">{COPY.admin.analytics.cafe}</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">{COPY.admin.analytics.city}</th>
+                <th scope="col" className="px-4 py-3 text-left text-sm font-semibold text-gray-700">{COPY.admin.analytics.cafe}</th>
+                <th scope="col" className="px-4 py-3 text-left text-sm font-semibold text-gray-700">{COPY.admin.analytics.city}</th>
                 <SortableHeader label={COPY.admin.analytics.views} sortKey="views" currentSortKey={sortBy} sortDesc={sortDesc} onSort={handleSort} />
                 <SortableHeader label={COPY.admin.analytics.directions} sortKey="directions_clicks" currentSortKey={sortBy} sortDesc={sortDesc} onSort={handleSort} />
-                <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700" title={COPY.admin.analytics.ctrTooltip}>{COPY.admin.analytics.ctr}</th>
+                <th scope="col" className="px-4 py-3 text-right text-sm font-semibold text-gray-700" title={COPY.admin.analytics.ctrTooltip}>{COPY.admin.analytics.ctr}</th>
                 <SortableHeader label={COPY.admin.analytics.anonymousMarks} sortKey="anonymous_passport_marks" currentSortKey={sortBy} sortDesc={sortDesc} onSort={handleSort} />
                 <SortableHeader label={COPY.admin.analytics.checkins} sortKey="authenticated_checkins" currentSortKey={sortBy} sortDesc={sortDesc} onSort={handleSort} />
-                <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700" title={COPY.admin.analytics.demandTooltip}>{COPY.admin.analytics.demand}</th>
-                <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">{COPY.admin.analytics.social}</th>
+                <th scope="col" className="px-4 py-3 text-right text-sm font-semibold text-gray-700" title={COPY.admin.analytics.demandTooltip}>{COPY.admin.analytics.demand}</th>
+                <th scope="col" className="px-4 py-3 text-right text-sm font-semibold text-gray-700">{COPY.admin.analytics.social}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">

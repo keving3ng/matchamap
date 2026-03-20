@@ -46,9 +46,8 @@ export const useDataStore = create<DataStore>((set, get) => ({
     maxPrice?: number
     limit?: number
     offset?: number
-  } | string, bustCache = false) => {
-    // Handle legacy single string parameter (city)
-    const filterParams = typeof filters === 'string' ? { city: filters } : filters
+  }, bustCache = false) => {
+    const filterParams = filters
 
     // Skip if already fetched (unless cache busting) and no filters provided
     if (!bustCache && get().cafesFetched && !filterParams?.search && !filterParams?.userMinRating) return
