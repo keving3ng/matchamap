@@ -1,0 +1,22 @@
+{
+  "model_profile": "budget",
+  "commit_docs": true,
+  "search_gitignored": false,
+  "branching_strategy": "none",
+  "phase_branch_template": "gsd/phase-{phase}-{slug}",
+  "milestone_branch_template": "gsd/{milestone}-{slug}",
+  "workflow": {
+    "research": true,
+    "plan_check": true,
+    "verifier": true,
+    "auto_advance": false,
+    "nyquist_validation": true,
+    "ui_phase": true,
+    "ui_safety_gate": true
+  },
+  "parallelization": true,
+  "brave_search": false,
+  "hooks": {
+    "context_warnings": false
+  }
+}
