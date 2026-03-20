@@ -915,7 +915,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
 
       {/* Quick Filters - Horizontal Scrollable */}
       <div className="absolute top-4 left-4 right-4 z-[1003]">
-        <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-1">
+        <div className="flex gap-1 overflow-x-auto scrollbar-hide pb-1">
           {/* City Selector - Navigation, not filter */}
           <div className="relative flex-shrink-0">
             <button
@@ -923,7 +923,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                 e.stopPropagation()
                 setShowCityDropdown(!showCityDropdown)
               }}
-              className="px-3 py-[2px] rounded-full text-[11px] font-bold shadow-xs transition-all flex items-center gap-0.5 bg-gradient-to-r from-matcha-600 to-matcha-500 text-white whitespace-nowrap"
+              className="px-2.5 py-1 rounded-lg text-[11px] font-semibold shadow-xs transition-all flex items-center gap-0.5 bg-gradient-to-r from-matcha-600 to-matcha-500 text-white whitespace-nowrap"
             >
               <Building2 size={11} />
               {CITIES[selectedCity].name}
@@ -938,7 +938,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
                 e.stopPropagation()
                 setShowDrinkDropdown(!showDrinkDropdown)
               }}
-              className={`px-3 py-[2px] rounded-full text-[11px] font-bold shadow-xs transition-all flex items-center gap-0.5 whitespace-nowrap max-w-[140px] ${
+              className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold shadow-xs transition-all flex items-center gap-0.5 whitespace-nowrap max-w-[140px] ${
                 selectedDrinkType !== null
                   ? 'bg-gradient-to-r from-matcha-600 to-matcha-500 text-white'
                   : 'bg-white text-gray-700 hover:bg-gray-50'
@@ -957,7 +957,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
             <button
               key={rating}
               onClick={() => setMinRating(minRating === rating ? null : rating)}
-              className={`px-3 py-[2px] rounded-full text-[11px] font-bold transition-all shadow-xs flex-shrink-0 whitespace-nowrap ${
+              className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all shadow-xs flex-shrink-0 whitespace-nowrap ${
                 minRating === rating
                   ? 'bg-gradient-to-r from-matcha-600 to-matcha-500 text-white'
                   : 'bg-white text-gray-700 hover:bg-gray-50'
@@ -972,7 +972,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
             <button
               key={price}
               onClick={() => setMaxPrice(maxPrice === price ? null : price)}
-              className={`px-3 py-[2px] rounded-full text-[11px] font-bold transition-all shadow-xs flex-shrink-0 whitespace-nowrap ${
+              className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all shadow-xs flex-shrink-0 whitespace-nowrap ${
                 maxPrice === price
                   ? 'bg-gradient-to-r from-matcha-600 to-matcha-500 text-white'
                   : 'bg-white text-gray-700 hover:bg-gray-50'
@@ -985,7 +985,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
           {/* Open Now */}
           <button
             onClick={() => setOpenNow(!openNow)}
-            className={`px-3 py-[2px] rounded-full text-[11px] font-bold transition-all shadow-xs flex-shrink-0 whitespace-nowrap ${
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all shadow-xs flex-shrink-0 whitespace-nowrap ${
               openNow
                 ? 'bg-gradient-to-r from-matcha-600 to-matcha-500 text-white'
                 : 'bg-white text-gray-700 hover:bg-gray-50'
