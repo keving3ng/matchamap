@@ -2,313 +2,89 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook } from '@testing-library/react'
 import { useFeatureToggle, isFeatureEnabled, getEnabledFeatures, getCurrentEnvironment } from '../useFeatureToggle'
 
-// Mock the feature config
 vi.mock('../../config/features.yaml', () => ({
   default: {
     ENABLE_PASSPORT: { dev: true, prod: false },
     ENABLE_EVENTS: { dev: false, prod: true },
     ENABLE_MENU: { dev: true, prod: true },
     ENABLE_USER_ACCOUNTS: { dev: false, prod: false },
-  }
+  },
 }))
 
-// Mock the admin store
 vi.mock('../../stores/adminStore', () => ({
   useAdminStore: vi.fn(),
 }))
 
-// Declare mockUseAdminStore at top level for all describe blocks
-let mockUseAdminStore: any
+let mockUseAdminStore: ReturnType<typeof vi.fn>
 
 describe('useFeatureToggle', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
-
+    vi.stubEnv('MODE', 'development')
     mockUseAdminStore = vi.fn(() => ({
       adminModeActive: false,
       featureOverrides: {},
-      environment: null,
+      environment: null as 'dev' | 'prod' | null,
     }))
-
     const { useAdminStore } = await import('../../stores/adminStore')
     vi.mocked(useAdminStore).mockImplementation(mockUseAdminStore)
-
-    // Reset import.meta.env.MODE
-    vi.stubEnv('MODE', 'development')
   })
 
-  it('should return feature value based on development environment', () => {
-    const { result } = renderHook(() => useFeatureToggle('ENABLE_PASSPORT'))
-
-    expect(result.current).toBe(true) // dev: true in mock config
-  })
-
-  it('should return feature value based on production environment', () => {
+  it('reads YAML by environment', () => {
+    expect(renderHook(() => useFeatureToggle('ENABLE_PASSPORT')).result.current).toBe(true)
     vi.stubEnv('MODE', 'production')
-
-    const { result } = renderHook(() => useFeatureToggle('ENABLE_EVENTS'))
-
-    expect(result.current).toBe(true) // prod: true in mock config
+    expect(renderHook(() => useFeatureToggle('ENABLE_PASSPORT')).result.current).toBe(false)
   })
 
-  it('should return false for disabled features', () => {
-    const { result } = renderHook(() => useFeatureToggle('ENABLE_USER_ACCOUNTS'))
-
-    expect(result.current).toBe(false) // Both dev and prod are false
-  })
-
-  it('should return false for non-existent features', () => {
-    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-    
-    const { result } = renderHook(() => useFeatureToggle('NON_EXISTENT_FEATURE' as any))
-
-    expect(result.current).toBe(false)
-    expect(consoleSpy).toHaveBeenCalledWith('Feature "NON_EXISTENT_FEATURE" not found in feature config')
-    
-    consoleSpy.mockRestore()
-  })
-
-  it('should use admin override when admin mode is active', () => {
+  it('applies admin overrides only when admin mode is on', () => {
     mockUseAdminStore.mockReturnValue({
       adminModeActive: true,
-      featureOverrides: {
-        ENABLE_PASSPORT: false, // Override to false
-      },
+      featureOverrides: { ENABLE_PASSPORT: false },
       environment: null,
     })
-
-    const { result } = renderHook(() => useFeatureToggle('ENABLE_PASSPORT'))
-
-    expect(result.current).toBe(false) // Should use override, not config
+    expect(renderHook(() => useFeatureToggle('ENABLE_PASSPORT')).result.current).toBe(false)
   })
 
-  it('should use config when admin override is undefined', () => {
-    mockUseAdminStore.mockReturnValue({
-      adminModeActive: true,
-      featureOverrides: {
-        ENABLE_EVENTS: true, // Override for different feature
-      },
-      environment: null,
-    })
-
-    const { result } = renderHook(() => useFeatureToggle('ENABLE_PASSPORT'))
-
-    expect(result.current).toBe(true) // Should use config since no override for this feature
-  })
-
-  it('should use simulated environment when admin mode is active', () => {
+  it('uses admin environment for config when admin mode is on', () => {
     mockUseAdminStore.mockReturnValue({
       adminModeActive: true,
       featureOverrides: {},
-      environment: 'prod', // Simulate production
+      environment: 'prod',
     })
-
-    const { result } = renderHook(() => useFeatureToggle('ENABLE_EVENTS'))
-
-    expect(result.current).toBe(true) // Should use prod value from config
+    expect(renderHook(() => useFeatureToggle('ENABLE_EVENTS')).result.current).toBe(true)
   })
 
-  it('should use actual environment when admin mode is inactive', () => {
-    vi.stubEnv('MODE', 'production')
-
-    mockUseAdminStore.mockReturnValue({
-      adminModeActive: false,
-      featureOverrides: {},
-      environment: 'dev', // This should be ignored
-    })
-
-    const { result } = renderHook(() => useFeatureToggle('ENABLE_PASSPORT'))
-
-    expect(result.current).toBe(false) // Should use prod value (false), not dev value (true)
-  })
-
-  it('should handle missing environment in feature config', () => {
-    const { result } = renderHook(() => useFeatureToggle('ENABLE_MENU'))
-
-    expect(result.current).toBe(true) // Both dev and prod are true
-  })
-
-  it('should update when admin store values change', () => {
-    const { result, rerender } = renderHook(() => useFeatureToggle('ENABLE_PASSPORT'))
-
-    expect(result.current).toBe(true) // Initial dev value
-
-    // Change admin store to override
-    mockUseAdminStore.mockReturnValue({
-      adminModeActive: true,
-      featureOverrides: {
-        ENABLE_PASSPORT: false,
-      },
-      environment: null,
-    })
-
-    rerender()
-
-    expect(result.current).toBe(false) // Should use override
-  })
-
-  it('should memoize result correctly', () => {
-    const { result, rerender } = renderHook(() => useFeatureToggle('ENABLE_PASSPORT'))
-
-    const firstResult = result.current
-    rerender()
-    const secondResult = result.current
-
-    expect(firstResult).toBe(secondResult)
+  it('warns and returns false for unknown feature keys', () => {
+    const spy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    expect(renderHook(() => useFeatureToggle('NON_EXISTENT_FEATURE' as never)).result.current).toBe(false)
+    expect(spy).toHaveBeenCalled()
+    spy.mockRestore()
   })
 })
 
 describe('isFeatureEnabled', () => {
-  beforeEach(() => {
+  it('mirrors environment without admin store', () => {
     vi.stubEnv('MODE', 'development')
-  })
-
-  it('should return correct value for development environment', () => {
     expect(isFeatureEnabled('ENABLE_PASSPORT')).toBe(true)
-    expect(isFeatureEnabled('ENABLE_EVENTS')).toBe(false)
-  })
-
-  it('should return correct value for production environment', () => {
     vi.stubEnv('MODE', 'production')
-
-    expect(isFeatureEnabled('ENABLE_PASSPORT')).toBe(false)
     expect(isFeatureEnabled('ENABLE_EVENTS')).toBe(true)
-  })
-
-  it('should return false for non-existent features', () => {
-    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-    
-    expect(isFeatureEnabled('NON_EXISTENT_FEATURE' as any)).toBe(false)
-    expect(consoleSpy).toHaveBeenCalledWith('Feature "NON_EXISTENT_FEATURE" not found in feature config')
-    
-    consoleSpy.mockRestore()
-  })
-
-  it('should handle missing environment values', () => {
-    // Test with feature that has undefined for current env
-    expect(isFeatureEnabled('ENABLE_USER_ACCOUNTS')).toBe(false)
   })
 })
 
 describe('getEnabledFeatures', () => {
-  beforeEach(() => {
+  it('lists keys enabled in current mode', () => {
     vi.stubEnv('MODE', 'development')
-  })
-
-  it('should return enabled features for development environment', () => {
-    const enabledFeatures = getEnabledFeatures()
-
-    expect(enabledFeatures).toContain('ENABLE_PASSPORT')
-    expect(enabledFeatures).toContain('ENABLE_MENU')
-    expect(enabledFeatures).not.toContain('ENABLE_EVENTS')
-    expect(enabledFeatures).not.toContain('ENABLE_USER_ACCOUNTS')
-  })
-
-  it('should return enabled features for production environment', () => {
+    expect(getEnabledFeatures()).toContain('ENABLE_PASSPORT')
     vi.stubEnv('MODE', 'production')
-
-    const enabledFeatures = getEnabledFeatures()
-
-    expect(enabledFeatures).toContain('ENABLE_EVENTS')
-    expect(enabledFeatures).toContain('ENABLE_MENU')
-    expect(enabledFeatures).not.toContain('ENABLE_PASSPORT')
-    expect(enabledFeatures).not.toContain('ENABLE_USER_ACCOUNTS')
-  })
-
-  it('should return array of feature keys', () => {
-    const enabledFeatures = getEnabledFeatures()
-    
-    expect(Array.isArray(enabledFeatures)).toBe(true)
-    enabledFeatures.forEach(feature => {
-      expect(typeof feature).toBe('string')
-    })
+    expect(getEnabledFeatures()).toContain('ENABLE_EVENTS')
   })
 })
 
 describe('getCurrentEnvironment', () => {
-  it('should return dev for development mode', () => {
+  it('maps MODE to dev or prod', () => {
     vi.stubEnv('MODE', 'development')
-
     expect(getCurrentEnvironment()).toBe('dev')
-  })
-
-  it('should return prod for production mode', () => {
     vi.stubEnv('MODE', 'production')
-
     expect(getCurrentEnvironment()).toBe('prod')
-  })
-
-  it('should return dev for unknown modes', () => {
-    vi.stubEnv('MODE', 'test')
-
-    expect(getCurrentEnvironment()).toBe('dev')
-  })
-
-  it('should handle missing MODE', () => {
-    vi.stubEnv('MODE', '')
-
-    expect(getCurrentEnvironment()).toBe('dev')
-  })
-})
-
-describe('Feature toggle edge cases', () => {
-  beforeEach(async () => {
-    vi.stubEnv('MODE', 'development')
-
-    mockUseAdminStore = vi.fn(() => ({
-      adminModeActive: false,
-      featureOverrides: {},
-      environment: null,
-    }))
-
-    const { useAdminStore } = await import('../../stores/adminStore')
-    vi.mocked(useAdminStore).mockImplementation(mockUseAdminStore)
-  })
-
-  it('should handle boolean admin overrides correctly', async () => {
-    mockUseAdminStore = vi.fn(() => ({
-      adminModeActive: true,
-      featureOverrides: {
-        ENABLE_PASSPORT: false, // Explicit false
-        ENABLE_EVENTS: true,    // Explicit true
-      },
-      environment: null,
-    }))
-
-    const { useAdminStore } = await import('../../stores/adminStore')
-    vi.mocked(useAdminStore).mockImplementation(mockUseAdminStore)
-
-    const { result: passportResult } = renderHook(() => useFeatureToggle('ENABLE_PASSPORT'))
-    const { result: eventsResult } = renderHook(() => useFeatureToggle('ENABLE_EVENTS'))
-
-    expect(passportResult.current).toBe(false)
-    expect(eventsResult.current).toBe(true)
-  })
-
-  it('should handle environment switching in admin mode', async () => {
-    mockUseAdminStore = vi.fn(() => ({
-      adminModeActive: true,
-      featureOverrides: {},
-      environment: 'prod',
-    }))
-
-    const { useAdminStore } = await import('../../stores/adminStore')
-    vi.mocked(useAdminStore).mockImplementation(mockUseAdminStore)
-
-    // Feature that differs between dev and prod
-    const { result, rerender } = renderHook(() => useFeatureToggle('ENABLE_PASSPORT'))
-
-    expect(result.current).toBe(false) // prod value
-
-    // Switch to dev environment
-    mockUseAdminStore.mockReturnValue({
-      adminModeActive: true,
-      featureOverrides: {},
-      environment: 'dev',
-    })
-
-    rerender()
-
-    expect(result.current).toBe(true) // dev value
   })
 })

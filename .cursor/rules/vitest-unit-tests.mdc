@@ -1,0 +1,27 @@
+---
+description: High-signal Vitest tests — avoid Tailwind/class churn and redundant UI cases
+globs: "**/*.test.ts,**/*.test.tsx,**/*.spec.ts,**/*.spec.tsx,**/vitest.config.ts"
+---
+
+# Unit tests (Vitest + Testing Library)
+
+## What to prioritize
+
+- **Behavior**: user-visible outcomes (roles, labels, disabled state, callbacks, navigation, API params).
+- **Logic**: Zustand stores, hooks with real state transitions, pure utils, Worker routes.
+- **One happy path + edges that can regress** (errors, empty data, permission boundaries).
+
+## Avoid (low signal for AI iteration)
+
+- Asserting **Tailwind class strings** (`toHaveClass('bg-green-600', …)`). Styling changes will fail tests without behavior changes. Prefer roles, text, `toBeDisabled()`, or `toHaveAttribute` when the contract is semantic.
+- **Duplicate interaction tests** on native `<button>` (Enter + Space + click for the same `onClick`).
+- **Multiple tests** that only vary presentation (each variant’s CSS) for primitives — use one smoke test per component family unless behavior differs.
+- **Snapshot tests** for large DOM trees (none in this repo — keep it that way unless reviewing intentional contracts).
+
+## Mocks
+
+- When a component calls `fetch` / `api` / stores on mount, **mock the module** in the test file so stderr stays clean and failures are localized (see `ListView.test.tsx` + `cityStore`).
+
+## Coverage
+
+- `frontend/vitest.config.ts` sets global thresholds. If you delete tests, run `npm run test:coverage --workspace=frontend` and adjust thresholds only with team agreement — do not “pad” with class-only tests to pass gates.

@@ -6,6 +6,42 @@ import { COPY } from '../../constants/copy'
 import { useUIStore } from '../../stores/uiStore'
 import type { CafeWithDistance } from '../../types'
 
+vi.mock('../../stores/cityStore', () => ({
+  useCityStore: () => ({
+    selectedCity: 'toronto',
+    setCity: vi.fn(),
+    getCity: () => ({
+      key: 'toronto',
+      name: 'Toronto',
+      shortCode: 'TO',
+      center: [43.6532, -79.3832] as [number, number],
+      zoom: 14,
+    }),
+    getAvailableCities: () => [],
+    loadAvailableCities: vi.fn().mockResolvedValue(undefined),
+    availableCitiesLoaded: true,
+  }),
+  CITIES: {
+    toronto: {
+      key: 'toronto',
+      name: 'Toronto',
+      shortCode: 'TO',
+      center: [43.6532, -79.3832] as [number, number],
+      zoom: 14,
+    },
+  },
+}))
+
+vi.mock('../../utils/api', () => ({
+  api: {
+    events: { getAll: vi.fn().mockResolvedValue({ events: [] }) },
+  },
+}))
+
+vi.mock('../../hooks/useFeatureToggle', () => ({
+  useFeatureToggle: () => false,
+}))
+
 // Mock Leaflet - define inline to avoid hoisting issues
 vi.mock('leaflet', () => {
   const mockLeaflet = {
