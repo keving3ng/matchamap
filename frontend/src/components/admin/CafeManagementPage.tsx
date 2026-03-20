@@ -12,6 +12,7 @@ import { OPTIONAL_CAFE_FIELDS } from '../../constants/cafeFields'
 import { borderRadius, zIndex, spacing } from '../../styles/spacing'
 import { CITIES } from '../../stores/cityStore'
 import type { Cafe } from '../../types'
+import type { CafeFormData } from '../../../../shared/types'
 
 const TOOLTIP_POSITION_THRESHOLD = parseInt(spacing.tooltipPositionThreshold, 10)
 
@@ -155,7 +156,7 @@ export const CafeManagementPage: React.FC = () => {
     setShowForm(true)
   }
 
-  const handleSaveCafe = async (cafeData: Partial<Cafe>) => {
+  const handleSaveCafe = async (cafeData: CafeFormData) => {
     if (editingCafe) {
       await api.cafes.update(editingCafe.id, cafeData)
     } else {

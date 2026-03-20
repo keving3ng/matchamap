@@ -4,10 +4,11 @@ import { api } from '../../utils/api'
 import { COPY } from '../../constants/copy'
 import { CITIES } from '../../stores/cityStore'
 import type { Cafe } from '../../types'
+import type { CafeFormData } from '../../../../shared/types'
 
 interface CafeFormProps {
   cafe?: Cafe | null
-  onSave: (cafeData: Partial<Cafe>) => Promise<void>
+  onSave: (cafeData: CafeFormData) => Promise<void>
   onCancel: () => void
 }
 
@@ -132,7 +133,7 @@ export const CafeForm: React.FC<CafeFormProps> = ({ cafe, onSave, onCancel }) =>
 
       // Transform to backend API format (matching Drizzle schema)
       // Note: Coordinates are read-only in the form but still included in submission
-      const payload = {
+      const payload: CafeFormData = {
         name: formData.name,
         slug,
         link: formData.link,
@@ -152,7 +153,7 @@ export const CafeForm: React.FC<CafeFormProps> = ({ cafe, onSave, onCancel }) =>
         images: formData.images || null,
       }
 
-      await onSave(payload as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+      await onSave(payload)
       onCancel()
     } catch (err) {
       setError((err as Error).message)

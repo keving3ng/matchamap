@@ -66,7 +66,7 @@ export const BulkImporterPage: React.FC = () => {
 
       // Call backend import endpoint
       const response = await api.cafes.import({
-        cafes: cafesToImport as any // eslint-disable-line @typescript-eslint/no-explicit-any -- CsvCafe is compatible with Partial<Cafe> for import
+        cafes: cafesToImport,
       })
 
       setExecutionResult({

@@ -6,6 +6,7 @@
 import { useAuthStore } from '../stores/authStore'
 import { useSessionExpiry } from '../hooks/useSessionExpiry'
 import type { Cafe, Drink, Event, CityWithCount, WaitlistResponse, CafeStats } from '../../../shared/types'
+import type { CsvCafe } from './csvParser'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -140,7 +141,7 @@ export const cafeAPI = {
   /**
    * Import cafes and drinks (admin only)
    */
-  async import(data: { cafes: Partial<Cafe>[] }): Promise<{
+  async import(data: { cafes: CsvCafe[] }): Promise<{
     success: number
     failed: number
     message: string

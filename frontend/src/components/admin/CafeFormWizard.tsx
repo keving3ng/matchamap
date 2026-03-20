@@ -3,10 +3,10 @@ import { X, Save, MapPin, Star, Coffee, ArrowRight, ArrowLeft, Search } from '@/
 import { api } from '../../utils/api'
 import { formatHoursList } from '../../utils/formatHours'
 import { CITIES, CityKey } from '../../stores/cityStore'
-import type { Cafe } from '../../types'
+import type { CafeFormData } from '../../../../shared/types'
 
 interface CafeFormWizardProps {
-  onSave: (cafeData: Partial<Cafe>) => Promise<void>
+  onSave: (cafeData: CafeFormData) => Promise<void>
   onCancel: () => void
 }
 
@@ -84,7 +84,7 @@ export const CafeFormWizard: React.FC<CafeFormWizardProps> = ({ onSave, onCancel
     try {
       const slug = formData.name.toLowerCase().replace(/\s+/g, '-')
 
-      const payload = {
+      const payload: CafeFormData = {
         name: formData.name,
         slug,
         link: formData.googleMapsUrl,
@@ -94,16 +94,16 @@ export const CafeFormWizard: React.FC<CafeFormWizardProps> = ({ onSave, onCancel
         ambianceScore: formData.ambianceScore || null,
         chargeForAltMilk: formData.chargeForAltMilk,
         quickNote: formData.quickNote,
-        review: formData.review,
+        review: formData.review || null,
         source: formData.source || null,
-        hours: formData.hours,
-        instagram: formData.instagram,
-        instagramPostLink: formData.instagramPostLink,
-        tiktokPostLink: formData.tiktokPostLink,
-        images: formData.images,
+        hours: formData.hours || null,
+        instagram: formData.instagram || null,
+        instagramPostLink: formData.instagramPostLink || null,
+        tiktokPostLink: formData.tiktokPostLink || null,
+        images: formData.images || null,
       }
 
-      await onSave(payload as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+      await onSave(payload)
       onCancel()
     } catch (err) {
       setError((err as Error).message)
