@@ -1,22 +1,24 @@
 {
+  "mode": "yolo",
+  "granularity": "coarse",
   "model_profile": "budget",
   "commit_docs": true,
-  "search_gitignored": false,
+  "parallelization": true,
   "branching_strategy": "none",
-  "phase_branch_template": "gsd/phase-{phase}-{slug}",
-  "milestone_branch_template": "gsd/{milestone}-{slug}",
+  "quick_branch_template": null,
   "workflow": {
     "research": true,
     "plan_check": true,
     "verifier": true,
     "auto_advance": false,
-    "nyquist_validation": true,
+    "nyquist_validation": false,
     "ui_phase": true,
-    "ui_safety_gate": true
+    "ui_safety_gate": true,
+    "research_before_questions": false,
+    "skip_discuss": true
   },
-  "parallelization": true,
-  "brave_search": false,
   "hooks": {
     "context_warnings": false
-  }
+  },
+  "resolve_model_ids": "omit"
 }
