@@ -1,3 +1,6 @@
+// Zustand initializes and recalculates this store outside React renders.
+'use no memo'
+
 import { create } from 'zustand'
 import { useLocationStore } from './locationStore'
 import { useDataStore } from './dataStore'
@@ -47,7 +50,9 @@ export const useCafeStore = create<CafeStore>((set) => ({
       }))
     }
 
-    set({ cafesWithDistance })
+    set(state => ({ cafesWithDistance,
+      selectedCafe: cafesWithDistance.find(cafe => cafe.id === state.selectedCafe?.id) || null,
+    }))
   },
 }))
 

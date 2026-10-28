@@ -1,3 +1,4 @@
+import 'leaflet/dist/leaflet.css'
 import React from 'react'
 import { MapPin, Navigation, Crosshair, Coffee, Star, Building2, ChevronDown, Route, Instagram, X } from '@/components/icons'
 import { TikTokIcon } from './TikTokIcon'
@@ -331,7 +332,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
   }, [selectedCity])
 
   return (
-    <div className="flex-1 relative">
+    <div data-cafe-view tabIndex={-1} className="flex-1 relative focus:outline-none">
       {/* Leaflet Map Container */}
       <div
         ref={containerRef}

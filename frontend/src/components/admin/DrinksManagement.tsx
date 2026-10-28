@@ -45,7 +45,7 @@ export const DrinksManagement: React.FC<DrinksManagementProps> = ({ cafeId, cafe
       await api.drinks.delete(drinkId)
       await loadDrinks()
       // Refresh cafe data in the store to update map view with cache busting
-      await fetchCafes(undefined, true)
+      await fetchCafes(undefined, true, 'admin')
     } catch (err) {
       setError((err as Error).message)
     }
@@ -72,7 +72,7 @@ export const DrinksManagement: React.FC<DrinksManagementProps> = ({ cafeId, cafe
       setDrinks(response.drinks)
       
       // Refresh cafe data in the store to update map view with cache busting
-      await fetchCafes(undefined, true)
+      await fetchCafes(undefined, true, 'admin')
     } catch (err) {
       setError(COPY.admin.drinksManagement.setAsDefaultError)
       console.error('Error setting default drink:', err)
@@ -88,7 +88,7 @@ export const DrinksManagement: React.FC<DrinksManagementProps> = ({ cafeId, cafe
     setEditingDrink(null)
     await loadDrinks()
     // Refresh cafe data in the store to update map view with cache busting
-    await fetchCafes(undefined, true)
+    await fetchCafes(undefined, true, 'admin')
   }
 
   return (

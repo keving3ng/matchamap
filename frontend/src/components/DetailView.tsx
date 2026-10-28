@@ -46,7 +46,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
   }
 
   return (
-    <div className="flex-1 overflow-y-auto pb-24 pt-0 bg-gradient-to-b from-cream-100 to-white">
+    <div data-cafe-view tabIndex={-1} className="flex-1 overflow-y-auto pb-24 pt-0 bg-gradient-to-b from-cream-100 to-white focus:outline-none">
       {/* Hero Section */}
       <div className="w-full h-56 bg-gradient-to-br from-matcha-400 via-matcha-500 to-matcha-600 flex items-center justify-center relative overflow-hidden">
         {/* Decorative circles */}

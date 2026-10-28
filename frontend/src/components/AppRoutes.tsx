@@ -13,6 +13,7 @@ const LoginPage = React.lazy(() => import('./auth/LoginPage'))
 const ProtectedRoute = React.lazy(() => import('./auth/ProtectedRoute'))
 const ContactPage = React.lazy(() => import('./ContactPage'))
 const AboutPage = React.lazy(() => import('./AboutPage'))
+const InstallHelpView = React.lazy(() => import('./InstallHelpView'))
 
 // Lazy load admin components for better performance
 const AdminLayout = React.lazy(() => import('./admin/AdminLayout'))
@@ -29,10 +30,14 @@ import { useFeatureToggle } from '../hooks/useFeatureToggle'
 import { useAppFeatures } from '../hooks/useAppFeatures'
 import { useDataStore } from '../stores/dataStore'
 import { useCafeStore } from '../stores/cafeStore'
+import { useCityStore } from '../stores/cityStore'
+import { parseCafeUrlPath, getCityFromShortcode } from '../utils/cityMapping'
 import { useUIStore } from '../stores/uiStore'
 import { useVisitedCafesStore } from '../stores/visitedCafesStore'
 import { useCafeSelection } from '../hooks/useCafeSelection'
 import { Skeleton } from './ui/Skeleton'
+import { CafeDataNotice } from './CafeDataNotice'
+import { UpdateNotice } from './UpdateNotice'
 
 // Loading fallback component for admin pages
 const AdminLoadingFallback: React.FC = () => (
@@ -61,21 +66,22 @@ const PageLoadingFallback: React.FC = () => (
 )
 
 // Wrapper component for cafe detail view with URL params
-const CafeDetailWrapper: React.FC = () => {
-  const { slug } = useParams<{ cityShortcode: string; slug: string }>()
+export const CafeDetailWrapper: React.FC = () => {
+  const { slug, cityShortcode } = useParams<{ cityShortcode: string; slug: string }>()
   const { cafesWithDistance } = useCafeStore()
   const { visitedCafeIds, toggleVisited } = useVisitedCafesStore()
-  const { cafesFetched, isLoading } = useDataStore()
+  const { cafesFetched, cafeLoading, cafeCity, cafeStatus } = useDataStore()
+  const requestedCity = getCityFromShortcode(cityShortcode || '')
 
   // Find cafe by slug
-  const cafe = cafesWithDistance.find(c => {
+  const cafe = cafeCity === requestedCity ? cafesWithDistance.find(c => {
     // Create slug from cafe name for comparison
     const cafeSlug = c.name.toLowerCase().replace(/\s+/g, '-')
     return cafeSlug === slug
-  })
+  }) : undefined
 
-  // Show loading state while cafes are being fetched
-  if (!cafesFetched || isLoading) {
+  // Wait only while the requested city is being fetched. A failed request must exit loading.
+  if (cafeLoading || cafeStatus === 'idle' && !cafesFetched || cafeCity !== requestedCity && cafeStatus !== 'error' && cafeStatus !== 'cleared') {
     return (
       <div className="flex-1 overflow-y-auto pb-24 pt-0">
         <Skeleton variant="rectangular" height={224} className="mb-4" />
@@ -90,17 +96,22 @@ const CafeDetailWrapper: React.FC = () => {
     )
   }
 
-  // Only redirect if cafes are loaded and cafe not found
+  // An uncached or missing detail needs a useful exit instead of a redirect loop.
   if (!cafe) {
-    return <Navigate to="/" replace />
+    return <div data-cafe-view tabIndex={-1} className="flex-1 overflow-y-auto pb-24 focus:outline-none">
+      <CafeDataNotice city={requestedCity} detail missingCafe />
+    </div>
   }
 
   return (
-    <DetailView
-      cafe={cafe}
-      visitedLocations={visitedCafeIds}
-      onToggleVisited={toggleVisited}
-    />
+    <>
+      <CafeDataNotice city={requestedCity} detail />
+      <DetailView
+        cafe={cafe}
+        visitedLocations={visitedCafeIds}
+        onToggleVisited={toggleVisited}
+      />
+    </>
   )
 }
 
@@ -157,17 +168,24 @@ export const AppRoutes: React.FC = () => {
   const isAboutEnabled = useFeatureToggle('ENABLE_ABOUT')
   const isUserAccountsEnabled = useFeatureToggle('ENABLE_USER_ACCOUNTS')
 
-  const { eventItems, fetchCafes } = useDataStore()
+  const { eventItems, fetchCafes, cafeCity } = useDataStore()
   const { cafesWithDistance, selectedCafe } = useCafeStore()
   const { showPopover, expandedCard, setExpandedCard, closePopover } = useUIStore()
   const { stampedCafeIds, toggleStamp } = useVisitedCafesStore()
-  const { handlePinClick, viewDetails } = useCafeSelection(cafesWithDistance)
   const location = useLocation()
+  const selectedCity = useCityStore(state => state.selectedCity)
+  const routePrefix = location.pathname.split('/')[1]
+  const parsedCity = ['admin', 'events', 'cafe'].includes(routePrefix) ? undefined : parseCafeUrlPath(location.pathname)?.city
+  const requestedCity = parsedCity ?? selectedCity
+  // Do not render the prior city even for the frame before the fetch effect runs.
+  const visibleCafes = cafeCity === requestedCity ? cafesWithDistance : []
+  const { handlePinClick, viewDetails } = useCafeSelection(visibleCafes)
 
   // Fetch only cafes on mount - feed/events lazy load when navigated to
   useEffect(() => {
-    fetchCafes() // Only fetch cafes (70% of users only use map)
-  }, [fetchCafes])
+    if (location.pathname.startsWith('/admin') || location.pathname === '/login') return
+    void fetchCafes({ city: requestedCity })
+  }, [fetchCafes, requestedCity, location.pathname])
 
   // Handle navigation state for cafe selection (from event views)
   useEffect(() => {
@@ -183,13 +201,16 @@ export const AppRoutes: React.FC = () => {
   }, [location.state, cafesWithDistance, handlePinClick])
 
   return (
-    <Routes>
+    <>
+      <UpdateNotice />
+      {(location.pathname === '/' || location.pathname === '/list') && <CafeDataNotice city={requestedCity} />}
+      <Routes>
       <Route path="/" element={
         <Suspense fallback={<PageLoadingFallback />}>
           <MapView
-            cafes={cafesWithDistance}
+            cafes={visibleCafes}
             showPopover={showPopover}
-            selectedCafe={selectedCafe}
+            selectedCafe={cafeCity === requestedCity ? selectedCafe : null}
             onPinClick={handlePinClick}
             onViewDetails={viewDetails}
             onClosePopover={closePopover}
@@ -199,7 +220,7 @@ export const AppRoutes: React.FC = () => {
       <Route path="/list" element={
         <Suspense fallback={<PageLoadingFallback />}>
           <ListView
-            cafes={cafesWithDistance}
+            cafes={visibleCafes}
             expandedCard={expandedCard}
             onToggleExpand={setExpandedCard}
             onViewDetails={viewDetails}
@@ -224,7 +245,7 @@ export const AppRoutes: React.FC = () => {
         <Route path="/passport" element={
           <Suspense fallback={<PageLoadingFallback />}>
             <PassportView
-              cafes={cafesWithDistance}
+              cafes={visibleCafes}
               visitedStamps={stampedCafeIds}
               onToggleStamp={toggleStamp}
             />
@@ -253,6 +274,11 @@ export const AppRoutes: React.FC = () => {
           </Suspense>
         } />
       )}
+      <Route path="/install" element={
+        <Suspense fallback={<PageLoadingFallback />}>
+          <InstallHelpView />
+        </Suspense>
+      } />
       {isAdminEnabled && (
         <>
           {/* Admin routes wrapped with Suspense for lazy loading and error boundaries */}
@@ -369,7 +395,8 @@ export const AppRoutes: React.FC = () => {
 
       {/* Catch-all redirect */}
       <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+      </Routes>
+    </>
   )
 }
 

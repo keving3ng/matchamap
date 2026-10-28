@@ -44,7 +44,7 @@ export const CafeManagementPage: React.FC = () => {
   const [openTooltip, setOpenTooltip] = useState<number | null>(null)
 
   useEffect(() => {
-    fetchCafes(undefined, true) // Bust cache on mount for admin
+    fetchCafes(undefined, true, 'admin') // Bust cache on mount for admin
   }, [fetchCafes])
 
   // Close tooltip when clicking outside
@@ -162,7 +162,7 @@ export const CafeManagementPage: React.FC = () => {
     } else {
       await api.cafes.create(cafeData)
     }
-    await fetchCafes(undefined, true) // Bust cache after save
+    await fetchCafes(undefined, true, 'admin') // Bust cache after save
   }
 
   const handleDeleteCafe = async (cafeId: number) => {
@@ -174,7 +174,7 @@ export const CafeManagementPage: React.FC = () => {
       setIsDeleting(cafeId)
       await api.cafes.delete(cafeId)
       // Refresh cafe list with cache busting
-      await fetchCafes(undefined, true)
+      await fetchCafes(undefined, true, 'admin')
     } catch (error) {
       alert(`Failed to delete cafe: ${(error as Error).message}`)
     } finally {

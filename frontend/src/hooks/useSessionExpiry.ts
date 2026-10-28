@@ -1,3 +1,6 @@
+// Zustand initializes this state outside React renders.
+'use no memo'
+
 import { create } from 'zustand'
 
 interface SessionExpiryState {

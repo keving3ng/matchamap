@@ -23,6 +23,7 @@ export const BottomNavigation: React.FC = () => {
   const currentView = location.pathname === '/list' ? 'list'
     : location.pathname === '/passport' ? 'passport'
     : location.pathname === '/events' ? 'events'
+    : location.pathname === '/install' ? 'help'
     : isDetailView ? 'detail'
     : 'map'
 

@@ -8,11 +8,11 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "build:analyze": "ANALYZE=true vite build",
+    "build": "vite build && node scripts/check-pwa-build.js",
+    "build:analyze": "ANALYZE=true vite build && node scripts/check-pwa-build.js",
     "preview": "vite preview",
-    "test": "vitest run",
-    "test:ci": "vitest run",
+    "test": "node --test scripts/pwa-shell.node-test.js && vitest run",
+    "test:ci": "node --test scripts/pwa-shell.node-test.js && vitest run",
     "test:verbose": "VITEST_VERBOSE=1 vitest run --reporter=verbose",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
@@ -20,7 +20,9 @@
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
     "lint:ci": "eslint . --report-unused-disable-directives --max-warnings 200",
     "typecheck": "tsc --noEmit",
-    "bundle:check": "node scripts/check-bundle-size.js"
+    "bundle:check": "node scripts/check-bundle-size.js",
+    "test:pwa": "node --test scripts/pwa-shell.node-test.js && vitest run src/pwa/register.test.ts",
+    "bundle:check:pages": "node scripts/check-public-bundles.js"
   },
   "dependencies": {
     "@types/dompurify": "^3.0.5",

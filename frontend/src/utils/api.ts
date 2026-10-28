@@ -1,3 +1,6 @@
+// API utilities are called outside React renders, including background refreshes.
+'use no memo'
+
 /**
  * API client for MatchaMap backend
  * Handles all communication with Cloudflare Workers API
@@ -6,9 +9,15 @@
 import { useAuthStore } from '../stores/authStore'
 import { useSessionExpiry } from '../hooks/useSessionExpiry'
 import type { Cafe, Drink, Event, CityWithCount, WaitlistResponse, CafeStats } from '../../../shared/types'
+import { COPY } from '../constants/copy'
 import type { CsvCafe } from './csvParser'
+import { cafeRequest, projectCafePage, publicCafeCache, invalidatePublicCafeCache, CAFE_CACHE_LIMITS, CafeCacheExpiredError } from '../offline/cafeCache'
+import type { CafeFilters, CafePageResult } from '../offline/cafeCache'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+export class ApiError extends Error {
+  constructor(message: string, public readonly status: number) { super(message); this.name = 'ApiError' }
+}
 
 /**
  * Helper to build query parameters from filters
@@ -32,7 +41,7 @@ function buildQueryParams(filters: Record<string, string | number | boolean | un
 /**
  * Generic fetch wrapper with error handling
  */
-async function fetchAPI<T>(endpoint: string, options?: RequestInit & { bustCache?: boolean }): Promise<T> {
+async function fetchAPI<T>(endpoint: string, options?: RequestInit & { bustCache?: boolean; anonymous?: boolean }): Promise<T> {
   let url = `${API_BASE_URL}/api${endpoint}`
 
   // Add cache-busting parameter for GET requests when bustCache is true
@@ -42,20 +51,20 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit & { bustCache
   }
 
   // Build headers
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    ...options?.headers as Record<string, string>,
-  }
+  const { anonymous, bustCache: _bustCache, ...requestOptions } = options || {}
+  const headers = new Headers(options?.headers)
+  if (!headers.has('Content-Type')) headers.set('Content-Type', 'application/json')
+  if (anonymous) headers.delete('Authorization')
 
   const response = await fetch(url, {
-    ...options,
-    credentials: 'include', // Always include cookies
+    ...requestOptions,
+    credentials: anonymous ? 'omit' : 'include',
     headers,
   })
 
   if (!response.ok) {
     // Handle authentication errors (401/403)
-    if (response.status === 401 || response.status === 403) {
+    if (!anonymous && (response.status === 401 || response.status === 403)) {
       // Clear expired tokens from auth store
       useAuthStore.getState().clearAuth()
 
@@ -64,11 +73,16 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit & { bustCache
       useSessionExpiry.getState().showSessionExpiredDialog(currentPath)
 
       // Return a specific error for auth failures
-      throw new Error('Authentication required')
+      throw new ApiError('Authentication required', response.status)
     }
 
     const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
-    throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`)
+    throw new ApiError(errorData.error || `HTTP ${response.status}: ${response.statusText}`, response.status)
+  }
+
+  if (anonymous && (response.redirected || response.type === 'opaque')) throw new ApiError(COPY.cafeData.invalidData, 400)
+  if (options?.method && options.method !== 'GET' && /^\/admin\/(cafes(?:\/|$)|drinks(?:\/|$)|import\/cafes(?:\?|$))/.test(endpoint)) {
+    await invalidatePublicCafeCache()
   }
 
   const data = await response.json()
@@ -79,6 +93,42 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit & { bustCache
  * Cafe API endpoints
  */
 export const cafeAPI = {
+  /** Anonymous network-first editorial page. Raw/admin reads never use this cache. */
+  async getPublicPage(filters: CafeFilters): Promise<CafePageResult> {
+    const request = cafeRequest(API_BASE_URL, filters)
+    const pendingToken = publicCafeCache.begin()
+    const controller = new AbortController()
+    let timer: ReturnType<typeof setTimeout> | undefined
+    try {
+      const raw = await Promise.race([
+        fetchAPI<unknown>(`/cafes?${request.query}`, { anonymous: true, cache: 'no-store', signal: controller.signal }),
+        new Promise<never>((_, reject) => { timer = setTimeout(() => { reject(new ApiError(COPY.cafeData.timeout, 0)); controller.abort() }, CAFE_CACHE_LIMITS.timeout) }),
+      ])
+      const page = projectCafePage(raw, request)
+      const observedAt = Date.now()
+      const token = await pendingToken
+      if (!publicCafeCache.isCurrent(token)) throw new ApiError(COPY.cafeData.changed, 409)
+      const accepted = await publicCafeCache.write(request, page, token, observedAt)
+      if (!accepted || !publicCafeCache.isCurrent(token)) throw new ApiError(COPY.cafeData.changed, 409)
+      // Online-only media and aggregates may be displayed but never persisted.
+      const originals = (raw as { cafes: Cafe[] }).cafes
+      const cafes = page.cafes.map((cafe, index) => ({ ...cafe,
+        images: typeof originals[index].images === 'string' ? originals[index].images : undefined,
+        userRatingAvg: typeof originals[index].userRatingAvg === 'number' ? originals[index].userRatingAvg : undefined,
+        userRatingCount: typeof originals[index].userRatingCount === 'number' ? originals[index].userRatingCount : undefined,
+      }))
+      return { ...page, cafes, cacheInfo: { key: request.key, source: 'network', observedAt } }
+    } catch (error) {
+      const token = await pendingToken
+      const transient = error instanceof TypeError || error instanceof ApiError && (error.status === 0 || error.status >= 500 && error.status <= 599)
+      if (transient && publicCafeCache.isCurrent(token)) {
+        const saved = await publicCafeCache.readStatus(request)
+        if (saved.page && publicCafeCache.isCurrent(token)) return saved.page
+        if (saved.expired && publicCafeCache.isCurrent(token)) throw new CafeCacheExpiredError()
+      }
+      throw error
+    } finally { if (timer !== undefined) clearTimeout(timer) }
+  },
   /**
    * Get all cafes with optional filtering and search
    */

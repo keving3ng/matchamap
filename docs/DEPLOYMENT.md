@@ -975,3 +975,46 @@ curl -H "Origin: https://matchamap.pages.dev" \
 **Deployment Guide Status:** Production Ready
 **Last Updated:** October 10, 2025
 **Infrastructure:** Cloudflare Pages + Workers + D1
+## Production shell build
+
+The frontend build generates `sw.js` and `shell-precache.json` from the source
+worker in `frontend/src/pwa/` and the explicit public route roots in
+`frontend/scripts/pwa-shell.js`. The build verifier checks the final emitted
+bytes, excludes old Workbox/registration artifacts, and caps the shell precache
+at 2 MiB uncompressed. Do not reuse an old `dist/` directory as source.
+
+- `npm run build --workspace=frontend` performs a clean Vite build and verifies
+  the generated shell inventory. `npm run test:pwa --workspace=frontend` checks
+  build policy, worker behavior, icon dimensions and registration guards.
+- Normal `npm run dev` does not register a worker. Use a production build with
+  `npm run preview --workspace=frontend` on a dedicated local origin to test it.
+  Worker registration requires HTTPS or a browser-trusted localhost origin.
+- Install fetches are anonymous, limited to public shell assets, and atomic.
+  APIs, map tiles, admin/login routes, photos and event routes are not cached.
+  Café data persistence is separate from this static shell.
+- Worker updates wait for all controlled tabs to close; they never force an
+  editor reload. Cleanup removes only obsolete `matchamap-shell-*` caches.
+  Inspect any older deployed worker and its ownership before release: unknown
+  Workbox caches are deliberately not deleted by prefix guesses.
+- `_headers` revalidates HTML/worker/manifest and gives hashed `/assets/`
+  immutable caching. Confirm the effective HTTPS headers on release; Pages
+  joins duplicate header rules, so avoid overlapping cache-control values.
+- Existing 192/512 PNGs and the 180px Apple icon retain their original artwork.
+  They are advertised as `any`, not `maskable`, because the bowl reaches the
+  image edge. Essential Leaflet CSS is local; web fonts have CSS fallbacks.
+- To reset a **local preview** worker, select its exact origin/scope in browser
+  DevTools → Application → Service Workers → Unregister, then delete only that
+  origin's `matchamap-shell-*` Cache Storage entries. Do not clear unrelated
+  origins or production data as a development shortcut.
+
+Reference behavior: [service-worker lifecycle](https://web.dev/articles/service-worker-lifecycle)
+and [Cloudflare Pages header rules](https://developers.cloudflare.com/pages/configuration/headers/).
+
+The dedicated built-app checks use `npx playwright test --config=playwright.pwa.config.ts`
+after the build (installed desktop Chrome required). They use a separate localhost
+origin and disposable browser contexts; café/API traffic is synthetic and all other
+external requests are blocked. The test-only native-cache bundle is written under
+`/private/tmp/map5-evidence`, never to the deployable `frontend/dist`. Its three-run
+3G timing check records desktop emulation, not physical device acceptance. Run
+`npm run bundle:check:pages --workspace=frontend` for measured deduplicated page
+JS+CSS gzip totals; CI gates the production build on this 100 KiB page limit.

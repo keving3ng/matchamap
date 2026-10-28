@@ -6,6 +6,7 @@ import AdminWrapper from './components/AdminWrapper'
 import { initWebVitals } from './utils/webVitals'
 import { initAnalyticsBatching } from './utils/analyticsBatcher'
 import './styles/index.css'
+import { registerShellWorker } from './pwa/register'
 
 // Set dynamic page title based on environment
 const setPageTitle = () => {
@@ -42,3 +43,7 @@ ReactDOM.createRoot(rootElement).render(
 // Initialize performance monitoring after app mounts
 initWebVitals()
 initAnalyticsBatching()
+
+if (import.meta.env.PROD) {
+  void registerShellWorker(true).catch(() => undefined)
+}

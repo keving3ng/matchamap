@@ -56,9 +56,14 @@ jobs:
       - name: Backend tests
         run: npm run test:ci --workspace=backend
 
+      - name: Shell policy tests
+        run: npm run test:pwa --workspace=frontend
+
       - name: Build
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: npm run build
+
+      - name: Public page bundle budgets
+        run: npm run bundle:check:pages --workspace=frontend
 
       - name: Apply database migrations
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'

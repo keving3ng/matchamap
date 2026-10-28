@@ -8,6 +8,7 @@ import { getMapsUrl } from '../utils/mapsUrl'
 import { isCurrentlyOpen, formatHoursCompact } from '../utils/hoursFormatter'
 import { ContentContainer } from './ContentContainer'
 import { useCityStore, type CityKey } from '../stores/cityStore'
+import { useDataStore } from '../stores/dataStore'
 import { COPY } from '../constants/copy'
 import type { ListViewProps } from '../types'
 
@@ -22,7 +23,9 @@ interface FilterState {
 }
 
 export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggleExpand, onViewDetails }) => {
-  const { getAvailableCities, loadAvailableCities, availableCitiesLoaded } = useCityStore()
+  const viewRef = React.useRef<HTMLDivElement>(null)
+  const { getAvailableCities, loadAvailableCities, availableCitiesLoaded, selectedCity } = useCityStore()
+  const { cafeStatus, cafeCity } = useDataStore()
   const availableCities = getAvailableCities()
   const [sortBy, setSortBy] = useState<SortOption>('rating')
   const [showFilters, setShowFilters] = useState(false)
@@ -37,6 +40,10 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
     openNow: false
   })
   const { selectedDrinkType, setSelectedDrinkType } = useUIStore()
+
+  React.useEffect(() => {
+    if (window.history.state?.usr?.focusCafeView) viewRef.current?.focus()
+  }, [])
 
   const {
     coordinates,
@@ -232,7 +239,7 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
   }
 
   return (
-    <div className="flex-1 overflow-y-auto pb-24 relative">
+    <div ref={viewRef} data-cafe-view tabIndex={-1} className="flex-1 overflow-y-auto pb-24 relative focus:outline-none">
       {/* Sort & Filter Header */}
       <div className="bg-gradient-to-b from-white to-cream-50 border-b-2 border-matcha-200 shadow-xs">
         {/* Sort & Action Buttons */}
@@ -629,15 +636,16 @@ export const ListView: React.FC<ListViewProps> = ({ cafes, expandedCard, onToggl
       <ContentContainer maxWidth="lg">
         <div className="px-4 py-4 space-y-3">
           {filteredAndSortedCafes.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-500 text-lg mb-2">{COPY.list.noResults}</p>
-              <button
-                onClick={clearFilters}
-                className="text-green-600 font-semibold hover:underline"
-              >
-                {COPY.list.clearFilters}
-              </button>
-            </div>
+            (cafeCity === selectedCity && (cafeStatus === 'fresh' || cafeStatus === 'saved')) && (
+              <div className="text-center py-12" role="status">
+                <p className="text-gray-500 text-lg mb-2">{hasActiveFilters || hasActiveSearch ? COPY.pwa.emptySearch : COPY.pwa.emptyCity}</p>
+                {(hasActiveFilters || hasActiveSearch) && (
+                  <button onClick={() => { clearFilters(); setSearchQuery('') }} className="min-h-11 px-3 text-green-600 font-semibold hover:underline focus:outline-none focus:ring-2 focus:ring-green-500">
+                    {COPY.list.clearFilters}
+                  </button>
+                )}
+              </div>
+            )
           ) : (
             filteredAndSortedCafes.map((cafe) => (
             <div

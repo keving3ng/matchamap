@@ -4,12 +4,15 @@ import { ArrowLeft, Menu, Instagram, LogIn, LogOut, Mail, Info } from '@/compone
 import { useFeatureToggle } from '../hooks/useFeatureToggle'
 import { useAuthStore } from '../stores/authStore'
 import { COPY } from '../constants/copy'
+import { useInstallSupport } from '../pwa/install'
 
 export const Header: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const [showMenu, setShowMenu] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
+  const menuButtonRef = useRef<HTMLButtonElement>(null)
+  const { standalone } = useInstallSupport()
 
   const isMenuEnabled = useFeatureToggle('ENABLE_MENU')
   const isAdminEnabled = useFeatureToggle('ENABLE_ADMIN_PANEL')
@@ -33,12 +36,25 @@ export const Header: React.FC = () => {
     }
   }, [showMenu])
 
+  useEffect(() => {
+    if (!showMenu) return
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setShowMenu(false)
+        menuButtonRef.current?.focus()
+      }
+    }
+    document.addEventListener('keydown', closeOnEscape)
+    return () => document.removeEventListener('keydown', closeOnEscape)
+  }, [showMenu])
+
   // Determine current view from URL path
   const currentView = location.pathname === '/list' ? 'list'
     : location.pathname === '/feed' ? 'feed'
     : location.pathname === '/passport' ? 'passport'
     : location.pathname === '/events' ? 'events'
     : location.pathname.startsWith('/cafe/') ? 'detail'
+    : location.pathname === '/install' ? 'help'
     : 'map'
 
   return (
@@ -129,15 +145,29 @@ export const Header: React.FC = () => {
           {isMenuEnabled && (
             <div ref={menuRef} className="relative">
               <button
+                ref={menuButtonRef}
                 onClick={() => setShowMenu(!showMenu)}
-                className="p-2 hover:bg-matcha-700 rounded-lg transition-colors duration-200"
+                className="min-h-11 min-w-11 p-2 hover:bg-matcha-700 rounded-lg transition-colors duration-200 motion-reduce:transition-none"
+                aria-label={COPY.header.menuAriaLabel}
+                aria-expanded={showMenu}
+                aria-controls="primary-menu"
               >
                 <Menu size={24} />
               </button>
 
               {/* Dropdown Menu */}
               {showMenu && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xs py-2 z-[9999]">
+                <div id="primary-menu" className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xs py-2 z-[9999]">
+                  <button
+                    onClick={() => {
+                      setShowMenu(false)
+                      navigate('/install')
+                    }}
+                    className="min-h-11 w-full px-4 py-2 text-left text-gray-700 hover:bg-green-50 flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-500"
+                  >
+                    <Info size={18} />
+                    <span>{standalone ? COPY.menu.offlineHelp : COPY.menu.installHelp}</span>
+                  </button>
                   {/* Login/Logout - Admin login when user accounts off (admins use /login) */}
                   {(isUserAccountsEnabled || isAdminEnabled) && (
                     isAuthenticated ? (
@@ -199,6 +229,11 @@ export const Header: React.FC = () => {
                 </div>
               )}
             </div>
+          )}
+          {!isMenuEnabled && (
+            <button onClick={() => navigate('/install')} className="min-h-11 min-w-11 flex items-center justify-center hover:bg-matcha-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-white" aria-label={standalone ? COPY.menu.offlineHelp : COPY.menu.installHelp}>
+              <Info size={20} />
+            </button>
           )}
         </div>
       </div>

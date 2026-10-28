@@ -76,7 +76,7 @@ export const BulkImporterPage: React.FC = () => {
       })
 
       // Refresh cafe data with cache busting
-      await fetchCafes(undefined, true)
+      await fetchCafes(undefined, true, 'admin')
 
       // Clear changelog after successful import
       if (response.success > 0) {

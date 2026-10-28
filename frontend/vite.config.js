@@ -9,6 +9,7 @@ import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import process from 'node:process'
+import { shellWorker } from './scripts/pwa-shell.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -29,6 +30,7 @@ export default defineConfig(() => ({
     }),
     tailwindcss(),
     yaml(),
+    shellWorker(),
 
     // Gzip compression for production
     viteCompression({
@@ -61,6 +63,7 @@ export default defineConfig(() => ({
 
   build: {
     outDir: 'dist',
+    manifest: true,
     sourcemap: true,
 
     // Minification settings

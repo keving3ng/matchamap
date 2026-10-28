@@ -1,6 +1,25 @@
+// Store initialization and background cache callbacks run outside React renders.
+'use no memo'
+
 import { create } from 'zustand'
 import { api } from '../utils/api'
 import type { Cafe, EventItem } from '../types'
+import { useCityStore } from './cityStore'
+import { cafeRequest, CAFE_CACHE_LIMITS, CafeCacheExpiredError, clearOfflineCafeCache, subscribeCafeInvalidation } from '../offline/cafeCache'
+import type { CafeFilters, CafePage, CafePageResult } from '../offline/cafeCache'
+
+const CLEAR_PREFERENCE = 'matchamap-offline-cafes-cleared'
+function wasCleared() {
+  try { return localStorage.getItem(CLEAR_PREFERENCE) === 'true' } catch { return false }
+}
+function rememberClear(cleared: boolean) {
+  try { if (cleared) localStorage.setItem(CLEAR_PREFERENCE, 'true'); else localStorage.removeItem(CLEAR_PREFERENCE) } catch { /* optional storage may be denied */ }
+}
+let requestSequence = 0
+let expiryTimer: ReturnType<typeof setTimeout> | undefined
+let lastFilters: CafeFilters = {}
+let lastMode: 'public' | 'admin' = 'public'
+
 
 interface DataStore {
   allCafes: Cafe[]
@@ -13,15 +32,16 @@ interface DataStore {
   eventsFetched: boolean
 
   // Actions
-  fetchCafes: (filters?: {
-    city?: string
-    search?: string
-    userMinRating?: number
-    minScore?: number
-    maxPrice?: number
-    limit?: number
-    offset?: number
-  }, bustCache?: boolean) => Promise<void>
+  cafeRequestKey: string | null
+  cafeCity: string | null
+  cafeLoading: boolean
+  cafeSource: 'network' | 'saved' | null
+  cafesObservedAt: number | null
+  cafesTotal: number | null
+  cafesHasMore: boolean
+  cafeStatus: 'idle' | 'loading' | 'fresh' | 'saved' | 'expired' | 'error' | 'cleared'
+  fetchCafes: (filters?: CafeFilters, bustCache?: boolean, mode?: 'public' | 'admin') => Promise<void>
+  clearOfflineCafes: () => Promise<void>
   fetchEvents: (bustCache?: boolean) => Promise<void>
   fetchAll: (city?: string, bustCache?: boolean) => Promise<void>
 }
@@ -38,70 +58,70 @@ export const useDataStore = create<DataStore>((set, get) => ({
   cafesFetched: false,
   eventsFetched: false,
 
-  fetchCafes: async (filters?: {
-    city?: string
-    search?: string
-    userMinRating?: number
-    minScore?: number
-    maxPrice?: number
-    limit?: number
-    offset?: number
-  }, bustCache = false) => {
-    const filterParams = filters
+  cafeRequestKey: null,
+  cafeCity: null,
+  cafeLoading: false,
+  cafeSource: null,
+  cafesObservedAt: null,
+  cafesTotal: null,
+  cafesHasMore: false,
+  cafeStatus: wasCleared() ? 'cleared' : 'idle',
 
-    // Skip if already fetched (unless cache busting) and no filters provided
-    if (!bustCache && get().cafesFetched && !filterParams?.search && !filterParams?.userMinRating) return
-
+  fetchCafes: async (filters = {}, bustCache = false, mode = 'public') => {
+    if (mode === 'public' && get().cafeStatus === 'cleared' && !bustCache) return
+    if (mode === 'public' && bustCache) rememberClear(false)
+    let key: string
+    let publicFilters: CafeFilters = filters
     try {
-      set({ isLoading: true, error: null })
-      const response = await api.cafes.getAll({
-        city: filterParams?.city,
-        search: filterParams?.search,
-        userMinRating: filterParams?.userMinRating,
-        minScore: filterParams?.minScore,
-        maxPrice: filterParams?.maxPrice,
-        limit: filterParams?.limit || 500,
-        offset: filterParams?.offset || 0
-      }, bustCache)
-
-      // Transform API response to frontend format
-      const cafes = response.cafes.map((cafe: Cafe) => ({
-        id: cafe.id,
-        name: cafe.name,
-        slug: cafe.slug,
-        latitude: cafe.latitude,
-        longitude: cafe.longitude,
-        lat: cafe.latitude, // Backwards compatibility
-        lng: cafe.longitude, // Backwards compatibility
-        link: cafe.link,
-        address: cafe.address || null,
-        city: cafe.city,
-        displayScore: cafe.displayScore, // Calculated from drinks
-        ambianceScore: cafe.ambianceScore,
-        userRatingAvg: cafe.userRatingAvg, // User review average
-        userRatingCount: cafe.userRatingCount, // User review count
-        drinks: cafe.drinks || [], // Include drinks from API
-        chargeForAltMilk: cafe.chargeForAltMilk, // Number or null
-        quickNote: cafe.quickNote || '',
-        review: cafe.review || '',
-        source: cafe.source || '',
-        reviewSnippets: cafe.reviewSnippets || [], // Search result snippets
-        instagram: cafe.instagram || '',
-        instagramPostLink: cafe.instagramPostLink || '',
-        tiktokPostLink: cafe.tiktokPostLink || '',
-        hours: cafe.hours || '',
-        images: cafe.images || '',
-        createdAt: cafe.createdAt,
-        updatedAt: cafe.updatedAt,
-        deletedAt: cafe.deletedAt,
-      }))
-
-      set({ allCafes: cafes, isLoading: false, cafesFetched: true })
+      if (mode === 'public') {
+        const request = cafeRequest(import.meta.env.VITE_API_URL || '', { ...filters, city: filters.city ?? useCityStore.getState().selectedCity })
+        key = request.key
+        publicFilters = request.filters
+      } else key = `admin:${JSON.stringify(filters)}`
     } catch (error) {
-      set({ error: (error as Error).message, isLoading: false })
+      requestSequence++
+      if (expiryTimer) clearTimeout(expiryTimer)
+      set({ allCafes: [], cafesFetched: false, cafeRequestKey: null, cafeCity: mode === 'public' ? (filters.city?.toLowerCase() ?? useCityStore.getState().selectedCity) : null, cafeLoading: false, isLoading: false,
+        cafeSource: null, cafesObservedAt: null, cafeStatus: 'error', error: (error as Error).message })
+      return
+    }
+    const state = get()
+    const age = state.cafesObservedAt === null ? Infinity : Date.now() - state.cafesObservedAt
+    if (!bustCache && state.cafeRequestKey === key && (state.cafeLoading || state.cafesFetched && age >= 0 && age < CAFE_CACHE_LIMITS.refreshAge)) return
+    const sequence = ++requestSequence
+    lastFilters = publicFilters
+    lastMode = mode
+    const changed = state.cafeRequestKey !== key || age >= CAFE_CACHE_LIMITS.maxAge
+    if (changed && expiryTimer) clearTimeout(expiryTimer)
+    set({ cafeRequestKey: key, cafeCity: mode === 'public' ? publicFilters.city! : null,
+      cafeLoading: true, isLoading: true, cafeStatus: 'loading', error: null,
+      ...(changed ? { allCafes: [], cafesFetched: false, cafeSource: null, cafesObservedAt: null, cafesTotal: null, cafesHasMore: false } : {}) })
+    try {
+      const response: CafePage & { cacheInfo?: CafePageResult['cacheInfo'] } = mode === 'admin' ? await api.cafes.getAll(filters, true) : await api.cafes.getPublicPage(publicFilters)
+      if (sequence !== requestSequence) return
+      const info = response.cacheInfo
+      const observedAt = info?.observedAt ?? Date.now()
+      set({ allCafes: response.cafes.map((cafe: Cafe) => ({ ...cafe, lat: cafe.latitude, lng: cafe.longitude, drinks: cafe.drinks || [] })),
+        isLoading: false, cafeLoading: false, cafesFetched: true, cafeSource: info?.source ?? null,
+        cafesObservedAt: observedAt, cafesTotal: response.total, cafesHasMore: response.hasMore,
+        cafeStatus: info?.source === 'saved' ? 'saved' : 'fresh' })
+      if (mode === 'public') {
+        if (expiryTimer) clearTimeout(expiryTimer)
+        expiryTimer = setTimeout(() => {
+          if (get().cafeRequestKey !== key || get().cafesObservedAt !== observedAt) return
+          set({ allCafes: [], cafesFetched: false, cafeSource: null, cafeStatus: 'expired' })
+          if (!get().cafeLoading && navigator.onLine !== false) void get().fetchCafes(lastFilters, true)
+        }, Math.max(0, observedAt + CAFE_CACHE_LIMITS.maxAge - Date.now()))
+      }
+    } catch (error) {
+      if (sequence !== requestSequence) return
+      // Auth/schema failures must not leave a previously saved page visible as success.
+      set({ allCafes: [], cafesFetched: false, cafeLoading: false, cafeSource: null,
+        cafesObservedAt: null, cafesTotal: null, cafesHasMore: false,
+        error: (error as Error).message, isLoading: false, cafeStatus: error instanceof CafeCacheExpiredError ? 'expired' : 'error' })
     }
   },
-
+  clearOfflineCafes: clearOfflineCafeCache,
 
   fetchEvents: async (bustCache = false) => {
     // Skip if already fetched (unless cache busting)
@@ -141,3 +161,26 @@ export const useDataStore = create<DataStore>((set, get) => ({
     ])
   },
 }))
+
+// Clear all visible results before refetching after edits, including other tabs.
+subscribeCafeInvalidation(reason => {
+  requestSequence++
+  if (expiryTimer) clearTimeout(expiryTimer)
+  const state = useDataStore.getState()
+  if (reason === 'clear') rememberClear(true)
+  useDataStore.setState({ allCafes: [], cafesFetched: false, cafeLoading: false, cafeSource: null,
+    cafesObservedAt: null, cafesTotal: null, cafesHasMore: false, cafeStatus: reason === 'clear' || state.cafeStatus === 'cleared' ? 'cleared' : 'idle', error: null })
+  if (reason === 'edit' && state.cafeStatus !== 'cleared' && state.cafeRequestKey && navigator.onLine !== false) void state.fetchCafes(lastFilters, true, lastMode)
+})
+
+if (typeof window !== 'undefined') {
+  const refresh = (force = false) => {
+    const state = useDataStore.getState()
+    if (lastMode === 'public' && state.cafeStatus !== 'cleared' && state.cafeRequestKey && !state.cafeLoading &&
+      (force || state.cafesObservedAt === null || Date.now() - state.cafesObservedAt >= CAFE_CACHE_LIMITS.refreshAge)) {
+      void state.fetchCafes(lastFilters, true)
+    }
+  }
+  window.addEventListener('online', () => refresh(true))
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') refresh() })
+}
