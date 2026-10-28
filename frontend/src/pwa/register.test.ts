@@ -23,8 +23,9 @@ it('leaves unsupported browsers working without registration', async () => {
 it('announces existing waiting workers and installed updates without activating or reloading tabs', async () => {
   vi.resetModules()
   const { registerShellWorker, hasShellUpdate, subscribeShellUpdate } = await import('./register')
-  const registration = new EventTarget() as EventTarget & { waiting?: { postMessage: ReturnType<typeof vi.fn> }; installing?: EventTarget }
+  const registration = new EventTarget() as EventTarget & { active?: object; waiting?: { postMessage: ReturnType<typeof vi.fn> }; installing?: EventTarget }
   const worker = new EventTarget()
+  registration.active = {}
   registration.installing = worker
   vi.stubGlobal('navigator', { serviceWorker: { register: vi.fn().mockResolvedValue(registration) } })
   vi.stubGlobal('isSecureContext', true)
@@ -48,7 +49,7 @@ it('announces existing waiting workers and installed updates without activating 
 it('detects a worker already waiting when a tab opens', async () => {
   vi.resetModules()
   const { registerShellWorker, hasShellUpdate } = await import('./register')
-  const registration = Object.assign(new EventTarget(), { waiting: {} })
+  const registration = Object.assign(new EventTarget(), { waiting: {}, active: {} })
   vi.stubGlobal('navigator', { serviceWorker: { register: vi.fn().mockResolvedValue(registration) } })
   vi.stubGlobal('isSecureContext', true)
   await registerShellWorker(true)
@@ -65,14 +66,25 @@ it('preserves registration failure for callers without announcing a successful u
 it('observes a later updatefound worker as well as one already installing', async () => {
   vi.resetModules()
   const { registerShellWorker, hasShellUpdate } = await import('./register')
-  const registration = Object.assign(new EventTarget(), { installing: undefined as EventTarget | undefined, waiting: undefined as object | undefined })
+  const registration = Object.assign(new EventTarget(), { active: {}, installing: undefined as EventTarget | undefined, waiting: undefined as object | undefined })
   vi.stubGlobal('navigator', { serviceWorker: { register: vi.fn().mockResolvedValue(registration) } })
   vi.stubGlobal('isSecureContext', true)
   await registerShellWorker(true)
   const worker = new EventTarget()
+  registration.active = {}
   registration.installing = worker
   registration.dispatchEvent(new Event('updatefound'))
   registration.waiting = {}
   worker.dispatchEvent(new Event('statechange'))
   expect(hasShellUpdate()).toBe(true)
+})
+
+it('does not announce the initial install as an update', async () => {
+  vi.resetModules()
+  const { registerShellWorker, hasShellUpdate } = await import('./register')
+  const registration = Object.assign(new EventTarget(), { waiting: {}, active: null })
+  vi.stubGlobal('navigator', { serviceWorker: { register: vi.fn().mockResolvedValue(registration) } })
+  vi.stubGlobal('isSecureContext', true)
+  await registerShellWorker(true)
+  expect(hasShellUpdate()).toBe(false)
 })

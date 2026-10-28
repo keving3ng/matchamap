@@ -7,7 +7,7 @@ export const subscribeShellUpdate = (listener: () => void) => {
   return () => { listeners.delete(listener) }
 }
 function announceWaiting(registration: ServiceWorkerRegistration) {
-  if (!registration.waiting || updateAvailable) return
+  if (!registration.waiting || !registration.active || updateAvailable) return
   updateAvailable = true
   listeners.forEach(listener => listener())
 }
