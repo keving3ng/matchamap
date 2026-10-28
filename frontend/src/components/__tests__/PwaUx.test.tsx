@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { COPY } from '../../constants/copy'
@@ -13,7 +13,7 @@ const mock = vi.hoisted(() => ({
   online: false,
 }))
 
-vi.mock('../../stores/dataStore', () => ({ useDataStore: () => mock.data }))
+vi.mock('../../stores/dataStore', () => ({ useDataStore: Object.assign(() => mock.data, { getState: () => mock.data }) }))
 vi.mock('../../stores/cityStore', () => ({ useCityStore: (selector: (state: { selectedCity: string }) => unknown) => selector({ selectedCity: 'toronto' }) }))
 vi.mock('../../stores/cafeStore', () => ({ useCafeStore: () => ({ cafesWithDistance: [] }) }))
 vi.mock('../../stores/visitedCafesStore', () => ({ useVisitedCafesStore: () => ({ visitedCafeIds: [], toggleVisited: vi.fn() }) }))
@@ -86,4 +86,20 @@ for (const online of [true, false]) {
       expect(mock.data.fetchCafes).toHaveBeenCalledWith({ city: 'toronto' }, true)
     })
   }
+}
+
+for (const success of [true, false]) {
+  it(`reports help retry loading and ${success ? 'success' : 'failure'} accessibly`, async () => {
+    let finish!: () => void
+    mock.data.fetchCafes.mockImplementationOnce(() => new Promise<void>(resolve => { finish = resolve }))
+    render(<MemoryRouter><InstallHelpView /></MemoryRouter>)
+    await userEvent.click(screen.getByRole('button', { name: COPY.pwa.retry }))
+    expect(screen.getByRole('status')).toHaveTextContent(COPY.pwa.refreshing)
+    expect(screen.getByRole('button', { name: COPY.pwa.clearData })).toBeDisabled()
+    mock.data.cafeStatus = success ? 'fresh' : 'error'
+    finish()
+    expect(await screen.findByText(success ? COPY.pwa.refreshDone : COPY.pwa.refreshFailed)).toBeInTheDocument()
+    expect(mock.data.clearOfflineCafes).not.toHaveBeenCalled()
+    await waitFor(() => expect(screen.getByRole('status')).toHaveFocus())
+  })
 }

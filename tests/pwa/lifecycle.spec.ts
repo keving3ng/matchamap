@@ -148,3 +148,20 @@ for (const status of [401, 403, 404, 429, 500, 503]) test(`HTTP ${status} ${stat
     await expect(page.getByText('Fixture Matcha', { exact: true })).toHaveCount(0)
   }
 })
+
+test('help Retry reports network success and offline failure without hiding the result', async ({ context, page }) => {
+  await isolatedNetwork(context)
+  await page.goto('/install')
+  await page.getByRole('button', { name: 'Clear offline café data' }).click()
+  await expect(page.getByText('Saved café data was cleared from this device.', { exact: true })).toBeVisible()
+  await page.getByRole('button', { name: 'Retry', exact: true }).click()
+  await expect(page.getByRole('status')).toHaveText('Café data was refreshed. Your browser may save it for offline use.')
+  await expect(page.getByRole('status')).toBeFocused()
+  expect((await storage(page)).snapshots).toHaveLength(1)
+  await offline(context, true)
+  await page.getByRole('button', { name: 'Clear offline café data' }).click()
+  await expect(page.getByText('Saved café data was cleared from this device.', { exact: true })).toBeVisible()
+  await page.getByRole('button', { name: 'Retry', exact: true }).click()
+  await expect(page.getByRole('status')).toHaveText('Unable to refresh café data right now.')
+  expect((await storage(page)).snapshots).toEqual([])
+})

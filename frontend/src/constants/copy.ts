@@ -72,6 +72,7 @@ export const COPY = {
     clearFailed: 'Saved café data could not be cleared. Please try again.',
     clearing: 'Clearing saved café data…',
     refreshing: 'Refreshing cafés…',
+    refreshDone: 'Café data was refreshed. Your browser may save it for offline use.',
     backToList: 'Open café list',
     retry: 'Retry',
     offline: 'Offline',

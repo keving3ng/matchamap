@@ -31,13 +31,24 @@ test('record cold 3G list timing separately from warm and offline (desktop emula
     await page.waitForTimeout(100)
     const cold = await page.evaluate(() => {
       const entries = (window as unknown as { __performanceFixture: Record<string, (PerformanceEntry & { value?: number; hadRecentInput?: boolean; processingStart?: number; interactionId?: number })[]> }).__performanceFixture
+      const shifts = entries['layout-shift'].filter(e => !e.hadRecentInput)
+      let cls = 0, session = 0, first = 0, previous = 0
+      for (const shift of shifts) {
+        if (!session || shift.startTime - previous > 1000 || shift.startTime - first > 5000) {
+          session = 0
+          first = shift.startTime
+        }
+        session += shift.value || 0
+        previous = shift.startTime
+        cls = Math.max(cls, session)
+      }
       const fcp = performance.getEntriesByName('first-contentful-paint')[0]?.startTime ?? null
       const lastLongTaskEnd = Math.max(fcp || 0, ...entries.longtask.map(t => t.startTime + t.duration))
       const resources = performance.getEntriesByType('resource').map(r => r.toJSON())
       const lastResourceEnd = Math.max(fcp || 0, ...performance.getEntriesByType('resource').map(r => r.startTime + r.duration))
       const quietStart = Math.max(lastLongTaskEnd, lastResourceEnd)
       return { fcp, lcp: entries['largest-contentful-paint'].at(-1)?.startTime ?? null,
-        cls: entries['layout-shift'].filter(e => !e.hadRecentInput).reduce((sum, e) => sum + (e.value || 0), 0),
+        cls, layoutShifts: shifts.map(e => e.toJSON()),
         fid: entries['first-input'][0] ? entries['first-input'][0].processingStart! - entries['first-input'][0].startTime : null,
         observedInteractionLatency: entries.event.filter(e => e.interactionId).map(e => e.duration),
         quietStart, quietDuration: performance.now() - quietStart,

@@ -15,6 +15,7 @@ export const InstallHelpView: React.FC = () => {
   const selectedCity = useCityStore(state => state.selectedCity)
   const [message, setMessage] = useState('')
   const [clearing, setClearing] = useState(false)
+  const [retrying, setRetrying] = useState(false)
 
   useEffect(() => { headingRef.current?.focus() }, [])
 
@@ -28,8 +29,24 @@ export const InstallHelpView: React.FC = () => {
     requestAnimationFrame(() => messageRef.current?.focus())
   }
 
+  const retry = async () => {
+    if (clearing || retrying) return
+    setRetrying(true)
+    setMessage(COPY.pwa.refreshing)
+    try {
+      await fetchCafes({ city: selectedCity }, true)
+      const status = useDataStore.getState().cafeStatus
+      setMessage(status === 'fresh' ? COPY.pwa.refreshDone : status === 'saved' ? COPY.pwa.savedRefreshFailed : COPY.pwa.refreshFailed)
+    } catch {
+      setMessage(COPY.pwa.refreshFailed)
+    } finally {
+      setRetrying(false)
+      requestAnimationFrame(() => messageRef.current?.focus())
+    }
+  }
+
   const clear = async () => {
-    if (clearing) return
+    if (clearing || retrying) return
     setClearing(true)
     setMessage('')
     try {
@@ -79,8 +96,8 @@ export const InstallHelpView: React.FC = () => {
           <p className="mt-2 text-sm leading-relaxed text-gray-700">{COPY.pwa.offlineStored}</p>
           <p className="mt-2 text-sm leading-relaxed text-gray-700">{COPY.pwa.offlineLimits}</p>
           <div className="mt-4 flex flex-wrap gap-2">
-            <SecondaryButton onClick={() => void clear()} className="motion-reduce:transition-none motion-reduce:transform-none">{COPY.pwa.clearData}</SecondaryButton>
-            <SecondaryButton onClick={() => { setMessage(''); void fetchCafes({ city: selectedCity }, true) }}>{COPY.pwa.retry}</SecondaryButton>
+            <SecondaryButton disabled={clearing || retrying} onClick={() => void clear()} className="motion-reduce:transition-none motion-reduce:transform-none">{COPY.pwa.clearData}</SecondaryButton>
+            <SecondaryButton disabled={clearing || retrying} onClick={() => void retry()}>{COPY.pwa.retry}</SecondaryButton>
             <PrimaryButton onClick={() => navigate('/list', { state: { focusCafeView: true } })} className="motion-reduce:transition-none motion-reduce:transform-none">{COPY.pwa.backToList}</PrimaryButton>
           </div>
         </section>
