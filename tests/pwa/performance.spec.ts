@@ -67,7 +67,7 @@ test('record cold 3G list timing separately from warm and offline (desktop emula
     measurements.push({ run, cold, warmReadyMs, offlineReadyMs })
     await context.close()
   }
-  await testInfo.attach('mobile-timing-observations', { body: JSON.stringify({ profile: { downBps: 1600000, upBps: 750000, latencyMs: 150, cpuSlowdown: 4, viewport: '320x740', physicalDevice: false, api: 'synthetic', tti: 'unverified: no pinned trace-based TTI analyzer', inp: 'event durations for one menu interaction per fresh context; insufficient field interactions for standardized INP' }, measurements }, null, 2), contentType: 'application/json' })
+  await testInfo.attach('mobile-timing-observations', { body: JSON.stringify({ profile: { downBps: 1600000, upBps: 750000, latencyMs: 150, cpuSlowdown: 4, viewport: '320x740', physicalDevice: false, transport: 'gzip local static responses; synthetic API', api: 'synthetic', tti: 'unverified: no pinned trace-based TTI analyzer', inp: 'event durations for one menu interaction per fresh context; insufficient field interactions for standardized INP' }, measurements }, null, 2), contentType: 'application/json' })
   // Record failed gates without replacing them with a Lighthouse score/quiet-window proxy.
   expect(measurements.every(m => m.cold.lcp !== null && m.cold.lcp < 2500 && m.cold.cls < .1)).toBe(true)
 })

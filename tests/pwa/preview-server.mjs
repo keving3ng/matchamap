@@ -1,6 +1,7 @@
 import { createServer } from 'node:http'
 import { readFileSync, existsSync } from 'node:fs'
 import { resolve, extname } from 'node:path'
+import { gzipSync } from 'node:zlib'
 const root = resolve('frontend/dist')
 let revision = 0, failInstall = false
 const mime = { '.js': 'application/javascript', '.css': 'text/css', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.html': 'text/html', '.png': 'image/png', '.ico': 'image/x-icon' }
@@ -30,5 +31,10 @@ createServer((req, res) => {
   }
   let data = readFileSync(file)
   if (pathname === '/sw.js' && revision) data = Buffer.from(data.toString().replace(/matchamap-shell-'/, `matchamap-shell-fixture${revision}-'`))
+  if (/\bgzip\b/.test(req.headers['accept-encoding'] || '')) {
+    data = gzipSync(data)
+    headers['Content-Encoding'] = 'gzip'
+    headers.Vary = 'Accept-Encoding'
+  }
   res.writeHead(200, headers); res.end(data)
 }).listen(4175, 'localhost')
