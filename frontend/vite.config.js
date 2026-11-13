@@ -77,21 +77,50 @@ export default defineConfig(() => ({
 
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Core React
-          vendor: ['react', 'react-dom'],
-
-          // Router (already split)
-          router: ['react-router', 'react-router-dom'],
-
-          // Maps (heavy dependency)
-          maps: ['leaflet'],
-
-          // State management
-          state: ['zustand'],
-
-          // Utils
-          utils: ['dompurify'],
+        manualChunks(id) {
+          const normalized = id.replaceAll('\\', '/')
+          if (id.includes('preload-helper') || id.includes('commonjsHelpers')) return 'vendor'
+          if (normalized.includes('/node_modules/')) {
+            if (/\/node_modules\/(react|react-dom|scheduler)\//.test(normalized)) return 'vendor'
+            if (/\/node_modules\/(react-router|react-router-dom)\//.test(normalized)) return 'router'
+            if (/\/node_modules\/leaflet\//.test(normalized) && !normalized.endsWith('.css')) return 'maps'
+            if (/\/node_modules\/zustand\//.test(normalized)) return 'state'
+            if (/\/node_modules\/dompurify\//.test(normalized)) return 'utils'
+            if (/\/node_modules\/lucide-react\/dist\/esm\/(createLucideIcon|Icon|defaultAttributes|shared|icons\/(map-pin|instagram|calendar|user|info|menu|arrow-left|log-in|log-out|mail|settings|triangle-alert))/.test(normalized)) return 'icons'
+          }
+          if (normalized.endsWith('/src/constants/copy.ts')) return 'copy'
+          if (
+            normalized.endsWith('/src/pwa/install.ts') ||
+            normalized.endsWith('/src/components/ui/Button.tsx')
+          ) {
+            return 'pwa-ui'
+          }
+          if (
+            normalized.endsWith('/src/utils/api.ts') ||
+            normalized.endsWith('/src/stores/dataStore.ts') ||
+            normalized.endsWith('/src/stores/cityStore.ts') ||
+            normalized.endsWith('/src/config/cities.yaml') ||
+            normalized.includes('/src/offline/')
+          ) {
+            return 'data'
+          }
+          if (
+            normalized.endsWith('/src/hooks/useFeatureToggle.ts') ||
+            normalized.endsWith('/src/hooks/useAppFeatures.ts') ||
+            normalized.endsWith('/src/stores/adminStore.ts') ||
+            normalized.endsWith('/src/config/features.yaml')
+          ) {
+            return 'features'
+          }
+          if (
+            normalized.endsWith('/src/stores/uiStore.ts') ||
+            normalized.endsWith('/src/stores/visitedCafesStore.ts') ||
+            normalized.endsWith('/src/stores/locationStore.ts') ||
+            normalized.endsWith('/src/utils/cityMapping.ts') ||
+            normalized.endsWith('/src/utils/distance.ts')
+          ) {
+            return 'core'
+          }
         },
 
         // Better chunk naming for cache busting

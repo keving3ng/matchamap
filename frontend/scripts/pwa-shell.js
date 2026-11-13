@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 
 export const MAX_PRECACHE_BYTES = 2 * 1024 * 1024
-export const PUBLIC_ROOTS = ['index.html', 'src/components/MapView.tsx', 'src/components/ListView.tsx', 'src/components/DetailView.tsx', 'src/components/InstallHelpView.tsx']
+export const PUBLIC_ROOTS = ['index.html', 'src/components/AppShell.tsx', 'src/components/MapView.tsx', 'src/components/ListView.tsx', 'src/components/DetailView.tsx', 'src/components/InstallHelpView.tsx']
 export const PUBLIC_FILES = ['site.webmanifest', 'android-chrome-192x192.png', 'android-chrome-512x512.png', 'apple-touch-icon.png', 'favicon.ico', 'favicon-16x16.png', 'favicon-32x32.png']
 
 // Follow static imports only: lazy routes need explicit approval to enter here.
@@ -27,7 +27,7 @@ export function collectShellFiles(bundle) {
     }
   }
   for (const root of PUBLIC_ROOTS) {
-    const chunk = Object.values(bundle).find(item => item.type === 'chunk' && item.facadeModuleId?.replaceAll('\\', '/').endsWith('/' + root))
+    const chunk = Object.values(bundle).find(item => item.type === 'chunk' && (item.facadeModuleId?.replaceAll('\\', '/').endsWith('/' + root) || Object.keys(item.modules || {}).some(id => id.replaceAll('\\', '/').endsWith('/' + root))))
     if (!chunk) throw new Error(`Missing public shell root: ${root}`)
     visit(chunk.fileName)
   }

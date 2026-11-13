@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Suspense } from 'react'
 import Header from './components/Header'
 import BottomNavigation from './components/BottomNavigation'
 import AppRoutes from './components/AppRoutes'
-import ComingSoon from './components/ComingSoon'
 import { SessionExpiredDialog } from './components/SessionExpiredDialog'
 import { useAppFeatures } from './hooks/useAppFeatures'
 import { useAuthStore } from './stores/authStore'
+
+const ComingSoon = React.lazy(() => import('./components/ComingSoon'))
 
 const SESSION_KEY = 'matchamap_unlocked'
 
@@ -34,7 +35,11 @@ export const App: React.FC = () => {
   const isAdmin = isAuthenticated && user?.role === 'admin'
   
   if (showComingSoon && !hasEnteredPassword && !isAdmin) {
-    return <ComingSoon onPasswordCorrect={handlePasswordCorrect} />
+    return (
+      <Suspense fallback={null}>
+        <ComingSoon onPasswordCorrect={handlePasswordCorrect} />
+      </Suspense>
+    )
   }
 
   return (

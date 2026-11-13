@@ -1,7 +1,7 @@
 import { useRef, useState, useSyncExternalStore } from 'react'
 import { COPY } from '../constants/copy'
 import { hasShellUpdate, subscribeShellUpdate } from '../pwa/register'
-import { PrimaryButton, SecondaryButton } from './ui'
+import { PrimaryButton, SecondaryButton } from './ui/Button'
 
 export const UpdateNotice = () => {
   const available = useSyncExternalStore(subscribeShellUpdate, hasShellUpdate, () => false)

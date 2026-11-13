@@ -6,8 +6,6 @@
  * Handles all communication with Cloudflare Workers API
  */
 
-import { useAuthStore } from '../stores/authStore'
-import { useSessionExpiry } from '../hooks/useSessionExpiry'
 import type { Cafe, Drink, Event, CityWithCount, WaitlistResponse, CafeStats } from '../../../shared/types'
 import { COPY } from '../constants/copy'
 import type { CsvCafe } from './csvParser'
@@ -65,6 +63,10 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit & { bustCache
   if (!response.ok) {
     // Handle authentication errors (401/403)
     if (!anonymous && (response.status === 401 || response.status === 403)) {
+      const [{ useAuthStore }, { useSessionExpiry }] = await Promise.all([
+        import('../stores/authStore'),
+        import('../hooks/useSessionExpiry'),
+      ])
       // Clear expired tokens from auth store
       useAuthStore.getState().clearAuth()
 

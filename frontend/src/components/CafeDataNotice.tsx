@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router'
 import { COPY } from '../constants/copy'
 import { useConnectionStatus } from '../hooks/useConnectionStatus'
 import { useDataStore } from '../stores/dataStore'
-import { PrimaryButton, SecondaryButton } from './ui'
+import { PrimaryButton, SecondaryButton } from './ui/Button'
 
 interface CafeDataNoticeProps {
   city: string

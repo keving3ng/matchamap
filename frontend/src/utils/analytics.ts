@@ -3,14 +3,12 @@
  * Handles user behavior tracking for metrics and insights
  */
 
-import { api } from './api'
-import { useAuthStore } from '../stores/authStore'
-
 /**
  * Get user ID if authenticated, otherwise null
  * Used to track both anonymous and authenticated user actions
  */
-function getUserId(): number | null {
+async function getUserId(): Promise<number | null> {
+  const { useAuthStore } = await import('../stores/authStore')
   const { user } = useAuthStore.getState()
   return user?.id ?? null
 }
@@ -23,7 +21,7 @@ export async function trackCafeStat(
   cafeId: number,
   stat: 'view' | 'directions' | 'passport' | 'instagram' | 'tiktok'
 ): Promise<void> {
-  const userId = getUserId()
+  const [{ api }, userId] = await Promise.all([import('./api'), getUserId()])
   await api.stats.trackCafeStat(cafeId, stat, userId)
 }
 
@@ -33,6 +31,6 @@ export async function trackCafeStat(
  * Fire-and-forget - errors are silently ignored
  */
 export async function trackEventClick(eventId: number): Promise<void> {
-  const userId = getUserId()
+  const [{ api }, userId] = await Promise.all([import('./api'), getUserId()])
   await api.stats.trackEventClick(eventId, userId)
 }

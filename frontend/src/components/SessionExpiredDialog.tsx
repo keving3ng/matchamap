@@ -1,8 +1,9 @@
-import React from 'react'
+import React, { Suspense } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AlertDialog } from './ui/AlertDialog'
 import { COPY } from '../constants/copy'
 import { useSessionExpiry } from '../hooks/useSessionExpiry'
+
+const LazyAlertDialog = React.lazy(() => import('./ui/AlertDialog').then(m => ({ default: m.AlertDialog })))
 
 /**
  * SessionExpiredDialog - Shows when authentication token expires
@@ -34,18 +35,20 @@ export const SessionExpiredDialog: React.FC = () => {
   }
 
   return (
-    <AlertDialog
-      variant="warning"
-      title={COPY.auth.sessionExpired.title}
-      message={COPY.auth.sessionExpired.message}
-      primaryAction={{
-        label: COPY.auth.sessionExpired.signInAgain,
-        onClick: handleSignInAgain,
-      }}
-      secondaryAction={{
-        label: COPY.auth.sessionExpired.dismiss,
-        onClick: handleDismiss,
-      }}
-    />
+    <Suspense fallback={null}>
+      <LazyAlertDialog
+        variant="warning"
+        title={COPY.auth.sessionExpired.title}
+        message={COPY.auth.sessionExpired.message}
+        primaryAction={{
+          label: COPY.auth.sessionExpired.signInAgain,
+          onClick: handleSignInAgain,
+        }}
+        secondaryAction={{
+          label: COPY.auth.sessionExpired.dismiss,
+          onClick: handleDismiss,
+        }}
+      />
+    </Suspense>
   )
 }

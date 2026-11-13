@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react'
-import L from 'leaflet'
+import { useEffect, useRef, useState } from 'react'
+import type * as Leaflet from 'leaflet'
 import { createMatchaMarker, createUserLocationMarker } from '../utils/mapMarkers'
 import type { CafeWithDistance } from '../types'
 
@@ -27,12 +27,14 @@ export const useLeafletMap = ({
   initialZoom = 13,
   onMapMove
 }: UseLeafletMapOptions) => {
-  const mapRef = useRef<L.Map | null>(null)
-  const tileLayerRef = useRef<L.TileLayer | null>(null)
-  const markersRef = useRef<Map<number, L.Marker>>(new Map())
-  const userLocationMarkerRef = useRef<L.Marker | null>(null)
-  const routeLayerRef = useRef<L.Polyline | L.LayerGroup | null>(null)
+  const leafletRef = useRef<typeof Leaflet | null>(null)
+  const mapRef = useRef<Leaflet.Map | null>(null)
+  const tileLayerRef = useRef<Leaflet.TileLayer | null>(null)
+  const markersRef = useRef<Map<number, Leaflet.Marker>>(new Map())
+  const userLocationMarkerRef = useRef<Leaflet.Marker | null>(null)
+  const routeLayerRef = useRef<Leaflet.Polyline | Leaflet.LayerGroup | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
+  const [mapReady, setMapReady] = useState(false)
   /** First-render center/zoom only — avoids remounting the map when props change (see comment below). */
   const initialCenterRef = useRef(initialCenter)
   const initialZoomRef = useRef(initialZoom)
@@ -45,54 +47,71 @@ export const useLeafletMap = ({
   useEffect(() => {
     if (!containerRef.current) return
 
-    // Initialize map
-    const map = L.map(containerRef.current, {
-      center: initialCenterRef.current,
-      zoom: initialZoomRef.current,
-      zoomControl: false, // We'll add custom controls
-      scrollWheelZoom: true,
-      touchZoom: 'center', // Zoom to center for predictable mobile UX
-      doubleClickZoom: true,
-      boxZoom: false,
+    let cancelled = false
+    let mapInstance: Leaflet.Map | null = null
 
-      // Smooth panning with momentum (optimized for mobile)
-      inertia: true,
-      inertiaDeceleration: 3000,
-      inertiaMaxSpeed: 1500, // Prevent overly fast flinging on mobile
+    void Promise.all([
+      import('leaflet'),
+      import('leaflet/dist/leaflet.css'),
+    ]).then(([leafletModule]) => {
+      if (cancelled || !containerRef.current) return
+      const L = ((leafletModule as unknown as { default?: typeof Leaflet }).default ?? leafletModule) as typeof Leaflet
+      leafletRef.current = L
 
-      // Smoother zoom transitions (allow half-zoom levels)
-      zoomSnap: 0.5,
-      zoomDelta: 0.5,
+      // Initialize map
+      const map = L.map(containerRef.current, {
+        center: initialCenterRef.current,
+        zoom: initialZoomRef.current,
+        zoomControl: false, // We'll add custom controls
+        scrollWheelZoom: true,
+        touchZoom: 'center', // Zoom to center for predictable mobile UX
+        doubleClickZoom: true,
+        boxZoom: false,
 
-      // Allow panning around the world (default: true, keeps world tracking correct)
-      worldCopyJump: true,
+        // Smooth panning with momentum (optimized for mobile)
+        inertia: true,
+        inertiaDeceleration: 3000,
+        inertiaMaxSpeed: 1500, // Prevent overly fast flinging on mobile
+
+        // Smoother zoom transitions (allow half-zoom levels)
+        zoomSnap: 0.5,
+        zoomDelta: 0.5,
+
+        // Allow panning around the world (default: true, keeps world tracking correct)
+        worldCopyJump: true,
+      })
+
+      // Add tile layer with improved preloading for city switching
+      const tileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors, © CARTO',
+        maxZoom: 19,
+        minZoom: 8, // Allow more zoom out for global cities
+        keepBuffer: 6, // Increased from 4 to prevent grey areas during city switching
+        updateWhenIdle: false, // Load tiles during pan for smoother experience
+        updateWhenZooming: false, // Don't update during zoom animations
+        updateInterval: 100, // Faster updates (reduced from 150ms)
+        detectRetina: true, // Load high-resolution tiles on Retina/high-DPI displays
+        // Remove bounds restriction to allow global tile loading for all cities
+      }).addTo(map)
+      
+      tileLayerRef.current = tileLayer
+      mapRef.current = map
+      mapInstance = map
+      setMapReady(true)
     })
 
-    // Add tile layer with improved preloading for city switching
-    const tileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors, © CARTO',
-      maxZoom: 19,
-      minZoom: 8, // Allow more zoom out for global cities
-      keepBuffer: 6, // Increased from 4 to prevent grey areas during city switching
-      updateWhenIdle: false, // Load tiles during pan for smoother experience
-      updateWhenZooming: false, // Don't update during zoom animations
-      updateInterval: 100, // Faster updates (reduced from 150ms)
-      detectRetina: true, // Load high-resolution tiles on Retina/high-DPI displays
-      // Remove bounds restriction to allow global tile loading for all cities
-    }).addTo(map)
-    
-    tileLayerRef.current = tileLayer
-
-    mapRef.current = map
-
     return () => {
-      map.remove()
+      cancelled = true
+      setMapReady(false)
+      mapInstance?.remove()
+      mapRef.current = null
+      tileLayerRef.current = null
     }
   }, [])
 
   // Add map move listener (callback via ref so parent need not wrap in useCallback)
   useEffect(() => {
-    if (!mapRef.current) return
+    if (!mapReady || !mapRef.current) return
 
     const handleMoveEnd = () => {
       if (!mapRef.current) return
@@ -107,7 +126,7 @@ export const useLeafletMap = ({
     return () => {
       mapRef.current?.off('moveend', handleMoveEnd)
     }
-  }, [])
+  }, [mapReady])
 
   // Note: We don't auto-update the map center when initialCenter changes
   // This would cause the map to "yank" when the user pans near another city
@@ -115,7 +134,8 @@ export const useLeafletMap = ({
   // (which is handled via the centerOnLocation callback)
 
   useEffect(() => {
-    if (!mapRef.current) return
+    const L = leafletRef.current
+    if (!mapReady || !mapRef.current || !L) return
 
     // Clear existing markers
     markersRef.current.forEach(marker => {
@@ -179,7 +199,7 @@ export const useLeafletMap = ({
 
       markersRef.current.set(cafe.id, marker)
     })
-  }, [cafes, onPinClick, selectedCafeId, visitedCafeIds, cafeIdsWithEvents, initialZoom])
+  }, [mapReady, cafes, onPinClick, selectedCafeId, visitedCafeIds, cafeIdsWithEvents, initialZoom])
 
   const zoomIn = () => {
     mapRef.current?.zoomIn()
@@ -209,7 +229,8 @@ export const useLeafletMap = ({
   }
 
   const addUserLocationMarker = (lat: number, lng: number) => {
-    if (!mapRef.current) return
+    const L = leafletRef.current
+    if (!mapRef.current || !L) return
 
     // Remove existing user location marker
     if (userLocationMarkerRef.current) {
@@ -238,7 +259,8 @@ export const useLeafletMap = ({
   }
 
   const drawRoute = (coordinates: Array<{ lat: number; lng: number }>) => {
-    if (!mapRef.current) {
+    const L = leafletRef.current
+    if (!mapRef.current || !L) {
       return
     }
 

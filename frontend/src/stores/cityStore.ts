@@ -1,6 +1,5 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { api } from '../utils/api'
 import { CityKey } from '../../../shared/types'
 
 export type { CityKey }
@@ -111,6 +110,7 @@ export const useCityStore = create<CityState>()(
       },
       loadAvailableCities: async () => {
         try {
+          const { api } = await import('../utils/api')
           const { cities } = await api.cities.getAll()
 
           // City keys are already normalized in the database

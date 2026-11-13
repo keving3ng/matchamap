@@ -1,4 +1,3 @@
-import 'leaflet/dist/leaflet.css'
 import React from 'react'
 import { MapPin, Navigation, Crosshair, Coffee, Star, Building2, ChevronDown, Route, Instagram, X } from '@/components/icons'
 import { TikTokIcon } from './TikTokIcon'
@@ -15,7 +14,6 @@ import { getMapsUrl } from '../utils/mapsUrl'
 import { formatHoursCompact, isCurrentlyOpen } from '../utils/hoursFormatter'
 import { formatDuration } from '../utils/routing'
 import { findClosestCity } from '../utils/cityDetection'
-import { api } from '../utils/api'
 import { COPY } from '../constants/copy'
 import type { MapViewProps } from '../types'
 
@@ -45,6 +43,7 @@ export const MapView: React.FC<MapViewProps> = ({ cafes, showPopover, selectedCa
   React.useEffect(() => {
     const fetchEventsForCafes = async () => {
       try {
+        const { api } = await import('../utils/api')
         const response = await api.events.getAll({ upcoming: true })
         const cafeIds = response.events
           .filter(event => event.cafeId !== null)

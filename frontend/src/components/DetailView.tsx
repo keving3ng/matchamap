@@ -6,12 +6,12 @@ import { useAppFeatures } from '../hooks/useAppFeatures'
 import { getMapsUrl } from '../utils/mapsUrl'
 import { ContentContainer } from './ContentContainer'
 import { formatHoursCompact } from '../utils/formatHours'
-import { sanitizeText } from '../utils/sanitize'
 import { COPY } from '../constants/copy'
-import { api } from '../utils/api'
 import { trackCafeStat } from '../utils/analytics'
 import type { DetailViewProps } from '../types'
 import type { Event } from '../../../shared/types'
+
+const sanitizePlainText = (text: string): string => text.replace(/<[^>]*>/g, '')
 
 export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, onToggleVisited }) => {
   const { isPassportEnabled } = useAppFeatures()
@@ -31,6 +31,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
   useEffect(() => {
     const fetchCafeEvents = async () => {
       try {
+        const { api } = await import('../utils/api')
         const response = await api.events.getAll({ cafeId: cafe.id, upcoming: true })
         setCafeEvents(response.events)
       } catch (error) {
@@ -61,11 +62,11 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
         <div className="bg-white rounded-2xl shadow-xs -mt-8 p-6 border-2 border-matcha-200 relative z-10 animate-slide-up">
           <div className="flex justify-between items-start mb-4">
             <div className="flex-1">
-              <h2 className="text-2xl font-bold text-charcoal-900 mb-1">{sanitizeText(cafe.name)}</h2>
+              <h2 className="text-2xl font-bold text-charcoal-900 mb-1">{sanitizePlainText(cafe.name)}</h2>
               {cafe.city && (
                 <div className="flex items-center gap-1.5">
                   <div className="w-1.5 h-1.5 bg-matcha-500 rounded-full"></div>
-                  <p className="text-gray-600 font-medium">{sanitizeText(cafe.city)}</p>
+                  <p className="text-gray-600 font-medium">{sanitizePlainText(cafe.city)}</p>
                 </div>
               )}
             </div>
@@ -79,7 +80,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ cafe, visitedLocations, 
           <div className="bg-gradient-to-r from-matcha-50 to-cream-100 -mx-6 px-6 py-3 mb-4">
             <div className="flex items-start gap-2.5 text-gray-700 mb-3">
               <MapPin size={20} className="text-matcha-600 mt-0.5 flex-shrink-0" />
-              <span className="text-sm font-medium leading-relaxed">{sanitizeText(cafe.address || '')}</span>
+              <span className="text-sm font-medium leading-relaxed">{sanitizePlainText(cafe.address || '')}</span>
             </div>
 
             {cafe.distanceInfo && (

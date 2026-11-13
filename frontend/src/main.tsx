@@ -1,12 +1,9 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
-import App from './App'
-import AdminWrapper from './components/AdminWrapper'
-import { initWebVitals } from './utils/webVitals'
-import { initAnalyticsBatching } from './utils/analyticsBatcher'
 import './styles/index.css'
 import { registerShellWorker } from './pwa/register'
+
+const AppShell = React.lazy(() => import('./components/AppShell'))
 
 // Set dynamic page title based on environment
 const setPageTitle = () => {
@@ -32,17 +29,15 @@ if (!rootElement) throw new Error('Failed to find the root element')
 
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <AdminWrapper>
-        <App />
-      </AdminWrapper>
-    </BrowserRouter>
+    <React.Suspense fallback={null}>
+      <AppShell />
+    </React.Suspense>
   </React.StrictMode>,
 )
 
 // Initialize performance monitoring after app mounts
-initWebVitals()
-initAnalyticsBatching()
+void import('./utils/webVitals').then(({ initWebVitals }) => initWebVitals()).catch(() => undefined)
+void import('./utils/analyticsBatcher').then(({ initAnalyticsBatching }) => initAnalyticsBatching()).catch(() => undefined)
 
 if (import.meta.env.PROD) {
   void registerShellWorker(true).catch(() => undefined)

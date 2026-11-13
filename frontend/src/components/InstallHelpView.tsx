@@ -4,7 +4,7 @@ import { COPY } from '../constants/copy'
 import { useInstallSupport } from '../pwa/install'
 import { useCityStore } from '../stores/cityStore'
 import { useDataStore } from '../stores/dataStore'
-import { PrimaryButton, SecondaryButton } from './ui'
+import { PrimaryButton, SecondaryButton } from './ui/Button'
 
 export const InstallHelpView: React.FC = () => {
   const navigate = useNavigate()
