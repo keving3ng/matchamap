@@ -415,5 +415,6 @@ export function resetStore<T>(
 // ==================== TypeScript Augmentation ====================
 
 declare global {
+  // eslint-disable-next-line no-var
   var __TEST_FEATURE_FLAGS__: Record<string, any>
 }

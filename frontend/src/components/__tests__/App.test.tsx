@@ -1,10 +1,12 @@
-import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import '@testing-library/jest-dom'
+import { MemoryRouter } from 'react-router-dom'
 import { App } from '../../App'
+import { useDataStore } from '../../stores/dataStore'
+import { useCafeStore } from '../../stores/cafeStore'
+import { useCityStore } from '../../stores/cityStore'
+import type { CafeWithDistance } from '../../types'
 
-// Mock useAppFeatures
 vi.mock('../../hooks/useAppFeatures', () => ({
   useAppFeatures: () => ({
     showComingSoon: false,
@@ -12,145 +14,93 @@ vi.mock('../../hooks/useAppFeatures', () => ({
     isEventsEnabled: true,
     isMenuEnabled: true,
     isCitySelectorEnabled: true,
-    isUserAccountsEnabled: true,
+    isUserAccountsEnabled: false,
   }),
 }))
 
-// Mock authStore to prevent async getCurrentUser calls
-vi.mock('../../stores/authStore', () => ({
-  useAuthStore: () => ({
+vi.mock('../../stores/authStore', () => {
+  const state = {
     isAuthenticated: false,
     user: null,
-    getCurrentUser: vi.fn().mockResolvedValue(undefined),
-  }),
-}))
+    getCurrentUser: () => Promise.resolve(undefined),
+  }
+  return {
+    useAuthStore: Object.assign(() => state, { getState: () => state }),
+  }
+})
 
-// Mock stores used by AppRoutes
-vi.mock('../../stores/dataStore', () => ({
-  useDataStore: () => ({
-    cafesFetched: true,
-    isLoading: false,
-    eventItems: [],
-    eventsFetched: false,
-    fetchCafes: vi.fn(),
-    fetchEvents: vi.fn(),
-  }),
-}))
-
-vi.mock('../../stores/cafeStore', () => ({
-  useCafeStore: () => ({
-    cafesWithDistance: [],
-    selectedCafe: null,
-    setSelectedCafe: vi.fn(),
-  }),
-}))
-
-vi.mock('../../stores/uiStore', () => ({
-  useUIStore: () => ({
-    showPopover: false,
-    expandedCard: null,
-    setExpandedCard: vi.fn(),
-    closePopover: vi.fn(),
-    setShowPopover: vi.fn(),
-  }),
-}))
-
-vi.mock('../../stores/visitedCafesStore', () => ({
-  useVisitedCafesStore: () => ({
-    stampedCafeIds: [],
-    toggleStamp: vi.fn(),
-    visitedCafeIds: [],
-    toggleVisited: vi.fn(),
-  }),
-}))
-
-// Mock Header and BottomNavigation since they use react-router hooks
-// We're testing App structure, not these components
-vi.mock('../Header', () => ({
-  default: () => <div data-testid="header">MatchaMap</div>,
-}))
-
-// Mock SessionExpiredDialog since it uses useNavigate
-vi.mock('../SessionExpiredDialog', () => ({
-  SessionExpiredDialog: () => <div data-testid="session-expired-dialog" />,
-}))
-
-vi.mock('../BottomNavigation', () => ({
-  default: () => (
-    <div data-testid="bottom-nav">
-      <button className="flex flex-col items-center gap-1 transition text-green-600">
-        <span className="text-xs font-semibold">Map</span>
-      </button>
-      <button className="flex flex-col items-center gap-1 transition text-gray-400">
-        <span className="text-xs">List</span>
-      </button>
-      <button className="flex flex-col items-center gap-1 transition text-gray-400">
-        <span className="text-xs">Passport</span>
-      </button>
-    </div>
-  ),
-  BottomNavigation: () => (
-    <div data-testid="bottom-nav">
-      <button className="flex flex-col items-center gap-1 transition text-green-600">
-        <span className="text-xs font-semibold">Map</span>
-      </button>
-      <button className="flex flex-col items-center gap-1 transition text-gray-400">
-        <span className="text-xs">List</span>
-      </button>
-      <button className="flex flex-col items-center gap-1 transition text-gray-400">
-        <span className="text-xs">Passport</span>
-      </button>
-    </div>
-  ),
-}))
-
-// Mock AppRoutes to avoid complex routing setup
-vi.mock('../AppRoutes', () => ({
-  default: () => <div data-testid="app-routes">AppRoutes Content</div>,
-}))
-
-// Mock useCafeSelection to avoid Router context dependency
-// useCafeSelection uses useNavigate() which needs Router context
-// By mocking it, AppRoutes can render without needing Router context for navigation
-vi.mock('../../hooks/useCafeSelection', () => ({
-  useCafeSelection: () => ({
-    handlePinClick: vi.fn(),
-    viewDetails: vi.fn(),
-  }),
-}))
-
-// Mock useFeatureToggle hook used by AppRoutes
-vi.mock('../../hooks/useFeatureToggle', () => ({
-  useFeatureToggle: () => false,
-  getCurrentEnvironment: () => 'production',
-}))
-
-// Simple render function since we mocked AppRoutes
-const renderApp = (component: React.ReactElement) => {
-  return render(component)
+const sampleCafe: CafeWithDistance = {
+  id: 1,
+  name: 'Queen West Matcha',
+  slug: 'queen-west-matcha',
+  latitude: 43.6532,
+  longitude: -79.3832,
+  lat: 43.6532,
+  lng: -79.3832,
+  link: 'https://maps.google.com',
+  address: '123 Queen St W',
+  city: 'toronto',
+  displayScore: 9.1,
+  quickNote: 'Ceremonial grade whisked to order',
+  distanceInfo: null,
 }
 
-describe('App', () => {
+describe('App public route smoke tests', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    useCityStore.setState({
+      selectedCity: 'toronto',
+      availableCities: ['toronto'],
+      availableCitiesLoaded: true,
+    })
+    useDataStore.setState({
+      allCafes: [sampleCafe],
+      cafesFetched: true,
+      cafeLoading: false,
+      cafeCity: 'toronto',
+      cafeStatus: 'fresh',
+      cafeSource: 'network',
+      cafesObservedAt: Date.now(),
+      fetchCafes: vi.fn().mockResolvedValue(undefined),
+      fetchEvents: vi.fn().mockResolvedValue(undefined),
+    })
+    useCafeStore.setState({
+      cafesWithDistance: [sampleCafe],
+      selectedCafe: null,
+    })
   })
 
-  it('renders MatchaMap title', () => {
-    renderApp(<App />)
+  it('renders header, bottom navigation, and /list route with cafes', async () => {
+    render(
+      <MemoryRouter initialEntries={['/list']}>
+        <App />
+      </MemoryRouter>
+    )
+
     expect(screen.getByText('MatchaMap')).toBeInTheDocument()
-  })
-
-  it('renders navigation tabs', () => {
-    renderApp(<App />)
     expect(screen.getByText('Map')).toBeInTheDocument()
     expect(screen.getByText('List')).toBeInTheDocument()
-    expect(screen.queryByText('Feed')).not.toBeInTheDocument()
-    expect(screen.getByText('Passport')).toBeInTheDocument()
+    expect(await screen.findByText('Queen West Matcha')).toBeInTheDocument()
   })
 
-  it('starts with map view selected', () => {
-    renderApp(<App />)
-    const mapButton = screen.getByText('Map').closest('button')
-    expect(mapButton).toHaveClass('text-green-600')
+  it('renders cafe detail route /tor/queen-west-matcha', async () => {
+    render(
+      <MemoryRouter initialEntries={['/tor/queen-west-matcha']}>
+        <App />
+      </MemoryRouter>
+    )
+
+    expect(await screen.findByText('Queen West Matcha')).toBeInTheDocument()
+    expect(screen.getByText('123 Queen St W')).toBeInTheDocument()
+  })
+
+  it('renders offline & install help route /install', async () => {
+    render(
+      <MemoryRouter initialEntries={['/install']}>
+        <App />
+      </MemoryRouter>
+    )
+
+    expect(await screen.findByRole('heading', { name: /Install and offline help/i })).toBeInTheDocument()
   })
 })
